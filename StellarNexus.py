@@ -21,7 +21,6 @@ except KeyError:
     st.error("🔧 CEO_ACCESS_TOKEN not found in secrets")
     st.stop()
 
-# Get token from URL query parameter: ?token=Vijay
 provided_token = st.query_params.get("token")
 if provided_token is not None:
     provided_token = provided_token[0] if isinstance(provided_token, list) else provided_token
@@ -33,12 +32,11 @@ if provided_token != EXPECTED_TOKEN:
     st.info("Append `?token=your_token` to the URL or contact admin.")
     st.stop()
 
-# Simple rate limiting (anti-bot protection)
 if "last_access" not in st.session_state:
     st.session_state.last_access = 0
 
 now = time.time()
-if now - st.session_state.last_access < 2:  # Less than 2 seconds
+if now - st.session_state.last_access < 2:
     st.warning("⏱ Too many requests – Please wait a moment.")
     st.stop()
 
@@ -52,21 +50,21 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# === BEAUTIFUL HEADER WITH EVERGENT LOGO BESIDE TITLE ===
+# === LIGHT MODERN BEAUTIFUL THEME WITH EVERGENT LOGO ===
 st.markdown("""
 <style>
     .stApp {
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #334155 100%);
-        color: #e2e8f0;
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 30%, #c9ecee 60%, #d4d4f7 100%);
+        color: #1e293b;
     }
     #MainMenu, footer, header {visibility: hidden;}
 
     .header-container {
-        background: linear-gradient(180deg, rgba(15,23,42,0.98), rgba(30,41,59,0.9));
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
         padding: 3rem 2rem 4rem;
         text-align: center;
-        border-radius: 0 0 28px 28px;
-        box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+        border-radius: 0 0 32px 32px;
+        box-shadow: 0 12px 32px rgba(0,0,0,0.08);
         margin-bottom: 3rem;
         border-bottom: 4px solid #3b82f6;
     }
@@ -75,110 +73,91 @@ st.markdown("""
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 30px;
+        gap: 32px;
         flex-wrap: wrap;
     }
 
     .evergent-logo {
-        height: 100px;
-        filter: brightness(1.1) drop-shadow(0 6px 15px rgba(0,0,0,0.6));
+        height: 90px;
+        filter: drop-shadow(0 4px 10px rgba(0,0,0,0.1));
     }
 
     .main-title {
         font-size: 2.8rem;
         font-weight: 800;
-        background: linear-gradient(90deg, #60a5fa, #a78bfa, #c084fc);
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6, #a78bfa);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
         margin: 0;
-        letter-spacing: -1px;
+        letter-spacing: -0.8px;
+    }
+
+    .col-header {
+        padding: 18px 24px;
+        border-radius: 20px 20px 0 0;
+        color: white;
+        font-weight: 700;
+        font-size: 1.15rem;
+        text-align: center;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.15);
     }
 
     .col-header-pink {
-        background: linear-gradient(135deg, #ec4899, #db2777);
-        padding: 18px 22px;
-        border-radius: 18px 18px 0 0;
-        color: white;
-        font-weight: 700;
-        font-size: 1.1rem;
-        text-align: center;
-        box-shadow: 0 8px 20px rgba(236,72,153,0.4);
+        background: linear-gradient(135deg, #f472b6, #ec4899);
     }
 
     .col-header-purple {
-        background: linear-gradient(135deg, #a78bfa, #7c3aed);
-        padding: 18px 22px;
-        border-radius: 18px 18px 0 0;
-        color: white;
-        font-weight: 700;
-        font-size: 1.1rem;
-        text-align: center;
-        box-shadow: 0 8px 20px rgba(167,139,250,0.4);
+        background: linear-gradient(135deg, #c084fc, #a855f7);
     }
 
     .col-header-green {
         background: linear-gradient(135deg, #34d399, #10b981);
-        padding: 18px 22px;
-        border-radius: 18px 18px 0 0;
-        color: white;
-        font-weight: 700;
-        font-size: 1.1rem;
-        text-align: center;
-        box-shadow: 0 8px 20px rgba(52,211,153,0.4);
     }
 
     .col-header-orange {
         background: linear-gradient(135deg, #fb923c, #f97316);
-        padding: 18px 22px;
-        border-radius: 18px 18px 0 0;
-        color: white;
-        font-weight: 700;
-        font-size: 1.1rem;
-        text-align: center;
-        box-shadow: 0 8px 20px rgba(251,146,60,0.4);
     }
 
     .col-body {
-        background: rgba(255,255,255,0.97);
-        border-radius: 0 0 18px 18px;
+        background: white;
+        border-radius: 0 0 20px 20px;
         padding: 22px;
         min-height: 640px;
         max-height: 740px;
         overflow-y: auto;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.25);
-        backdrop-filter: blur(15px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.1);
     }
 
     .news-card {
-        background: #f8fafc;
+        background: #ffffff;
         border: 1px solid #e2e8f0;
         border-radius: 16px;
         padding: 20px;
         margin-bottom: 16px;
-        transition: all 0.4s ease;
-        border-left: 6px solid #e2e8f0;
+        transition: all 0.3s ease;
+        border-left: 5px solid #e2e8f0;
     }
 
     .news-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 16px 35px rgba(0,0,0,0.15);
+        transform: translateY(-6px);
+        box-shadow: 0 14px 30px rgba(0,0,0,0.12);
         border-left-color: #3b82f6;
     }
 
     .news-card-priority {
-        background: linear-gradient(135deg, #fffbeb, #fef3c7);
-        border: 3px solid #fbbf24;
-        border-left: 8px solid #f59e0b;
+        background: #fffbeb;
+        border: 2px solid #fbbf24;
+        border-left: 7px solid #f59e0b;
         border-radius: 16px;
         padding: 20px;
         margin-bottom: 16px;
-        transition: all 0.4s ease;
+        transition: all 0.3s ease;
     }
 
     .news-card-priority:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 20px 45px rgba(251,191,36,0.4);
+        transform: translateY(-8px);
+        box-shadow: 0 18px 40px rgba(251,191,36,0.25);
     }
 
     .news-title {
@@ -220,8 +199,8 @@ st.markdown("""
     }
 
     @keyframes glow {
-        from { box-shadow: 0 0 12px #dc2626; }
-        to { box-shadow: 0 0 28px #dc2626, 0 0 40px #dc2626; }
+        from { box-shadow: 0 0 10px #dc2626; }
+        to { box-shadow: 0 0 25px #dc2626; }
     }
 
     .tag-client, .tag-competitor, .tag-telco {
@@ -238,15 +217,17 @@ st.markdown("""
     .footer-text {
         text-align: center;
         padding: 2.5rem 1rem;
-        color: #94a3b8;
+        color: #475569;
         font-size: 0.95rem;
         margin-top: 4rem;
-        border-top: 1px solid #334155;
+        background: rgba(255,255,255,0.7);
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     }
 </style>
 """, unsafe_allow_html=True)
 
-# === EVERGENT LOGO + ORIGINAL TITLE (SIDE BY SIDE) ===
+# === EVERGENT LOGO BESIDE TITLE ===
 st.markdown("""
 <div class="header-container">
     <div class="logo-title-row">
