@@ -50,199 +50,230 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# === BEAUTIFUL HERO HEADER WITH HUMAN-ROBOT IMAGE + EVERGENT LOGO BESIDE TITLE ===
-st.markdown(f"""
+# === CLEAN LIGHT THEME + NEAT EVERGENT LOGO BESIDE SINGLE TITLE ===
+st.markdown("""
 <style>
-    .stApp {{
-        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 40%, #c9ecee 70%, #d4d4f7 100%);
+    .stApp {
+        background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 40%, #e6f0ff 100%);
         color: #1e293b;
-    }}
-    #MainMenu, footer, header {{visibility: hidden;}}
+    }
+    #MainMenu, footer, header {visibility: hidden;}
 
-    .hero-header {{
-        position: relative;
-        height: 480px;
-        background: url('https://i.imgur.com/5rZf1kP.png') center/cover no-repeat;
-        border-radius: 0 0 32px 32px;
-        overflow: hidden;
-        margin-bottom: 3rem;
-        box-shadow: 0 15px 40px rgba(0,0,0,0.2);
-    }}
-
-    .hero-overlay {{
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: linear-gradient(180deg, rgba(15,23,42,0.4) 0%, rgba(30,41,59,0.7) 100%);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
+    .header-container {
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        padding: 2.2rem 1.5rem 2.8rem;
         text-align: center;
-        padding: 2rem;
-    }}
+        border-radius: 0 0 28px 28px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+        border-bottom: 3px solid #3b82f6;
+    }
 
-    .logo-title-row {{
+    .logo-title-row {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 40px;
+        gap: 30px;
         flex-wrap: wrap;
-        margin-bottom: 1rem;
-    }}
+    }
 
-    .evergent-logo {{
-        height: 110px;
-        filter: drop-shadow(0 6px 15px rgba(0,0,0,0.4));
-    }}
+    .evergent-logo {
+        height: 80px;
+        filter: drop-shadow(0 4px 10px rgba(0,0,0,0.08));
+    }
 
-    .main-title {{
-        font-size: 3.2rem;
+    .main-title {
+        font-size: 2.6rem;
         font-weight: 800;
-        background: linear-gradient(90deg, #60a5fa, #a78bfa, #c084fc);
+        background: linear-gradient(90deg, #3b82f6, #6366f1, #8b5cf6);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
         margin: 0;
-        letter-spacing: -1.2px;
-        text-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }}
+        letter-spacing: -0.8px;
+    }
 
-    .subtitle {{
-        font-size: 1.3rem;
-        color: #e0f2fe;
-        font-weight: 500;
-        margin-top: 1rem;
-        opacity: 0.95;
-    }}
-
-    .col-header {{
-        padding: 18px 24px;
-        border-radius: 20px 20px 0 0;
+    .col-header-pink {
+        background: linear-gradient(90deg, #ec4899, #db2777);
+        padding: 12px 16px;
+        border-radius: 12px 12px 0 0;
         color: white;
         font-weight: 700;
-        font-size: 1.15rem;
-        text-align: center;
-        box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-    }}
-
-    .col-header-pink {{ background: linear-gradient(135deg, #f472b6, #ec4899); }}
-    .col-header-purple {{ background: linear-gradient(135deg, #c084fc, #a855f7); }}
-    .col-header-green {{ background: linear-gradient(135deg, #34d399, #10b981); }}
-    .col-header-orange {{ background: linear-gradient(135deg, #fb923c, #f97316); }}
-
-    .col-body {{
+        font-size: 0.95rem;
+    }
+    
+    .col-header-purple {
+        background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+        padding: 12px 16px;
+        border-radius: 12px 12px 0 0;
+        color: white;
+        font-weight: 700;
+        font-size: 0.95rem;
+    }
+    
+    .col-header-green {
+        background: linear-gradient(90deg, #10b981, #059669);
+        padding: 12px 16px;
+        border-radius: 12px 12px 0 0;
+        color: white;
+        font-weight: 700;
+        font-size: 0.95rem;
+    }
+    
+    .col-header-orange {
+        background: linear-gradient(90deg, #f97316, #ea580c);
+        padding: 12px 16px;
+        border-radius: 12px 12px 0 0;
+        color: white;
+        font-weight: 700;
+        font-size: 0.95rem;
+    }
+    
+    .col-body {
         background: white;
-        border-radius: 0 0 20px 20px;
-        padding: 22px;
-        min-height: 640px;
-        max-height: 740px;
+        border-radius: 0 0 12px 12px;
+        padding: 12px;
+        min-height: 550px;
+        max-height: 650px;
         overflow-y: auto;
-        box-shadow: 0 12px 30px rgba(0,0,0,0.1);
-    }}
-
-    .news-card {{
-        background: #ffffff;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .news-card {
+        background: #f8fafc;
         border: 1px solid #e2e8f0;
-        border-radius: 16px;
-        padding: 20px;
-        margin-bottom: 16px;
-        transition: all 0.3s ease;
-        border-left: 5px solid #e2e8f0;
-    }}
-
-    .news-card:hover {{
-        transform: translateY(-6px);
-        box-shadow: 0 14px 30px rgba(0,0,0,0.12);
-        border-left-color: #3b82f6;
-    }}
-
-    .news-card-priority {{
-        background: #fffbeb;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 10px;
+    }
+    
+    .news-card:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e0;
+    }
+    
+    .news-card-priority {
+        background: #fef3c7;
         border: 2px solid #fbbf24;
-        border-left: 7px solid #f59e0b;
-        border-radius: 16px;
-        padding: 20px;
-        margin-bottom: 16px;
-    }}
-
-    .news-card-priority:hover {{
-        transform: translateY(-8px);
-        box-shadow: 0 18px 40px rgba(251,191,36,0.25);
-    }}
-
-    .news-title {{
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 10px;
+    }
+    
+    .news-card-priority:hover {
+        background: #fde68a;
+        border-color: #f59e0b;
+    }
+    
+    .news-title {
         color: #1e40af;
-        font-size: 1.05rem;
+        font-size: 0.9rem;
         font-weight: 600;
-        line-height: 1.5;
+        line-height: 1.4;
         text-decoration: none;
         display: block;
-        margin-bottom: 12px;
-    }}
-
-    .news-title:hover {{
+        margin-bottom: 8px;
+    }
+    
+    .news-title:hover {
         color: #1d4ed8;
         text-decoration: underline;
-    }}
-
-    .news-meta {{
-        font-size: 0.82rem;
+    }
+    
+    .news-meta {
+        font-size: 0.75rem;
         color: #64748b;
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 6px;
         flex-wrap: wrap;
-    }}
-
-    .time-hot {{ color: #dc2626; font-weight: 700; font-style: italic; }}
-    .time-warm {{ color: #ea580c; font-weight: 600; }}
-    .time-normal {{ color: #64748b; }}
-
-    .tag-netcracker {{
+    }
+    
+    .time-hot {
+        color: #dc2626;
+        font-weight: 600;
+        font-style: italic;
+    }
+    
+    .time-warm {
+        color: #ea580c;
+        font-weight: 600;
+    }
+    
+    .time-normal {
+        color: #64748b;
+        font-weight: 600;
+    }
+    
+    .tag-netcracker {
         background: #dc2626;
         color: white;
-        padding: 8px 16px;
-        border-radius: 12px;
-        font-size: 0.85rem;
-        font-weight: 800;
-        animation: glow 2s infinite alternate;
-    }}
-
-    @keyframes glow {{
-        from {{ box-shadow: 0 0 10px #dc2626; }}
-        to {{ box-shadow: 0 0 25px #dc2626; }}
-    }}
-
-    .tag-client, .tag-competitor, .tag-telco {{
-        padding: 6px 14px;
-        border-radius: 10px;
-        font-size: 0.8rem;
-        font-weight: 600;
-    }}
-
-    .tag-client {{ background: #fef3c7; color: #92400e; }}
-    .tag-competitor {{ background: #fee2e2; color: #dc2626; }}
-    .tag-telco {{ background: #dbeafe; color: #1d4ed8; }}
-
-    .footer-text {{
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        animation: glow 2s infinite;
+    }
+    
+    @keyframes glow {
+        0%, 100% { box-shadow: 0 0 5px #dc2626; }
+        50% { box-shadow: 0 0 15px #dc2626; }
+    }
+    
+    .tag-client {
+        background: #fef3c7;
+        color: #b45309;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
+    
+    .tag-competitor {
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
+    
+    .tag-telco {
+        background: #dbeafe;
+        color: #1d4ed8;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
+    
+    .col-body::-webkit-scrollbar {
+        width: 6px;
+    }
+    .col-body::-webkit-scrollbar-track {
+        background: #f1f5f9;
+    }
+    .col-body::-webkit-scrollbar-thumb {
+        background: #cbd5e0;
+        border-radius: 3px;
+    }
+    
+    .footer-text {
         text-align: center;
-        padding: 2.5rem 1rem;
-        color: #475569;
-        font-size: 0.95rem;
-        margin-top: 4rem;
-        background: rgba(255,255,255,0.8);
-        border-radius: 16px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    }}
+        padding: 1rem;
+        color: #64748b;
+        font-size: 0.8rem;
+        margin-top: 1rem;
+    }
 </style>
+""", unsafe_allow_html=True)
 
-<div class="hero-header">
-    <div class="hero-overlay">
-        <div class="logo-title-row">
-            <img src="https://i.imgur.com/0Z3b8.jpg" class="evergent-logo" alt="Evergent Logo">
-            <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
-        </div>
-        <p class="subtitle">Real-time Competitive Intelligence • CEO Exclusive Dashboard</p>
+# === NEAT EVERGENT LOGO BESIDE SINGLE TITLE ===
+st.markdown("""
+<div class="header-container">
+    <div class="logo-title-row">
+        <img src="https://www.evergent.com/wp-content/uploads/2023/06/Evergent-Logo-Horizontal-White.png" class="evergent-logo" alt="Evergent Logo">
+        <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
     </div>
 </div>
 """, unsafe_allow_html=True)
