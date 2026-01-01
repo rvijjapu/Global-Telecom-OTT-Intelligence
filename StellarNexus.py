@@ -50,50 +50,72 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# === LIGHT MODERN BEAUTIFUL THEME WITH EVERGENT LOGO ===
-st.markdown("""
+# === BEAUTIFUL HERO HEADER WITH HUMAN-ROBOT IMAGE + EVERGENT LOGO BESIDE TITLE ===
+st.markdown(f"""
 <style>
-    .stApp {
-        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 30%, #c9ecee 60%, #d4d4f7 100%);
+    .stApp {{
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 40%, #c9ecee 70%, #d4d4f7 100%);
         color: #1e293b;
-    }
-    #MainMenu, footer, header {visibility: hidden;}
+    }}
+    #MainMenu, footer, header {{visibility: hidden;}}
 
-    .header-container {
-        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-        padding: 3rem 2rem 4rem;
-        text-align: center;
+    .hero-header {{
+        position: relative;
+        height: 480px;
+        background: url('https://i.imgur.com/5rZf1kP.png') center/cover no-repeat;
         border-radius: 0 0 32px 32px;
-        box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+        overflow: hidden;
         margin-bottom: 3rem;
-        border-bottom: 4px solid #3b82f6;
-    }
+        box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    }}
 
-    .logo-title-row {
+    .hero-overlay {{
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(180deg, rgba(15,23,42,0.4) 0%, rgba(30,41,59,0.7) 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 2rem;
+    }}
+
+    .logo-title-row {{
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 32px;
+        gap: 40px;
         flex-wrap: wrap;
-    }
+        margin-bottom: 1rem;
+    }}
 
-    .evergent-logo {
-        height: 90px;
-        filter: drop-shadow(0 4px 10px rgba(0,0,0,0.1));
-    }
+    .evergent-logo {{
+        height: 110px;
+        filter: drop-shadow(0 6px 15px rgba(0,0,0,0.4));
+    }}
 
-    .main-title {
-        font-size: 2.8rem;
+    .main-title {{
+        font-size: 3.2rem;
         font-weight: 800;
-        background: linear-gradient(90deg, #3b82f6, #8b5cf6, #a78bfa);
+        background: linear-gradient(90deg, #60a5fa, #a78bfa, #c084fc);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
         margin: 0;
-        letter-spacing: -0.8px;
-    }
+        letter-spacing: -1.2px;
+        text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }}
 
-    .col-header {
+    .subtitle {{
+        font-size: 1.3rem;
+        color: #e0f2fe;
+        font-weight: 500;
+        margin-top: 1rem;
+        opacity: 0.95;
+    }}
+
+    .col-header {{
         padding: 18px 24px;
         border-radius: 20px 20px 0 0;
         color: white;
@@ -101,25 +123,14 @@ st.markdown("""
         font-size: 1.15rem;
         text-align: center;
         box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-    }
+    }}
 
-    .col-header-pink {
-        background: linear-gradient(135deg, #f472b6, #ec4899);
-    }
+    .col-header-pink {{ background: linear-gradient(135deg, #f472b6, #ec4899); }}
+    .col-header-purple {{ background: linear-gradient(135deg, #c084fc, #a855f7); }}
+    .col-header-green {{ background: linear-gradient(135deg, #34d399, #10b981); }}
+    .col-header-orange {{ background: linear-gradient(135deg, #fb923c, #f97316); }}
 
-    .col-header-purple {
-        background: linear-gradient(135deg, #c084fc, #a855f7);
-    }
-
-    .col-header-green {
-        background: linear-gradient(135deg, #34d399, #10b981);
-    }
-
-    .col-header-orange {
-        background: linear-gradient(135deg, #fb923c, #f97316);
-    }
-
-    .col-body {
+    .col-body {{
         background: white;
         border-radius: 0 0 20px 20px;
         padding: 22px;
@@ -127,9 +138,9 @@ st.markdown("""
         max-height: 740px;
         overflow-y: auto;
         box-shadow: 0 12px 30px rgba(0,0,0,0.1);
-    }
+    }}
 
-    .news-card {
+    .news-card {{
         background: #ffffff;
         border: 1px solid #e2e8f0;
         border-radius: 16px;
@@ -137,30 +148,29 @@ st.markdown("""
         margin-bottom: 16px;
         transition: all 0.3s ease;
         border-left: 5px solid #e2e8f0;
-    }
+    }}
 
-    .news-card:hover {
+    .news-card:hover {{
         transform: translateY(-6px);
         box-shadow: 0 14px 30px rgba(0,0,0,0.12);
         border-left-color: #3b82f6;
-    }
+    }}
 
-    .news-card-priority {
+    .news-card-priority {{
         background: #fffbeb;
         border: 2px solid #fbbf24;
         border-left: 7px solid #f59e0b;
         border-radius: 16px;
         padding: 20px;
         margin-bottom: 16px;
-        transition: all 0.3s ease;
-    }
+    }}
 
-    .news-card-priority:hover {
+    .news-card-priority:hover {{
         transform: translateY(-8px);
         box-shadow: 0 18px 40px rgba(251,191,36,0.25);
-    }
+    }}
 
-    .news-title {
+    .news-title {{
         color: #1e40af;
         font-size: 1.05rem;
         font-weight: 600;
@@ -168,27 +178,27 @@ st.markdown("""
         text-decoration: none;
         display: block;
         margin-bottom: 12px;
-    }
+    }}
 
-    .news-title:hover {
+    .news-title:hover {{
         color: #1d4ed8;
         text-decoration: underline;
-    }
+    }}
 
-    .news-meta {
+    .news-meta {{
         font-size: 0.82rem;
         color: #64748b;
         display: flex;
         align-items: center;
         gap: 12px;
         flex-wrap: wrap;
-    }
+    }}
 
-    .time-hot { color: #dc2626; font-weight: 700; font-style: italic; }
-    .time-warm { color: #ea580c; font-weight: 600; }
-    .time-normal { color: #64748b; }
+    .time-hot {{ color: #dc2626; font-weight: 700; font-style: italic; }}
+    .time-warm {{ color: #ea580c; font-weight: 600; }}
+    .time-normal {{ color: #64748b; }}
 
-    .tag-netcracker {
+    .tag-netcracker {{
         background: #dc2626;
         color: white;
         padding: 8px 16px;
@@ -196,43 +206,43 @@ st.markdown("""
         font-size: 0.85rem;
         font-weight: 800;
         animation: glow 2s infinite alternate;
-    }
+    }}
 
-    @keyframes glow {
-        from { box-shadow: 0 0 10px #dc2626; }
-        to { box-shadow: 0 0 25px #dc2626; }
-    }
+    @keyframes glow {{
+        from {{ box-shadow: 0 0 10px #dc2626; }}
+        to {{ box-shadow: 0 0 25px #dc2626; }}
+    }}
 
-    .tag-client, .tag-competitor, .tag-telco {
+    .tag-client, .tag-competitor, .tag-telco {{
         padding: 6px 14px;
         border-radius: 10px;
         font-size: 0.8rem;
         font-weight: 600;
-    }
+    }}
 
-    .tag-client { background: #fef3c7; color: #92400e; }
-    .tag-competitor { background: #fee2e2; color: #dc2626; }
-    .tag-telco { background: #dbeafe; color: #1d4ed8; }
+    .tag-client {{ background: #fef3c7; color: #92400e; }}
+    .tag-competitor {{ background: #fee2e2; color: #dc2626; }}
+    .tag-telco {{ background: #dbeafe; color: #1d4ed8; }}
 
-    .footer-text {
+    .footer-text {{
         text-align: center;
         padding: 2.5rem 1rem;
         color: #475569;
         font-size: 0.95rem;
         margin-top: 4rem;
-        background: rgba(255,255,255,0.7);
+        background: rgba(255,255,255,0.8);
         border-radius: 16px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    }
+    }}
 </style>
-""", unsafe_allow_html=True)
 
-# === EVERGENT LOGO BESIDE TITLE ===
-st.markdown("""
-<div class="header-container">
-    <div class="logo-title-row">
-        <img src="https://www.evergent.com/wp-content/uploads/2023/06/Evergent-Logo-Horizontal-White.png" class="evergent-logo" alt="Evergent Logo">
-        <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
+<div class="hero-header">
+    <div class="hero-overlay">
+        <div class="logo-title-row">
+            <img src="https://i.imgur.com/0Z3b8.jpg" class="evergent-logo" alt="Evergent Logo">
+            <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
+        </div>
+        <p class="subtitle">Real-time Competitive Intelligence • CEO Exclusive Dashboard</p>
     </div>
 </div>
 """, unsafe_allow_html=True)
