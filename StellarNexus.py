@@ -12,10 +12,6 @@ import time  # For rate limiting
 # ==========================
 # 🔐 CEO TOKEN SECURITY GATE (Using Streamlit Secrets)
 # ==========================
-# In your GitHub repo, create a file: .streamlit/secrets.toml
-# Content:
-# CEO_ACCESS_TOKEN = "Vijay"   # Change to a strong random string in production!
-
 try:
     EXPECTED_TOKEN = st.secrets["CEO_ACCESS_TOKEN"]
 except FileNotFoundError:
@@ -28,7 +24,6 @@ except KeyError:
 # Get token from URL query parameter: ?token=Vijay
 provided_token = st.query_params.get("token")
 if provided_token is not None:
-    # st.query_params returns a list in newer versions
     provided_token = provided_token[0] if isinstance(provided_token, list) else provided_token
 else:
     provided_token = ""
@@ -57,196 +52,208 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# === BEAUTIFUL HEADER WITH EVERGENT LOGO BESIDE TITLE ===
 st.markdown("""
 <style>
     .stApp {
-        background: linear-gradient(180deg, #f0f4f8 0%, #e2e8f0 100%);
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #334155 100%);
+        color: #e2e8f0;
     }
     #MainMenu, footer, header {visibility: hidden;}
-    
-    .main-title {
-        font-size: 2rem;
-        font-weight: 800;
+
+    .header-container {
+        background: linear-gradient(180deg, rgba(15,23,42,0.98), rgba(30,41,59,0.9));
+        padding: 3rem 2rem 4rem;
         text-align: center;
-        margin-bottom: 1.5rem;
-        background: linear-gradient(135deg, #1a365d, #2b6cb0, #4c51bf);
+        border-radius: 0 0 28px 28px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+        margin-bottom: 3rem;
+        border-bottom: 4px solid #3b82f6;
+    }
+
+    .logo-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 30px;
+        flex-wrap: wrap;
+    }
+
+    .evergent-logo {
+        height: 100px;
+        filter: brightness(1.1) drop-shadow(0 6px 15px rgba(0,0,0,0.6));
+    }
+
+    .main-title {
+        font-size: 2.8rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #60a5fa, #a78bfa, #c084fc);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        letter-spacing: -1px;
     }
-    
+
     .col-header-pink {
-        background: linear-gradient(90deg, #ec4899, #db2777);
-        padding: 12px 16px;
-        border-radius: 12px 12px 0 0;
+        background: linear-gradient(135deg, #ec4899, #db2777);
+        padding: 18px 22px;
+        border-radius: 18px 18px 0 0;
         color: white;
         font-weight: 700;
-        font-size: 0.95rem;
+        font-size: 1.1rem;
+        text-align: center;
+        box-shadow: 0 8px 20px rgba(236,72,153,0.4);
     }
-    
+
     .col-header-purple {
-        background: linear-gradient(90deg, #8b5cf6, #7c3aed);
-        padding: 12px 16px;
-        border-radius: 12px 12px 0 0;
+        background: linear-gradient(135deg, #a78bfa, #7c3aed);
+        padding: 18px 22px;
+        border-radius: 18px 18px 0 0;
         color: white;
         font-weight: 700;
-        font-size: 0.95rem;
+        font-size: 1.1rem;
+        text-align: center;
+        box-shadow: 0 8px 20px rgba(167,139,250,0.4);
     }
-    
+
     .col-header-green {
-        background: linear-gradient(90deg, #10b981, #059669);
-        padding: 12px 16px;
-        border-radius: 12px 12px 0 0;
+        background: linear-gradient(135deg, #34d399, #10b981);
+        padding: 18px 22px;
+        border-radius: 18px 18px 0 0;
         color: white;
         font-weight: 700;
-        font-size: 0.95rem;
+        font-size: 1.1rem;
+        text-align: center;
+        box-shadow: 0 8px 20px rgba(52,211,153,0.4);
     }
-    
+
     .col-header-orange {
-        background: linear-gradient(90deg, #f97316, #ea580c);
-        padding: 12px 16px;
-        border-radius: 12px 12px 0 0;
+        background: linear-gradient(135deg, #fb923c, #f97316);
+        padding: 18px 22px;
+        border-radius: 18px 18px 0 0;
         color: white;
         font-weight: 700;
-        font-size: 0.95rem;
+        font-size: 1.1rem;
+        text-align: center;
+        box-shadow: 0 8px 20px rgba(251,146,60,0.4);
     }
-    
+
     .col-body {
-        background: white;
-        border-radius: 0 0 12px 12px;
-        padding: 12px;
-        min-height: 550px;
-        max-height: 650px;
+        background: rgba(255,255,255,0.97);
+        border-radius: 0 0 18px 18px;
+        padding: 22px;
+        min-height: 640px;
+        max-height: 740px;
         overflow-y: auto;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+        backdrop-filter: blur(15px);
     }
-    
+
     .news-card {
         background: #f8fafc;
         border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 12px;
-        margin-bottom: 10px;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 16px;
+        transition: all 0.4s ease;
+        border-left: 6px solid #e2e8f0;
     }
-    
+
     .news-card:hover {
-        background: #f1f5f9;
-        border-color: #cbd5e0;
+        transform: translateY(-8px);
+        box-shadow: 0 16px 35px rgba(0,0,0,0.15);
+        border-left-color: #3b82f6;
     }
-    
+
     .news-card-priority {
-        background: #fef3c7;
-        border: 2px solid #fbbf24;
-        border-radius: 8px;
-        padding: 12px;
-        margin-bottom: 10px;
+        background: linear-gradient(135deg, #fffbeb, #fef3c7);
+        border: 3px solid #fbbf24;
+        border-left: 8px solid #f59e0b;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 16px;
+        transition: all 0.4s ease;
     }
-    
+
     .news-card-priority:hover {
-        background: #fde68a;
-        border-color: #f59e0b;
+        transform: translateY(-10px);
+        box-shadow: 0 20px 45px rgba(251,191,36,0.4);
     }
-    
+
     .news-title {
         color: #1e40af;
-        font-size: 0.9rem;
+        font-size: 1.05rem;
         font-weight: 600;
-        line-height: 1.4;
+        line-height: 1.5;
         text-decoration: none;
         display: block;
-        margin-bottom: 8px;
+        margin-bottom: 12px;
     }
-    
+
     .news-title:hover {
         color: #1d4ed8;
         text-decoration: underline;
     }
-    
+
     .news-meta {
-        font-size: 0.75rem;
+        font-size: 0.82rem;
         color: #64748b;
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 12px;
         flex-wrap: wrap;
     }
-    
-    .time-hot {
-        color: #dc2626;
-        font-weight: 600;
-        font-style: italic;
-    }
-    
-    .time-warm {
-        color: #ea580c;
-        font-weight: 600;
-    }
-    
-    .time-normal {
-        color: #64748b;
-        font-weight: 600;
-    }
-    
+
+    .time-hot { color: #dc2626; font-weight: 700; font-style: italic; }
+    .time-warm { color: #ea580c; font-weight: 600; }
+    .time-normal { color: #64748b; }
+
     .tag-netcracker {
         background: #dc2626;
         color: white;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-size: 0.7rem;
-        font-weight: 700;
-        animation: glow 2s infinite;
+        padding: 8px 16px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 800;
+        animation: glow 2s infinite alternate;
     }
-    
+
     @keyframes glow {
-        0%, 100% { box-shadow: 0 0 5px #dc2626; }
-        50% { box-shadow: 0 0 15px #dc2626; }
+        from { box-shadow: 0 0 12px #dc2626; }
+        to { box-shadow: 0 0 28px #dc2626, 0 0 40px #dc2626; }
     }
-    
-    .tag-client {
-        background: #fef3c7;
-        color: #b45309;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-size: 0.7rem;
-        font-weight: 700;
+
+    .tag-client, .tag-competitor, .tag-telco {
+        padding: 6px 14px;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
     }
-    
-    .tag-competitor {
-        background: #fee2e2;
-        color: #dc2626;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-size: 0.7rem;
-        font-weight: 700;
-    }
-    
-    .tag-telco {
-        background: #dbeafe;
-        color: #1d4ed8;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-size: 0.7rem;
-        font-weight: 700;
-    }
-    
-    .col-body::-webkit-scrollbar {
-        width: 6px;
-    }
-    .col-body::-webkit-scrollbar-track {
-        background: #f1f5f9;
-    }
-    .col-body::-webkit-scrollbar-thumb {
-        background: #cbd5e0;
-        border-radius: 3px;
-    }
-    
+
+    .tag-client { background: #fef3c7; color: #92400e; }
+    .tag-competitor { background: #fee2e2; color: #dc2626; }
+    .tag-telco { background: #dbeafe; color: #1d4ed8; }
+
     .footer-text {
         text-align: center;
-        padding: 1rem;
-        color: #64748b;
-        font-size: 0.8rem;
-        margin-top: 1rem;
+        padding: 2.5rem 1rem;
+        color: #94a3b8;
+        font-size: 0.95rem;
+        margin-top: 4rem;
+        border-top: 1px solid #334155;
     }
 </style>
+""", unsafe_allow_html=True)
+
+# === EVERGENT LOGO + ORIGINAL TITLE (SIDE BY SIDE) ===
+st.markdown("""
+<div class="header-container">
+    <div class="logo-title-row">
+        <img src="https://www.evergent.com/wp-content/uploads/2023/06/Evergent-Logo-Horizontal-White.png" class="evergent-logo" alt="Evergent Logo">
+        <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
+    </div>
+</div>
 """, unsafe_allow_html=True)
 
 
@@ -366,7 +373,6 @@ RSS_FEEDS = {
         ("Ericsson", "https://www.ericsson.com/en/newsroom/rss"),
         ("TM Forum", "https://www.tmforum.org/feed/"),
         ("GSMA", "https://www.gsma.com/newsroom/feed/"),
-        # Top Telecom News
         ("Telecoms.com", "https://telecoms.com/feed/"),
         ("Light Reading", "https://www.lightreading.com/rss.xml"),
         ("Fierce Telecom", "https://www.fiercetelecom.com/rss/xml"),
@@ -569,7 +575,6 @@ def render_column(cat, items, sec):
     return header + body
 
 def main():
-    st.markdown('<div class="main-title">🌐 Global Telecom & OTT Stellar Nexus</div>', unsafe_allow_html=True)
     with st.spinner("Loading latest feeds (Netcracker & Amdocs pinned on top)..."):
         data = load_feeds()
     cols = st.columns(4)
@@ -578,6 +583,7 @@ def main():
         sec = SECTIONS[cat]
         items = data.get(cat, [])
         with cols[idx]:
+            st.markdown(f'<div class="{sec["style"]}">{sec["icon"]} {sec["name"]}</div>', unsafe_allow_html=True)
             column_html = render_column(cat, items, sec)
             st.markdown(column_html, unsafe_allow_html=True)
     netcracker_count = sum(1 for c in data.values() for i in c if i.get("ptype") == "NETCRACKER")
