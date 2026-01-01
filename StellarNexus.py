@@ -1,11 +1,4 @@
-To view keyboard shortcuts, press question mark
-View keyboard shortcuts
 
-20+
-
-Auto
-
-See new posts
 
 import streamlit as st
 import feedparser
