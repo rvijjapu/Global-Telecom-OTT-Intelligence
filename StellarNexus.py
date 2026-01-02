@@ -186,6 +186,8 @@ RSS_FEEDS = [
     ("Netcracker Press", "https://rss.app/feeds/oyAS1q31oAma1iDX.xml"),
     ("Netcracker News", "https://rss.app/feeds/GxJESz3Wl0PRbyFG.xml"),
     ("Amdocs LinkedIn", "https://rss.app/feeds/rszN8UooJxRHd9RT.xml"),
+    ("Subex News", "https://rss.app/feeds/nBo6830ABe1HTZ5u.xml"),
+    ("OSS/BSS News", "https://rss.app/feeds/OXf4iibABnDj7t1l.xml"),
 
     # OTT
     ("Variety", "https://variety.com/feed/"),
