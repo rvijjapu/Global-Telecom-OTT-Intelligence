@@ -36,53 +36,141 @@ st.session_state.last_access = time.time()
 
 st.set_page_config(page_title="🌐 Global Telecom & OTT Stellar Nexus", page_icon="🌐", layout="wide", initial_sidebar_state="collapsed")
 
+# ==========================
+# 🎀 MAXIMUM CUTE & STUNNING PASTEL DESIGN
+# ==========================
 st.markdown("""
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Fredoka+One&display=swap" rel="stylesheet">
 <style>
- .stApp {
-    background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
-    background-size: cover;
-    color: #1e293b;
-    padding-top: 0.5rem;
- }
- .header-container {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 1.2rem 1.5rem;
-    text-align: center;
-    border-radius: 20px;
-    box-shadow: 0 6px 25px rgba(0,0,0,0.08);
-    margin: 0 1.5rem 1.8rem 1.5rem;
-    border-bottom: 4px solid #3b82f6;
-    backdrop-filter: blur(8px);
- }
- .main-title { font-size: 2.4rem; font-weight: 800; color: #1e40af; margin: 0; letter-spacing: -0.6px; }
- .subtitle { font-size: 1.1rem; color: #475569; margin-top: 0.6rem; margin-bottom: 0; font-weight: 500; }
- .col-header { padding: 10px 16px; border-radius: 14px 14px 0 0; color: white; font-weight: 700; font-size: 0.95rem; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
- .col-header-pink { background: linear-gradient(135deg, #ec4899, #db2777); }
- .col-header-purple { background: linear-gradient(135deg, #a78bfa, #8b5cf6); }
- .col-header-green { background: linear-gradient(135deg, #34d399, #10b981); }
- .col-header-orange { background: linear-gradient(135deg, #fb923c, #f97316); }
- .col-body { background: white; border-radius: 0 0 14px 14px; padding: 12px; min-height: 520px; max-height: 620px; overflow-y: auto; box-shadow: 0 6px 20px rgba(0,0,0,0.08); margin-bottom: 1rem; }
- .news-card { background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 10px; transition: all 0.3s ease; }
- .news-card:hover { background: #f1f5f9; box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
- .news-card-priority { background: #fefce8; border: 2px solid #fbbf24; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
- .news-card-priority:hover { background: #fef3c7; box-shadow: 0 8px 20px rgba(251,191,36,0.15); }
- .news-title { color: #1e40af; font-size: 0.92rem; font-weight: 600; line-height: 1.35; text-decoration: none; display: block; margin-bottom: 6px; }
- .news-title:hover { color: #1d4ed8; text-decoration: underline; }
- .news-meta { font-size: 0.76rem; color: #64748b; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
- .time-hot { color: #dc2626; font-weight: 600; font-style: italic; }
- .time-warm { color: #ea580c; font-weight: 600; }
- .time-normal { color: #64748b; }
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Fredoka+One&display=swap');
+
+    .stApp {
+        background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
+        background-size: cover;
+        font-family: 'Poppins', sans-serif;
+        color: #2d3748;
+        padding-top: 0.5rem;
+    }
+
+    .header-container {
+        background: rgba(255, 255, 255, 0.94);
+        padding: 2.5rem 1.5rem;
+        text-align: center;
+        border-radius: 45px;
+        box-shadow: 0 18px 45px rgba(0,0,0,0.15);
+        margin: 0 1.5rem 3rem 1.5rem;
+        border-bottom: 12px solid #d8b4fe;
+        backdrop-filter: blur(18px);
+    }
+
+    .main-title {
+        font-family: 'Fredoka One', cursive;
+        font-size: 3.8rem;
+        color: #7c3aed;
+        margin: 0;
+        letter-spacing: -2px;
+        text-shadow: 0 5px 10px rgba(124,58,237,0.25);
+    }
+
+    .subtitle {
+        font-size: 1.6rem;
+        color: #64748b;
+        margin-top: 1.4rem;
+        font-weight: 500;
+    }
+
+    .col-header {
+        padding: 28px;
+        border-radius: 40px 40px 0 0;
+        color: white;
+        font-family: 'Fredoka One', cursive;
+        font-size: 2.2rem;
+        text-align: center;
+        box-shadow: 0 12px 30px rgba(0,0,0,0.22);
+        text-shadow: 0 4px 10px rgba(0,0,0,0.35);
+    }
+
+    .col-header-pink { background: linear-gradient(135deg, #fecdd3, #f472b6); }
+    .col-header-purple { background: linear-gradient(135deg, #e9d5ff, #a78bfa); }
+    .col-header-green { background: linear-gradient(135deg, #bbf7d0, #4ade80); }
+    .col-header-orange { background: linear-gradient(135deg, #fed7aa, #fb923c); }
+
+    .col-body {
+        background: white;
+        border-radius: 0 0 40px 40px;
+        padding: 28px;
+        min-height: 620px;
+        max-height: 720px;
+        overflow-y: auto;
+        box-shadow: 0 18px 45px rgba(0,0,0,0.15);
+        margin-bottom: 3rem;
+    }
+
+    .news-card {
+        background: #fdfdfb;
+        border-radius: 32px;
+        padding: 24px;
+        margin-bottom: 20px;
+        box-shadow: 0 12px 35px rgba(0,0,0,0.12);
+        transition: all 0.6s ease;
+    }
+
+    .news-card:hover {
+        transform: translateY(-12px);
+        box-shadow: 0 30px 60px rgba(167,139,250,0.4);
+    }
+
+    .news-card-priority {
+        background: linear-gradient(135deg, #fffbeb, #fde68a);
+        border: 6px solid #f59e0b;
+        border-radius: 32px;
+        padding: 24px;
+        margin-bottom: 20px;
+        box-shadow: 0 15px 40px rgba(251,146,60,0.35);
+    }
+
+    .news-card-priority:hover {
+        transform: translateY(-15px);
+        box-shadow: 0 35px 70px rgba(251,146,60,0.45);
+    }
+
+    .news-title {
+        color: #5b21b6;
+        font-size: 1.2rem;
+        font-weight: 600;
+        line-height: 1.55;
+        text-decoration: none;
+        display: block;
+        margin-bottom: 14px;
+    }
+
+    .news-title:hover {
+        color: #7c3aed;
+    }
+
+    .news-meta {
+        font-size: 0.95rem;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .time-hot { color: #dc2626; font-weight: 700; font-style: italic; }
+    .time-warm { color: #ea580c; font-weight: 700; }
+    .time-normal { color: #64748b; }
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown("""
 <div class="header-container">
     <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
-    <p class="subtitle">Real-time Competitive Intelligence Dashboard</p>
+    <p class="subtitle">Real-time Competitive Intelligence Dashboard ✨</p>
 </div>
 """, unsafe_allow_html=True)
 
-# === RSS FEEDS ===
+# === RSS FEEDS (RICH & DIVERSE COVERAGE) ===
 RSS_FEEDS = [
     # Telco
     ("Telecoms.com", "https://www.telecoms.com/feed"),
@@ -119,14 +207,14 @@ RSS_FEEDS = [
     ("Engadget", "https://www.engadget.com/rss.xml"),
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 
-    # Key Evergent OTT Clients
+    # Key Evergent OTT Clients (official)
     ("Netflix Press", "https://ir.netflix.net/resources/rss-feeds/default.aspx"),
     ("Disney Company News", "https://thewaltdisneycompany.com/feed/"),
     ("Warner Bros Discovery", "https://press.wbd.com/us/rss-feed"),
     ("Paramount Global", "https://ir.paramount.com/rss/news-releases.xml"),
     ("Peacock Press", "https://www.nbcuniversal.com/rss/peacock"),
 
-    # Top Telcos
+    # Top Telcos (official)
     ("Verizon Newsroom", "https://www.verizon.com/about/news/rss"),
     ("T-Mobile News", "https://www.t-mobile.com/news/rss"),
     ("Vodafone Group", "https://www.vodafone.com/news/rss"),
@@ -143,27 +231,20 @@ SECTIONS = {
 }
 
 SOURCE_CATEGORY_MAP = {
-    # Telco
     "Telecoms.com": "telco", "Light Reading": "telco", "Fierce Telecom": "telco",
     "RCR Wireless": "telco", "Mobile World Live": "telco", "ET Telecom": "telco",
     "Netcracker Press": "telco", "Netcracker News": "telco", "Amdocs LinkedIn": "telco",
-    "Verizon Newsroom": "telco", "T-Mobile News": "telco", "Vodafone Group": "telco",
-    "Deutsche Telekom": "telco", "Bharti Airtel": "telco", "Reliance Jio": "telco",
-
-    # OTT
     "Variety": "ott", "Hollywood Reporter": "ott", "Deadline": "ott",
     "Digital TV Europe": "ott", "Advanced Television": "ott",
-    "Netflix Press": "ott", "Disney Company News": "ott", "Warner Bros Discovery": "ott",
-    "Paramount Global": "ott", "Peacock Press": "ott",
-
-    # Sports
     "ESPN": "sports", "BBC Sport": "sports", "Front Office Sports": "sports",
     "Sportico": "sports", "SportsPro": "sports",
-
-    # Technology
     "TechCrunch": "technology", "The Verge": "technology", "Wired": "technology",
     "Ars Technica": "technology", "VentureBeat": "technology", "ZDNet": "technology",
     "Engadget": "technology", "Techmeme": "technology",
+    "Netflix Press": "ott", "Disney Company News": "ott", "Warner Bros Discovery": "ott",
+    "Paramount Global": "ott", "Peacock Press": "ott",
+    "Verizon Newsroom": "telco", "T-Mobile News": "telco", "Vodafone Group": "telco",
+    "Deutsche Telekom": "telco", "Bharti Airtel": "telco", "Reliance Jio": "telco",
 }
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
@@ -175,11 +256,11 @@ def clean(raw):
 def fetch_feed(source, url):
     items = []
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=4)
+        resp = requests.get(url, headers=HEADERS, timeout=10)
         if resp.status_code != 200: return items
         feed = feedparser.parse(resp.content)
         NOW = datetime.now()
-        CUTOFF = NOW - timedelta(days=3)
+        CUTOFF = NOW - timedelta(days=7)  # Ensures content even during quiet periods
         for entry in feed.entries[:10]:
             title = clean(entry.get("title", ""))
             if len(title) < 20: continue
@@ -195,26 +276,22 @@ def fetch_feed(source, url):
             if not pub or pub < CUTOFF: continue
             items.append({"title": title, "link": link, "pub": pub, "source": source, "summary": summary})
     except: pass
-    return items
+    items.sort(key=lambda x: x["pub"], reverse=True)
+    return items[:1]  # Only the newest, most impactful from each source
 
 @st.cache_data(ttl=300, show_spinner=False)
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
-    seen_sources = {"telco": set(), "ott": set(), "sports": set(), "technology": set()}
-
     with ThreadPoolExecutor(max_workers=16) as executor:
         futures = [executor.submit(fetch_feed, source, url) for source, url in RSS_FEEDS]
         for future in as_completed(futures):
             items = future.result()
-            for item in items:
+            if items:
+                item = items[0]
                 category = SOURCE_CATEGORY_MAP.get(item["source"], "technology")
-                if item["source"] not in seen_sources[category]:
-                    categorized[category].append(item)
-                    seen_sources[category].add(item["source"])
-
+                categorized[category].append(item)
     for cat in categorized:
         categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
-
     return categorized
 
 def get_time_str(dt):
@@ -241,12 +318,12 @@ def render_body(items):
 </div>
 </div>'''
     if not items:
-        cards = '<div style="text-align:center;color:#94a3b8;padding:30px;">No recent news</div>'
+        cards = '<div style="text-align:center;color:#94a3b8;padding:80px;font-size:1.4rem;">No recent news in this category yet 🌙<br><small style="font-size:1rem;">Check back soon! ♡</small></div>'
     return f'<div class="col-body">{cards}</div>'
 
 # Loading message
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Powering up the latest insights...<br><small>Please wait a moment</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#7c3aed;margin-top:180px;font-family:\"Fredoka One\";font-size:3.2rem;'>✨ Powering up the latest insights...<br><small style='font-size:1.4rem;color:#94a3b8;'>Please wait a moment ♡</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_feeds()
