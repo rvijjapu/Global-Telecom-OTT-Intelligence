@@ -3,24 +3,18 @@ import feedparser
 import requests
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import hashlib
-import re
 import html
 import time
 
 # ==========================
-# 🔐 CEO TOKEN SECURITY GATE (Using Streamlit Secrets)
+# 🔐 CEO TOKEN SECURITY GATE
 # ==========================
 try:
     EXPECTED_TOKEN = st.secrets["CEO_ACCESS_TOKEN"]
-except FileNotFoundError:
-    st.error("🔧 Missing secrets.toml – Add CEO_ACCESS_TOKEN in .streamlit/secrets.toml or Streamlit Cloud Secrets")
-    st.stop()
-except KeyError:
-    st.error("🔧 CEO_ACCESS_TOKEN not found in secrets")
+except:
+    st.error("🔧 Missing or invalid CEO_ACCESS_TOKEN in secrets")
     st.stop()
 
-# Get token from URL query parameter: ?token=your_token
 provided_token = st.query_params.get("token")
 if provided_token is not None:
     provided_token = provided_token[0] if isinstance(provided_token, list) else provided_token
@@ -29,26 +23,18 @@ else:
 
 if provided_token != EXPECTED_TOKEN:
     st.error("⛔ Unauthorized access – Invalid or missing token")
-    st.info("Append `?token=your_token` to the URL or contact admin.")
+    st.info("Append `?token=your_token` to the URL")
     st.stop()
 
-# Simple rate limiting
+# Rate limiting
 if "last_access" not in st.session_state:
     st.session_state.last_access = 0
-
-now = time.time()
-if now - st.session_state.last_access < 2:
-    st.warning("⏱ Too many requests – Please wait a moment.")
+if time.time() - st.session_state.last_access < 2:
+    st.warning("⏱ Too many requests – Please wait.")
     st.stop()
+st.session_state.last_access = time.time()
 
-st.session_state.last_access = now
-
-st.set_page_config(
-    page_title="🌐 Global Telecom & OTT Stellar Nexus",
-    page_icon="🌐",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+st.set_page_config(page_title="🌐 Global Telecom & OTT Stellar Nexus", page_icon="🌐", layout="wide", initial_sidebar_state="collapsed")
 
 st.markdown("""
 <style>
@@ -68,107 +54,27 @@ st.markdown("""
     border-bottom: 4px solid #3b82f6;
     backdrop-filter: blur(8px);
  }
-
- .main-title {
-    font-size: 2.4rem;
-    font-weight: 800;
-    color: #1e40af;
-    margin: 0;
-    letter-spacing: -0.6px;
- }
-
- .subtitle {
-    font-size: 1.1rem;
-    color: #475569;
-    margin-top: 0.6rem;
-    margin-bottom: 0;
-    font-weight: 500;
- }
-
- .col-header {
-    padding: 10px 16px;
-    border-radius: 14px 14px 0 0;
-    color: white;
-    font-weight: 700;
-    font-size: 0.95rem;
-    text-align: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
- }
-
+ .main-title { font-size: 2.4rem; font-weight: 800; color: #1e40af; margin: 0; letter-spacing: -0.6px; }
+ .subtitle { font-size: 1.1rem; color: #475569; margin-top: 0.6rem; margin-bottom: 0; font-weight: 500; }
+ .col-header { padding: 10px 16px; border-radius: 14px 14px 0 0; color: white; font-weight: 700; font-size: 0.95rem; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
  .col-header-pink { background: linear-gradient(135deg, #ec4899, #db2777); }
  .col-header-purple { background: linear-gradient(135deg, #a78bfa, #8b5cf6); }
  .col-header-green { background: linear-gradient(135deg, #34d399, #10b981); }
  .col-header-orange { background: linear-gradient(135deg, #fb923c, #f97316); }
-
- .col-body {
-    background: white;
-    border-radius: 0 0 14px 14px;
-    padding: 12px;
-    min-height: 520px;
-    max-height: 620px;
-    overflow-y: auto;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-    margin-bottom: 1rem;
- }
-
- .news-card {
-    background: #fafbfc;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 12px;
-    margin-bottom: 10px;
-    transition: all 0.3s ease;
- }
-
- .news-card:hover {
-    background: #f1f5f9;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
- }
-
- .news-card-priority {
-    background: #fefce8;
-    border: 2px solid #fbbf24;
-    border-radius: 10px;
-    padding: 12px;
-    margin-bottom: 10px;
- }
-
- .news-card-priority:hover {
-    background: #fef3c7;
-    box-shadow: 0 8px 20px rgba(251,191,36,0.15);
- }
-
- .news-title {
-    color: #1e40af;
-    font-size: 0.92rem;
-    font-weight: 600;
-    line-height: 1.35;
-    text-decoration: none;
-    display: block;
-    margin-bottom: 6px;
- }
-
- .news-title:hover {
-    color: #1d4ed8;
-    text-decoration: underline;
- }
-
- .news-meta {
-    font-size: 0.76rem;
-    color: #64748b;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    flex-wrap: wrap;
- }
-
+ .col-body { background: white; border-radius: 0 0 14px 14px; padding: 12px; min-height: 520px; max-height: 620px; overflow-y: auto; box-shadow: 0 6px 20px rgba(0,0,0,0.08); margin-bottom: 1rem; }
+ .news-card { background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 10px; transition: all 0.3s ease; }
+ .news-card:hover { background: #f1f5f9; box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
+ .news-card-priority { background: #fefce8; border: 2px solid #fbbf24; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+ .news-card-priority:hover { background: #fef3c7; box-shadow: 0 8px 20px rgba(251,191,36,0.15); }
+ .news-title { color: #1e40af; font-size: 0.92rem; font-weight: 600; line-height: 1.35; text-decoration: none; display: block; margin-bottom: 6px; }
+ .news-title:hover { color: #1d4ed8; text-decoration: underline; }
+ .news-meta { font-size: 0.76rem; color: #64748b; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
  .time-hot { color: #dc2626; font-weight: 600; font-style: italic; }
  .time-warm { color: #ea580c; font-weight: 600; }
  .time-normal { color: #64748b; }
 </style>
 """, unsafe_allow_html=True)
 
-# === TITLE ===
 st.markdown("""
 <div class="header-container">
     <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
@@ -176,7 +82,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# === OPTIMIZED RSS FEEDS (ORIGINAL + NEW CLIENT/TELCO FEEDS) ===
+# === RSS FEEDS ===
 RSS_FEEDS = [
     # Telco
     ("Telecoms.com", "https://www.telecoms.com/feed"),
@@ -213,20 +119,20 @@ RSS_FEEDS = [
     ("Engadget", "https://www.engadget.com/rss.xml"),
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 
-    # === NEW: Evergent OTT Clients ===
-    ("Netflix Press Releases", "https://ir.netflix.net/resources/rss-feeds/default.aspx"),
+    # Key Evergent OTT Clients
+    ("Netflix Press", "https://ir.netflix.net/resources/rss-feeds/default.aspx"),
     ("Disney Company News", "https://thewaltdisneycompany.com/feed/"),
-    ("Warner Bros Discovery Press", "https://press.wbd.com/us/rss-feed"),
-    ("Paramount Global News", "https://ir.paramount.com/rss/news-releases.xml"),
-    ("Peacock/NBCUniversal Press", "https://www.nbcuniversal.com/rss/peacock"),
+    ("Warner Bros Discovery", "https://press.wbd.com/us/rss-feed"),
+    ("Paramount Global", "https://ir.paramount.com/rss/news-releases.xml"),
+    ("Peacock Press", "https://www.nbcuniversal.com/rss/peacock"),
 
-    # === NEW: Top Telcos ===
+    # Top Telcos
     ("Verizon Newsroom", "https://www.verizon.com/about/news/rss"),
-    ("T-Mobile Newsroom", "https://www.t-mobile.com/news/rss"),
-    ("Vodafone Group News", "https://www.vodafone.com/news/rss"),
-    ("Deutsche Telekom Media", "https://www.telekom.com/en/media/rss-feed"),
-    ("Bharti Airtel Press", "https://www.airtel.in/press-release/rss"),
-    ("Reliance Jio News", "https://www.jio.com/rss/news"),
+    ("T-Mobile News", "https://www.t-mobile.com/news/rss"),
+    ("Vodafone Group", "https://www.vodafone.com/news/rss"),
+    ("Deutsche Telekom", "https://www.telekom.com/en/media/rss-feed"),
+    ("Bharti Airtel", "https://www.airtel.in/press-release/rss"),
+    ("Reliance Jio", "https://www.jio.com/rss/news"),
 ]
 
 SECTIONS = {
@@ -237,103 +143,64 @@ SECTIONS = {
 }
 
 SOURCE_CATEGORY_MAP = {
-    # Original
-    "Telecoms.com": "telco",
-    "Light Reading": "telco",
-    "Fierce Telecom": "telco",
-    "RCR Wireless": "telco",
-    "Mobile World Live": "telco",
-    "ET Telecom": "telco",
-    "Netcracker Press": "telco",
-    "Netcracker News": "telco",
-    "Amdocs LinkedIn": "telco",
-    "Variety": "ott",
-    "Hollywood Reporter": "ott",
-    "Deadline": "ott",
-    "Digital TV Europe": "ott",
-    "Advanced Television": "ott",
-    "ESPN": "sports",
-    "BBC Sport": "sports",
-    "Front Office Sports": "sports",
-    "Sportico": "sports",
-    "SportsPro": "sports",
-    "TechCrunch": "technology",
-    "The Verge": "technology",
-    "Wired": "technology",
-    "Ars Technica": "technology",
-    "VentureBeat": "technology",
-    "ZDNet": "technology",
-    "Engadget": "technology",
-    "Techmeme": "technology",
+    # Telco
+    "Telecoms.com": "telco", "Light Reading": "telco", "Fierce Telecom": "telco",
+    "RCR Wireless": "telco", "Mobile World Live": "telco", "ET Telecom": "telco",
+    "Netcracker Press": "telco", "Netcracker News": "telco", "Amdocs LinkedIn": "telco",
+    "Verizon Newsroom": "telco", "T-Mobile News": "telco", "Vodafone Group": "telco",
+    "Deutsche Telekom": "telco", "Bharti Airtel": "telco", "Reliance Jio": "telco",
 
-    # New OTT Clients
-    "Netflix Press Releases": "ott",
-    "Disney Company News": "ott",
-    "Warner Bros Discovery Press": "ott",
-    "Paramount Global News": "ott",
-    "Peacock/NBCUniversal Press": "ott",
+    # OTT
+    "Variety": "ott", "Hollywood Reporter": "ott", "Deadline": "ott",
+    "Digital TV Europe": "ott", "Advanced Television": "ott",
+    "Netflix Press": "ott", "Disney Company News": "ott", "Warner Bros Discovery": "ott",
+    "Paramount Global": "ott", "Peacock Press": "ott",
 
-    # New Telcos
-    "Verizon Newsroom": "telco",
-    "T-Mobile Newsroom": "telco",
-    "Vodafone Group News": "telco",
-    "Deutsche Telekom Media": "telco",
-    "Bharti Airtel Press": "telco",
-    "Reliance Jio News": "telco",
+    # Sports
+    "ESPN": "sports", "BBC Sport": "sports", "Front Office Sports": "sports",
+    "Sportico": "sports", "SportsPro": "sports",
+
+    # Technology
+    "TechCrunch": "technology", "The Verge": "technology", "Wired": "technology",
+    "Ars Technica": "technology", "VentureBeat": "technology", "ZDNet": "technology",
+    "Engadget": "technology", "Techmeme": "technology",
 }
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-    "Accept": "application/rss+xml, application/xml, text/xml, */*",
-}
+HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
 def clean(raw):
-    if not raw:
-        return ""
+    if not raw: return ""
     return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
 
 def fetch_feed(source, url):
     items = []
     try:
         resp = requests.get(url, headers=HEADERS, timeout=4)
-        if resp.status_code != 200:
-            return items
+        if resp.status_code != 200: return items
         feed = feedparser.parse(resp.content)
         NOW = datetime.now()
         CUTOFF = NOW - timedelta(days=3)
         for entry in feed.entries[:10]:
             title = clean(entry.get("title", ""))
-            if len(title) < 20:
-                continue
+            if len(title) < 20: continue
             summary = clean(entry.get("summary", ""))
             link = entry.get("link", "")
             pub = None
             for k in ("published_parsed", "updated_parsed"):
                 val = getattr(entry, k, None)
                 if val:
-                    try:
-                        pub = datetime(*val[:6])
-                    except:
-                        pass
+                    try: pub = datetime(*val[:6])
+                    except: pass
                     break
-            if not pub or pub < CUTOFF:
-                continue
-            items.append({
-                "title": title, "link": link, "pub": pub, "source": source,
-                "summary": summary
-            })
-    except:
-        pass
+            if not pub or pub < CUTOFF: continue
+            items.append({"title": title, "link": link, "pub": pub, "source": source, "summary": summary})
+    except: pass
     return items
 
 @st.cache_data(ttl=300, show_spinner=False)
 def load_feeds():
-    categorized = {
-        "telco": [],
-        "ott": [],
-        "sports": [],
-        "technology": []
-    }
+    categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
+    seen_sources = {"telco": set(), "ott": set(), "sports": set(), "technology": set()}
 
     with ThreadPoolExecutor(max_workers=16) as executor:
         futures = [executor.submit(fetch_feed, source, url) for source, url in RSS_FEEDS]
@@ -341,7 +208,9 @@ def load_feeds():
             items = future.result()
             for item in items:
                 category = SOURCE_CATEGORY_MAP.get(item["source"], "technology")
-                categorized[category].append(item)
+                if item["source"] not in seen_sources[category]:
+                    categorized[category].append(item)
+                    seen_sources[category].add(item["source"])
 
     for cat in categorized:
         categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
@@ -350,12 +219,9 @@ def load_feeds():
 
 def get_time_str(dt):
     hrs = int((datetime.now() - dt).total_seconds() / 3600)
-    if hrs < 1:
-        return "Now", "time-hot"
-    if hrs < 6:
-        return f"{hrs}h", "time-hot"
-    if hrs < 24:
-        return f"{hrs}h", "time-warm"
+    if hrs < 1: return "Now", "time-hot"
+    if hrs < 6: return f"{hrs}h", "time-hot"
+    if hrs < 24: return f"{hrs}h", "time-warm"
     return f"{hrs//24}d", "time-normal"
 
 def render_body(items):
@@ -378,7 +244,7 @@ def render_body(items):
         cards = '<div style="text-align:center;color:#94a3b8;padding:30px;">No recent news</div>'
     return f'<div class="col-body">{cards}</div>'
 
-# === INSTANT FEEDBACK MESSAGE ===
+# Loading message
 placeholder = st.empty()
 placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Powering up the latest insights...<br><small>Please wait a moment</small></h2>", unsafe_allow_html=True)
 
@@ -387,7 +253,7 @@ with st.spinner(""):
 
 placeholder.empty()
 
-# === RENDER DASHBOARD ===
+# Render dashboard
 cols = st.columns(4)
 cat_list = ["telco", "ott", "sports", "technology"]
 for idx, cat in enumerate(cat_list):
