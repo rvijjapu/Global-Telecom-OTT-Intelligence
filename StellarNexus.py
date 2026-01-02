@@ -61,21 +61,46 @@ st.markdown("""
 <style>
 .stApp {
     background: 
-        linear-gradient(to bottom, #ffffff 0%, #f0f9ff 30%, #e0f2fe 60%, #bae6fd 100%),
-        radial-gradient(circle at top center, rgba(186, 230, 253, 0.5), transparent 60%),
-        radial-gradient(circle at bottom left, rgba(125, 211, 252, 0.3), transparent 70%);
+        linear-gradient(135deg, #f8fbff 0%, #eef5ff 30%, #e0ecff 60%, #d0e2ff 100%),
+        radial-gradient(circle at 15% 85%, rgba(200, 220, 255, 0.6), transparent 40%),
+        radial-gradient(circle at 85% 20%, rgba(180, 210, 255, 0.5), transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(240, 248, 255, 0.7), transparent 60%),
+        radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.4), transparent 30%),
+        radial-gradient(circle at 70% 60%, rgba(220, 235, 255, 0.4), transparent 35%);
     background-attachment: fixed;
+    background-blend-mode: screen;
     color: #1e293b;
     padding-top: 0.5rem;
+    position: relative;
+    overflow: hidden;
 }
 
-How to UseJust replace your current .stApp background with any of the above. My top recommendation for your "Stellar Nexus" theme is Option 1 or 4 — they feel light, futuristic, and perfectly telecom/aerospace without being busy.All are instant, light-themed, professional, and zero dependencies. Your CEO will see a clean, elegant dashboard in milliseconds.Pick one and paste — done!  Let me know if you want a custom blend.
+/* Subtle floating orbs to mimic the 3D icons in the image */
+.stApp::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+        radial-gradient(circle at 10% 90%, #e8edff 8px, transparent 9px),
+        radial-gradient(circle at 20% 70%, #ffffff 12px, transparent 13px),
+        radial-gradient(circle at 80% 15%, #e0e7ff 10px, transparent 11px),
+        radial-gradient(circle at 60% 80%, #d0d8ff 15px, transparent 16px),
+        radial-gradient(circle at 40% 30%, #f0f4ff 11px, transparent 12px),
+        radial-gradient(circle at 85% 60%, #ffffff 9px, transparent 10px),
+        radial-gradient(circle at 30% 20%, #c8d4ff 14px, transparent 15px);
+    background-size: 300px 300px, 250px 250px, 280px 280px, 320px 320px, 260px 260px, 240px 240px, 290px 290px;
+    background-position: 10% 90%, 25% 65%, 80% 10%, 55% 75%, 45% 35%, 90% 55%, 35% 25%;
+    opacity: 0.25;
+    animation: float-orbs 40s ease-in-out infinite;
+}
 
-Add animated CSS effects
+@keyframes float-orbs {
+    0%, 100% { transform: translateY(0) translateX(0); }
+    50% { transform: translateY(-40px) translateX(30px); }
+}
 
-Dark theme variants
-
-Make CSS more concise
 
  #MainMenu, footer, header {visibility: hidden;}
 
