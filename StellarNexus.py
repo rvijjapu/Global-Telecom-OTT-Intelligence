@@ -202,6 +202,7 @@ RSS_FEEDS = [
     ("Front Office Sports", "https://frontofficesports.com/feed/"),
     ("Sportico", "https://www.sportico.com/feed/"),
     ("SportsPro", "https://www.sportspromedia.com/feed/"),
+    ("Sports Business", "https://rss.app/feeds/qDuU3qpiuafUec6u.xml"),
 
     # Technology
     ("TechCrunch", "https://techcrunch.com/feed/"),
@@ -225,10 +226,11 @@ SOURCE_CATEGORY_MAP = {
     "Telecoms.com": "telco", "Light Reading": "telco", "Fierce Telecom": "telco",
     "RCR Wireless": "telco", "Mobile World Live": "telco", "ET Telecom": "telco",
     "Netcracker Press": "telco", "Netcracker News": "telco", "Amdocs LinkedIn": "telco",
+    "Subex News": "telco", "OSS/BSS News": "telco",
     "Variety": "ott", "Hollywood Reporter": "ott", "Deadline": "ott",
     "Digital TV Europe": "ott", "Advanced Television": "ott",
     "ESPN": "sports", "BBC Sport": "sports", "Front Office Sports": "sports",
-    "Sportico": "sports", "SportsPro": "sports",
+    "Sportico": "sports", "SportsPro": "sports", "Sports Business": "sports",
     "TechCrunch": "technology", "The Verge": "technology", "Wired": "technology",
     "Ars Technica": "technology", "VentureBeat": "technology", "ZDNet": "technology",
     "Engadget": "technology", "Techmeme": "technology",
@@ -256,7 +258,7 @@ def fetch_feed(source, url):
             return items
         
         NOW = datetime.now()
-        CUTOFF = NOW - timedelta(days=14)
+        CUTOFF = NOW - timedelta(days=3)
         
         for entry in feed.entries[:15]:
             title = clean(entry.get("title", ""))
@@ -279,6 +281,7 @@ def fetch_feed(source, url):
             if not pub:
                 pub = NOW
             
+            # Only skip if article is older than 3 days
             if pub < CUTOFF:
                 continue
             
