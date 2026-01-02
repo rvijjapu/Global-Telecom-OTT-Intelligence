@@ -8,47 +8,6 @@ import re
 import html
 import time
 
-
-# ==========================
-# 🔐 CEO TOKEN SECURITY GATE (Using Streamlit Secrets)
-# ==========================
-# In your GitHub repo, create a file: .streamlit/secrets.toml
-# Content:
-# CEO_ACCESS_TOKEN = "Vijay"   # Change to a strong random string in production!
-
-try:
-    EXPECTED_TOKEN = st.secrets["CEO_ACCESS_TOKEN"]
-except FileNotFoundError:
-    st.error("🔧 Missing secrets.toml – Add CEO_ACCESS_TOKEN in .streamlit/secrets.toml or Streamlit Cloud Secrets")
-    st.stop()
-except KeyError:
-    st.error("🔧 CEO_ACCESS_TOKEN not found in secrets")
-    st.stop()
-
-# Get token from URL query parameter: ?token=Vijay
-provided_token = st.query_params.get("token")
-if provided_token is not None:
-    # st.query_params returns a list in newer versions
-    provided_token = provided_token[0] if isinstance(provided_token, list) else provided_token
-else:
-    provided_token = ""
-
-if provided_token != EXPECTED_TOKEN:
-    st.error("⛔ Unauthorized access – Invalid or missing token")
-    st.info("Append `?token=your_token` to the URL or contact admin.")
-    st.stop()
-
-# Simple rate limiting (anti-bot protection)
-if "last_access" not in st.session_state:
-    st.session_state.last_access = 0
-
-now = time.time()
-if now - st.session_state.last_access < 2:  # Less than 2 seconds
-    st.warning("⏱ Too many requests – Please wait a moment.")
-    st.stop()
-
-st.session_state.last_access = now
-
 st.set_page_config(
     page_title="Global Telecom & OTT Stellar Nexus",
     page_icon="🌐",
