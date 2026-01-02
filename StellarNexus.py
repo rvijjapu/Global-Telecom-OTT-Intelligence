@@ -61,15 +61,23 @@ st.markdown("""
 <style>
 .stApp {
     background: 
-        linear-gradient(90deg, transparent 98%, rgba(59, 130, 246, 0.1) 98%),
-        linear-gradient(0deg, transparent 98%, rgba(99, 102, 241, 0.1) 98%),
-        radial-gradient(circle at 20% 30%, rgba(147, 197, 253, 0.3), transparent 40%),
-        radial-gradient(circle at 80% 70%, rgba(191, 219, 254, 0.25), transparent 50%),
-        #0f172a;
-    background-size: 50px 50px, 50px 50px, cover, cover, cover;
+        linear-gradient(to bottom, #ffffff 0%, #f0f9ff 30%, #e0f2fe 60%, #bae6fd 100%),
+        radial-gradient(circle at top center, rgba(186, 230, 253, 0.5), transparent 60%),
+        radial-gradient(circle at bottom left, rgba(125, 211, 252, 0.3), transparent 70%);
     background-attachment: fixed;
-    color: #e0f2fe;
-} #MainMenu, footer, header {visibility: hidden;}
+    color: #1e293b;
+    padding-top: 0.5rem;
+}
+
+How to UseJust replace your current .stApp background with any of the above. My top recommendation for your "Stellar Nexus" theme is Option 1 or 4 — they feel light, futuristic, and perfectly telecom/aerospace without being busy.All are instant, light-themed, professional, and zero dependencies. Your CEO will see a clean, elegant dashboard in milliseconds.Pick one and paste — done!  Let me know if you want a custom blend.
+
+Add animated CSS effects
+
+Dark theme variants
+
+Make CSS more concise
+
+ #MainMenu, footer, header {visibility: hidden;}
 
     .block-container {
         padding-top: 1rem !important;
