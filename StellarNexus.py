@@ -19,8 +19,12 @@ st.set_page_config(
 st.markdown("""
 <style>
 .stApp {
-    background: url('https://i.ibb.co/PstYJ8Hr/image.jpg') no-repeat center center fixed;
-    background-size: cover;
+    background: 
+        linear-gradient(to bottom, #ffffff 0%, #f0f9ff 30%, #e0f2fe 70%, #bae6fd 100%),
+        radial-gradient(circle at top left, rgba(186, 230, 253, 0.4), transparent 60%),
+        radial-gradient(circle at bottom right, rgba(125, 211, 252, 0.3), transparent 70%),
+        radial-gradient(circle at center, rgba(99, 102, 241, 0.15), transparent 80%);
+    background-attachment: fixed;
     color: #1e293b;
     padding-top: 0.5rem;
 } #MainMenu, footer, header {visibility: hidden;}
