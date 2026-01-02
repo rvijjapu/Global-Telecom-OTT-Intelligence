@@ -209,37 +209,30 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# === VALID & ACTIVE RSS FEEDS ONLY (Verified Jan 2, 2026) ===
+# === VALID & ACTIVE RSS FEEDS ONLY ===
 RSS_FEEDS = [
-    # Telco - All active
+    # Telco
     ("Telecoms.com", "https://www.telecoms.com/feed"),
     ("Light Reading", "https://www.lightreading.com/rss/simple"),
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml"),
     ("RCR Wireless", "https://www.rcrwireless.com/feed"),
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/"),
     ("ET Telecom", "https://telecom.economictimes.indiatimes.com/rss/topstories"),
-    ("Verizon Newsroom", "https://www.verizon.com/about/news/rss"),
-    ("T-Mobile News", "https://www.t-mobile.com/news/rss"),
-    ("Vodafone Group", "https://www.vodafone.com/news/rss"),
     
-    # OTT - All active
+    # OTT
     ("Variety", "https://variety.com/feed/"),
     ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/"),
     ("Deadline", "https://deadline.com/feed/"),
     ("Digital TV Europe", "https://www.digitaltveurope.com/feed/"),
     ("Advanced Television", "https://advanced-television.com/feed/"),
-    ("Netflix Press", "https://ir.netflix.net/resources/rss-feeds/default.aspx"),
-    ("Disney Company News", "https://thewaltdisneycompany.com/feed/"),
-    ("Warner Bros Discovery", "https://press.wbd.com/us/rss-feed"),
     
-    # Sports - All active
+    # Sports
     ("ESPN", "https://www.espn.com/espn/rss/news"),
     ("BBC Sport", "https://feeds.bbci.co.uk/sport/rss.xml"),
     ("Front Office Sports", "https://frontofficesports.com/feed/"),
     ("Sportico", "https://www.sportico.com/feed/"),
-    ("SportsPro", "https://www.sportspromedia.com/feed/"),
     
-    # Technology - All active
+    # Technology
     ("TechCrunch", "https://techcrunch.com/feed/"),
     ("The Verge", "https://www.theverge.com/rss/index.xml"),
     ("Wired", "https://www.wired.com/feed/rss"),
@@ -258,68 +251,35 @@ SECTIONS = {
 }
 
 SOURCE_CATEGORY_MAP = {
-    "Telecoms.com": "telco",
-    "Light Reading": "telco",
-    "Fierce Telecom": "telco",
-    "RCR Wireless": "telco",
-    "Mobile World Live": "telco",
-    "ET Telecom": "telco",
-    "Verizon Newsroom": "telco",
-    "T-Mobile News": "telco",
-    "Vodafone Group": "telco",
-    
-    "Variety": "ott",
-    "Hollywood Reporter": "ott",
-    "Deadline": "ott",
-    "Digital TV Europe": "ott",
-    "Advanced Television": "ott",
-    "Netflix Press": "ott",
-    "Disney Company News": "ott",
-    "Warner Bros Discovery": "ott",
-    
-    "ESPN": "sports",
-    "BBC Sport": "sports",
-    "Front Office Sports": "sports",
-    "Sportico": "sports",
-    "SportsPro": "sports",
-    
-    "TechCrunch": "technology",
-    "The Verge": "technology",
-    "Wired": "technology",
-    "Ars Technica": "technology",
-    "VentureBeat": "technology",
-    "ZDNet": "technology",
-    "Engadget": "technology",
-    "Techmeme": "technology",
+    "Telecoms.com": "telco", "Light Reading": "telco", "Fierce Telecom": "telco",
+    "RCR Wireless": "telco", "Mobile World Live": "telco", "ET Telecom": "telco",
+    "Variety": "ott", "Hollywood Reporter": "ott", "Deadline": "ott",
+    "Digital TV Europe": "ott", "Advanced Television": "ott",
+    "ESPN": "sports", "BBC Sport": "sports", "Front Office Sports": "sports", "Sportico": "sports",
+    "TechCrunch": "technology", "The Verge": "technology", "Wired": "technology",
+    "Ars Technica": "technology", "VentureBeat": "technology", "ZDNet": "technology",
+    "Engadget": "technology", "Techmeme": "technology",
 }
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
 def clean(raw):
-    """Clean HTML and escape special characters"""
     if not raw:
         return ""
-    # Remove HTML tags
     text = re.sub(r'<[^>]+>', '', str(raw))
-    # Unescape HTML entities
     text = html.unescape(text)
-    # Clean whitespace
     text = ' '.join(text.split())
     return text.strip()
 
 def fetch_feed(source, url):
-    """Fetch and parse a single RSS feed"""
     items = []
     try:
         resp = requests.get(url, headers=HEADERS, timeout=10)
         if resp.status_code != 200:
-            print(f"Failed to fetch {source}: HTTP {resp.status_code}")
             return items
         
         feed = feedparser.parse(resp.content)
-        
         if not feed.entries:
-            print(f"No entries found for {source}")
             return items
         
         NOW = datetime.now()
@@ -327,15 +287,12 @@ def fetch_feed(source, url):
         
         for entry in feed.entries[:15]:
             title = clean(entry.get("title", ""))
-            
-            # Skip very short titles
             if len(title) < 15:
                 continue
             
             summary = clean(entry.get("summary", ""))
             link = entry.get("link", "")
             
-            # Parse publication date
             pub = None
             for k in ("published_parsed", "updated_parsed"):
                 val = getattr(entry, k, None)
@@ -346,11 +303,9 @@ def fetch_feed(source, url):
                     except:
                         pass
             
-            # If no valid date, use current time
             if not pub:
                 pub = NOW
             
-            # Skip old articles
             if pub < CUTOFF:
                 continue
             
@@ -362,26 +317,15 @@ def fetch_feed(source, url):
                 "summary": summary
             })
         
-        # Sort by date and keep top 3
         items.sort(key=lambda x: x["pub"], reverse=True)
-        items = items[:3]
-        
-        print(f"✓ {source}: {len(items)} articles")
+        return items[:3]
         
     except Exception as e:
-        print(f"Error fetching {source}: {str(e)}")
-    
-    return items
+        return items
 
 @st.cache_data(ttl=300, show_spinner=False)
 def load_feeds():
-    """Load all RSS feeds in parallel"""
-    categorized = {
-        "telco": [],
-        "ott": [],
-        "sports": [],
-        "technology": []
-    }
+    categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
     
     with ThreadPoolExecutor(max_workers=20) as executor:
         futures = [executor.submit(fetch_feed, source, url) for source, url in RSS_FEEDS]
@@ -392,66 +336,53 @@ def load_feeds():
                 for item in items:
                     category = SOURCE_CATEGORY_MAP.get(item["source"], "technology")
                     categorized[category].append(item)
-            except Exception as e:
-                print(f"Error processing future: {str(e)}")
+            except:
+                pass
     
-    # Sort each category by date
     for cat in categorized:
         categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
     
     return categorized
 
 def get_time_str(dt):
-    """Get human-readable time string with styling class"""
     hrs = int((datetime.now() - dt).total_seconds() / 3600)
-    
     if hrs < 1:
         return "Now", "time-hot"
     if hrs < 6:
         return f"{hrs}h", "time-hot"
     if hrs < 24:
         return f"{hrs}h", "time-warm"
-    
     return f"{hrs//24}d", "time-normal"
 
 def render_body(items):
-    """Render news cards for a category"""
     if not items:
         return '<div class="empty-state">No recent news in this category yet 🌙<br>Check back soon! ♡</div>'
     
     cards = ""
     for item in items:
         time_str, time_class = get_time_str(item["pub"])
-        
         safe_title = html.escape(item["title"])
         safe_link = html.escape(item["link"])
         safe_source = html.escape(item["source"])
         
-        # Check if this is a priority item (mentions netcracker)
         content_lower = (item["title"] + item.get("summary", "")).lower()
         card_class = "news-card-priority" if "netcracker" in content_lower else "news-card"
         
         cards += f'''
-        <div class="{card_class}">
-            <a href="{safe_link}" target="_blank" class="card-title">
-                {safe_title}
-            </a>
-            <div class="card-meta">
-                <span class="{time_class}">{time_str}</span>
-                <span>•</span>
-                <span>{safe_source}</span>
-            </div>
-        </div>
-        '''
+<div class="{card_class}">
+    <a href="{safe_link}" target="_blank" class="card-title">{safe_title}</a>
+    <div class="card-meta">
+        <span class="{time_class}">{time_str}</span>
+        <span>•</span>
+        <span>{safe_source}</span>
+    </div>
+</div>'''
     
-    return f'<div>{cards}</div>'
+    return cards
 
-# Loading message
+# Loading
 placeholder = st.empty()
-placeholder.markdown(
-    '<div class="loading-msg">✨ Powering up the latest insights... Please wait a moment ♡</div>',
-    unsafe_allow_html=True
-)
+placeholder.markdown('<div class="loading-msg">✨ Powering up the latest insights... Please wait a moment ♡</div>', unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_feeds()
@@ -467,14 +398,5 @@ for idx, cat in enumerate(cat_list):
     items = data.get(cat, [])
     
     with cols[idx]:
-        st.markdown(
-            f'<div class="col-header {sec["style"]}">{sec["icon"]} {sec["name"]}</div>',
-            unsafe_allow_html=True
-        )
+        st.markdown(f'<div class="col-header {sec["style"]}">{sec["icon"]} {sec["name"]}</div>', unsafe_allow_html=True)
         st.markdown(render_body(items), unsafe_allow_html=True)
-
-# Debug info (optional - remove in production)
-with st.expander("📊 Debug Information"):
-    st.write("Items per category:")
-    for cat in cat_list:
-        st.write(f"- {cat}: {len(data.get(cat, []))} articles")
