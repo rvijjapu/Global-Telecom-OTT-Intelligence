@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import html
 import time
+import re
 
 # ==========================
 # 🔐 CEO TOKEN SECURITY GATE
@@ -29,144 +30,182 @@ if provided_token != EXPECTED_TOKEN:
 # Rate limiting
 if "last_access" not in st.session_state:
     st.session_state.last_access = 0
+
 if time.time() - st.session_state.last_access < 2:
     st.warning("⏱ Too many requests – Please wait.")
     st.stop()
+
 st.session_state.last_access = time.time()
 
-st.set_page_config(page_title="🌐 Global Telecom & OTT Stellar Nexus", page_icon="🌐", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(
+    page_title="🌐 Global Telecom & OTT Stellar Nexus",
+    page_icon="🌐",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
 # ==========================
 # 🎀 MAXIMUM CUTE & STUNNING PASTEL DESIGN
 # ==========================
 st.markdown("""
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Fredoka+One&display=swap" rel="stylesheet">
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Fredoka+One&display=swap');
-
-    .stApp {
-        background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
-        background-size: cover;
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+    
+    * {
         font-family: 'Poppins', sans-serif;
-        color: #2d3748;
-        padding-top: 0.5rem;
     }
-
-    .header-container {
-        background: rgba(255, 255, 255, 0.94);
-        padding: 2.5rem 1.5rem;
+    
+    .stApp {
+        background: linear-gradient(135deg, #ffeef8 0%, #e8f4ff 50%, #fff5e6 100%);
+    }
+    
+    .main-header {
         text-align: center;
-        border-radius: 45px;
-        box-shadow: 0 18px 45px rgba(0,0,0,0.15);
-        margin: 0 1.5rem 3rem 1.5rem;
-        border-bottom: 12px solid #d8b4fe;
-        backdrop-filter: blur(18px);
+        padding: 2rem 1rem;
+        background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 50%, #ffecd2 100%);
+        border-radius: 25px;
+        box-shadow: 0 15px 40px rgba(255, 154, 158, 0.3);
+        margin-bottom: 2rem;
+        animation: fadeIn 0.8s ease-in;
     }
-
-    .main-title {
-        font-family: 'Fredoka One', cursive;
-        font-size: 3.8rem;
-        color: #7c3aed;
+    
+    .main-header h1 {
+        font-size: 2.8rem;
+        font-weight: 700;
+        background: linear-gradient(90deg, #ff6b9d, #c06c84, #f67280);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         margin: 0;
-        letter-spacing: -2px;
-        text-shadow: 0 5px 10px rgba(124,58,237,0.25);
+        text-shadow: 2px 2px 10px rgba(255, 107, 157, 0.2);
     }
-
-    .subtitle {
-        font-size: 1.6rem;
-        color: #64748b;
-        margin-top: 1.4rem;
-        font-weight: 500;
+    
+    .main-header p {
+        color: #6a4c93;
+        font-size: 1.1rem;
+        margin-top: 0.5rem;
+        font-weight: 300;
     }
-
+    
     .col-header {
-        padding: 28px;
-        border-radius: 40px 40px 0 0;
-        color: white;
-        font-family: 'Fredoka One', cursive;
-        font-size: 2.2rem;
+        padding: 1rem;
+        border-radius: 15px;
         text-align: center;
-        box-shadow: 0 12px 30px rgba(0,0,0,0.22);
-        text-shadow: 0 4px 10px rgba(0,0,0,0.35);
-    }
-
-    .col-header-pink { background: linear-gradient(135deg, #fecdd3, #f472b6); }
-    .col-header-purple { background: linear-gradient(135deg, #e9d5ff, #a78bfa); }
-    .col-header-green { background: linear-gradient(135deg, #bbf7d0, #4ade80); }
-    .col-header-orange { background: linear-gradient(135deg, #fed7aa, #fb923c); }
-
-    .col-body {
-        background: white;
-        border-radius: 0 0 40px 40px;
-        padding: 28px;
-        min-height: 620px;
-        max-height: 720px;
-        overflow-y: auto;
-        box-shadow: 0 18px 45px rgba(0,0,0,0.15);
-        margin-bottom: 3rem;
-    }
-
-    .news-card {
-        background: #fdfdfb;
-        border-radius: 32px;
-        padding: 24px;
-        margin-bottom: 20px;
-        box-shadow: 0 12px 35px rgba(0,0,0,0.12);
-        transition: all 0.6s ease;
-    }
-
-    .news-card:hover {
-        transform: translateY(-12px);
-        box-shadow: 0 30px 60px rgba(167,139,250,0.4);
-    }
-
-    .news-card-priority {
-        background: linear-gradient(135deg, #fffbeb, #fde68a);
-        border: 6px solid #f59e0b;
-        border-radius: 32px;
-        padding: 24px;
-        margin-bottom: 20px;
-        box-shadow: 0 15px 40px rgba(251,146,60,0.35);
-    }
-
-    .news-card-priority:hover {
-        transform: translateY(-15px);
-        box-shadow: 0 35px 70px rgba(251,146,60,0.45);
-    }
-
-    .news-title {
-        color: #5b21b6;
-        font-size: 1.2rem;
+        font-size: 1.3rem;
         font-weight: 600;
-        line-height: 1.55;
-        text-decoration: none;
+        margin-bottom: 1rem;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        color: white;
+    }
+    
+    .col-header-pink {
+        background: linear-gradient(135deg, #ff9a9e, #fecfef);
+    }
+    
+    .col-header-purple {
+        background: linear-gradient(135deg, #a18cd1, #fbc2eb);
+    }
+    
+    .col-header-green {
+        background: linear-gradient(135deg, #84fab0, #8fd3f4);
+    }
+    
+    .col-header-orange {
+        background: linear-gradient(135deg, #ffd89b, #19547b);
+    }
+    
+    .news-card, .news-card-priority {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 1.2rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        border-left: 4px solid #ffc3a0;
+    }
+    
+    .news-card-priority {
+        border-left: 5px solid #ff6b9d;
+        background: linear-gradient(135deg, #fff5f7 0%, #ffe5ec 100%);
+        box-shadow: 0 8px 25px rgba(255, 107, 157, 0.2);
+    }
+    
+    .news-card:hover, .news-card-priority:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(255, 107, 157, 0.3);
+    }
+    
+    .card-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #2d3436;
+        line-height: 1.5;
+        margin-bottom: 0.8rem;
         display: block;
-        margin-bottom: 14px;
+        text-decoration: none;
     }
-
-    .news-title:hover {
-        color: #7c3aed;
+    
+    .card-title:hover {
+        color: #ff6b9d;
     }
-
-    .news-meta {
-        font-size: 0.95rem;
-        color: #64748b;
+    
+    .card-meta {
         display: flex;
         align-items: center;
-        gap: 16px;
-        flex-wrap: wrap;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        color: #636e72;
     }
-
-    .time-hot { color: #dc2626; font-weight: 700; font-style: italic; }
-    .time-warm { color: #ea580c; font-weight: 700; }
-    .time-normal { color: #64748b; }
+    
+    .time-hot {
+        background: linear-gradient(135deg, #ff6b9d, #f67280);
+        color: white;
+        padding: 0.2rem 0.6rem;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+    
+    .time-warm {
+        background: linear-gradient(135deg, #ffa502, #ff6348);
+        color: white;
+        padding: 0.2rem 0.6rem;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+    
+    .time-normal {
+        background: #dfe6e9;
+        color: #2d3436;
+        padding: 0.2rem 0.6rem;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #b2bec3;
+        font-size: 1.1rem;
+    }
+    
+    .loading-msg {
+        text-align: center;
+        padding: 3rem;
+        font-size: 1.3rem;
+        color: #ff6b9d;
+        font-weight: 600;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown("""
-<div class="header-container">
-    <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
-    <p class="subtitle">Real-time Competitive Intelligence Dashboard ✨</p>
+<div class="main-header">
+    <h1>🌐 Global Telecom & OTT Stellar Nexus</h1>
+    <p>Real-time Competitive Intelligence Dashboard ✨</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -182,7 +221,7 @@ RSS_FEEDS = [
     ("Verizon Newsroom", "https://www.verizon.com/about/news/rss"),
     ("T-Mobile News", "https://www.t-mobile.com/news/rss"),
     ("Vodafone Group", "https://www.vodafone.com/news/rss"),
-
+    
     # OTT - All active
     ("Variety", "https://variety.com/feed/"),
     ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/"),
@@ -192,14 +231,14 @@ RSS_FEEDS = [
     ("Netflix Press", "https://ir.netflix.net/resources/rss-feeds/default.aspx"),
     ("Disney Company News", "https://thewaltdisneycompany.com/feed/"),
     ("Warner Bros Discovery", "https://press.wbd.com/us/rss-feed"),
-
+    
     # Sports - All active
     ("ESPN", "https://www.espn.com/espn/rss/news"),
     ("BBC Sport", "https://feeds.bbci.co.uk/sport/rss.xml"),
     ("Front Office Sports", "https://frontofficesports.com/feed/"),
     ("Sportico", "https://www.sportico.com/feed/"),
     ("SportsPro", "https://www.sportspromedia.com/feed/"),
-
+    
     # Technology - All active
     ("TechCrunch", "https://techcrunch.com/feed/"),
     ("The Verge", "https://www.theverge.com/rss/index.xml"),
@@ -219,95 +258,200 @@ SECTIONS = {
 }
 
 SOURCE_CATEGORY_MAP = {
-    "Telecoms.com": "telco", "Light Reading": "telco", "Fierce Telecom": "telco",
-    "RCR Wireless": "telco", "Mobile World Live": "telco", "ET Telecom": "telco",
-    "Verizon Newsroom": "telco", "T-Mobile News": "telco", "Vodafone Group": "telco",
-    "Variety": "ott", "Hollywood Reporter": "ott", "Deadline": "ott",
-    "Digital TV Europe": "ott", "Advanced Television": "ott",
-    "Netflix Press": "ott", "Disney Company News": "ott", "Warner Bros Discovery": "ott",
-    "ESPN": "sports", "BBC Sport": "sports", "Front Office Sports": "sports",
-    "Sportico": "sports", "SportsPro": "sports",
-    "TechCrunch": "technology", "The Verge": "technology", "Wired": "technology",
-    "Ars Technica": "technology", "VentureBeat": "technology", "ZDNet": "technology",
-    "Engadget": "technology", "Techmeme": "technology",
+    "Telecoms.com": "telco",
+    "Light Reading": "telco",
+    "Fierce Telecom": "telco",
+    "RCR Wireless": "telco",
+    "Mobile World Live": "telco",
+    "ET Telecom": "telco",
+    "Verizon Newsroom": "telco",
+    "T-Mobile News": "telco",
+    "Vodafone Group": "telco",
+    
+    "Variety": "ott",
+    "Hollywood Reporter": "ott",
+    "Deadline": "ott",
+    "Digital TV Europe": "ott",
+    "Advanced Television": "ott",
+    "Netflix Press": "ott",
+    "Disney Company News": "ott",
+    "Warner Bros Discovery": "ott",
+    
+    "ESPN": "sports",
+    "BBC Sport": "sports",
+    "Front Office Sports": "sports",
+    "Sportico": "sports",
+    "SportsPro": "sports",
+    
+    "TechCrunch": "technology",
+    "The Verge": "technology",
+    "Wired": "technology",
+    "Ars Technica": "technology",
+    "VentureBeat": "technology",
+    "ZDNet": "technology",
+    "Engadget": "technology",
+    "Techmeme": "technology",
 }
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
 def clean(raw):
-    if not raw: return ""
-    return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
+    """Clean HTML and escape special characters"""
+    if not raw:
+        return ""
+    # Remove HTML tags
+    text = re.sub(r'<[^>]+>', '', str(raw))
+    # Unescape HTML entities
+    text = html.unescape(text)
+    # Clean whitespace
+    text = ' '.join(text.split())
+    return text.strip()
 
 def fetch_feed(source, url):
+    """Fetch and parse a single RSS feed"""
     items = []
     try:
         resp = requests.get(url, headers=HEADERS, timeout=10)
-        if resp.status_code != 200: return items
+        if resp.status_code != 200:
+            print(f"Failed to fetch {source}: HTTP {resp.status_code}")
+            return items
+        
         feed = feedparser.parse(resp.content)
+        
+        if not feed.entries:
+            print(f"No entries found for {source}")
+            return items
+        
         NOW = datetime.now()
         CUTOFF = NOW - timedelta(days=14)
+        
         for entry in feed.entries[:15]:
             title = clean(entry.get("title", ""))
-            if len(title) < 20: continue
+            
+            # Skip very short titles
+            if len(title) < 15:
+                continue
+            
             summary = clean(entry.get("summary", ""))
             link = entry.get("link", "")
+            
+            # Parse publication date
             pub = None
             for k in ("published_parsed", "updated_parsed"):
                 val = getattr(entry, k, None)
                 if val:
-                    try: pub = datetime(*val[:6])
-                    except: pass
-                    break
-            if not pub or pub < CUTOFF: continue
-            items.append({"title": title, "link": link, "pub": pub, "source": source, "summary": summary})
-    except: pass
-    items.sort(key=lambda x: x["pub"], reverse=True)
-    return items[:3]  # Up to 3 newest per source
+                    try:
+                        pub = datetime(*val[:6])
+                        break
+                    except:
+                        pass
+            
+            # If no valid date, use current time
+            if not pub:
+                pub = NOW
+            
+            # Skip old articles
+            if pub < CUTOFF:
+                continue
+            
+            items.append({
+                "title": title,
+                "link": link,
+                "pub": pub,
+                "source": source,
+                "summary": summary
+            })
+        
+        # Sort by date and keep top 3
+        items.sort(key=lambda x: x["pub"], reverse=True)
+        items = items[:3]
+        
+        print(f"✓ {source}: {len(items)} articles")
+        
+    except Exception as e:
+        print(f"Error fetching {source}: {str(e)}")
+    
+    return items
 
 @st.cache_data(ttl=300, show_spinner=False)
 def load_feeds():
-    categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
+    """Load all RSS feeds in parallel"""
+    categorized = {
+        "telco": [],
+        "ott": [],
+        "sports": [],
+        "technology": []
+    }
+    
     with ThreadPoolExecutor(max_workers=20) as executor:
         futures = [executor.submit(fetch_feed, source, url) for source, url in RSS_FEEDS]
+        
         for future in as_completed(futures):
-            items = future.result()
-            for item in items:
-                category = SOURCE_CATEGORY_MAP.get(item["source"], "technology")
-                categorized[category].append(item)
+            try:
+                items = future.result()
+                for item in items:
+                    category = SOURCE_CATEGORY_MAP.get(item["source"], "technology")
+                    categorized[category].append(item)
+            except Exception as e:
+                print(f"Error processing future: {str(e)}")
+    
+    # Sort each category by date
     for cat in categorized:
         categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
+    
     return categorized
 
 def get_time_str(dt):
+    """Get human-readable time string with styling class"""
     hrs = int((datetime.now() - dt).total_seconds() / 3600)
-    if hrs < 1: return "Now", "time-hot"
-    if hrs < 6: return f"{hrs}h", "time-hot"
-    if hrs < 24: return f"{hrs}h", "time-warm"
+    
+    if hrs < 1:
+        return "Now", "time-hot"
+    if hrs < 6:
+        return f"{hrs}h", "time-hot"
+    if hrs < 24:
+        return f"{hrs}h", "time-warm"
+    
     return f"{hrs//24}d", "time-normal"
 
 def render_body(items):
+    """Render news cards for a category"""
+    if not items:
+        return '<div class="empty-state">No recent news in this category yet 🌙<br>Check back soon! ♡</div>'
+    
     cards = ""
     for item in items:
         time_str, time_class = get_time_str(item["pub"])
+        
         safe_title = html.escape(item["title"])
         safe_link = html.escape(item["link"])
         safe_source = html.escape(item["source"])
-        card_class = "news-card-priority" if "netcracker" in (item["title"] + item.get("summary", "")).lower() else "news-card"
-        cards += f'''<div class="{card_class}">
-<a href="{safe_link}" target="_blank" class="news-title">{safe_title}</a>
-<div class="news-meta">
-<span class="{time_class}">{time_str}</span>
-<span>•</span>
-<span>{safe_source}</span>
-</div>
-</div>'''
-    if not items:
-        cards = '<div style="text-align:center;color:#94a3b8;padding:80px;font-size:1.4rem;">No recent news in this category yet 🌙<br><small style="font-size:1rem;">Check back soon! ♡</small></div>'
-    return f'<div class="col-body">{cards}</div>'
+        
+        # Check if this is a priority item (mentions netcracker)
+        content_lower = (item["title"] + item.get("summary", "")).lower()
+        card_class = "news-card-priority" if "netcracker" in content_lower else "news-card"
+        
+        cards += f'''
+        <div class="{card_class}">
+            <a href="{safe_link}" target="_blank" class="card-title">
+                {safe_title}
+            </a>
+            <div class="card-meta">
+                <span class="{time_class}">{time_str}</span>
+                <span>•</span>
+                <span>{safe_source}</span>
+            </div>
+        </div>
+        '''
+    
+    return f'<div>{cards}</div>'
 
 # Loading message
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#7c3aed;margin-top:180px;font-family:\"Fredoka One\";font-size:3.2rem;'>✨ Powering up the latest insights...<br><small style='font-size:1.4rem;color:#94a3b8;'>Please wait a moment ♡</small></h2>", unsafe_allow_html=True)
+placeholder.markdown(
+    '<div class="loading-msg">✨ Powering up the latest insights... Please wait a moment ♡</div>',
+    unsafe_allow_html=True
+)
 
 with st.spinner(""):
     data = load_feeds()
@@ -317,9 +461,20 @@ placeholder.empty()
 # Render dashboard
 cols = st.columns(4)
 cat_list = ["telco", "ott", "sports", "technology"]
+
 for idx, cat in enumerate(cat_list):
     sec = SECTIONS[cat]
     items = data.get(cat, [])
+    
     with cols[idx]:
-        st.markdown(f'<div class="{sec["style"]}">{sec["icon"]} {sec["name"]}</div>', unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="col-header {sec["style"]}">{sec["icon"]} {sec["name"]}</div>',
+            unsafe_allow_html=True
+        )
         st.markdown(render_body(items), unsafe_allow_html=True)
+
+# Debug info (optional - remove in production)
+with st.expander("📊 Debug Information"):
+    st.write("Items per category:")
+    for cat in cat_list:
+        st.write(f"- {cat}: {len(data.get(cat, []))} articles")
