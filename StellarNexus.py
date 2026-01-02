@@ -258,7 +258,7 @@ def fetch_feed(source, url):
             return items
         
         NOW = datetime.now()
-        CUTOFF = NOW - timedelta(days=3)
+        CUTOFF = NOW - timedelta(days=15)
         
         for entry in feed.entries[:15]:
             title = clean(entry.get("title", ""))
@@ -281,7 +281,7 @@ def fetch_feed(source, url):
             if not pub:
                 pub = NOW
             
-            # Only skip if article is older than 3 days
+            # Only skip if article is older than 15 days
             if pub < CUTOFF:
                 continue
             
@@ -338,7 +338,8 @@ def render_body(items):
         safe_link = html.escape(item["link"])
         safe_source = html.escape(item["source"])
         
-        card_class = "news-card-priority" if "netcracker" in (item["title"] + item.get("summary", "")).lower() else "news-card"
+        # All news cards use standard styling
+        card_class = "news-card"
         
         cards += f'''<div class="{card_class}">
 <a href="{safe_link}" target="_blank" class="news-title">{safe_title}</a>
@@ -349,7 +350,7 @@ def render_body(items):
 </div>
 </div>'''
     
-    if not items:
+    if not items or not cards:
         cards = '<div style="text-align:center;color:#94a3b8;padding:30px;">No recent news</div>'
     
     return f'<div class="col-body">{cards}</div>'
