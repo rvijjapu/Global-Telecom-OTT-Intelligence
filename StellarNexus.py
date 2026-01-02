@@ -170,34 +170,37 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# === RSS FEEDS (RICH & DIVERSE COVERAGE) ===
+# === VALID & ACTIVE RSS FEEDS ONLY (Verified Jan 2, 2026) ===
 RSS_FEEDS = [
-    # Telco
+    # Telco - All active
     ("Telecoms.com", "https://www.telecoms.com/feed"),
     ("Light Reading", "https://www.lightreading.com/rss/simple"),
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml"),
     ("RCR Wireless", "https://www.rcrwireless.com/feed"),
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/"),
     ("ET Telecom", "https://telecom.economictimes.indiatimes.com/rss/topstories"),
-    ("Netcracker Press", "https://rss.app/feeds/oyAS1q31oAma1iDX.xml"),
-    ("Netcracker News", "https://rss.app/feeds/GxJESz3Wl0PRbyFG.xml"),
-    ("Amdocs LinkedIn", "https://rss.app/feeds/rszN8UooJxRHd9RT.xml"),
+    ("Verizon Newsroom", "https://www.verizon.com/about/news/rss"),
+    ("T-Mobile News", "https://www.t-mobile.com/news/rss"),
+    ("Vodafone Group", "https://www.vodafone.com/news/rss"),
 
-    # OTT
+    # OTT - All active
     ("Variety", "https://variety.com/feed/"),
     ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/"),
     ("Deadline", "https://deadline.com/feed/"),
     ("Digital TV Europe", "https://www.digitaltveurope.com/feed/"),
     ("Advanced Television", "https://advanced-television.com/feed/"),
+    ("Netflix Press", "https://ir.netflix.net/resources/rss-feeds/default.aspx"),
+    ("Disney Company News", "https://thewaltdisneycompany.com/feed/"),
+    ("Warner Bros Discovery", "https://press.wbd.com/us/rss-feed"),
 
-    # Sports
+    # Sports - All active
     ("ESPN", "https://www.espn.com/espn/rss/news"),
     ("BBC Sport", "https://feeds.bbci.co.uk/sport/rss.xml"),
     ("Front Office Sports", "https://frontofficesports.com/feed/"),
     ("Sportico", "https://www.sportico.com/feed/"),
     ("SportsPro", "https://www.sportspromedia.com/feed/"),
 
-    # Technology
+    # Technology - All active
     ("TechCrunch", "https://techcrunch.com/feed/"),
     ("The Verge", "https://www.theverge.com/rss/index.xml"),
     ("Wired", "https://www.wired.com/feed/rss"),
@@ -206,21 +209,6 @@ RSS_FEEDS = [
     ("ZDNet", "https://www.zdnet.com/news/rss.xml"),
     ("Engadget", "https://www.engadget.com/rss.xml"),
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
-
-    # Key Evergent OTT Clients (official)
-    ("Netflix Press", "https://ir.netflix.net/resources/rss-feeds/default.aspx"),
-    ("Disney Company News", "https://thewaltdisneycompany.com/feed/"),
-    ("Warner Bros Discovery", "https://press.wbd.com/us/rss-feed"),
-    ("Paramount Global", "https://ir.paramount.com/rss/news-releases.xml"),
-    ("Peacock Press", "https://www.nbcuniversal.com/rss/peacock"),
-
-    # Top Telcos (official)
-    ("Verizon Newsroom", "https://www.verizon.com/about/news/rss"),
-    ("T-Mobile News", "https://www.t-mobile.com/news/rss"),
-    ("Vodafone Group", "https://www.vodafone.com/news/rss"),
-    ("Deutsche Telekom", "https://www.telekom.com/en/media/rss-feed"),
-    ("Bharti Airtel", "https://www.airtel.in/press-release/rss"),
-    ("Reliance Jio", "https://www.jio.com/rss/news"),
 ]
 
 SECTIONS = {
@@ -233,18 +221,15 @@ SECTIONS = {
 SOURCE_CATEGORY_MAP = {
     "Telecoms.com": "telco", "Light Reading": "telco", "Fierce Telecom": "telco",
     "RCR Wireless": "telco", "Mobile World Live": "telco", "ET Telecom": "telco",
-    "Netcracker Press": "telco", "Netcracker News": "telco", "Amdocs LinkedIn": "telco",
+    "Verizon Newsroom": "telco", "T-Mobile News": "telco", "Vodafone Group": "telco",
     "Variety": "ott", "Hollywood Reporter": "ott", "Deadline": "ott",
     "Digital TV Europe": "ott", "Advanced Television": "ott",
+    "Netflix Press": "ott", "Disney Company News": "ott", "Warner Bros Discovery": "ott",
     "ESPN": "sports", "BBC Sport": "sports", "Front Office Sports": "sports",
     "Sportico": "sports", "SportsPro": "sports",
     "TechCrunch": "technology", "The Verge": "technology", "Wired": "technology",
     "Ars Technica": "technology", "VentureBeat": "technology", "ZDNet": "technology",
     "Engadget": "technology", "Techmeme": "technology",
-    "Netflix Press": "ott", "Disney Company News": "ott", "Warner Bros Discovery": "ott",
-    "Paramount Global": "ott", "Peacock Press": "ott",
-    "Verizon Newsroom": "telco", "T-Mobile News": "telco", "Vodafone Group": "telco",
-    "Deutsche Telekom": "telco", "Bharti Airtel": "telco", "Reliance Jio": "telco",
 }
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
@@ -260,8 +245,8 @@ def fetch_feed(source, url):
         if resp.status_code != 200: return items
         feed = feedparser.parse(resp.content)
         NOW = datetime.now()
-        CUTOFF = NOW - timedelta(days=7)  # Ensures content even during quiet periods
-        for entry in feed.entries[:10]:
+        CUTOFF = NOW - timedelta(days=14)
+        for entry in feed.entries[:15]:
             title = clean(entry.get("title", ""))
             if len(title) < 20: continue
             summary = clean(entry.get("summary", ""))
@@ -277,17 +262,16 @@ def fetch_feed(source, url):
             items.append({"title": title, "link": link, "pub": pub, "source": source, "summary": summary})
     except: pass
     items.sort(key=lambda x: x["pub"], reverse=True)
-    return items[:1]  # Only the newest, most impactful from each source
+    return items[:3]  # Up to 3 newest per source
 
 @st.cache_data(ttl=300, show_spinner=False)
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
-    with ThreadPoolExecutor(max_workers=16) as executor:
+    with ThreadPoolExecutor(max_workers=20) as executor:
         futures = [executor.submit(fetch_feed, source, url) for source, url in RSS_FEEDS]
         for future in as_completed(futures):
             items = future.result()
-            if items:
-                item = items[0]
+            for item in items:
                 category = SOURCE_CATEGORY_MAP.get(item["source"], "technology")
                 categorized[category].append(item)
     for cat in categorized:
