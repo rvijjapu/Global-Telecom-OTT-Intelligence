@@ -5,7 +5,9 @@ from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import re
 import html
- ==========================
+import time
+
+# ==========================
 # 🔐 CEO TOKEN SECURITY GATE (Using Streamlit Secrets)
 # ==========================
 # In your GitHub repo, create a file: .streamlit/secrets.toml
@@ -22,12 +24,17 @@ except KeyError:
     st.stop()
 
 # Get token from URL query parameter: ?token=Vijay
-provided_token = st.query_params.get("token")
-if provided_token is not None:
-    # st.query_params returns a list in newer versions
-    provided_token = provided_token[0] if isinstance(provided_token, list) else provided_token
-else:
-    provided_token = ""
+# Handle both old and new Streamlit versions
+try:
+    provided_token = st.query_params.get("token", "")
+    if isinstance(provided_token, list):
+        provided_token = provided_token[0] if provided_token else ""
+except AttributeError:
+    # Fallback for older Streamlit versions
+    try:
+        provided_token = st.experimental_get_query_params().get("token", [""])[0]
+    except:
+        provided_token = ""
 
 if provided_token != EXPECTED_TOKEN:
     st.error("⛔ Unauthorized access – Invalid or missing token")
