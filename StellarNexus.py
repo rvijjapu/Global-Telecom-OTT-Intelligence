@@ -19,10 +19,15 @@ st.set_page_config(
 st.markdown("""
 <style>
 .stApp {
-    background: url('https://i.ibb.co/PstYJ8Hr/image.jpg') no-repeat center center fixed;
-    background-size: cover;
-    color: #1e293b;
-    padding-top: 0.5rem;
+    background: 
+        linear-gradient(90deg, transparent 98%, rgba(59, 130, 246, 0.1) 98%),
+        linear-gradient(0deg, transparent 98%, rgba(99, 102, 241, 0.1) 98%),
+        radial-gradient(circle at 20% 30%, rgba(147, 197, 253, 0.3), transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(191, 219, 254, 0.25), transparent 50%),
+        #0f172a;
+    background-size: 50px 50px, 50px 50px, cover, cover, cover;
+    background-attachment: fixed;
+    color: #e0f2fe;
 } #MainMenu, footer, header {visibility: hidden;}
 
     .block-container {
