@@ -183,9 +183,6 @@ RSS_FEEDS = [
     ("RCR Wireless", "https://www.rcrwireless.com/feed"),
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/"),
     ("ET Telecom", "https://telecom.economictimes.indiatimes.com/rss/topstories"),
-    ("Netcracker Press", "https://rss.app/feeds/oyAS1q31oAma1iDX.xml"),
-    ("Netcracker News", "https://rss.app/feeds/GxJESz3Wl0PRbyFG.xml"),
-    ("Amdocs LinkedIn", "https://rss.app/feeds/rszN8UooJxRHd9RT.xml"),
     ("Subex News", "https://rss.app/feeds/nBo6830ABe1HTZ5u.xml"),
     ("OSS/BSS News", "https://rss.app/feeds/OXf4iibABnDj7t1l.xml"),
 
@@ -225,7 +222,6 @@ SECTIONS = {
 SOURCE_CATEGORY_MAP = {
     "Telecoms.com": "telco", "Light Reading": "telco", "Fierce Telecom": "telco",
     "RCR Wireless": "telco", "Mobile World Live": "telco", "ET Telecom": "telco",
-    "Netcracker Press": "telco", "Netcracker News": "telco", "Amdocs LinkedIn": "telco",
     "Subex News": "telco", "OSS/BSS News": "telco",
     "Variety": "ott", "Hollywood Reporter": "ott", "Deadline": "ott",
     "Digital TV Europe": "ott", "Advanced Television": "ott",
@@ -294,7 +290,7 @@ def fetch_feed(source, url):
             })
         
         items.sort(key=lambda x: x["pub"], reverse=True)
-        return items[:3]
+        return items[:1]  # Only return 1 article per source
         
     except:
         return items
