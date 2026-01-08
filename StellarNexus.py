@@ -48,120 +48,144 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# === STYLING ===
+# === ENHANCED BEAUTIFUL STYLING WITH GOOGLE FONTS ===
 st.markdown("""
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
- .stApp {
-    background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
-    background-size: cover;
-    color: #1e293b;
-    padding-top: 0.5rem;
-      } .header-container {
-        background: rgba(255, 255, 255, 0.95);
-        padding: 1.2rem 1.5rem;
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+    html, body, [class*="css"]  {  
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .stApp {
+        background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
+        background-size: cover;
+        padding-top: 0.5rem;
+    }
+
+    .header-container {
+        background: rgba(255, 255, 255, 0.92);
+        padding: 1.8rem 2rem;
         text-align: center;
-        border-radius: 20px;
-        box-shadow: 0 6px 25px rgba(0,0,0,0.08);
-        margin: 0 1.5rem 1.8rem 1.5rem;
-        border-bottom: 4px solid #3b82f6;
-        backdrop-filter: blur(8px);
+        border-radius: 24px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+        margin: 0 2rem 2.5rem 2rem;
+        border-bottom: 5px solid #6366f1;
+        backdrop-filter: blur(12px);
     }
 
     .main-title {
-        font-size: 2.4rem;
-        font-weight: 800;
-        color: #1e40af;
+        font-family: 'Poppins', sans-serif;
+        font-size: 2.8rem;
+        font-weight: 700;
+        color: #1e293b;
         margin: 0;
-        letter-spacing: -0.6px;
+        letter-spacing: -1px;
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
 
     .subtitle {
-        font-size: 1.1rem;
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.25rem;
         color: #475569;
-        margin-top: 0.6rem;
-        margin-bottom: 0;
+        margin-top: 0.8rem;
         font-weight: 500;
     }
 
     .col-header {
-        padding: 10px 16px;
-        border-radius: 14px 14px 0 0;
+        padding: 14px 20px;
+        border-radius: 18px 18px 0 0;
         color: white;
-        font-weight: 700;
-        font-size: 0.95rem;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 1.05rem;
         text-align: center;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        letter-spacing: 0.5px;
     }
 
-    .col-header-pink { background: linear-gradient(135deg, #ec4899, #db2777); }
-    .col-header-purple { background: linear-gradient(135deg, #a78bfa, #8b5cf6); }
-    .col-header-green { background: linear-gradient(135deg, #34d399, #10b981); }
-    .col-header-orange { background: linear-gradient(135deg, #fb923c, #f97316); }
+    /* Modern Gradient Headers */
+    .col-header-telco { background: linear-gradient(135deg, #ec4899, #f43f5e); }
+    .col-header-ott { background: linear-gradient(135deg, #a855f7, #d946ef); }
+    .col-header-sports { background: linear-gradient(135deg, #10b981, #34d399); }
+    .col-header-tech { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
 
     .col-body {
-        background: white;
-        border-radius: 0 0 14px 14px;
-        padding: 12px;
-        min-height: 520px;
-        max-height: 620px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 0 0 18px 18px;
+        padding: 16px;
+        min-height: 540px;
+        max-height: 640px;
         overflow-y: auto;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-        margin-bottom: 1rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+        margin-bottom: 1.5rem;
+        backdrop-filter: blur(8px);
     }
 
     .news-card {
-        background: #fafbfc;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        padding: 12px;
-        margin-bottom: 10px;
-        transition: all 0.3s ease;
+        background: linear-gradient(145deg, #ffffff, #f8fafc);
+        border: none;
+        border-radius: 14px;
+        padding: 14px;
+        margin-bottom: 12px;
+        transition: all 0.4s ease;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
 
     .news-card:hover {
-        background: #f1f5f9;
-        box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+        background: #ffffff;
     }
 
     .news-card-priority {
-        background: #fefce8;
-        border: 2px solid #fbbf24;
-        border-radius: 10px;
-        padding: 12px;
-        margin-bottom: 10px;
+        background: linear-gradient(145deg, #fffbeb, #fefce8);
+        border: 2px solid #f59e0b;
+        border-radius: 14px;
+        padding: 16px;
+        margin-bottom: 14px;
+        box-shadow: 0 6px 18px rgba(251, 191, 36, 0.2);
+        transition: all 0.4s ease;
     }
 
     .news-card-priority:hover {
-        background: #fef3c7;
-        box-shadow: 0 8px 20px rgba(251,191,36,0.15);
+        transform: translateY(-6px);
+        box-shadow: 0 16px 32px rgba(251, 191, 36, 0.3);
+        background: #fffbeb;
     }
 
     .news-title {
+        font-family: 'Poppins', sans-serif;
         color: #1e40af;
-        font-size: 0.92rem;
+        font-size: 0.98rem;
         font-weight: 600;
-        line-height: 1.35;
+        line-height: 1.4;
         text-decoration: none;
         display: block;
-        margin-bottom: 6px;
+        margin-bottom: 8px;
+        transition: color 0.3s ease;
     }
 
     .news-title:hover {
-        color: #1d4ed8;
+        color: #4338ca;
         text-decoration: underline;
     }
 
     .news-meta {
-        font-size: 0.76rem;
+        font-size: 0.78rem;
         color: #64748b;
         display: flex;
         align-items: center;
-        gap: 7px;
+        gap: 8px;
         flex-wrap: wrap;
+        font-weight: 500;
     }
 
-    .time-hot { color: #dc2626; font-weight: 600; font-style: italic; }
-    .time-warm { color: #ea580c; font-weight: 600; }
+    .time-hot { color: #ef4444; font-weight: 700; font-style: normal; }
+    .time-warm { color: #f97316; font-weight: 600; }
     .time-normal { color: #64748b; }
 </style>
 """, unsafe_allow_html=True)
@@ -217,14 +241,13 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-# Priority sources - fixed order at the top
 PRIORITY_SOURCES = ["Netcracker", "Ericsson", "Telecom TV"]
 
 SECTIONS = {
-    "telco": {"icon": "📡", "name": "Telco & OSS/BSS", "style": "col-header col-header-pink"},
-    "ott": {"icon": "📺", "name": "OTT & Streaming", "style": "col-header col-header-purple"},
-    "sports": {"icon": "🏆", "name": "Sports & Events", "style": "col-header col-header-green"},
-    "technology": {"icon": "⚡", "name": "Technology", "style": "col-header col-header-orange"},
+    "telco": {"icon": "📡", "name": "Telco & OSS/BSS", "style": "col-header col-header-telco"},
+    "ott": {"icon": "📺", "name": "OTT & Streaming", "style": "col-header col-header-ott"},
+    "sports": {"icon": "🏆", "name": "Sports & Events", "style": "col-header col-header-sports"},
+    "technology": {"icon": "⚡", "name": "Technology", "style": "col-header col-header-tech"},
 }
 
 SOURCE_CATEGORY_MAP = {
@@ -263,7 +286,6 @@ def fetch_feed(source, url):
             return items
         
         NOW = datetime.now()
-        # 7 days cutoff for priority, 15 days for others
         cutoff_days = 7 if source in PRIORITY_SOURCES else 15
         CUTOFF = NOW - timedelta(days=cutoff_days)
         
@@ -300,7 +322,6 @@ def fetch_feed(source, url):
                 "is_priority": source in PRIORITY_SOURCES
             })
         
-        # Return only the latest article per source
         items.sort(key=lambda x: x["pub"], reverse=True)
         return items[:1]
         
@@ -310,7 +331,7 @@ def fetch_feed(source, url):
 @st.cache_data(ttl=300, show_spinner=False)
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
-    priority_items = []  # Collect priority source items separately
+    priority_items = []
     
     with ThreadPoolExecutor(max_workers=20) as executor:
         futures = [executor.submit(fetch_feed, source, url) for source, url in RSS_FEEDS]
@@ -327,25 +348,20 @@ def load_feeds():
             except:
                 pass
     
-    # Sort other categories normally
     for cat in ["ott", "sports", "technology"]:
         categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
     
-    # For telco: priority items first (in defined order, latest of each), then others sorted by date
     ordered_priority = []
     for src in PRIORITY_SOURCES:
         src_items = [it for it in priority_items if it["source"] == src]
         if src_items:
-            ordered_priority.append(max(src_items, key=lambda x: x["pub"]))  # latest for that source
+            ordered_priority.append(max(src_items, key=lambda x: x["pub"]))
     
-    # Sort the priority block by date (latest on top)
     ordered_priority.sort(key=lambda x: x["pub"], reverse=True)
     
-    # Regular telco items sorted by date
     regular_telco = categorized["telco"]
     regular_telco.sort(key=lambda x: x["pub"], reverse=True)
     
-    # Final telco list: priority block first, then regular
     categorized["telco"] = ordered_priority + regular_telco
     
     return categorized
@@ -380,13 +396,13 @@ def render_body(items):
 </div>'''
     
     if not items or not cards:
-        cards = '<div style="text-align:center;color:#94a3b8;padding:30px;">No recent news</div>'
+        cards = '<div style="text-align:center;color:#94a3b8;padding:40px;font-size:1rem;">No recent news</div>'
     
     return f'<div class="col-body">{cards}</div>'
 
 # === LOADING MESSAGE ===
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Powering up the latest insights...<br><small>Please wait a moment</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#4f46e5;margin-top:140px;font-family:\"Poppins\";font-weight:600;'>✨ Loading the latest intelligence...<br><small style='color:#64748b;'>One moment please</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_feeds()
