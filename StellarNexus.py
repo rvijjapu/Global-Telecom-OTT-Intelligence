@@ -48,7 +48,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# === YOUR ORIGINAL STYLING ===
+# === STYLING ===
 st.markdown("""
 <style>
  .stApp {
@@ -166,7 +166,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# === YOUR ORIGINAL TITLE ===
+# === TITLE ===
 st.markdown("""
 <div class="header-container">
     <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
@@ -174,7 +174,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# === RSS FEEDS ===
+# === RSS FEEDS (UPDATED WITH PRIORITY SOURCES) ===
 RSS_FEEDS = [
     # Telco
     ("Telecoms.com", "https://www.telecoms.com/feed"),
@@ -185,6 +185,11 @@ RSS_FEEDS = [
     ("ET Telecom", "https://telecom.economictimes.indiatimes.com/rss/topstories"),
     ("Subex News", "https://rss.app/feeds/nBo6830ABe1HTZ5u.xml"),
     ("OSS/BSS News", "https://rss.app/feeds/OXf4iibABnDj7t1l.xml"),
+    
+    # === PRIORITY TELCO SOURCES ===
+    ("Netcracker", "https://rss.app/feeds/GxJESz3Wl0PRbyFG.xml"),
+    ("Ericsson", "https://rss.app/feeds/Z6HUnDFle57Uu0hU.xml"),
+    ("Telecom TV", "https://rss.app/feeds/4OeTYFrRAw7YjI6B.xml"),
 
     # OTT
     ("Variety", "https://variety.com/feed/"),
@@ -212,6 +217,9 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
+# Priority sources that get special treatment
+PRIORITY_SOURCES = ["Netcracker", "Ericsson", "Telecom TV"]
+
 SECTIONS = {
     "telco": {"icon": "📡", "name": "Telco & OSS/BSS", "style": "col-header col-header-pink"},
     "ott": {"icon": "📺", "name": "OTT & Streaming", "style": "col-header col-header-purple"},
@@ -223,6 +231,7 @@ SOURCE_CATEGORY_MAP = {
     "Telecoms.com": "telco", "Light Reading": "telco", "Fierce Telecom": "telco",
     "RCR Wireless": "telco", "Mobile World Live": "telco", "ET Telecom": "telco",
     "Subex News": "telco", "OSS/BSS News": "telco",
+    "Netcracker": "telco", "Ericsson": "telco", "Telecom TV": "telco",
     "Variety": "ott", "Hollywood Reporter": "ott", "Deadline": "ott",
     "Digital TV Europe": "ott", "Advanced Television": "ott",
     "ESPN": "sports", "BBC Sport": "sports", "Front Office Sports": "sports",
@@ -254,7 +263,9 @@ def fetch_feed(source, url):
             return items
         
         NOW = datetime.now()
-        CUTOFF = NOW - timedelta(days=15)
+        # 7 days for priority sources, 15 days for others
+        cutoff_days = 7 if source in PRIORITY_SOURCES else 15
+        CUTOFF = NOW - timedelta(days=cutoff_days)
         
         for entry in feed.entries[:15]:
             title = clean(entry.get("title", ""))
@@ -277,7 +288,6 @@ def fetch_feed(source, url):
             if not pub:
                 pub = NOW
             
-            # Only skip if article is older than 15 days
             if pub < CUTOFF:
                 continue
             
@@ -286,13 +296,14 @@ def fetch_feed(source, url):
                 "link": link,
                 "pub": pub,
                 "source": source,
-                "summary": summary
+                "summary": summary,
+                "is_priority": source in PRIORITY_SOURCES
             })
         
         items.sort(key=lambda x: x["pub"], reverse=True)
-        return items[:1]  # Only return 1 article per source
+        return items[:1]  # One latest article per source
         
-    except:
+    except Exception:
         return items
 
 @st.cache_data(ttl=300, show_spinner=False)
@@ -311,6 +322,7 @@ def load_feeds():
             except:
                 pass
     
+    # Sort all categories by date (latest first)
     for cat in categorized:
         categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
     
@@ -334,8 +346,8 @@ def render_body(items):
         safe_link = html.escape(item["link"])
         safe_source = html.escape(item["source"])
         
-        # All news cards use standard styling
-        card_class = "news-card"
+        # Priority sources get highlighted card
+        card_class = "news-card-priority" if item.get("is_priority", False) else "news-card"
         
         cards += f'''<div class="{card_class}">
 <a href="{safe_link}" target="_blank" class="news-title">{safe_title}</a>
