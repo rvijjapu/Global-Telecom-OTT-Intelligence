@@ -10,9 +10,36 @@ import re
 # ==========================
 # 🔐 CEO TOKEN SECURITY GATE
 # ==========================
-# (unchanged)
+try:
+    EXPECTED_TOKEN = st.secrets["CEO_ACCESS_TOKEN"]
+except FileNotFoundError:
+    st.error("🔧 Missing secrets.toml – Add CEO_ACCESS_TOKEN in .streamlit/secrets.toml or Streamlit Cloud Secrets")
+    st.stop()
+except KeyError:
+    st.error("🔧 CEO_ACCESS_TOKEN not found in secrets")
+    st.stop()
 
-# ... [security code unchanged]
+provided_token = st.query_params.get("token")
+if provided_token is not None:
+    provided_token = provided_token[0] if isinstance(provided_token, list) else provided_token
+else:
+    provided_token = ""
+
+if provided_token != EXPECTED_TOKEN:
+    st.error("⛔ Unauthorized access – Invalid or missing token")
+    st.info("Append `?token=your_token` to the URL or contact admin.")
+    st.stop()
+
+# Rate limiting
+if "last_access" not in st.session_state:
+    st.session_state.last_access = 0
+
+now = time.time()
+if now - st.session_state.last_access < 2:
+    st.warning("⏱ Too many requests – Please wait a moment.")
+    st.stop()
+
+st.session_state.last_access = now
 
 st.set_page_config(
     page_title="🌐 Global Telecom & OTT Stellar Nexus",
@@ -21,7 +48,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# === ULTRA-MODERN, CEO-PRAISED DASHBOARD UI ===
+# === ULTRA-MODERN CEO-APPROVED DASHBOARD UI ===
 st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -82,7 +109,6 @@ st.markdown("""
         backdrop-filter: blur(12px);
     }
 
-    /* Premium Gradient Headers */
     .col-header-telco { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
     .col-header-ott { background: linear-gradient(135deg, #9f7aea, #da70d6); }
     .col-header-sports { background: linear-gradient(135deg, #51cf66, #40c057); }
@@ -102,7 +128,6 @@ st.markdown("""
         -webkit-backdrop-filter: blur(16px);
     }
 
-    /* Uniform clean cards – no priority highlighting */
     .news-card {
         background: rgba(255, 255, 255, 0.85);
         border-radius: 18px;
@@ -119,10 +144,9 @@ st.markdown("""
         box-shadow: 0 25px 50px rgba(0,0,0,0.3);
     }
 
-    /* Ultra-modern, smaller, stylish title */
     .news-title {
         font-family: 'Manrope', sans-serif;
-        font-size: 0.98rem;        /* Smaller & elegant */
+        font-size: 0.98rem;
         font-weight: 700;
         line-height: 1.48;
         color: #1e293b;
@@ -160,9 +184,9 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# === RSS FEEDS – NOW WITH 4 PRIORITY TELCO SOURCES ===
+# === RSS FEEDS ===
 RSS_FEEDS = [
-    # Regular Telco
+    # Regular Telco sources
     ("Telecoms.com", "https://www.telecoms.com/feed"),
     ("Light Reading", "https://www.lightreading.com/rss/simple"),
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml"),
@@ -171,15 +195,15 @@ RSS_FEEDS = [
     ("ET Telecom", "https://telecom.economictimes.indiatimes.com/rss/topstories"),
     ("Subex News", "https://rss.app/feeds/nBo6830ABe1HTZ5u.xml"),
     ("OSS/BSS News", "https://rss.app/feeds/OXf4iibABnDj7t1l.xml"),
-    ("The Fast Mode", "https://www.thefastmode.com/rss-feeds"),  # Added reliable OSS/BSS-rich feed
+    ("The Fast Mode", "https://www.thefastmode.com/rss-feeds"),
 
-    # Priority Telco sources – now 4, always pinned at top (latest first)
+    # Priority Telco sources – always pinned at top (4 sources)
     ("Netcracker", "https://rss.app/feeds/GxJESz3Wl0PRbyFG.xml"),
     ("Ericsson", "https://rss.app/feeds/Z6HUnDFle57Uu0hU.xml"),
     ("Telecom TV", "https://rss.app/feeds/4OeTYFrRAw7YjI6B.xml"),
-    ("Amdocs", "https://rss.app/feeds/E9xROIQmdwZQP7YN.xml"),  # New 4th priority source
+    ("Amdocs", "https://rss.app/feeds/E9xROIQmdwZQP7YN.xml"),
 
-    # OTT Business-focused (more feeds for richer content)
+    # OTT Business-focused sources
     ("Variety Business", "https://variety.com/varietyvip/business/feed/"),
     ("Hollywood Reporter Business", "https://www.hollywoodreporter.com/c/business/feed/"),
     ("Deadline Business", "https://deadline.com/vip/business/feed/"),
@@ -189,20 +213,183 @@ RSS_FEEDS = [
     ("Netflix Press Releases", "https://ir.netflix.net/resources/rss-feeds/press-releases/rss.xml"),
     ("VideoNuze", "https://www.videonuze.com/atom"),
     ("nScreenMedia", "https://nscreenmedia.com/feed/"),
-    ("Fierce Video", "https://www.streamtvinsider.com/fiercevideocom/rss-feeds"),  # Main feed link
+    ("Fierce Video", "https://www.fierce-network.com/rss.xml"),
 
-    # Sports & Technology unchanged
-    # ...
+    # Sports
+    ("ESPN", "https://www.espn.com/espn/rss/news"),
+    ("BBC Sport", "https://feeds.bbci.co.uk/sport/rss.xml"),
+    ("Front Office Sports", "https://frontofficesports.com/feed/"),
+    ("Sportico", "https://www.sportico.com/feed/"),
+    ("SportsPro", "https://www.sportspromedia.com/feed/"),
+    ("Sports Business", "https://rss.app/feeds/qDuU3qpiuafUec6u.xml"),
+
+    # Technology
+    ("TechCrunch", "https://techcrunch.com/feed/"),
+    ("The Verge", "https://www.theverge.com/rss/index.xml"),
+    ("Wired", "https://www.wired.com/feed/rss"),
+    ("Ars Technica", "https://arstechnica.com/rss/"),
+    ("VentureBeat", "https://venturebeat.com/feed/"),
+    ("ZDNet", "https://www.zdnet.com/news/rss.xml"),
+    ("Engadget", "https://www.engadget.com/rss.xml"),
+    ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-# Now 4 priority sources
+# 4 Priority sources – always at the top of Telco column
 PRIORITY_SOURCES = ["Netcracker", "Ericsson", "Telecom TV", "Amdocs"]
 
-# === NO PRIORITY HIGHLIGHTING – ALL CARDS UNIFORM ===
-# Removed news-card-priority class entirely – all use .news-card
+# Content filters
+BAD_WORDS = ["sex", "sexual", "nude", "nudity", "porn", "orgasm", "erotic", "anal", "bdsm",
+             "fetish", "xxx", "adult", "explicit", "nc-17", "full frontal", "oral sex",
+             "vagina", "penis", "boobs", "tits", "ass", "fuck", "fisting", "facials"]
 
-# (Rest of the code – filters, fetch_feed, load_feeds, render_body – unchanged except:
-# In render_body: always use card_class = "news-card"
+OTT_IRRELEVANT_WORDS = ["trailer", "teaser", "preview", "episode", "season", "recap", "review", "spoiler",
+                        "watch now", "streaming now", "new episode", "binge", "series premiere", "finale"]
+
+BAD_PATTERN = re.compile(r'\b(' + '|'.join(re.escape(word) for word in BAD_WORDS) + r')\b', re.IGNORECASE)
+OTT_IRRELEVANT_PATTERN = re.compile(r'\b(' + '|'.join(re.escape(word) for word in OTT_IRRELEVANT_WORDS) + r')\b', re.IGNORECASE)
+
+def is_inappropriate(title):
+    return bool(BAD_PATTERN.search(title))
+
+def is_ott_irrelevant(title):
+    return bool(OTT_IRRELEVANT_PATTERN.search(title.lower()))
+
+SECTIONS = {
+    "telco": {"icon": "📡", "name": "Telco & OSS/BSS", "style": "col-header col-header-telco"},
+    "ott": {"icon": "📺", "name": "OTT & Streaming", "style": "col-header col-header-ott"},
+    "sports": {"icon": "🏆", "name": "Sports & Events", "style": "col-header col-header-sports"},
+    "technology": {"icon": "⚡", "name": "Technology", "style": "col-header col-header-tech"},
+}
+
+SOURCE_CATEGORY_MAP = {
+    "Telecoms.com": "telco", "Light Reading": "telco", "Fierce Telecom": "telco",
+    "RCR Wireless": "telco", "Mobile World Live": "telco", "ET Telecom": "telco",
+    "Subex News": "telco", "OSS/BSS News": "telco", "The Fast Mode": "telco",
+    "Netcracker": "telco", "Ericsson": "telco", "Telecom TV": "telco", "Amdocs": "telco",
+    "Variety Business": "ott", "Hollywood Reporter Business": "ott", "Deadline Business": "ott",
+    "Digital TV Europe": "ott", "Advanced Television": "ott", "Streaming Media": "ott",
+    "Netflix Press Releases": "ott", "VideoNuze": "ott", "nScreenMedia": "ott", "Fierce Video": "ott",
+    "ESPN": "sports", "BBC Sport": "sports", "Front Office Sports": "sports",
+    "Sportico": "sports", "SportsPro": "sports", "Sports Business": "sports",
+    "TechCrunch": "technology", "The Verge": "technology", "Wired": "technology",
+    "Ars Technica": "technology", "VentureBeat": "technology", "ZDNet": "technology",
+    "Engadget": "technology", "Techmeme": "technology",
+}
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    "Accept": "application/rss+xml, application/xml, text/xml, */*",
+}
+
+def clean(raw):
+    if not raw:
+        return ""
+    return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
+
+def fetch_feed(source, url):
+    items = []
+    try:
+        resp = requests.get(url, headers=HEADERS, timeout=10)
+        if resp.status_code != 200:
+            return items
+        
+        feed = feedparser.parse(resp.content)
+        if not feed.entries:
+            return items
+        
+        NOW = datetime.now()
+        cutoff_days = 7 if source in PRIORITY_SOURCES else 15
+        CUTOFF = NOW - timedelta(days=cutoff_days)
+        
+        for entry in feed.entries[:15]:
+            title = clean(entry.get("title", ""))
+            if len(title) < 15 or is_inappropriate(title):
+                continue
+            
+            source_category = SOURCE_CATEGORY_MAP.get(source, "")
+            if source_category == "ott" and is_ott_irrelevant(title):
+                continue
+            
+            link = entry.get("link", "")
+            
+            pub = None
+            for k in ("published_parsed", "updated_parsed"):
+                val = getattr(entry, k, None)
+                if val:
+                    try:
+                        pub = datetime(*val[:6])
+                        break
+                    except:
+                        pass
+            
+            if not pub:
+                pub = NOW
+            
+            if pub < CUTOFF:
+                continue
+            
+            items.append({
+                "title": title,
+                "link": link,
+                "pub": pub,
+                "source": source
+            })
+        
+        items.sort(key=lambda x: x["pub"], reverse=True)
+        return items[:1]
+        
+    except Exception:
+        return items
+
+@st.cache_data(ttl=300, show_spinner=False)
+def load_feeds():
+    categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
+    priority_items = []
+    
+    with ThreadPoolExecutor(max_workers=20) as executor:
+        futures = [executor.submit(fetch_feed, source, url) for source, url in RSS_FEEDS]
+        
+        for future in as_completed(futures):
+            try:
+                items = future.result()
+                for item in items:
+                    category = SOURCE_CATEGORY_MAP.get(item["source"], "technology")
+                    if item["source"] in PRIORITY_SOURCES:
+                        priority_items.append(item)
+                    else:
+                        categorized[category].append(item)
+            except:
+                pass
+    
+    # Sort non-telco categories
+    for cat in ["ott", "sports", "technology"]:
+        categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
+    
+    # Priority pinning: 4 sources always at top of telco (latest first)
+    ordered_priority = []
+    for src in PRIORITY_SOURCES:
+        src_items = [it for it in priority_items if it["source"] == src]
+        if src_items:
+            ordered_priority.append(max(src_items, key=lambda x: x["pub"]))
+    
+    ordered_priority.sort(key=lambda x: x["pub"], reverse=True)
+    
+    regular_telco = categorized["telco"]
+    regular_telco.sort(key=lambda x: x["pub"], reverse=True)
+    
+    categorized["telco"] = ordered_priority + regular_telco
+    
+    return categorized
+
+def get_time_str(dt):
+    hrs = int((datetime.now() - dt).total_seconds() / 3600)
+    if hrs < 1:
+        return "Now", "time-hot"
+    if hrs < 6:
+        return f"{hrs}h", "time-hot"
+    if hrs < 24:
+        return f"{hrs}h", "time-warm"
+    return f"{hrs//24}d", "time-normal"
 
 def render_body(items):
     cards = ""
@@ -212,10 +399,8 @@ def render_body(items):
         safe_link = html.escape(item["link"])
         safe_source = html.escape(item["source"])
         
-        # Uniform styling for all
-        card_class = "news-card"
-        
-        cards += f'''<div class="{card_class}">
+        # All cards use the same clean, uniform style – no priority highlight
+        cards += f'''<div class="news-card">
 <a href="{safe_link}" target="_blank" class="news-title">{safe_title}</a>
 <div class="news-meta">
 <span class="{time_class}">{time_str}</span>
@@ -224,11 +409,28 @@ def render_body(items):
 </div>
 </div>'''
     
-    if not items or not cards:
+    if not items:
         cards = '<div style="text-align:center;color:#64748b;padding:70px;font-size:1rem;">No recent news</div>'
     
     return f'<div class="col-body">{cards}</div>'
 
-# In load_feeds: priority pinning logic updated for 4 sources (same as before, just longer list)
+# === LOADING MESSAGE ===
+placeholder = st.empty()
+placeholder.markdown("<h2 style='text-align:center;color:#4338ca;margin-top:160px;font-family:\"Manrope\";font-weight:700;'>✨ Igniting the future of intelligence...<br><small style='color:#64748b;'>Preparing your nexus</small></h2>", unsafe_allow_html=True)
 
-# === LOADING & DASHBOARD RENDER (unchanged) ===
+with st.spinner(""):
+    data = load_feeds()
+
+placeholder.empty()
+
+# === RENDER DASHBOARD ===
+cols = st.columns(4)
+cat_list = ["telco", "ott", "sports", "technology"]
+
+for idx, cat in enumerate(cat_list):
+    sec = SECTIONS[cat]
+    items = data.get(cat, [])
+    
+    with cols[idx]:
+        st.markdown(f'<div class="{sec["style"]}">{sec["icon"]} {sec["name"]}</div>', unsafe_allow_html=True)
+        st.markdown(render_body(items), unsafe_allow_html=True)
