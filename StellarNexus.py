@@ -48,7 +48,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# === ENHANCED BEAUTIFUL STYLING WITH GOOGLE FONTS ===
+# === ENHANCED BEAUTIFUL STYLING ===
 st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -160,9 +160,9 @@ st.markdown("""
     .news-title {
         font-family: 'Poppins', sans-serif;
         color: #1e40af;
-        font-size: 0.98rem;
+        font-size: 0.92rem;  /* Made smaller and more elegant */
         font-weight: 600;
-        line-height: 1.4;
+        line-height: 1.38;
         text-decoration: none;
         display: block;
         margin-bottom: 8px;
@@ -243,6 +243,18 @@ RSS_FEEDS = [
 
 PRIORITY_SOURCES = ["Netcracker", "Ericsson", "Telecom TV"]
 
+# === ADULT CONTENT FILTER ===
+BAD_WORDS = [
+    "sex", "sexual", "nude", "nudity", "porn", "orgasm", "erotic", "anal", "bdsm",
+    "fetish", "xxx", "adult", "explicit", "nc-17", "full frontal", "oral sex",
+    "vagina", "penis", "boobs", "tits", "ass", "fuck", "fisting", "facials"
+]
+
+BAD_PATTERN = re.compile(r'\b(' + '|'.join(re.escape(word) for word in BAD_WORDS) + r')\b', re.IGNORECASE)
+
+def is_inappropriate(title):
+    return bool(BAD_PATTERN.search(title))
+
 SECTIONS = {
     "telco": {"icon": "📡", "name": "Telco & OSS/BSS", "style": "col-header col-header-telco"},
     "ott": {"icon": "📺", "name": "OTT & Streaming", "style": "col-header col-header-ott"},
@@ -291,7 +303,7 @@ def fetch_feed(source, url):
         
         for entry in feed.entries[:15]:
             title = clean(entry.get("title", ""))
-            if len(title) < 15:
+            if len(title) < 15 or is_inappropriate(title):
                 continue
             
             summary = clean(entry.get("summary", ""))
