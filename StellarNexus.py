@@ -48,7 +48,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# === FANTASTIC MODERN 2026 UI STYLING – GLASSMORPHISM + VIBRANT GRADIENTS ===
+# === FANTASTIC MODERN UI – NO WHITE FONT ANYWHERE ===
 st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -65,13 +65,13 @@ st.markdown("""
     }
 
     .header-container {
-        background: rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.18);
         padding: 2rem 2.5rem;
         text-align: center;
         border-radius: 28px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.18);
         margin: 0 2.5rem 3rem 2.5rem;
-        border: 1px solid rgba(255,255,255,0.2);
+        border: 1px solid rgba(255,255,255,0.25);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
     }
@@ -82,7 +82,7 @@ st.markdown("""
         font-weight: 800;
         margin: 0;
         letter-spacing: -1.5px;
-        background: linear-gradient(135deg, #a855f7, #3b82f6, #10b981);
+        background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
@@ -90,9 +90,10 @@ st.markdown("""
     .subtitle {
         font-family: 'Manrope', sans-serif;
         font-size: 1.35rem;
-        color: rgba(255,255,255,0.9);
+        color: #1e293b;
         margin-top: 0.8rem;
         font-weight: 600;
+        opacity: 0.95;
     }
 
     .col-header {
@@ -103,69 +104,69 @@ st.markdown("""
         font-weight: 700;
         font-size: 1.15rem;
         text-align: center;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.25);
         letter-spacing: 0.8px;
         backdrop-filter: blur(10px);
     }
 
-    /* Vibrant 2026 Gradient Headers */
+    /* Vibrant Gradient Headers */
     .col-header-telco { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
     .col-header-ott { background: linear-gradient(135deg, #9f7aea, #da70d6); }
     .col-header-sports { background: linear-gradient(135deg, #51cf66, #40c057); }
     .col-header-tech { background: linear-gradient(135deg, #339af0, #22b8cf); }
 
     .col-body {
-        background: rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.22);
         border-radius: 0 0 20px 20px;
         padding: 18px;
         min-height: 560px;
         max-height: 660px;
         overflow-y: auto;
-        box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.22);
         margin-bottom: 1.8rem;
-        border: 1px solid rgba(255,255,255,0.18);
+        border: 1px solid rgba(255,255,255,0.3);
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
     }
 
     .news-card {
-        background: rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.75);
         border-radius: 16px;
         padding: 16px;
         margin-bottom: 14px;
         transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        border: 1px solid rgba(255,255,255,0.15);
-        box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+        border: 1px solid rgba(255,255,255,0.6);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.12);
     }
 
     .news-card:hover {
         transform: translateY(-8px) scale(1.02);
-        background: rgba(255, 255, 255, 0.18);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.28);
     }
 
     .news-card-priority {
-        background: linear-gradient(145deg, rgba(255,251,235,0.25), rgba(254,252,232,0.15));
-        border: 2px solid rgba(251,191,36,0.6);
+        background: linear-gradient(145deg, #fffbeb, #fefce8);
+        border: 2px solid #f59e0b;
         border-radius: 16px;
         padding: 18px;
         margin-bottom: 16px;
-        box-shadow: 0 8px 24px rgba(251,191,36,0.25);
+        box-shadow: 0 8px 24px rgba(251,191,36,0.3);
         transition: all 0.5s ease;
     }
 
     .news-card-priority:hover {
         transform: translateY(-10px) scale(1.03);
-        box-shadow: 0 24px 48px rgba(251,191,36,0.35);
-        background: linear-gradient(145deg, rgba(255,251,235,0.35), rgba(254,252,232,0.25));
+        box-shadow: 0 24px 48px rgba(251,191,36,0.4);
     }
 
+    /* MODERN TITLE – DARK, ELEGANT, NO WHITE */
     .news-title {
         font-family: 'Manrope', sans-serif;
         font-size: 1.05rem;
         font-weight: 700;
         line-height: 1.5;
-        color: #ffffff;
+        color: #1e293b;          /* Deep slate – premium & readable */
         text-decoration: none;
         display: block;
         margin-bottom: 10px;
@@ -173,13 +174,13 @@ st.markdown("""
     }
 
     .news-title:hover {
-        color: #e0f2fe;
+        color: #4338ca;          /* Indigo accent on hover */
         transform: translateX(6px);
     }
 
     .news-meta {
         font-size: 0.82rem;
-        color: rgba(255,255,255,0.85);
+        color: #475569;
         display: flex;
         align-items: center;
         gap: 10px;
@@ -187,9 +188,9 @@ st.markdown("""
         font-weight: 500;
     }
 
-    .time-hot { color: #ff6b6b; font-weight: 800; }
-    .time-warm { color: #ffa726; font-weight: 700; }
-    .time-normal { color: rgba(255,255,255,0.7); }
+    .time-hot { color: #dc2626; font-weight: 800; }
+    .time-warm { color: #ea580c; font-weight: 700; }
+    .time-normal { color: #64748b; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -411,13 +412,13 @@ def render_body(items):
 </div>'''
     
     if not items or not cards:
-        cards = '<div style="text-align:center;color:rgba(255,255,255,0.6);padding:60px;font-size:1rem;">No recent news</div>'
+        cards = '<div style="text-align:center;color:#64748b;padding:60px;font-size:1rem;">No recent news</div>'
     
     return f'<div class="col-body">{cards}</div>'
 
 # === LOADING MESSAGE ===
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#e0f2fe;margin-top:160px;font-family:\"Manrope\";font-weight:700;'>✨ Igniting the future of intelligence...<br><small style='color:rgba(255,255,255,0.8);'>Preparing your nexus</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#4338ca;margin-top:160px;font-family:\"Manrope\";font-weight:700;'>✨ Igniting the future of intelligence...<br><small style='color:#64748b;'>Preparing your nexus</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_feeds()
