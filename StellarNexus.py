@@ -48,11 +48,11 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# === ENHANCED BEAUTIFUL STYLING ===
+# === MODERN & CLEAN STYLING WITH IMPROVED NEWS TITLE FONT ===
 st.markdown("""
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap');
 
     html, body, [class*="css"]  {  
         font-family: 'Inter', sans-serif;
@@ -129,7 +129,7 @@ st.markdown("""
         background: linear-gradient(145deg, #ffffff, #f8fafc);
         border: none;
         border-radius: 14px;
-        padding: 14px;
+        padding: 15px;
         margin-bottom: 12px;
         transition: all 0.4s ease;
         box-shadow: 0 4px 12px rgba(0,0,0,0.08);
@@ -145,7 +145,7 @@ st.markdown("""
         background: linear-gradient(145deg, #fffbeb, #fefce8);
         border: 2px solid #f59e0b;
         border-radius: 14px;
-        padding: 16px;
+        padding: 17px;
         margin-bottom: 14px;
         box-shadow: 0 6px 18px rgba(251, 191, 36, 0.2);
         transition: all 0.4s ease;
@@ -157,25 +157,26 @@ st.markdown("""
         background: #fffbeb;
     }
 
+    /* IMPROVED MODERN NEWS TITLE */
     .news-title {
-        font-family: 'Poppins', sans-serif;
-        color: #1e40af;
-        font-size: 0.90rem;  /* Slightly smaller for even more elegance */
-        font-weight: 600;
-        line-height: 1.38;
+        font-family: 'Inter', sans-serif;   /* Clean, highly readable modern font */
+        font-size: 1.02rem;                 /* Slightly larger for better clarity */
+        font-weight: 600;                   /* Strong but not bold-overkill */
+        line-height: 1.45;                  /* Improved spacing for readability */
+        color: #1e293b;                     /* Deep slate for professional look */
         text-decoration: none;
         display: block;
-        margin-bottom: 8px;
+        margin-bottom: 9px;
         transition: color 0.3s ease;
     }
 
     .news-title:hover {
-        color: #4338ca;
-        text-decoration: underline;
+        color: #4f46e5;                     /* Indigo accent on hover */
+        text-decoration: none;              /* Clean underline removed for modern feel */
     }
 
     .news-meta {
-        font-size: 0.78rem;
+        font-size: 0.80rem;
         color: #64748b;
         display: flex;
         align-items: center;
@@ -184,7 +185,7 @@ st.markdown("""
         font-weight: 500;
     }
 
-    .time-hot { color: #ef4444; font-weight: 700; font-style: normal; }
+    .time-hot { color: #ef4444; font-weight: 700; }
     .time-warm { color: #f97316; font-weight: 600; }
     .time-normal { color: #64748b; }
 </style>
@@ -198,7 +199,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# === RSS FEEDS (UPDATED FOR OTT BUSINESS FOCUS) ===
+# === RSS FEEDS (BUSINESS-FOCUSED OTT) ===
 RSS_FEEDS = [
     # Telco (regular)
     ("Telecoms.com", "https://www.telecoms.com/feed"),
@@ -215,14 +216,14 @@ RSS_FEEDS = [
     ("Ericsson", "https://rss.app/feeds/Z6HUnDFle57Uu0hU.xml"),
     ("Telecom TV", "https://rss.app/feeds/4OeTYFrRAw7YjI6B.xml"),
 
-    # OTT - Focused on business, partnerships, mergers, financials (permanent daily-updating feeds)
-    ("Variety Business", "https://variety.com/varietyvip/business/feed/"),  # Variety VIP Business section RSS
+    # OTT - Business & Industry Focused
+    ("Variety Business", "https://variety.com/varietyvip/business/feed/"),
     ("Hollywood Reporter Business", "https://www.hollywoodreporter.com/c/business/feed/"),
-    ("Deadline Business", "https://deadline.com/vip/business/feed/"),  # VIP/business often covers deals
-    ("Digital TV Europe", "https://www.digitaltveurope.com/feed/"),  # Strong on OTT business, partnerships
-    ("Advanced Television", "https://advanced-television.com/feed/"),  # Industry news, mergers, financials
-    ("Streaming Media", "https://www.streamingmedia.com/rss"),  # Dedicated OTT/streaming industry news
-    ("Netflix Press Releases", "https://ir.netflix.net/resources/rss-feeds/press-releases/rss.xml"),  # Official financial/partnership announcements
+    ("Deadline Business", "https://deadline.com/vip/business/feed/"),
+    ("Digital TV Europe", "https://www.digitaltveurope.com/feed/"),
+    ("Advanced Television", "https://advanced-television.com/feed/"),
+    ("Streaming Media", "https://www.streamingmedia.com/rss"),
+    ("Netflix Press Releases", "https://ir.netflix.net/resources/rss-feeds/press-releases/rss.xml"),
 
     # Sports
     ("ESPN", "https://www.espn.com/espn/rss/news"),
@@ -246,16 +247,12 @@ RSS_FEEDS = [
 PRIORITY_SOURCES = ["Netcracker", "Ericsson", "Telecom TV"]
 
 # === CONTENT FILTERS ===
-BAD_WORDS = [
-    "sex", "sexual", "nude", "nudity", "porn", "orgasm", "erotic", "anal", "bdsm",
-    "fetish", "xxx", "adult", "explicit", "nc-17", "full frontal", "oral sex",
-    "vagina", "penis", "boobs", "tits", "ass", "fuck", "fisting", "facials"
-]
+BAD_WORDS = ["sex", "sexual", "nude", "nudity", "porn", "orgasm", "erotic", "anal", "bdsm",
+             "fetish", "xxx", "adult", "explicit", "nc-17", "full frontal", "oral sex",
+             "vagina", "penis", "boobs", "tits", "ass", "fuck", "fisting", "facials"]
 
-OTT_IRRELEVANT_WORDS = [
-    "trailer", "teaser", "preview", "episode", "season", "recap", "review", "spoiler",
-    "watch now", "streaming now", "new episode", "binge", "series premiere", "finale"
-]
+OTT_IRRELEVANT_WORDS = ["trailer", "teaser", "preview", "episode", "season", "recap", "review", "spoiler",
+                        "watch now", "streaming now", "new episode", "binge", "series premiere", "finale"]
 
 BAD_PATTERN = re.compile(r'\b(' + '|'.join(re.escape(word) for word in BAD_WORDS) + r')\b', re.IGNORECASE)
 OTT_IRRELEVANT_PATTERN = re.compile(r'\b(' + '|'.join(re.escape(word) for word in OTT_IRRELEVANT_WORDS) + r')\b', re.IGNORECASE)
@@ -274,18 +271,13 @@ SECTIONS = {
 }
 
 SOURCE_CATEGORY_MAP = {
-    # Telco sources...
     "Telecoms.com": "telco", "Light Reading": "telco", "Fierce Telecom": "telco",
     "RCR Wireless": "telco", "Mobile World Live": "telco", "ET Telecom": "telco",
     "Subex News": "telco", "OSS/BSS News": "telco",
     "Netcracker": "telco", "Ericsson": "telco", "Telecom TV": "telco",
-    
-    # OTT business-focused sources
     "Variety Business": "ott", "Hollywood Reporter Business": "ott", "Deadline Business": "ott",
     "Digital TV Europe": "ott", "Advanced Television": "ott", "Streaming Media": "ott",
     "Netflix Press Releases": "ott",
-    
-    # Sports & Tech unchanged
     "ESPN": "sports", "BBC Sport": "sports", "Front Office Sports": "sports",
     "Sportico": "sports", "SportsPro": "sports", "Sports Business": "sports",
     "TechCrunch": "technology", "The Verge": "technology", "Wired": "technology",
@@ -323,7 +315,6 @@ def fetch_feed(source, url):
             if len(title) < 15 or is_inappropriate(title):
                 continue
             
-            # Extra filter for OTT sources
             source_category = SOURCE_CATEGORY_MAP.get(source, "")
             if source_category == "ott" and is_ott_irrelevant(title):
                 continue
