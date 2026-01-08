@@ -160,7 +160,7 @@ st.markdown("""
     .news-title {
         font-family: 'Poppins', sans-serif;
         color: #1e40af;
-        font-size: 0.92rem;  /* Made smaller and more elegant */
+        font-size: 0.90rem;  /* Slightly smaller for even more elegance */
         font-weight: 600;
         line-height: 1.38;
         text-decoration: none;
@@ -198,7 +198,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# === RSS FEEDS ===
+# === RSS FEEDS (UPDATED FOR OTT BUSINESS FOCUS) ===
 RSS_FEEDS = [
     # Telco (regular)
     ("Telecoms.com", "https://www.telecoms.com/feed"),
@@ -215,12 +215,14 @@ RSS_FEEDS = [
     ("Ericsson", "https://rss.app/feeds/Z6HUnDFle57Uu0hU.xml"),
     ("Telecom TV", "https://rss.app/feeds/4OeTYFrRAw7YjI6B.xml"),
 
-    # OTT
-    ("Variety", "https://variety.com/feed/"),
-    ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/"),
-    ("Deadline", "https://deadline.com/feed/"),
-    ("Digital TV Europe", "https://www.digitaltveurope.com/feed/"),
-    ("Advanced Television", "https://advanced-television.com/feed/"),
+    # OTT - Focused on business, partnerships, mergers, financials (permanent daily-updating feeds)
+    ("Variety Business", "https://variety.com/varietyvip/business/feed/"),  # Variety VIP Business section RSS
+    ("Hollywood Reporter Business", "https://www.hollywoodreporter.com/c/business/feed/"),
+    ("Deadline Business", "https://deadline.com/vip/business/feed/"),  # VIP/business often covers deals
+    ("Digital TV Europe", "https://www.digitaltveurope.com/feed/"),  # Strong on OTT business, partnerships
+    ("Advanced Television", "https://advanced-television.com/feed/"),  # Industry news, mergers, financials
+    ("Streaming Media", "https://www.streamingmedia.com/rss"),  # Dedicated OTT/streaming industry news
+    ("Netflix Press Releases", "https://ir.netflix.net/resources/rss-feeds/press-releases/rss.xml"),  # Official financial/partnership announcements
 
     # Sports
     ("ESPN", "https://www.espn.com/espn/rss/news"),
@@ -243,17 +245,26 @@ RSS_FEEDS = [
 
 PRIORITY_SOURCES = ["Netcracker", "Ericsson", "Telecom TV"]
 
-# === ADULT CONTENT FILTER ===
+# === CONTENT FILTERS ===
 BAD_WORDS = [
     "sex", "sexual", "nude", "nudity", "porn", "orgasm", "erotic", "anal", "bdsm",
     "fetish", "xxx", "adult", "explicit", "nc-17", "full frontal", "oral sex",
     "vagina", "penis", "boobs", "tits", "ass", "fuck", "fisting", "facials"
 ]
 
+OTT_IRRELEVANT_WORDS = [
+    "trailer", "teaser", "preview", "episode", "season", "recap", "review", "spoiler",
+    "watch now", "streaming now", "new episode", "binge", "series premiere", "finale"
+]
+
 BAD_PATTERN = re.compile(r'\b(' + '|'.join(re.escape(word) for word in BAD_WORDS) + r')\b', re.IGNORECASE)
+OTT_IRRELEVANT_PATTERN = re.compile(r'\b(' + '|'.join(re.escape(word) for word in OTT_IRRELEVANT_WORDS) + r')\b', re.IGNORECASE)
 
 def is_inappropriate(title):
     return bool(BAD_PATTERN.search(title))
+
+def is_ott_irrelevant(title):
+    return bool(OTT_IRRELEVANT_PATTERN.search(title.lower()))
 
 SECTIONS = {
     "telco": {"icon": "📡", "name": "Telco & OSS/BSS", "style": "col-header col-header-telco"},
@@ -263,12 +274,18 @@ SECTIONS = {
 }
 
 SOURCE_CATEGORY_MAP = {
+    # Telco sources...
     "Telecoms.com": "telco", "Light Reading": "telco", "Fierce Telecom": "telco",
     "RCR Wireless": "telco", "Mobile World Live": "telco", "ET Telecom": "telco",
     "Subex News": "telco", "OSS/BSS News": "telco",
     "Netcracker": "telco", "Ericsson": "telco", "Telecom TV": "telco",
-    "Variety": "ott", "Hollywood Reporter": "ott", "Deadline": "ott",
-    "Digital TV Europe": "ott", "Advanced Television": "ott",
+    
+    # OTT business-focused sources
+    "Variety Business": "ott", "Hollywood Reporter Business": "ott", "Deadline Business": "ott",
+    "Digital TV Europe": "ott", "Advanced Television": "ott", "Streaming Media": "ott",
+    "Netflix Press Releases": "ott",
+    
+    # Sports & Tech unchanged
     "ESPN": "sports", "BBC Sport": "sports", "Front Office Sports": "sports",
     "Sportico": "sports", "SportsPro": "sports", "Sports Business": "sports",
     "TechCrunch": "technology", "The Verge": "technology", "Wired": "technology",
@@ -304,6 +321,11 @@ def fetch_feed(source, url):
         for entry in feed.entries[:15]:
             title = clean(entry.get("title", ""))
             if len(title) < 15 or is_inappropriate(title):
+                continue
+            
+            # Extra filter for OTT sources
+            source_category = SOURCE_CATEGORY_MAP.get(source, "")
+            if source_category == "ott" and is_ott_irrelevant(title):
                 continue
             
             summary = clean(entry.get("summary", ""))
