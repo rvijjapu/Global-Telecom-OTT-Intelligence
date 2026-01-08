@@ -174,9 +174,9 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# === RSS FEEDS (UPDATED WITH PRIORITY SOURCES) ===
+# === RSS FEEDS ===
 RSS_FEEDS = [
-    # Telco
+    # Telco (regular)
     ("Telecoms.com", "https://www.telecoms.com/feed"),
     ("Light Reading", "https://www.lightreading.com/rss/simple"),
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml"),
@@ -186,7 +186,7 @@ RSS_FEEDS = [
     ("Subex News", "https://rss.app/feeds/nBo6830ABe1HTZ5u.xml"),
     ("OSS/BSS News", "https://rss.app/feeds/OXf4iibABnDj7t1l.xml"),
     
-    # === PRIORITY TELCO SOURCES ===
+    # Priority Telco sources
     ("Netcracker", "https://rss.app/feeds/GxJESz3Wl0PRbyFG.xml"),
     ("Ericsson", "https://rss.app/feeds/Z6HUnDFle57Uu0hU.xml"),
     ("Telecom TV", "https://rss.app/feeds/4OeTYFrRAw7YjI6B.xml"),
@@ -217,7 +217,7 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-# Priority sources that get special treatment
+# Priority sources - fixed order at the top
 PRIORITY_SOURCES = ["Netcracker", "Ericsson", "Telecom TV"]
 
 SECTIONS = {
@@ -263,7 +263,7 @@ def fetch_feed(source, url):
             return items
         
         NOW = datetime.now()
-        # 7 days for priority sources, 15 days for others
+        # 7 days cutoff for priority, 15 days for others
         cutoff_days = 7 if source in PRIORITY_SOURCES else 15
         CUTOFF = NOW - timedelta(days=cutoff_days)
         
@@ -300,8 +300,9 @@ def fetch_feed(source, url):
                 "is_priority": source in PRIORITY_SOURCES
             })
         
+        # Return only the latest article per source
         items.sort(key=lambda x: x["pub"], reverse=True)
-        return items[:1]  # One latest article per source
+        return items[:1]
         
     except Exception:
         return items
@@ -309,6 +310,7 @@ def fetch_feed(source, url):
 @st.cache_data(ttl=300, show_spinner=False)
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
+    priority_items = []  # Collect priority source items separately
     
     with ThreadPoolExecutor(max_workers=20) as executor:
         futures = [executor.submit(fetch_feed, source, url) for source, url in RSS_FEEDS]
@@ -318,13 +320,33 @@ def load_feeds():
                 items = future.result()
                 for item in items:
                     category = SOURCE_CATEGORY_MAP.get(item["source"], "technology")
-                    categorized[category].append(item)
+                    if item["source"] in PRIORITY_SOURCES:
+                        priority_items.append(item)
+                    else:
+                        categorized[category].append(item)
             except:
                 pass
     
-    # Sort all categories by date (latest first)
-    for cat in categorized:
+    # Sort other categories normally
+    for cat in ["ott", "sports", "technology"]:
         categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
+    
+    # For telco: priority items first (in defined order, latest of each), then others sorted by date
+    ordered_priority = []
+    for src in PRIORITY_SOURCES:
+        src_items = [it for it in priority_items if it["source"] == src]
+        if src_items:
+            ordered_priority.append(max(src_items, key=lambda x: x["pub"]))  # latest for that source
+    
+    # Sort the priority block by date (latest on top)
+    ordered_priority.sort(key=lambda x: x["pub"], reverse=True)
+    
+    # Regular telco items sorted by date
+    regular_telco = categorized["telco"]
+    regular_telco.sort(key=lambda x: x["pub"], reverse=True)
+    
+    # Final telco list: priority block first, then regular
+    categorized["telco"] = ordered_priority + regular_telco
     
     return categorized
 
@@ -346,7 +368,6 @@ def render_body(items):
         safe_link = html.escape(item["link"])
         safe_source = html.escape(item["source"])
         
-        # Priority sources get highlighted card
         card_class = "news-card-priority" if item.get("is_priority", False) else "news-card"
         
         cards += f'''<div class="{card_class}">
