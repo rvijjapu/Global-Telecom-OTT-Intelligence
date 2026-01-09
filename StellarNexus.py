@@ -186,7 +186,7 @@ st.markdown("""
 
 # === RSS FEEDS ===
 RSS_FEEDS = [
-    # Regular Telco sources (fine-tuned for top telecom/OSS/BSS focus – removed less critical like Subex/OSS/BSS News to prioritize importance)
+    # Regular top telecom sources
     ("Telecoms.com", "https://www.telecoms.com/feed"),
     ("Light Reading", "https://www.lightreading.com/rss/simple"),
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml"),
@@ -195,14 +195,19 @@ RSS_FEEDS = [
     ("ET Telecom", "https://telecom.economictimes.indiatimes.com/rss/topstories"),
     ("The Fast Mode", "https://www.thefastmode.com/rss-feeds"),
 
-    # Priority Telco sources – now 5, pinned at top (Netcracker, Amdocs, Ericsson, Telecom TV, Telecom paper)
+    # Priority sources – exact order as requested:
+    # 1. Netcracker
+    # 2. Amdocs
+    # 3. Telecom paper (immediate after Netcracker & Amdocs)
+    # 4. Ericsson
+    # 5. Telecom TV
     ("Netcracker", "https://rss.app/feeds/GxJESz3Wl0PRbyFG.xml"),
     ("Amdocs", "https://rss.app/feeds/E9xROIQmdwZQP7YN.xml"),
+    ("Telecom paper", "https://rss.app/feed/YU1XJaMr6q7xseby"),  # Immediate priority after Netcracker & Amdocs
     ("Ericsson", "https://rss.app/feeds/Z6HUnDFle57Uu0hU.xml"),
     ("Telecom TV", "https://rss.app/feeds/4OeTYFrRAw7YjI6B.xml"),
-    ("Telecom paper", "https://rss.app/feed/YU1XJaMr6q7xseby"),  # New: Only latest from today
 
-    # OTT Business-focused sources (unchanged for now)
+    # OTT Business-focused sources
     ("Variety Business", "https://variety.com/varietyvip/business/feed/"),
     ("Hollywood Reporter Business", "https://www.hollywoodreporter.com/c/business/feed/"),
     ("Deadline Business", "https://deadline.com/vip/business/feed/"),
@@ -214,7 +219,7 @@ RSS_FEEDS = [
     ("nScreenMedia", "https://nscreenmedia.com/feed/"),
     ("Fierce Video", "https://www.fierce-network.com/rss.xml"),
 
-    # Sports (unchanged)
+    # Sports
     ("ESPN", "https://www.espn.com/espn/rss/news"),
     ("BBC Sport", "https://feeds.bbci.co.uk/sport/rss.xml"),
     ("Front Office Sports", "https://frontofficesports.com/feed/"),
@@ -222,7 +227,7 @@ RSS_FEEDS = [
     ("SportsPro", "https://www.sportspromedia.com/feed/"),
     ("Sports Business", "https://rss.app/feeds/qDuU3qpiuafUec6u.xml"),
 
-    # Technology (unchanged)
+    # Technology
     ("TechCrunch", "https://techcrunch.com/feed/"),
     ("The Verge", "https://www.theverge.com/rss/index.xml"),
     ("Wired", "https://www.wired.com/feed/rss"),
@@ -233,7 +238,8 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-PRIORITY_SOURCES = ["Netcracker", "Amdocs", "Ericsson", "Telecom TV", "Telecom paper"]
+# Priority order – Telecom paper immediately after Netcracker & Amdocs
+PRIORITY_SOURCES = ["Netcracker", "Amdocs", "Telecom paper", "Ericsson", "Telecom TV"]
 
 BAD_WORDS = ["sex", "sexual", "nude", "nudity", "porn", "orgasm", "erotic", "anal", "bdsm",
              "fetish", "xxx", "adult", "explicit", "nc-17", "full frontal", "oral sex",
@@ -262,7 +268,8 @@ SOURCE_CATEGORY_MAP = {
     "Telecoms.com": "telco", "Light Reading": "telco", "Fierce Telecom": "telco",
     "RCR Wireless": "telco", "Mobile World Live": "telco", "ET Telecom": "telco",
     "The Fast Mode": "telco",
-    "Netcracker": "telco", "Amdocs": "telco", "Ericsson": "telco", "Telecom TV": "telco", "Telecom paper": "telco",
+    "Netcracker": "telco", "Amdocs": "telco", "Telecom paper": "telco",
+    "Ericsson": "telco", "Telecom TV": "telco",
     "Variety Business": "ott", "Hollywood Reporter Business": "ott", "Deadline Business": "ott",
     "Digital TV Europe": "ott", "Advanced Television": "ott", "Streaming Media": "ott",
     "Netflix Press Releases": "ott", "VideoNuze": "ott", "nScreenMedia": "ott", "Fierce Video": "ott",
@@ -326,7 +333,7 @@ def fetch_feed(source, url):
             if pub < CUTOFF:
                 continue
             
-            # Special rule for Telecom paper: only today's latest news
+            # Special rule: Telecom paper only shows today's latest news
             if source == "Telecom paper" and pub.date() != today:
                 continue
             
@@ -338,7 +345,7 @@ def fetch_feed(source, url):
             })
         
         items.sort(key=lambda x: x["pub"], reverse=True)
-        return items[:1]  # Latest per source
+        return items[:1]
         
     except Exception:
         return items
@@ -366,6 +373,7 @@ def load_feeds():
     for cat in ["ott", "sports", "technology"]:
         categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
     
+    # Priority pinning in exact requested order
     ordered_priority = []
     for src in PRIORITY_SOURCES:
         src_items = [it for it in priority_items if it["source"] == src]
