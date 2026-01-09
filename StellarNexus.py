@@ -7,7 +7,6 @@ import html
 import time
 import re
 from zoneinfo import ZoneInfo
-import hashlib
 
 # ========================== 
 # 🔐 CEO TOKEN SECURITY GATE 
@@ -43,344 +42,164 @@ if now - st.session_state.last_access < 2:
 st.session_state.last_access = now
 
 st.set_page_config(
-    page_title="🌐 Global Telecom & OTT Intelligence Hub 2026",
+    page_title="🌐 Global Telecom & OTT Stellar Nexus",
     page_icon="🌐",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# Auto-refresh configuration
-AUTO_REFRESH_INTERVAL = 300  # 5 minutes in seconds
-
-# Enhanced styling with modern 2026 design trends
+# YOUR ORIGINAL STYLING - KEPT EXACTLY
 st.markdown("""
 <style>
-    /* Global Variables */
-    :root {
-        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        --telco-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        --ott-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        --sports-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-        --tech-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-        --dark-bg: #0f1419;
-        --card-bg: #1a1f2e;
-        --text-primary: #e4e6eb;
-        --text-secondary: #8b92a8;
-        --border-color: #2d3748;
-    }
-    
-    /* Reset and Base */
-    .stApp {
-        background: var(--dark-bg);
-        color: var(--text-primary);
-    }
-    
-    /* Hide Streamlit Branding */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
-    
-    /* Dashboard Header */
-    .dashboard-header {
-        background: var(--primary-gradient);
-        padding: 2rem;
-        border-radius: 16px;
-        margin-bottom: 2rem;
-        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
-        text-align: center;
+    .stApp {
+        background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
-    
-    .dashboard-title {
-        font-size: 2.5rem;
+    .main-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem;
+        border-radius: 15px;
+        text-align: center;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
+    }
+    .main-title {
+        font-size: 2.8rem;
         font-weight: 800;
         color: white;
         margin: 0;
-        text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
-    
-    .dashboard-subtitle {
+    .main-subtitle {
         font-size: 1.1rem;
         color: rgba(255,255,255,0.9);
         margin-top: 0.5rem;
-        font-weight: 300;
     }
-    
-    /* Section Headers */
-    .section-header {
-        padding: 1rem 1.5rem;
-        border-radius: 12px;
-        margin-bottom: 1rem;
+    .col-header {
+        padding: 1rem;
+        border-radius: 10px;
+        text-align: center;
         font-size: 1.3rem;
         font-weight: 700;
         color: white;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        position: sticky;
-        top: 0;
-        z-index: 10;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     }
-    
-    .section-telco { background: var(--telco-gradient); }
-    .section-ott { background: var(--ott-gradient); }
-    .section-sports { background: var(--sports-gradient); }
-    .section-tech { background: var(--tech-gradient); }
-    
-    /* News Cards Container */
-    .news-container {
+    .col-header-pink {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    .col-header-purple {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    .col-header-green {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+    .col-header-orange {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+    .news-body {
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 0.8rem;
         padding: 0.5rem;
-        max-height: calc(100vh - 280px);
+        max-height: 75vh;
         overflow-y: auto;
     }
-    
-    .news-container::-webkit-scrollbar {
+    .news-body::-webkit-scrollbar {
         width: 6px;
     }
-    
-    .news-container::-webkit-scrollbar-track {
-        background: var(--dark-bg);
+    .news-body::-webkit-scrollbar-track {
+        background: rgba(255,255,255,0.05);
+        border-radius: 10px;
     }
-    
-    .news-container::-webkit-scrollbar-thumb {
-        background: var(--border-color);
-        border-radius: 3px;
+    .news-body::-webkit-scrollbar-thumb {
+        background: rgba(102, 126, 234, 0.6);
+        border-radius: 10px;
     }
-    
-    /* Enhanced News Card with Summary */
     .news-card {
-        background: var(--card-bg);
+        background: rgba(26, 32, 44, 0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.1);
         border-radius: 12px;
-        padding: 1.25rem;
-        border: 1px solid var(--border-color);
+        padding: 1rem;
         transition: all 0.3s ease;
         cursor: pointer;
-        position: relative;
-        overflow: hidden;
     }
-    
-    .news-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: var(--primary-gradient);
-        transform: scaleX(0);
-        transition: transform 0.3s ease;
-    }
-    
     .news-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
-        border-color: #667eea;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        border-color: rgba(102, 126, 234, 0.5);
     }
-    
-    .news-card:hover::before {
-        transform: scaleX(1);
-    }
-    
-    /* Breaking/Hot News Indicator */
-    .news-card.breaking {
-        border-left: 4px solid #ff4757;
-        background: linear-gradient(135deg, rgba(255,71,87,0.1) 0%, var(--card-bg) 100%);
-    }
-    
-    .news-card.breaking .news-title::before {
-        content: '🔥 ';
-    }
-    
-    /* News Title */
     .news-title {
-        font-size: 1.05rem;
+        font-size: 1rem;
         font-weight: 600;
-        color: var(--text-primary);
-        margin-bottom: 0.75rem;
-        line-height: 1.5;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+        color: #e2e8f0;
+        margin-bottom: 0.6rem;
+        line-height: 1.4;
     }
-    
-    /* News Summary */
     .news-summary {
-        font-size: 0.9rem;
-        color: var(--text-secondary);
-        line-height: 1.6;
-        margin-bottom: 0.75rem;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        border-left: 3px solid var(--border-color);
-        padding-left: 0.75rem;
-    }
-    
-    /* Metadata Bar */
-    .news-meta {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
         font-size: 0.85rem;
-        color: var(--text-secondary);
-        margin-top: 0.75rem;
+        color: #a0aec0;
+        margin-bottom: 0.6rem;
+        line-height: 1.5;
+        border-left: 2px solid rgba(102, 126, 234, 0.4);
+        padding-left: 0.6rem;
     }
-    
+    .news-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.8rem;
+        color: #718096;
+        margin-top: 0.5rem;
+    }
     .news-source {
         font-weight: 600;
         color: #667eea;
     }
-    
-    .news-time {
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-    }
-    
     .time-badge {
-        padding: 0.25rem 0.5rem;
-        border-radius: 6px;
-        font-size: 0.75rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 5px;
         font-weight: 600;
     }
-    
     .time-hot {
         background: rgba(255, 71, 87, 0.2);
         color: #ff4757;
     }
-    
     .time-warm {
         background: rgba(255, 165, 2, 0.2);
         color: #ffa502;
     }
-    
     .time-normal {
-        background: rgba(139, 146, 168, 0.2);
-        color: var(--text-secondary);
+        background: rgba(160, 174, 192, 0.2);
+        color: #a0aec0;
     }
-    
-    /* Read More Button */
-    .read-more {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
-        color: #667eea;
-        font-size: 0.85rem;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.2s ease;
-    }
-    
-    .read-more:hover {
-        color: #764ba2;
-        gap: 0.75rem;
-    }
-    
-    /* Empty State */
-    .empty-state {
+    .empty-msg {
         text-align: center;
-        padding: 3rem 1rem;
-        color: var(--text-secondary);
-        background: var(--card-bg);
-        border-radius: 12px;
-        border: 2px dashed var(--border-color);
+        padding: 2rem;
+        color: #718096;
+        font-size: 0.9rem;
     }
-    
-    .empty-state-icon {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-        opacity: 0.5;
-    }
-    
-    /* Loading State */
-    .loading-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 4rem 2rem;
-        background: var(--card-bg);
-        border-radius: 16px;
+    .loading-box {
+        background: rgba(26, 32, 44, 0.8);
+        padding: 3rem;
+        border-radius: 15px;
+        text-align: center;
         margin: 2rem 0;
     }
-    
-    .loading-spinner {
-        width: 60px;
-        height: 60px;
-        border: 4px solid var(--border-color);
-        border-top: 4px solid #667eea;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-    
     .loading-text {
-        margin-top: 1.5rem;
+        color: #a0aec0;
         font-size: 1.1rem;
-        color: var(--text-secondary);
-    }
-    
-    /* Stats Bar */
-    .stats-bar {
-        display: flex;
-        gap: 1rem;
-        justify-content: space-around;
-        background: var(--card-bg);
-        padding: 1rem;
-        border-radius: 12px;
-        margin-bottom: 2rem;
-    }
-    
-    .stat-item {
-        text-align: center;
-    }
-    
-    .stat-value {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--text-primary);
-    }
-    
-    .stat-label {
-        font-size: 0.8rem;
-        color: var(--text-secondary);
-        margin-top: 0.25rem;
-    }
-    
-    /* Responsive Design */
-    @media (max-width: 768px) {
-        .dashboard-title {
-            font-size: 1.8rem;
-        }
-        
-        .news-card {
-            padding: 1rem;
-        }
-        
-        .news-title {
-            font-size: 0.95rem;
-        }
-        
-        .stats-bar {
-            flex-wrap: wrap;
-        }
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Enhanced RSS feeds with better sources for 2026
+# RSS FEEDS
 RSS_FEEDS = [
-    # Telco & OSS/BSS
+    # Telco
     ("Telecoms.com", "https://www.telecoms.com/feed"),
     ("Light Reading", "https://www.lightreading.com/rss/simple"),
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml"),
@@ -388,16 +207,12 @@ RSS_FEEDS = [
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/"),
     ("ET Telecom", "https://telecom.economictimes.indiatimes.com/rss/topstories"),
     ("The Fast Mode", "https://www.thefastmode.com/rss-feeds"),
-    ("TelecomTV", "https://www.telecomtv.com/feed/"),
-    
-    # OTT & Streaming
+    # OTT
     ("Variety", "https://variety.com/feed/"),
     ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/"),
     ("Deadline", "https://deadline.com/feed/"),
     ("Digital TV Europe", "https://www.digitaltveurope.com/feed/"),
     ("Advanced Television", "https://advanced-television.com/feed/"),
-    ("StreamingMedia", "https://www.streamingmedia.com/RSS/"),
-    
     # Sports
     ("ESPN", "https://www.espn.com/espn/rss/news"),
     ("BBC Sport", "https://feeds.bbci.co.uk/sport/rss.xml"),
@@ -405,7 +220,6 @@ RSS_FEEDS = [
     ("Sportico", "https://www.sportico.com/feed/"),
     ("SportsPro", "https://www.sportspromedia.com/feed/"),
     ("Sports Business", "https://rss.app/feeds/qDuU3qpiuafUec6u.xml"),
-    
     # Technology
     ("TechCrunch", "https://techcrunch.com/feed/"),
     ("The Verge", "https://www.theverge.com/rss/index.xml"),
@@ -418,10 +232,10 @@ RSS_FEEDS = [
 ]
 
 SECTIONS = {
-    "telco": {"icon": "📡", "name": "Telco & OSS/BSS", "style": "section-telco"},
-    "ott": {"icon": "📺", "name": "OTT & Streaming", "style": "section-ott"},
-    "sports": {"icon": "🏆", "name": "Sports & Events", "style": "section-sports"},
-    "technology": {"icon": "⚡", "name": "Technology", "style": "section-tech"},
+    "telco": {"icon": "📡", "name": "Telco & OSS/BSS", "style": "col-header col-header-pink"},
+    "ott": {"icon": "📺", "name": "OTT & Streaming", "style": "col-header col-header-purple"},
+    "sports": {"icon": "🏆", "name": "Sports & Events", "style": "col-header col-header-green"},
+    "technology": {"icon": "⚡", "name": "Technology", "style": "col-header col-header-orange"},
 }
 
 SOURCE_CATEGORY_MAP = {
@@ -432,13 +246,11 @@ SOURCE_CATEGORY_MAP = {
     "Mobile World Live": "telco",
     "ET Telecom": "telco",
     "The Fast Mode": "telco",
-    "TelecomTV": "telco",
     "Variety": "ott",
     "Hollywood Reporter": "ott",
     "Deadline": "ott",
     "Digital TV Europe": "ott",
     "Advanced Television": "ott",
-    "StreamingMedia": "ott",
     "ESPN": "sports",
     "BBC Sport": "sports",
     "Front Office Sports": "sports",
@@ -465,11 +277,8 @@ def clean(raw):
         return ""
     return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
 
-def extract_summary(entry, max_length=200):
-    """Extract and clean summary from feed entry"""
+def extract_summary(entry, max_len=180):
     summary = ""
-    
-    # Try different summary fields
     for field in ['summary', 'description', 'content']:
         if hasattr(entry, field):
             content = getattr(entry, field)
@@ -478,12 +287,9 @@ def extract_summary(entry, max_length=200):
             summary = clean(content)
             if summary:
                 break
-    
-    # Truncate to max length with ellipsis
-    if len(summary) > max_length:
-        summary = summary[:max_length].rsplit(' ', 1)[0] + '...'
-    
-    return summary if summary else "Click to read full article"
+    if len(summary) > max_len:
+        summary = summary[:max_len].rsplit(' ', 1)[0] + '...'
+    return summary if summary else "Click to read the full article"
 
 def fetch_feed(source, url):
     items = []
@@ -491,7 +297,6 @@ def fetch_feed(source, url):
         resp = requests.get(url, headers=HEADERS, timeout=10)
         if resp.status_code != 200:
             return items
-        
         feed = feedparser.parse(resp.content)
         if not feed.entries:
             return items
@@ -501,16 +306,14 @@ def fetch_feed(source, url):
         yesterday_et = today_et - timedelta(days=1)
         min_date = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))
         
-        for entry in feed.entries[:8]:  # Get more entries for better coverage
+        for entry in feed.entries[:5]:
             title = clean(entry.get("title", ""))
             if len(title) < 15:
                 continue
-            
             link = entry.get("link", "")
             if not link:
                 continue
             
-            # Extract summary
             summary = extract_summary(entry)
             
             pub = None
@@ -522,13 +325,9 @@ def fetch_feed(source, url):
                         break
                     except:
                         pass
-            
             if not pub:
                 pub = NOW
-            
             pub_date = pub.date()
-            
-            # Only today or yesterday in US ET, no 2025
             if pub < min_date or (pub_date != today_et and pub_date != yesterday_et):
                 continue
             
@@ -539,16 +338,14 @@ def fetch_feed(source, url):
                 "source": source,
                 "summary": summary
             })
-        
         items.sort(key=lambda x: x["pub"], reverse=True)
         return items
     except:
         return items
 
-@st.cache_data(ttl=300, show_spinner=False)  # 5 minute cache
+@st.cache_data(ttl=300, show_spinner=False)
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
-    
     with ThreadPoolExecutor(max_workers=20) as executor:
         futures = [executor.submit(fetch_feed, source, url) for source, url in RSS_FEEDS]
         for future in as_completed(futures):
@@ -559,148 +356,79 @@ def load_feeds():
                     categorized[category].append(item)
             except:
                 pass
-    
     for cat in categorized:
         categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
-    
     return categorized
 
-def get_time_info(dt):
+def get_time_str(dt):
     now_et = datetime.now(ZoneInfo("America/New_York"))
-    diff = (now_et - dt).total_seconds()
-    hrs = int(diff / 3600)
-    mins = int(diff / 60)
-    
-    if mins < 30:
-        return "Just now", "time-hot", True
-    elif hrs < 6:
-        return f"{hrs}h ago", "time-hot", True
-    elif hrs < 24:
-        return f"{hrs}h ago", "time-warm", False
-    else:
-        return f"{hrs//24}d ago", "time-normal", False
+    hrs = int((now_et - dt).total_seconds() / 3600)
+    if hrs < 1:
+        return "Now", "time-hot"
+    if hrs < 6:
+        return f"{hrs}h", "time-hot"
+    if hrs < 24:
+        return f"{hrs}h", "time-warm"
+    return f"{hrs//24}d", "time-normal"
 
-def render_news_card(item):
-    time_str, time_class, is_breaking = get_time_info(item["pub"])
-    safe_title = html.escape(item["title"])
-    safe_link = html.escape(item["link"])
-    safe_source = html.escape(item["source"])
-    safe_summary = html.escape(item["summary"])
-    
-    breaking_class = "breaking" if is_breaking else ""
-    
-    return f"""
-    <div class="news-card {breaking_class}">
+def render_body(items):
+    cards = ""
+    for item in items:
+        time_str, time_class = get_time_str(item["pub"])
+        safe_title = html.escape(item["title"])
+        safe_link = html.escape(item["link"])
+        safe_source = html.escape(item["source"])
+        safe_summary = html.escape(item["summary"])
+        
+        cards += f'''
+<a href="{safe_link}" target="_blank" style="text-decoration: none;">
+    <div class="news-card">
         <div class="news-title">{safe_title}</div>
         <div class="news-summary">{safe_summary}</div>
-        <div class="news-meta">
+        <div class="news-footer">
             <span class="news-source">{safe_source}</span>
-            <span class="news-time">
-                <span class="time-badge {time_class}">{time_str}</span>
-            </span>
+            <span class="time-badge {time_class}">{time_str}</span>
         </div>
-        <a href="{safe_link}" target="_blank" class="read-more">
-            Read full article →
-        </a>
     </div>
-    """
-
-def render_section(items, section_key):
-    sec = SECTIONS[section_key]
-    
+</a>
+'''
     if not items:
-        return f"""
-        <div class="section-header {sec['style']}">
-            {sec['icon']} {sec['name']}
-        </div>
-        <div class="empty-state">
-            <div class="empty-state-icon">📭</div>
-            <div>No fresh news in the last 24 hours</div>
-        </div>
-        """
-    
-    cards_html = "".join([render_news_card(item) for item in items[:10]])  # Show top 10
-    
-    return f"""
-    <div class="section-header {sec['style']}">
-        {sec['icon']} {sec['name']} <span style="opacity: 0.7; font-size: 0.9rem; margin-left: auto;">({len(items)} stories)</span>
-    </div>
-    <div class="news-container">
-        {cards_html}
-    </div>
-    """
+        cards = '<div class="empty-msg">No fresh news today or yesterday (US Eastern Time)</div>'
+    return f'<div class="news-body">{cards}</div>'
 
-# Header
-st.markdown("""
-<div class="dashboard-header">
-    <div class="dashboard-title">🌐 Global Intelligence Hub 2026</div>
-    <div class="dashboard-subtitle">Real-time competitive intelligence across Telecom, OTT, Sports & Technology</div>
+# HEADER
+st.markdown('''
+<div class="main-header">
+    <div class="main-title">🌐 Global Telecom & OTT Stellar Nexus</div>
+    <div class="main-subtitle">Real-time Competitive Intelligence Dashboard</div>
 </div>
-""", unsafe_allow_html=True)
+''', unsafe_allow_html=True)
 
-# Loading state
+# LOADING
 placeholder = st.empty()
-with placeholder.container():
-    st.markdown("""
-    <div class="loading-container">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">⚡ Aggregating latest insights from 28 premium sources...</div>
-    </div>
-    """, unsafe_allow_html=True)
+placeholder.markdown('<div class="loading-box"><div class="loading-text">⚡ Powering up the latest insights... Please wait a moment</div></div>', unsafe_allow_html=True)
 
-# Load data
 with st.spinner(""):
     data = load_feeds()
 
 placeholder.empty()
 
-# Calculate stats
-total_stories = sum(len(data[cat]) for cat in data)
-breaking_count = sum(1 for cat in data for item in data[cat] if get_time_info(item["pub"])[2])
-sources_active = len(set(item["source"] for cat in data for item in data[cat]))
-
-# Stats bar
-st.markdown(f"""
-<div class="stats-bar">
-    <div class="stat-item">
-        <div class="stat-value">{total_stories}</div>
-        <div class="stat-label">Total Stories</div>
-    </div>
-    <div class="stat-item">
-        <div class="stat-value">{breaking_count}</div>
-        <div class="stat-label">Breaking News</div>
-    </div>
-    <div class="stat-item">
-        <div class="stat-value">{sources_active}</div>
-        <div class="stat-label">Active Sources</div>
-    </div>
-    <div class="stat-item">
-        <div class="stat-value">{datetime.now(ZoneInfo('America/New_York')).strftime('%I:%M %p')}</div>
-        <div class="stat-label">Last Updated (ET)</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# Render columns
+# RENDER COLUMNS
 cols = st.columns(4)
 cat_list = ["telco", "ott", "sports", "technology"]
 
 for idx, cat in enumerate(cat_list):
+    sec = SECTIONS[cat]
+    items = data.get(cat, [])
     with cols[idx]:
-        st.markdown(render_section(data[cat], cat), unsafe_allow_html=True)
+        st.markdown(f'<div class="{sec["style"]}">{sec["icon"]} {sec["name"]}</div>', unsafe_allow_html=True)
+        st.markdown(render_body(items), unsafe_allow_html=True)
 
-# Auto-refresh script
-st.markdown(f"""
+# Auto-refresh every 5 minutes
+st.markdown("""
 <script>
-    setTimeout(function(){{
-        window.location.reload();
-    }}, {AUTO_REFRESH_INTERVAL * 1000});
+setTimeout(function(){
+    window.location.reload();
+}, 300000);
 </script>
-""", unsafe_allow_html=True)
-
-# Footer with refresh info
-st.markdown(f"""
-<div style="text-align: center; margin-top: 2rem; padding: 1rem; color: var(--text-secondary); font-size: 0.85rem;">
-    Auto-refresh every {AUTO_REFRESH_INTERVAL//60} minutes • Last refresh: {datetime.now(ZoneInfo('America/New_York')).strftime('%I:%M:%S %p ET')}
-</div>
 """, unsafe_allow_html=True)
