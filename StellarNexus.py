@@ -8,7 +8,9 @@ import time
 import re
 from zoneinfo import ZoneInfo
 
-# Security gate (unchanged)
+# ==========================
+# 🔐 CEO TOKEN SECURITY GATE
+# ==========================
 try:
     EXPECTED_TOKEN = st.secrets["CEO_ACCESS_TOKEN"]
 except FileNotFoundError:
@@ -373,7 +375,7 @@ def fetch_feed(source, url):
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
     
-    # 1. ALL Google News OSS/BSS first in Telco (last 7 days)
+    # 1. ALL Google News OSS/BSS first in Telco (last 7 days, no limit)
     google_items = fetch_google_news_oss_bss()
     for item in google_items:
         categorized["telco"].append(item)
@@ -435,7 +437,7 @@ def render_body(items):
 
 # === LOADING MESSAGE ===
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading latest OSS/BSS intelligence...<br><small>Google News first</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading latest OSS/BSS intelligence...<br><small>Google News first - all items</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_feeds()
