@@ -208,7 +208,7 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-# Google News RSS - Optimized query for OSS/BSS news (2026 focus)
+# Google News RSS - Optimized for OSS/BSS + AI/telecom relevance (2026 focus)
 GOOGLE_OSS_BSS_RSS = "https://news.google.com/rss/search?q=(OSS+BSS+OR+%22operations+support+systems%22+OR+%22business+support+systems%22)+telecom+AI+after:2025-12-01&hl=en-US&gl=US&ceid=US:en"
 
 SECTIONS = {
@@ -229,7 +229,7 @@ SOURCE_CATEGORY_MAP = {
     "TechCrunch": "technology", "The Verge": "technology", "Wired": "technology",
     "Ars Technica": "technology", "VentureBeat": "technology", "ZDNet": "technology",
     "Engadget": "technology", "Techmeme": "technology",
-    "Google News OSS/BSS": "telco",  # Force Google results into Telco first
+    "Google News OSS/BSS": "telco",  # Force Google items first in Telco
 }
 
 HEADERS = {
@@ -272,7 +272,7 @@ def fetch_google_news_oss_bss():
         yesterday_et = today_et - timedelta(days=1)
         min_date = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))
         
-        for entry in feed.entries[:10]:  # More results for better coverage
+        for entry in feed.entries[:10]:  # Up to 10 for good coverage
             title = clean(entry.get("title", ""))
             if len(title) < 15:
                 continue
