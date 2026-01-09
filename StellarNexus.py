@@ -8,7 +8,9 @@ import time
 import re
 from zoneinfo import ZoneInfo
 
-# Security gate (unchanged)
+# ==========================
+# 🔐 CEO TOKEN SECURITY GATE
+# ==========================
 try:
     EXPECTED_TOKEN = st.secrets["CEO_ACCESS_TOKEN"]
 except FileNotFoundError:
@@ -47,7 +49,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# === YOUR ORIGINAL STYLING WITH BACKGROUND IMAGE ===
+# === ORIGINAL STYLING WITH BACKGROUND IMAGE ===
 st.markdown("""
 <style>
     .stApp {
@@ -208,7 +210,7 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-# Google News RSS - Proven working query for OSS/BSS news (2026 focus)
+# Google News RSS - Query optimized for OSS/BSS news (recent + AI/telecom focus)
 GOOGLE_OSS_BSS_RSS = "https://news.google.com/rss/search?q=(OSS+BSS+OR+%22operations+support+systems%22+OR+%22business+support+systems%22)+telecom+after:2025-12-01&hl=en-US&gl=US&ceid=US:en"
 
 SECTIONS = {
@@ -229,7 +231,7 @@ SOURCE_CATEGORY_MAP = {
     "TechCrunch": "technology", "The Verge": "technology", "Wired": "technology",
     "Ars Technica": "technology", "VentureBeat": "technology", "ZDNet": "technology",
     "Engadget": "technology", "Techmeme": "technology",
-    "Google News OSS/BSS": "telco",  # Force first
+    "Google News OSS/BSS": "telco",  # Force to top of Telco
 }
 
 HEADERS = {
@@ -269,10 +271,10 @@ def fetch_google_news_oss_bss():
         
         NOW = datetime.now(ZoneInfo("America/New_York"))
         today_et = NOW.date()
-        yesterday_et = today_et - timedelta(days=1)
+        seven_days_ago = today_et - timedelta(days=7)
         min_date = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))
         
-        for entry in feed.entries[:10]:
+        for entry in feed.entries:  # Take ALL results (no limit)
             title = clean(entry.get("title", ""))
             if len(title) < 15:
                 continue
@@ -294,7 +296,8 @@ def fetch_google_news_oss_bss():
                 pub = NOW
             
             pub_date = pub.date()
-            if pub < min_date or (pub_date != today_et and pub_date != yesterday_et):
+            # Only last 7 days (inclusive today)
+            if pub_date < seven_days_ago or pub < min_date:
                 continue
             
             items.append({
@@ -306,9 +309,9 @@ def fetch_google_news_oss_bss():
             })
         
         items.sort(key=lambda x: x["pub"], reverse=True)
-        return items
+        return items  # Return ALL qualifying items
     
-    except:
+    except Exception as e:
         return []
 
 def fetch_feed(source, url):
@@ -324,10 +327,10 @@ def fetch_feed(source, url):
        
         NOW = datetime.now(ZoneInfo("America/New_York"))
         today_et = NOW.date()
-        yesterday_et = today_et - timedelta(days=1)
+        seven_days_ago = today_et - timedelta(days=7)
         min_date = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))
         
-        for entry in feed.entries[:5]:
+        for entry in feed.entries[:8]:
             title = clean(entry.get("title", ""))
             if len(title) < 15:
                 continue
@@ -352,7 +355,7 @@ def fetch_feed(source, url):
                 pub = NOW
            
             pub_date = pub.date()
-            if pub < min_date or (pub_date != today_et and pub_date != yesterday_et):
+            if pub_date < seven_days_ago or pub < min_date:
                 continue
            
             items.append({
@@ -369,16 +372,16 @@ def fetch_feed(source, url):
     except:
         return items
 
-@st.cache_data(ttl=180, show_spinner=False)  # Reduced TTL for faster refresh
+@st.cache_data(ttl=180, show_spinner=False)
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
     
-    # Priority: Google News OSS/BSS first in Telco
+    # 1. Google News OSS/BSS - ALL items first in Telco (up to 7 days)
     google_items = fetch_google_news_oss_bss()
     for item in google_items:
         categorized["telco"].append(item)
     
-    # Regular RSS feeds
+    # 2. Regular RSS feeds
     with ThreadPoolExecutor(max_workers=20) as executor:
         futures = [executor.submit(fetch_feed, source, url) for source, url in RSS_FEEDS]
        
@@ -402,10 +405,10 @@ def get_time_str(dt):
     if hrs < 1:
         return "Now", "time-hot"
     if hrs < 6:
-        return f"{hrs}h", "time-hot"
+        return f"{hrs}h ago", "time-hot"
     if hrs < 24:
-        return f"{hrs}h", "time-warm"
-    return f"{hrs//24}d", "time-normal"
+        return f"{hrs}h ago", "time-warm"
+    return f"{hrs//24}d ago", "time-normal"
 
 def render_body(items):
     cards = ""
@@ -429,13 +432,13 @@ def render_body(items):
 </div>'''
    
     if not items:
-        cards = '<div class="empty-message">No fresh news today or yesterday (US Eastern Time)</div>'
+        cards = '<div class="empty-message">No fresh news in last 7 days (US Eastern Time)</div>'
    
     return f'<div class="col-body">{cards}</div>'
 
 # === LOADING MESSAGE ===
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Powering up the latest insights...<br><small>Please wait a moment</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading latest OSS/BSS intelligence...<br><small>Google News first</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_feeds()
