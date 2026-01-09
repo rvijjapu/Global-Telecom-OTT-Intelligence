@@ -8,9 +8,7 @@ import time
 import re
 from zoneinfo import ZoneInfo
 
-# ==========================
-# 🔐 CEO TOKEN SECURITY GATE
-# ==========================
+# Security gate (unchanged)
 try:
     EXPECTED_TOKEN = st.secrets["CEO_ACCESS_TOKEN"]
 except FileNotFoundError:
@@ -31,7 +29,7 @@ if provided_token != EXPECTED_TOKEN:
     st.info("Append `?token=your_token` to the URL or contact admin.")
     st.stop()
 
-# Rate limiting
+# Rate limiting (unchanged)
 if "last_access" not in st.session_state:
     st.session_state.last_access = 0
 
@@ -49,7 +47,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# === ORIGINAL STYLING WITH BACKGROUND IMAGE ===
+# === YOUR ORIGINAL STYLING WITH BACKGROUND IMAGE ===
 st.markdown("""
 <style>
     .stApp {
@@ -210,8 +208,8 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-# Google News RSS for OSS/BSS
-GOOGLE_OSS_BSS_RSS = "https://news.google.com/rss/search?q=only+OSS+BSS+news+after:2026-01-01&hl=en-US&gl=US&ceid=US:en"
+# Google News RSS for OSS/BSS (broader query for reliability)
+GOOGLE_OSS_BSS_RSS = "https://news.google.com/rss/search?q=(OSS+BSS+OR+%22operations+support+systems%22+OR+%22business+support+systems%22)+telecom+after:2025-12-01&hl=en-US&gl=US&ceid=US:en"
 
 SECTIONS = {
     "telco": {"icon": "📡", "name": "Telco & OSS/BSS", "style": "col-header col-header-pink"},
@@ -231,8 +229,7 @@ SOURCE_CATEGORY_MAP = {
     "TechCrunch": "technology", "The Verge": "technology", "Wired": "technology",
     "Ars Technica": "technology", "VentureBeat": "technology", "ZDNet": "technology",
     "Engadget": "technology", "Techmeme": "technology",
-    # Google News items will be forced into telco
-    "Google News OSS/BSS": "telco",
+    "Google News OSS/BSS": "telco",  # Force Google items into telco
 }
 
 HEADERS = {
@@ -260,7 +257,6 @@ def extract_summary(entry, max_len=160):
     return summary if summary else ""
 
 def fetch_google_news_oss_bss():
-    """Fetch latest OSS/BSS news from Google News RSS"""
     items = []
     try:
         resp = requests.get(GOOGLE_OSS_BSS_RSS, headers=HEADERS, timeout=10)
@@ -276,7 +272,7 @@ def fetch_google_news_oss_bss():
         yesterday_et = today_et - timedelta(days=1)
         min_date = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))
         
-        for entry in feed.entries[:5]:  # Top 5 Google results
+        for entry in feed.entries[:8]:  # Up to 8 Google results for better coverage
             title = clean(entry.get("title", ""))
             if len(title) < 15:
                 continue
@@ -312,7 +308,7 @@ def fetch_google_news_oss_bss():
         items.sort(key=lambda x: x["pub"], reverse=True)
         return items
     
-    except:
+    except Exception as e:
         return []
 
 def fetch_feed(source, url):
@@ -377,12 +373,12 @@ def fetch_feed(source, url):
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
     
-    # 1. First fetch Google News OSS/BSS items (priority in telco)
+    # Priority: Fetch Google News OSS/BSS first → put in telco section
     google_items = fetch_google_news_oss_bss()
     for item in google_items:
         categorized["telco"].append(item)
     
-    # 2. Then fetch regular RSS feeds
+    # Then regular RSS feeds
     with ThreadPoolExecutor(max_workers=20) as executor:
         futures = [executor.submit(fetch_feed, source, url) for source, url in RSS_FEEDS]
        
