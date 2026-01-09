@@ -185,7 +185,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# === RSS FEEDS - Updated Netcracker feed ===
+# === RSS FEEDS ===
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed"),
     ("Light Reading", "https://www.lightreading.com/rss/simple"),
@@ -194,7 +194,7 @@ RSS_FEEDS = [
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/"),
     ("ET Telecom", "https://telecom.economictimes.indiatimes.com/rss/topstories"),
     ("The Fast Mode", "https://www.thefastmode.com/rss-feeds"),
-    ("Netcracker", "https://rss.app/feeds/JEhRtr3neJTdr3T8.xml"),  # Updated to your requested Netcracker feed
+    ("Netcracker", "https://rss.app/feeds/JEhRtr3neJTdr3T8.xml"),  # Updated to your requested feed - only this one for Netcracker
     ("Amdocs", "https://rss.app/feeds/E9xROIQmdwZQP7YN.xml"),
     ("Telecom paper", "https://rss.app/feeds/YU1XJaMr6q7xseby.xml"),
     ("Telecoms.com Custom", "https://rss.app/feeds/W6MaJxFnGogpB3W1.xml"),
@@ -340,8 +340,9 @@ def fetch_feed(source, url):
             if not pub:
                 pub = NOW
             
-            # STRICT: Only today's news in US Eastern Time
-            if pub.date() != today_et:
+            # STRICT: Only today or yesterday in US Eastern Time
+            pub_date = pub.date()
+            if pub_date != today_et and pub_date != (today_et - timedelta(days=1)):
                 continue
             
             is_pri = is_priority_headline(title)
@@ -420,7 +421,7 @@ def render_body(items):
 </div>'''
     
     if not items:
-        cards = '<div style="text-align:center;color:#64748b;padding:70px;font-size:1rem;">No news today (US Eastern Time)</div>'
+        cards = '<div style="text-align:center;color:#64748b;padding:70px;font-size:1rem;">No news today or yesterday (US Eastern Time)</div>'
     
     return f'<div class="col-body">{cards}</div>'
 
