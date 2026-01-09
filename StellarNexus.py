@@ -182,7 +182,6 @@ st.markdown("""
 
 # === RSS FEEDS ===
 RSS_FEEDS = [
-    # Telco
     ("Telecoms.com", "https://www.telecoms.com/feed"),
     ("Light Reading", "https://www.lightreading.com/rss/simple"),
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml"),
@@ -190,23 +189,17 @@ RSS_FEEDS = [
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/"),
     ("ET Telecom", "https://telecom.economictimes.indiatimes.com/rss/topstories"),
     ("The Fast Mode", "https://www.thefastmode.com/rss-feeds"),
-
-    # OTT
     ("Variety", "https://variety.com/feed/"),
     ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/"),
     ("Deadline", "https://deadline.com/feed/"),
     ("Digital TV Europe", "https://www.digitaltveurope.com/feed/"),
     ("Advanced Television", "https://advanced-television.com/feed/"),
-
-    # Sports
     ("ESPN", "https://www.espn.com/espn/rss/news"),
     ("BBC Sport", "https://feeds.bbci.co.uk/sport/rss.xml"),
     ("Front Office Sports", "https://frontofficesports.com/feed/"),
     ("Sportico", "https://www.sportico.com/feed/"),
     ("SportsPro", "https://www.sportspromedia.com/feed/"),
     ("Sports Business", "https://rss.app/feeds/qDuU3qpiuafUec6u.xml"),
-
-    # Technology
     ("TechCrunch", "https://techcrunch.com/feed/"),
     ("The Verge", "https://www.theverge.com/rss/index.xml"),
     ("Wired", "https://www.wired.com/feed/rss"),
@@ -216,6 +209,9 @@ RSS_FEEDS = [
     ("Engadget", "https://www.engadget.com/rss.xml"),
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
+
+# Google News RSS for OSS/BSS
+GOOGLE_OSS_BSS_RSS = "https://news.google.com/rss/search?q=only+OSS+BSS+news+after:2026-01-01&hl=en-US&gl=US&ceid=US:en"
 
 SECTIONS = {
     "telco": {"icon": "📡", "name": "Telco & OSS/BSS", "style": "col-header col-header-pink"},
@@ -235,6 +231,8 @@ SOURCE_CATEGORY_MAP = {
     "TechCrunch": "technology", "The Verge": "technology", "Wired": "technology",
     "Ars Technica": "technology", "VentureBeat": "technology", "ZDNet": "technology",
     "Engadget": "technology", "Techmeme": "technology",
+    # Google News items will be forced into telco
+    "Google News OSS/BSS": "telco",
 }
 
 HEADERS = {
@@ -248,7 +246,6 @@ def clean(raw):
     return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
 
 def extract_summary(entry, max_len=160):
-    """Extract summary from RSS feed entry"""
     summary = ""
     for field in ['summary', 'description', 'content']:
         if hasattr(entry, field):
@@ -261,6 +258,62 @@ def extract_summary(entry, max_len=160):
     if len(summary) > max_len:
         summary = summary[:max_len].rsplit(' ', 1)[0] + '...'
     return summary if summary else ""
+
+def fetch_google_news_oss_bss():
+    """Fetch latest OSS/BSS news from Google News RSS"""
+    items = []
+    try:
+        resp = requests.get(GOOGLE_OSS_BSS_RSS, headers=HEADERS, timeout=10)
+        if resp.status_code != 200:
+            return items
+        
+        feed = feedparser.parse(resp.content)
+        if not feed.entries:
+            return items
+        
+        NOW = datetime.now(ZoneInfo("America/New_York"))
+        today_et = NOW.date()
+        yesterday_et = today_et - timedelta(days=1)
+        min_date = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))
+        
+        for entry in feed.entries[:5]:  # Top 5 Google results
+            title = clean(entry.get("title", ""))
+            if len(title) < 15:
+                continue
+            
+            link = entry.get("link", "")
+            if not link:
+                continue
+            
+            summary = extract_summary(entry)
+            
+            pub = None
+            if hasattr(entry, 'published_parsed'):
+                try:
+                    pub = datetime(*entry.published_parsed[:6], tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/New_York"))
+                except:
+                    pass
+            
+            if not pub:
+                pub = NOW
+            
+            pub_date = pub.date()
+            if pub < min_date or (pub_date != today_et and pub_date != yesterday_et):
+                continue
+            
+            items.append({
+                "title": title,
+                "link": link,
+                "pub": pub,
+                "source": "Google News OSS/BSS",
+                "summary": summary
+            })
+        
+        items.sort(key=lambda x: x["pub"], reverse=True)
+        return items
+    
+    except:
+        return []
 
 def fetch_feed(source, url):
     items = []
@@ -323,7 +376,13 @@ def fetch_feed(source, url):
 @st.cache_data(ttl=300, show_spinner=False)
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
-   
+    
+    # 1. First fetch Google News OSS/BSS items (priority in telco)
+    google_items = fetch_google_news_oss_bss()
+    for item in google_items:
+        categorized["telco"].append(item)
+    
+    # 2. Then fetch regular RSS feeds
     with ThreadPoolExecutor(max_workers=20) as executor:
         futures = [executor.submit(fetch_feed, source, url) for source, url in RSS_FEEDS]
        
