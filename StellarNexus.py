@@ -195,10 +195,13 @@ RSS_FEEDS = [
     ("ET Telecom", "https://telecom.economictimes.indiatimes.com/rss/topstories"),
     ("The Fast Mode", "https://www.thefastmode.com/rss-feeds"),
 
-    # Priority sources – Netcracker → Amdocs → Telecom paper → Ericsson → Telecom TV
+    # Priority sources – Updated order with new additions
     ("Netcracker", "https://rss.app/feeds/GxJESz3Wl0PRbyFG.xml"),
     ("Amdocs", "https://rss.app/feeds/E9xROIQmdwZQP7YN.xml"),
-    ("Telecom paper", "https://rss.app/feeds/YU1XJaMr6q7xseby.xml"),  # Updated to your working feed
+    ("Telecom paper", "https://rss.app/feeds/YU1XJaMr6q7xseby.xml"),  # Immediate after Netcracker & Amdocs
+    ("Telecoms.com Custom", "https://rss.app/feeds/W6MaJxFnGogpB3W1.xml"),  # New high-priority
+    ("Spectrum.com", "https://rss.app/feeds/oH8RbqDucjcQPj28.xml"),  # Always print
+    ("T-Mobile", "https://rss.app/feeds/xrU4bLSBJuNizyMg.xml"),  # Always print
     ("Ericsson", "https://rss.app/feeds/Z6HUnDFle57Uu0hU.xml"),
     ("Telecom TV", "https://rss.app/feeds/4OeTYFrRAw7YjI6B.xml"),
 
@@ -233,7 +236,12 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-PRIORITY_SOURCES = ["Netcracker", "Amdocs", "Telecom paper", "Ericsson", "Telecom TV"]
+# Updated priority list – includes all new sources
+PRIORITY_SOURCES = [
+    "Netcracker", "Amdocs", "Telecom paper",
+    "Telecoms.com Custom", "Spectrum.com", "T-Mobile",
+    "Ericsson", "Telecom TV"
+]
 
 BAD_WORDS = ["sex", "sexual", "nude", "nudity", "porn", "orgasm", "erotic", "anal", "bdsm",
              "fetish", "xxx", "adult", "explicit", "nc-17", "full frontal", "oral sex",
@@ -263,6 +271,7 @@ SOURCE_CATEGORY_MAP = {
     "RCR Wireless": "telco", "Mobile World Live": "telco", "ET Telecom": "telco",
     "The Fast Mode": "telco",
     "Netcracker": "telco", "Amdocs": "telco", "Telecom paper": "telco",
+    "Telecoms.com Custom": "telco", "Spectrum.com": "telco", "T-Mobile": "telco",
     "Ericsson": "telco", "Telecom TV": "telco",
     "Variety Business": "ott", "Hollywood Reporter Business": "ott", "Deadline Business": "ott",
     "Digital TV Europe": "ott", "Advanced Television": "ott", "Streaming Media": "ott",
