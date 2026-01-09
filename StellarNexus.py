@@ -8,9 +8,7 @@ import time
 import re
 from zoneinfo import ZoneInfo
 
-# ==========================
-# 🔐 CEO TOKEN SECURITY GATE
-# ==========================
+# Security gate (unchanged)
 try:
     EXPECTED_TOKEN = st.secrets["CEO_ACCESS_TOKEN"]
 except FileNotFoundError:
@@ -210,7 +208,7 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-# Google News RSS - Query optimized for OSS/BSS news (recent + AI/telecom focus)
+# Google News RSS - Query for OSS/BSS telecom news (last 7 days focus)
 GOOGLE_OSS_BSS_RSS = "https://news.google.com/rss/search?q=(OSS+BSS+OR+%22operations+support+systems%22+OR+%22business+support+systems%22)+telecom+after:2025-12-01&hl=en-US&gl=US&ceid=US:en"
 
 SECTIONS = {
@@ -231,7 +229,7 @@ SOURCE_CATEGORY_MAP = {
     "TechCrunch": "technology", "The Verge": "technology", "Wired": "technology",
     "Ars Technica": "technology", "VentureBeat": "technology", "ZDNet": "technology",
     "Engadget": "technology", "Techmeme": "technology",
-    "Google News OSS/BSS": "telco",  # Force to top of Telco
+    "Google News OSS/BSS": "telco",
 }
 
 HEADERS = {
@@ -274,7 +272,7 @@ def fetch_google_news_oss_bss():
         seven_days_ago = today_et - timedelta(days=7)
         min_date = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))
         
-        for entry in feed.entries:  # Take ALL results (no limit)
+        for entry in feed.entries:  # Take ALL results from Google
             title = clean(entry.get("title", ""))
             if len(title) < 15:
                 continue
@@ -296,7 +294,6 @@ def fetch_google_news_oss_bss():
                 pub = NOW
             
             pub_date = pub.date()
-            # Only last 7 days (inclusive today)
             if pub_date < seven_days_ago or pub < min_date:
                 continue
             
@@ -309,7 +306,7 @@ def fetch_google_news_oss_bss():
             })
         
         items.sort(key=lambda x: x["pub"], reverse=True)
-        return items  # Return ALL qualifying items
+        return items  # ALL qualifying Google items
     
     except Exception as e:
         return []
@@ -376,12 +373,12 @@ def fetch_feed(source, url):
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
     
-    # 1. Google News OSS/BSS - ALL items first in Telco (up to 7 days)
+    # 1. ALL Google News OSS/BSS first in Telco (last 7 days)
     google_items = fetch_google_news_oss_bss()
     for item in google_items:
         categorized["telco"].append(item)
     
-    # 2. Regular RSS feeds
+    # 2. Regular RSS feeds after Google
     with ThreadPoolExecutor(max_workers=20) as executor:
         futures = [executor.submit(fetch_feed, source, url) for source, url in RSS_FEEDS]
        
