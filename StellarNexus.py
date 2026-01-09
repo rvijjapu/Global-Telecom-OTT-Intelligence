@@ -195,10 +195,10 @@ RSS_FEEDS = [
     ("ET Telecom", "https://telecom.economictimes.indiatimes.com/rss/topstories"),
     ("The Fast Mode", "https://www.thefastmode.com/rss-feeds"),
 
-    # Priority sources – exact order: Netcracker → Amdocs → Telecom paper → Ericsson → Telecom TV
+    # Priority sources – Netcracker → Amdocs → Telecom paper → Ericsson → Telecom TV
     ("Netcracker", "https://rss.app/feeds/GxJESz3Wl0PRbyFG.xml"),
     ("Amdocs", "https://rss.app/feeds/E9xROIQmdwZQP7YN.xml"),
-    ("Telecom paper", "https://rss.app/feed/YU1XJaMr6q7xseby"),  # Immediate after Netcracker & Amdocs
+    ("Telecom paper", "https://rss.app/feeds/YU1XJaMr6q7xseby.xml"),  # Updated to your working feed
     ("Ericsson", "https://rss.app/feeds/Z6HUnDFle57Uu0hU.xml"),
     ("Telecom TV", "https://rss.app/feeds/4OeTYFrRAw7YjI6B.xml"),
 
@@ -328,7 +328,7 @@ def fetch_feed(source, url):
             if pub < CUTOFF:
                 continue
             
-            # Special rule: Telecom paper – allow only yesterday and today
+            # Telecom paper: allow yesterday and today
             if source == "Telecom paper":
                 pub_date = pub.date()
                 if pub_date != today and pub_date != yesterday:
@@ -342,7 +342,7 @@ def fetch_feed(source, url):
             })
         
         items.sort(key=lambda x: x["pub"], reverse=True)
-        return items[:1]  # Latest per source
+        return items[:1]
         
     except Exception:
         return items
