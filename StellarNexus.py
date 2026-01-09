@@ -7,9 +7,7 @@ import html
 import time
 import re
 
-# ==========================
-# 🔐 CEO TOKEN SECURITY GATE
-# ==========================
+# Security gate (unchanged)
 try:
     EXPECTED_TOKEN = st.secrets["CEO_ACCESS_TOKEN"]
 except FileNotFoundError:
@@ -48,7 +46,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# === ULTRA-MODERN CEO-APPROVED DASHBOARD UI ===
+# === ULTRA-MODERN UI ===
 st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -227,7 +225,7 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-# Priority company keywords for headline matching (expanded from your lists)
+# Priority company keywords for headline matching
 PRIORITY_KEYWORDS = [
     "netcracker", "amdocs", "t-mobile", "tmobile", "ericsson", "telecom tv",
     "telecoms.com", "spectrum", "charter", "astro", "mongoltv", "fox", "nba",
@@ -312,12 +310,13 @@ def fetch_feed(source, url):
             return items
         
         NOW = datetime.now()
-        cutoff_days = 30 if source in ["Spectrum.com", "T-Mobile", "Telecoms.com Custom"] else 7 if source in ["Netcracker", "Amdocs", "Ericsson", "Telecom TV"] else 15
-        CUTOFF = NOW - timedelta(days=cutoff_days)
+        # Strict cutoff: no news older than Dec 1, 2025
+        MIN_DATE = datetime(2025, 12, 1)
+        CUTOFF = NOW - timedelta(days=30)  # Max 30 days back for non-priority
         today = date.today()
         yesterday = today - timedelta(days=1)
         
-        for entry in feed.entries[:15]:
+        for entry in feed.entries[:20]:  # More entries to catch latest
             title = clean(entry.get("title", ""))
             if len(title) < 15 or is_inappropriate(title):
                 continue
@@ -341,10 +340,14 @@ def fetch_feed(source, url):
             if not pub:
                 pub = NOW
             
+            # Never show 2025 or older
+            if pub.year < 2026:
+                continue
+            
             if pub < CUTOFF:
                 continue
             
-            # Telecom paper: yesterday + today
+            # Telecom paper: yesterday + today preference
             if source == "Telecom paper":
                 pub_date = pub.date()
                 if pub_date != today and pub_date != yesterday:
@@ -361,7 +364,7 @@ def fetch_feed(source, url):
             })
         
         items.sort(key=lambda x: x["pub"], reverse=True)
-        return items[:3]  # Allow up to 3 per source for coverage
+        return items[:3]  # Allow up to 3 per source
         
     except Exception:
         return items
@@ -389,12 +392,14 @@ def load_feeds():
     for cat in ["ott", "sports", "technology"]:
         categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
     
-    # Priority headlines latest first
+    # Priority headlines (company mentions) – latest first
     telco_priority_headlines.sort(key=lambda x: x["pub"], reverse=True)
     
+    # Regular telco items
     regular_telco = categorized["telco"]
     regular_telco.sort(key=lambda x: x["pub"], reverse=True)
     
+    # Final Telco column: priority company headlines first, then regular
     categorized["telco"] = telco_priority_headlines + regular_telco
     
     return categorized
@@ -433,7 +438,7 @@ def render_body(items):
 
 # === LOADING MESSAGE ===
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#4338ca;margin-top:160px;font-family:\"Manrope\";font-weight:700;'>✨ Igniting the future of intelligence...<br><small style='color:#64748b;'>Preparing your nexus</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#4338ca;margin-top:160px;font-family:\"Manrope\";font-weight:700;'>✨ Loading the latest & best intelligence...<br><small style='color:#64748b;'>Only fresh 2026 news</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_feeds()
