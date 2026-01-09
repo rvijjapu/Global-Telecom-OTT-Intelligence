@@ -185,7 +185,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# === RSS FEEDS ===
+# === RSS FEEDS - Updated Netcracker feed ===
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed"),
     ("Light Reading", "https://www.lightreading.com/rss/simple"),
@@ -194,7 +194,7 @@ RSS_FEEDS = [
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/"),
     ("ET Telecom", "https://telecom.economictimes.indiatimes.com/rss/topstories"),
     ("The Fast Mode", "https://www.thefastmode.com/rss-feeds"),
-    ("Netcracker", "https://rss.app/feeds/GxJESz3Wl0PRbyFG.xml"),
+    ("Netcracker", "https://rss.app/feeds/JEhRtr3neJTdr3T8.xml"),  # Updated to your requested Netcracker feed
     ("Amdocs", "https://rss.app/feeds/E9xROIQmdwZQP7YN.xml"),
     ("Telecom paper", "https://rss.app/feeds/YU1XJaMr6q7xseby.xml"),
     ("Telecoms.com Custom", "https://rss.app/feeds/W6MaJxFnGogpB3W1.xml"),
@@ -355,7 +355,7 @@ def fetch_feed(source, url):
             })
         
         items.sort(key=lambda x: x["pub"], reverse=True)
-        return items[:3]  # Up to 3 per source for coverage
+        return items[:3]  # Up to 3 per source
         
     except Exception:
         return items
