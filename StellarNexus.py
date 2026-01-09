@@ -208,7 +208,7 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-# Google News RSS for OSS/BSS (broader query for reliability)
+# Google News RSS - Broader, reliable query for OSS/BSS news (2026 focus)
 GOOGLE_OSS_BSS_RSS = "https://news.google.com/rss/search?q=(OSS+BSS+OR+%22operations+support+systems%22+OR+%22business+support+systems%22)+telecom+after:2025-12-01&hl=en-US&gl=US&ceid=US:en"
 
 SECTIONS = {
@@ -229,7 +229,7 @@ SOURCE_CATEGORY_MAP = {
     "TechCrunch": "technology", "The Verge": "technology", "Wired": "technology",
     "Ars Technica": "technology", "VentureBeat": "technology", "ZDNet": "technology",
     "Engadget": "technology", "Techmeme": "technology",
-    "Google News OSS/BSS": "telco",  # Force Google items into telco
+    "Google News OSS/BSS": "telco",  # Force Google results into Telco
 }
 
 HEADERS = {
@@ -272,7 +272,7 @@ def fetch_google_news_oss_bss():
         yesterday_et = today_et - timedelta(days=1)
         min_date = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))
         
-        for entry in feed.entries[:8]:  # Up to 8 Google results for better coverage
+        for entry in feed.entries[:8]:
             title = clean(entry.get("title", ""))
             if len(title) < 15:
                 continue
@@ -308,7 +308,7 @@ def fetch_google_news_oss_bss():
         items.sort(key=lambda x: x["pub"], reverse=True)
         return items
     
-    except Exception as e:
+    except:
         return []
 
 def fetch_feed(source, url):
@@ -373,12 +373,12 @@ def fetch_feed(source, url):
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
     
-    # Priority: Fetch Google News OSS/BSS first → put in telco section
+    # Priority: Google News OSS/BSS first in Telco
     google_items = fetch_google_news_oss_bss()
     for item in google_items:
         categorized["telco"].append(item)
     
-    # Then regular RSS feeds
+    # Regular RSS feeds
     with ThreadPoolExecutor(max_workers=20) as executor:
         futures = [executor.submit(fetch_feed, source, url) for source, url in RSS_FEEDS]
        
