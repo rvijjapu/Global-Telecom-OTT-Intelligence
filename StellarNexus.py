@@ -195,17 +195,17 @@ RSS_FEEDS = [
     ("ET Telecom", "https://telecom.economictimes.indiatimes.com/rss/topstories"),
     ("The Fast Mode", "https://www.thefastmode.com/rss-feeds"),
 
-    # Priority sources – Updated order with new additions
+    # Priority sources – exact order requested
     ("Netcracker", "https://rss.app/feeds/GxJESz3Wl0PRbyFG.xml"),
     ("Amdocs", "https://rss.app/feeds/E9xROIQmdwZQP7YN.xml"),
-    ("Telecom paper", "https://rss.app/feeds/YU1XJaMr6q7xseby.xml"),  # Immediate after Netcracker & Amdocs
+    ("Telecom paper", "https://rss.app/feeds/YU1XJaMr6q7xseby.xml"),
     ("Telecoms.com Custom", "https://rss.app/feeds/W6MaJxFnGogpB3W1.xml"),  # New high-priority
     ("Spectrum.com", "https://rss.app/feeds/oH8RbqDucjcQPj28.xml"),  # Always print
     ("T-Mobile", "https://rss.app/feeds/xrU4bLSBJuNizyMg.xml"),  # Always print
     ("Ericsson", "https://rss.app/feeds/Z6HUnDFle57Uu0hU.xml"),
     ("Telecom TV", "https://rss.app/feeds/4OeTYFrRAw7YjI6B.xml"),
 
-    # OTT Business-focused sources
+    # OTT Business-focused
     ("Variety Business", "https://variety.com/varietyvip/business/feed/"),
     ("Hollywood Reporter Business", "https://www.hollywoodreporter.com/c/business/feed/"),
     ("Deadline Business", "https://deadline.com/vip/business/feed/"),
@@ -236,7 +236,6 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-# Updated priority list – includes all new sources
 PRIORITY_SOURCES = [
     "Netcracker", "Amdocs", "Telecom paper",
     "Telecoms.com Custom", "Spectrum.com", "T-Mobile",
@@ -305,7 +304,8 @@ def fetch_feed(source, url):
             return items
         
         NOW = datetime.now()
-        cutoff_days = 7 if source in PRIORITY_SOURCES else 15
+        # Relaxed cutoff for new sources to ensure they show
+        cutoff_days = 30 if source in ["Spectrum.com", "T-Mobile", "Telecoms.com Custom"] else 7 if source in PRIORITY_SOURCES else 15
         CUTOFF = NOW - timedelta(days=cutoff_days)
         today = date.today()
         yesterday = today - timedelta(days=1)
@@ -337,7 +337,7 @@ def fetch_feed(source, url):
             if pub < CUTOFF:
                 continue
             
-            # Telecom paper: allow yesterday and today
+            # Telecom paper: yesterday + today
             if source == "Telecom paper":
                 pub_date = pub.date()
                 if pub_date != today and pub_date != yesterday:
