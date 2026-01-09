@@ -195,15 +195,10 @@ RSS_FEEDS = [
     ("ET Telecom", "https://telecom.economictimes.indiatimes.com/rss/topstories"),
     ("The Fast Mode", "https://www.thefastmode.com/rss-feeds"),
 
-    # Priority sources – exact order as requested:
-    # 1. Netcracker
-    # 2. Amdocs
-    # 3. Telecom paper (immediate after Netcracker & Amdocs)
-    # 4. Ericsson
-    # 5. Telecom TV
+    # Priority sources – exact order: Netcracker → Amdocs → Telecom paper → Ericsson → Telecom TV
     ("Netcracker", "https://rss.app/feeds/GxJESz3Wl0PRbyFG.xml"),
     ("Amdocs", "https://rss.app/feeds/E9xROIQmdwZQP7YN.xml"),
-    ("Telecom paper", "https://rss.app/feed/YU1XJaMr6q7xseby"),  # Immediate priority after Netcracker & Amdocs
+    ("Telecom paper", "https://rss.app/feed/YU1XJaMr6q7xseby"),  # Immediate after Netcracker & Amdocs
     ("Ericsson", "https://rss.app/feeds/Z6HUnDFle57Uu0hU.xml"),
     ("Telecom TV", "https://rss.app/feeds/4OeTYFrRAw7YjI6B.xml"),
 
@@ -238,7 +233,6 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-# Priority order – Telecom paper immediately after Netcracker & Amdocs
 PRIORITY_SOURCES = ["Netcracker", "Amdocs", "Telecom paper", "Ericsson", "Telecom TV"]
 
 BAD_WORDS = ["sex", "sexual", "nude", "nudity", "porn", "orgasm", "erotic", "anal", "bdsm",
@@ -305,6 +299,7 @@ def fetch_feed(source, url):
         cutoff_days = 7 if source in PRIORITY_SOURCES else 15
         CUTOFF = NOW - timedelta(days=cutoff_days)
         today = date.today()
+        yesterday = today - timedelta(days=1)
         
         for entry in feed.entries[:15]:
             title = clean(entry.get("title", ""))
@@ -333,9 +328,11 @@ def fetch_feed(source, url):
             if pub < CUTOFF:
                 continue
             
-            # Special rule: Telecom paper only shows today's latest news
-            if source == "Telecom paper" and pub.date() != today:
-                continue
+            # Special rule: Telecom paper – allow only yesterday and today
+            if source == "Telecom paper":
+                pub_date = pub.date()
+                if pub_date != today and pub_date != yesterday:
+                    continue
             
             items.append({
                 "title": title,
@@ -345,7 +342,7 @@ def fetch_feed(source, url):
             })
         
         items.sort(key=lambda x: x["pub"], reverse=True)
-        return items[:1]
+        return items[:1]  # Latest per source
         
     except Exception:
         return items
@@ -373,7 +370,6 @@ def load_feeds():
     for cat in ["ott", "sports", "technology"]:
         categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
     
-    # Priority pinning in exact requested order
     ordered_priority = []
     for src in PRIORITY_SOURCES:
         src_items = [it for it in priority_items if it["source"] == src]
