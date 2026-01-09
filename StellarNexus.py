@@ -6,8 +6,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import html
 import time
 import re
+from zoneinfo import ZoneInfo
 
-# Security gate (unchanged)
+# ==========================
+# 🔐 CEO TOKEN SECURITY GATE
+# ==========================
 try:
     EXPECTED_TOKEN = st.secrets["CEO_ACCESS_TOKEN"]
 except FileNotFoundError:
@@ -46,7 +49,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# === ULTRA-MODERN UI ===
+# === ULTRA-MODERN CEO-APPROVED DASHBOARD UI ===
 st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -309,14 +312,11 @@ def fetch_feed(source, url):
         if not feed.entries:
             return items
         
-        NOW = datetime.now()
-        # Strict cutoff: no news older than Dec 1, 2025
-        MIN_DATE = datetime(2025, 12, 1)
-        CUTOFF = NOW - timedelta(days=30)  # Max 30 days back for non-priority
-        today = date.today()
-        yesterday = today - timedelta(days=1)
+        NOW = datetime.now(ZoneInfo("America/New_York"))  # US Eastern Time
+        today_et = NOW.date()
+        CUTOFF = datetime(today_et.year, today_et.month, today_et.day, tzinfo=ZoneInfo("America/New_York"))
         
-        for entry in feed.entries[:20]:  # More entries to catch latest
+        for entry in feed.entries[:20]:
             title = clean(entry.get("title", ""))
             if len(title) < 15 or is_inappropriate(title):
                 continue
@@ -332,7 +332,7 @@ def fetch_feed(source, url):
                 val = getattr(entry, k, None)
                 if val:
                     try:
-                        pub = datetime(*val[:6])
+                        pub = datetime(*val[:6], tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/New_York"))
                         break
                     except:
                         pass
@@ -340,18 +340,9 @@ def fetch_feed(source, url):
             if not pub:
                 pub = NOW
             
-            # Never show 2025 or older
-            if pub.year < 2026:
+            # STRICT: Only today's news in US Eastern Time
+            if pub.date() != today_et:
                 continue
-            
-            if pub < CUTOFF:
-                continue
-            
-            # Telecom paper: yesterday + today preference
-            if source == "Telecom paper":
-                pub_date = pub.date()
-                if pub_date != today and pub_date != yesterday:
-                    continue
             
             is_pri = is_priority_headline(title)
             
@@ -364,7 +355,7 @@ def fetch_feed(source, url):
             })
         
         items.sort(key=lambda x: x["pub"], reverse=True)
-        return items[:3]  # Allow up to 3 per source
+        return items[:3]  # Up to 3 per source for coverage
         
     except Exception:
         return items
@@ -392,27 +383,24 @@ def load_feeds():
     for cat in ["ott", "sports", "technology"]:
         categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
     
-    # Priority headlines (company mentions) – latest first
     telco_priority_headlines.sort(key=lambda x: x["pub"], reverse=True)
     
-    # Regular telco items
     regular_telco = categorized["telco"]
     regular_telco.sort(key=lambda x: x["pub"], reverse=True)
     
-    # Final Telco column: priority company headlines first, then regular
     categorized["telco"] = telco_priority_headlines + regular_telco
     
     return categorized
 
 def get_time_str(dt):
-    hrs = int((datetime.now() - dt).total_seconds() / 3600)
+    hrs = int((datetime.now(ZoneInfo("America/New_York")) - dt).total_seconds() / 3600)
     if hrs < 1:
         return "Now", "time-hot"
     if hrs < 6:
-        return f"{hrs}h", "time-hot"
+        return f"{hrs}h ago", "time-hot"
     if hrs < 24:
-        return f"{hrs}h", "time-warm"
-    return f"{hrs//24}d", "time-normal"
+        return f"{hrs}h ago", "time-warm"
+    return f"{hrs//24}d ago", "time-normal"
 
 def render_body(items):
     cards = ""
@@ -432,13 +420,13 @@ def render_body(items):
 </div>'''
     
     if not items:
-        cards = '<div style="text-align:center;color:#64748b;padding:70px;font-size:1rem;">No recent news</div>'
+        cards = '<div style="text-align:center;color:#64748b;padding:70px;font-size:1rem;">No news today (US Eastern Time)</div>'
     
     return f'<div class="col-body">{cards}</div>'
 
 # === LOADING MESSAGE ===
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#4338ca;margin-top:160px;font-family:\"Manrope\";font-weight:700;'>✨ Loading the latest & best intelligence...<br><small style='color:#64748b;'>Only fresh 2026 news</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#4338ca;margin-top:160px;font-family:\"Manrope\";font-weight:700;'>✨ Igniting the future of intelligence...<br><small style='color:#64748b;'>Preparing your nexus</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_feeds()
