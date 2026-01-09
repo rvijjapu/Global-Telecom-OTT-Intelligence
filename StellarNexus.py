@@ -29,7 +29,7 @@ if provided_token != EXPECTED_TOKEN:
     st.info("Append `?token=your_token` to the URL or contact admin.")
     st.stop()
 
-# Rate limiting (unchanged)
+# Rate limiting
 if "last_access" not in st.session_state:
     st.session_state.last_access = 0
 
@@ -208,8 +208,8 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-# Google News RSS - Optimized for OSS/BSS + AI/telecom relevance (2026 focus)
-GOOGLE_OSS_BSS_RSS = "https://news.google.com/rss/search?q=(OSS+BSS+OR+%22operations+support+systems%22+OR+%22business+support+systems%22)+telecom+AI+after:2025-12-01&hl=en-US&gl=US&ceid=US:en"
+# Google News RSS - Reliable query for OSS/BSS news (2026 focus)
+GOOGLE_OSS_BSS_RSS = "https://news.google.com/rss/search?q=(OSS+BSS+OR+%22operations+support+systems%22+OR+%22business+support+systems%22)+telecom+after:2025-12-01&hl=en-US&gl=US&ceid=US:en"
 
 SECTIONS = {
     "telco": {"icon": "📡", "name": "Telco & OSS/BSS", "style": "col-header col-header-pink"},
@@ -229,7 +229,7 @@ SOURCE_CATEGORY_MAP = {
     "TechCrunch": "technology", "The Verge": "technology", "Wired": "technology",
     "Ars Technica": "technology", "VentureBeat": "technology", "ZDNet": "technology",
     "Engadget": "technology", "Techmeme": "technology",
-    "Google News OSS/BSS": "telco",  # Force Google items first in Telco
+    "Google News OSS/BSS": "telco",  # Force Google items first
 }
 
 HEADERS = {
@@ -272,7 +272,7 @@ def fetch_google_news_oss_bss():
         yesterday_et = today_et - timedelta(days=1)
         min_date = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))
         
-        for entry in feed.entries[:10]:  # Up to 10 for good coverage
+        for entry in feed.entries[:10]:
             title = clean(entry.get("title", ""))
             if len(title) < 15:
                 continue
