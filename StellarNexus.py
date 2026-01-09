@@ -186,7 +186,6 @@ st.markdown("""
 
 # === RSS FEEDS ===
 RSS_FEEDS = [
-    # Regular top telecom sources
     ("Telecoms.com", "https://www.telecoms.com/feed"),
     ("Light Reading", "https://www.lightreading.com/rss/simple"),
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml"),
@@ -194,18 +193,14 @@ RSS_FEEDS = [
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/"),
     ("ET Telecom", "https://telecom.economictimes.indiatimes.com/rss/topstories"),
     ("The Fast Mode", "https://www.thefastmode.com/rss-feeds"),
-
-    # Priority sources – exact order requested
     ("Netcracker", "https://rss.app/feeds/GxJESz3Wl0PRbyFG.xml"),
     ("Amdocs", "https://rss.app/feeds/E9xROIQmdwZQP7YN.xml"),
     ("Telecom paper", "https://rss.app/feeds/YU1XJaMr6q7xseby.xml"),
-    ("Telecoms.com Custom", "https://rss.app/feeds/W6MaJxFnGogpB3W1.xml"),  # New high-priority
-    ("Spectrum.com", "https://rss.app/feeds/oH8RbqDucjcQPj28.xml"),  # Always print
-    ("T-Mobile", "https://rss.app/feeds/xrU4bLSBJuNizyMg.xml"),  # Always print
+    ("Telecoms.com Custom", "https://rss.app/feeds/W6MaJxFnGogpB3W1.xml"),
+    ("Spectrum.com", "https://rss.app/feeds/oH8RbqDucjcQPj28.xml"),
+    ("T-Mobile", "https://rss.app/feeds/xrU4bLSBJuNizyMg.xml"),
     ("Ericsson", "https://rss.app/feeds/Z6HUnDFle57Uu0hU.xml"),
     ("Telecom TV", "https://rss.app/feeds/4OeTYFrRAw7YjI6B.xml"),
-
-    # OTT Business-focused
     ("Variety Business", "https://variety.com/varietyvip/business/feed/"),
     ("Hollywood Reporter Business", "https://www.hollywoodreporter.com/c/business/feed/"),
     ("Deadline Business", "https://deadline.com/vip/business/feed/"),
@@ -216,16 +211,12 @@ RSS_FEEDS = [
     ("VideoNuze", "https://www.videonuze.com/atom"),
     ("nScreenMedia", "https://nscreenmedia.com/feed/"),
     ("Fierce Video", "https://www.fierce-network.com/rss.xml"),
-
-    # Sports
     ("ESPN", "https://www.espn.com/espn/rss/news"),
     ("BBC Sport", "https://feeds.bbci.co.uk/sport/rss.xml"),
     ("Front Office Sports", "https://frontofficesports.com/feed/"),
     ("Sportico", "https://www.sportico.com/feed/"),
     ("SportsPro", "https://www.sportspromedia.com/feed/"),
     ("Sports Business", "https://rss.app/feeds/qDuU3qpiuafUec6u.xml"),
-
-    # Technology
     ("TechCrunch", "https://techcrunch.com/feed/"),
     ("The Verge", "https://www.theverge.com/rss/index.xml"),
     ("Wired", "https://www.wired.com/feed/rss"),
@@ -236,10 +227,23 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-PRIORITY_SOURCES = [
-    "Netcracker", "Amdocs", "Telecom paper",
-    "Telecoms.com Custom", "Spectrum.com", "T-Mobile",
-    "Ericsson", "Telecom TV"
+# Priority company keywords for headline matching (expanded from your lists)
+PRIORITY_KEYWORDS = [
+    "netcracker", "amdocs", "t-mobile", "tmobile", "ericsson", "telecom tv",
+    "telecoms.com", "spectrum", "charter", "astro", "mongoltv", "fox", "nba",
+    "shahid", "mbc", "tv asahi", "tv3", "abs-cbn", "viki", "trt", "sinclair",
+    "fanduel", "bally sports", "gotham", "marquee", "sony", "aha", "bbc",
+    "lightbox", "sky", "cignal", "etv", "simple tv", "telekom malaysia",
+    "britbox", "quickplay", "pilipinas", "verizon", "at&t", "att", "comcast",
+    "cox", "lumen", "frontier", "windstream", "mediacom", "altice", "bt",
+    "vodafone", "o2", "virgin media", "three", "orange", "deutsche telekom",
+    "telefonica", "telecom italia", "swisscom", "kpn", "proximus", "telenor",
+    "telia", "bouygues", "singtel", "starhub", "m1", "maxis", "celcom", "digi",
+    "u mobile", "spark", "2degrees", "telstra", "optus", "tpg", "china mobile",
+    "china telecom", "china unicom", "ntt", "softbank", "kddi", "reliance jio",
+    "airtel", "vi", "bsnl", "sk telecom", "kt", "lg uplus", "globe", "pldt",
+    "smart", "etisalat", "du", "stc", "ooredoo", "zain", "mobily", "america movil",
+    "telus", "rogers", "bell", "shaw", "mtn", "vodacom", "safaricom"
 ]
 
 BAD_WORDS = ["sex", "sexual", "nude", "nudity", "porn", "orgasm", "erotic", "anal", "bdsm",
@@ -251,12 +255,16 @@ OTT_IRRELEVANT_WORDS = ["trailer", "teaser", "preview", "episode", "season", "re
 
 BAD_PATTERN = re.compile(r'\b(' + '|'.join(re.escape(word) for word in BAD_WORDS) + r')\b', re.IGNORECASE)
 OTT_IRRELEVANT_PATTERN = re.compile(r'\b(' + '|'.join(re.escape(word) for word in OTT_IRRELEVANT_WORDS) + r')\b', re.IGNORECASE)
+PRIORITY_PATTERN = re.compile(r'\b(' + '|'.join(re.escape(word) for word in PRIORITY_KEYWORDS) + r')\b', re.IGNORECASE)
 
 def is_inappropriate(title):
     return bool(BAD_PATTERN.search(title))
 
 def is_ott_irrelevant(title):
     return bool(OTT_IRRELEVANT_PATTERN.search(title.lower()))
+
+def is_priority_headline(title):
+    return bool(PRIORITY_PATTERN.search(title.lower()))
 
 SECTIONS = {
     "telco": {"icon": "📡", "name": "Telco & OSS/BSS", "style": "col-header col-header-telco"},
@@ -304,8 +312,7 @@ def fetch_feed(source, url):
             return items
         
         NOW = datetime.now()
-        # Relaxed cutoff for new sources to ensure they show
-        cutoff_days = 30 if source in ["Spectrum.com", "T-Mobile", "Telecoms.com Custom"] else 7 if source in PRIORITY_SOURCES else 15
+        cutoff_days = 30 if source in ["Spectrum.com", "T-Mobile", "Telecoms.com Custom"] else 7 if source in ["Netcracker", "Amdocs", "Ericsson", "Telecom TV"] else 15
         CUTOFF = NOW - timedelta(days=cutoff_days)
         today = date.today()
         yesterday = today - timedelta(days=1)
@@ -343,15 +350,18 @@ def fetch_feed(source, url):
                 if pub_date != today and pub_date != yesterday:
                     continue
             
+            is_pri = is_priority_headline(title)
+            
             items.append({
                 "title": title,
                 "link": link,
                 "pub": pub,
-                "source": source
+                "source": source,
+                "is_priority_headline": is_pri
             })
         
         items.sort(key=lambda x: x["pub"], reverse=True)
-        return items[:1]
+        return items[:3]  # Allow up to 3 per source for coverage
         
     except Exception:
         return items
@@ -359,7 +369,7 @@ def fetch_feed(source, url):
 @st.cache_data(ttl=300, show_spinner=False)
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
-    priority_items = []
+    telco_priority_headlines = []
     
     with ThreadPoolExecutor(max_workers=20) as executor:
         futures = [executor.submit(fetch_feed, source, url) for source, url in RSS_FEEDS]
@@ -369,8 +379,8 @@ def load_feeds():
                 items = future.result()
                 for item in items:
                     category = SOURCE_CATEGORY_MAP.get(item["source"], "technology")
-                    if item["source"] in PRIORITY_SOURCES:
-                        priority_items.append(item)
+                    if item["is_priority_headline"]:
+                        telco_priority_headlines.append(item)
                     else:
                         categorized[category].append(item)
             except:
@@ -379,18 +389,13 @@ def load_feeds():
     for cat in ["ott", "sports", "technology"]:
         categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
     
-    ordered_priority = []
-    for src in PRIORITY_SOURCES:
-        src_items = [it for it in priority_items if it["source"] == src]
-        if src_items:
-            ordered_priority.append(max(src_items, key=lambda x: x["pub"]))
-    
-    ordered_priority.sort(key=lambda x: x["pub"], reverse=True)
+    # Priority headlines latest first
+    telco_priority_headlines.sort(key=lambda x: x["pub"], reverse=True)
     
     regular_telco = categorized["telco"]
     regular_telco.sort(key=lambda x: x["pub"], reverse=True)
     
-    categorized["telco"] = ordered_priority + regular_telco
+    categorized["telco"] = telco_priority_headlines + regular_telco
     
     return categorized
 
