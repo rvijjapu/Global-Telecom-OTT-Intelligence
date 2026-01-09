@@ -194,7 +194,7 @@ RSS_FEEDS = [
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/"),
     ("ET Telecom", "https://telecom.economictimes.indiatimes.com/rss/topstories"),
     ("The Fast Mode", "https://www.thefastmode.com/rss-feeds"),
-    ("Netcracker", "https://rss.app/feeds/JEhRtr3neJTdr3T8.xml"),  # Updated to your requested feed - only this one for Netcracker
+    ("Netcracker", "https://rss.app/feeds/JEhRtr3neJTdr3T8.xml"),
     ("Amdocs", "https://rss.app/feeds/E9xROIQmdwZQP7YN.xml"),
     ("Telecom paper", "https://rss.app/feeds/YU1XJaMr6q7xseby.xml"),
     ("Telecoms.com Custom", "https://rss.app/feeds/W6MaJxFnGogpB3W1.xml"),
@@ -314,7 +314,8 @@ def fetch_feed(source, url):
         
         NOW = datetime.now(ZoneInfo("America/New_York"))  # US Eastern Time
         today_et = NOW.date()
-        CUTOFF = datetime(today_et.year, today_et.month, today_et.day, tzinfo=ZoneInfo("America/New_York"))
+        yesterday_et = today_et - timedelta(days=1)
+        cutoff = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))  # Never 2025 or older
         
         for entry in feed.entries[:20]:
             title = clean(entry.get("title", ""))
@@ -340,9 +341,8 @@ def fetch_feed(source, url):
             if not pub:
                 pub = NOW
             
-            # STRICT: Only today or yesterday in US Eastern Time
             pub_date = pub.date()
-            if pub_date != today_et and pub_date != (today_et - timedelta(days=1)):
+            if pub < cutoff or (pub_date != today_et and pub_date != yesterday_et):
                 continue
             
             is_pri = is_priority_headline(title)
