@@ -1,32 +1,24 @@
 import streamlit as st
 import feedparser
 import requests
-from datetime import datetime, timedelta, date
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timedelta
 import html
 import time
-import re
 from zoneinfo import ZoneInfo
 
 # Security gate (unchanged)
 try:
     EXPECTED_TOKEN = st.secrets["CEO_ACCESS_TOKEN"]
 except FileNotFoundError:
-    st.error("🔧 Missing secrets.toml – Add CEO_ACCESS_TOKEN in .streamlit/secrets.toml or Streamlit Cloud Secrets")
+    st.error("Missing secrets.toml – Add CEO_ACCESS_TOKEN")
     st.stop()
 except KeyError:
-    st.error("🔧 CEO_ACCESS_TOKEN not found in secrets")
+    st.error("CEO_ACCESS_TOKEN not found in secrets")
     st.stop()
 
-provided_token = st.query_params.get("token")
-if provided_token is not None:
-    provided_token = provided_token[0] if isinstance(provided_token, list) else provided_token
-else:
-    provided_token = ""
-
+provided_token = st.query_params.get("token", [""])[0]
 if provided_token != EXPECTED_TOKEN:
-    st.error("⛔ Unauthorized access – Invalid or missing token")
-    st.info("Append `?token=your_token` to the URL or contact admin.")
+    st.error("Unauthorized – Append ?token=your_token")
     st.stop()
 
 # Rate limiting
@@ -35,142 +27,39 @@ if "last_access" not in st.session_state:
 
 now = time.time()
 if now - st.session_state.last_access < 2:
-    st.warning("⏱ Too many requests – Please wait a moment.")
+    st.warning("Too many requests – Wait a moment.")
     st.stop()
 
 st.session_state.last_access = now
 
-st.set_page_config(
-    page_title="🌐 Global Telecom & OTT Stellar Nexus",
-    page_icon="🌐",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+st.set_page_config(page_title="Global Telecom & OTT Stellar Nexus", page_icon="🌐", layout="wide")
 
-# === ORIGINAL STYLING WITH BACKGROUND IMAGE ===
+# Original styling (unchanged)
 st.markdown("""
 <style>
-    .stApp {
-        background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
-        background-size: cover;
-        color: #1e293b;
-        padding-top: 0.5rem;
-    }
-    
-    .header-container {
-        background: rgba(255, 255, 255, 0.95);
-        padding: 1.2rem 1.5rem;
-        text-align: center;
-        border-radius: 20px;
-        box-shadow: 0 6px 25px rgba(0,0,0,0.08);
-        margin: 0 1.5rem 1.8rem 1.5rem;
-        border-bottom: 4px solid #3b82f6;
-        backdrop-filter: blur(8px);
-    }
-
-    .main-title {
-        font-size: 2.4rem;
-        font-weight: 800;
-        color: #1e40af;
-        margin: 0;
-        letter-spacing: -0.6px;
-    }
-
-    .subtitle {
-        font-size: 1.1rem;
-        color: #475569;
-        margin-top: 0.6rem;
-        margin-bottom: 0;
-        font-weight: 500;
-    }
-
-    .col-header {
-        padding: 10px 16px;
-        border-radius: 14px 14px 0 0;
-        color: white;
-        font-weight: 700;
-        font-size: 0.95rem;
-        text-align: center;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-
+    .stApp { background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed; background-size: cover; color: #1e293b; padding-top: 0.5rem; }
+    .header-container { background: rgba(255,255,255,0.95); padding: 1.2rem 1.5rem; text-align: center; border-radius: 20px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); margin: 0 1.5rem 1.8rem 1.5rem; border-bottom: 4px solid #3b82f6; backdrop-filter: blur(8px); }
+    .main-title { font-size: 2.4rem; font-weight: 800; color: #1e40af; margin: 0; letter-spacing: -0.6px; }
+    .subtitle { font-size: 1.1rem; color: #475569; margin-top: 0.6rem; font-weight: 500; }
+    .col-header { padding: 10px 16px; border-radius: 14px 14px 0 0; color: white; font-weight: 700; font-size: 0.95rem; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     .col-header-pink { background: linear-gradient(135deg, #ec4899, #db2777); }
     .col-header-purple { background: linear-gradient(135deg, #a78bfa, #8b5cf6); }
     .col-header-green { background: linear-gradient(135deg, #34d399, #10b981); }
     .col-header-orange { background: linear-gradient(135deg, #fb923c, #f97316); }
-
-    .col-body {
-        background: white;
-        border-radius: 0 0 14px 14px;
-        padding: 12px;
-        min-height: 520px;
-        max-height: 620px;
-        overflow-y: auto;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-        margin-bottom: 1rem;
-    }
-
-    .news-card {
-        background: #fafbfc;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        padding: 12px;
-        margin-bottom: 10px;
-        transition: all 0.3s ease;
-    }
-
-    .news-card:hover {
-        background: #f1f5f9;
-        box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-        transform: translateY(-2px);
-    }
-
-    .news-title {
-        color: #1e40af;
-        font-size: 0.92rem;
-        font-weight: 600;
-        line-height: 1.35;
-        text-decoration: none;
-        display: block;
-        margin-bottom: 8px;
-    }
-
-    .news-title:hover {
-        color: #1d4ed8;
-        text-decoration: underline;
-    }
-
-    .news-summary {
-        color: #64748b;
-        font-size: 0.82rem;
-        line-height: 1.45;
-        margin-bottom: 8px;
-        padding-left: 8px;
-        border-left: 3px solid #e2e8f0;
-    }
-
-    .news-meta {
-        font-size: 0.76rem;
-        color: #64748b;
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        flex-wrap: wrap;
-    }
-
+    .col-body { background: white; border-radius: 0 0 14px 14px; padding: 12px; min-height: 520px; max-height: 620px; overflow-y: auto; box-shadow: 0 6px 20px rgba(0,0,0,0.08); margin-bottom: 1rem; }
+    .news-card { background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 10px; transition: all 0.3s ease; }
+    .news-card:hover { background: #f1f5f9; box-shadow: 0 6px 16px rgba(0,0,0,0.08); transform: translateY(-2px); }
+    .news-title { color: #1e40af; font-size: 0.92rem; font-weight: 600; line-height: 1.35; text-decoration: none; display: block; margin-bottom: 8px; }
+    .news-title:hover { color: #1d4ed8; text-decoration: underline; }
+    .news-summary { color: #64748b; font-size: 0.82rem; line-height: 1.45; margin-bottom: 8px; padding-left: 8px; border-left: 3px solid #e2e8f0; }
+    .news-meta { font-size: 0.76rem; color: #64748b; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
     .time-hot { color: #dc2626; font-weight: 600; font-style: italic; }
     .time-warm { color: #ea580c; font-weight: 600; }
     .time-normal { color: #64748b; }
-    
-    .empty-message {
-        text-align: center;
-        color: #94a3b8;
-        padding: 30px;
-    }
+    .empty-message { text-align: center; color: #94a3b8; padding: 30px; }
 </style>
 """, unsafe_allow_html=True)
 
-# === HEADER ===
 st.markdown("""
 <div class="header-container">
     <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
@@ -178,7 +67,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# === RSS FEEDS ===
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed"),
     ("Light Reading", "https://www.lightreading.com/rss/simple"),
@@ -208,203 +96,92 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-# Google News RSS - Targeted for OSS/BSS telecom news
 GOOGLE_OSS_BSS_RSS = "https://news.google.com/rss/search?q=(OSS+BSS+OR+%22operations+support+systems%22+OR+%22business+support+systems%22)+telecom+after:2025-12-01&hl=en-US&gl=US&ceid=US:en"
-
-SECTIONS = {
-    "telco": {"icon": "📡", "name": "Telco & OSS/BSS", "style": "col-header col-header-pink"},
-    "ott": {"icon": "📺", "name": "OTT & Streaming", "style": "col-header col-header-purple"},
-    "sports": {"icon": "🏆", "name": "Sports & Events", "style": "col-header col-header-green"},
-    "technology": {"icon": "⚡", "name": "Technology", "style": "col-header col-header-orange"},
-}
-
-SOURCE_CATEGORY_MAP = {
-    "Telecoms.com": "telco", "Light Reading": "telco", "Fierce Telecom": "telco",
-    "RCR Wireless": "telco", "Mobile World Live": "telco", "ET Telecom": "telco",
-    "The Fast Mode": "telco",
-    "Variety": "ott", "Hollywood Reporter": "ott", "Deadline": "ott",
-    "Digital TV Europe": "ott", "Advanced Television": "ott",
-    "ESPN": "sports", "BBC Sport": "sports", "Front Office Sports": "sports",
-    "Sportico": "sports", "SportsPro": "sports", "Sports Business": "sports",
-    "TechCrunch": "technology", "The Verge": "technology", "Wired": "technology",
-    "Ars Technica": "technology", "VentureBeat": "technology", "ZDNet": "technology",
-    "Engadget": "technology", "Techmeme": "technology",
-    "Google News OSS/BSS": "telco",
-}
-
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-    "Accept": "application/rss+xml, application/xml, text/xml, */*",
-}
 
 def clean(raw):
     if not raw:
         return ""
     return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
 
-def extract_summary(entry, max_len=160):
-    summary = ""
+def extract_summary(entry):
     for field in ['summary', 'description', 'content']:
         if hasattr(entry, field):
             content = getattr(entry, field)
-            if isinstance(content, list) and len(content) > 0:
+            if isinstance(content, list) and content:
                 content = content[0].get('value', '')
             summary = clean(content)
             if summary:
-                break
-    if len(summary) > max_len:
-        summary = summary[:max_len].rsplit(' ', 1)[0] + '...'
-    return summary if summary else ""
+                return summary[:160] + '...' if len(summary) > 160 else summary
+    return ""
 
 def fetch_google_news_oss_bss():
     items = []
     try:
-        resp = requests.get(GOOGLE_OSS_BSS_RSS, headers=HEADERS, timeout=10)
-        if resp.status_code != 200:
-            return items
-        
-        feed = feedparser.parse(resp.content)
-        if not feed.entries:
-            return items
-        
-        NOW = datetime.now(ZoneInfo("America/New_York"))
-        today_et = NOW.date()
-        seven_days_ago = today_et - timedelta(days=7)
-        min_date = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))
-        
-        for entry in feed.entries:  # Take ALL Google results
-            title = clean(entry.get("title", ""))
-            if len(title) < 15:
-                continue
-            
-            link = entry.get("link", "")
-            if not link:
-                continue
-            
-            summary = extract_summary(entry)
-            
-            pub = None
-            if hasattr(entry, 'published_parsed'):
-                try:
-                    pub = datetime(*entry.published_parsed[:6], tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/New_York"))
-                except:
-                    pub = NOW  # Fallback
-            
-            if not pub:
-                pub = NOW
-            
-            pub_date = pub.date()
-            if pub_date < seven_days_ago or pub < min_date:
-                continue
-            
-            items.append({
-                "title": title,
-                "link": link,
-                "pub": pub,
-                "source": "Google News OSS/BSS",
-                "summary": summary
-            })
-        
-        items.sort(key=lambda x: x["pub"], reverse=True)
-        return items  # ALL Google items
-    
-    except Exception as e:
-        return []
-
-def fetch_feed(source, url):
-    items = []
-    try:
-        resp = requests.get(url, headers=HEADERS, timeout=10)
-        if resp.status_code != 200:
-            return items
-       
-        feed = feedparser.parse(resp.content)
-        if not feed.entries:
-            return items
-       
-        NOW = datetime.now(ZoneInfo("America/New_York"))
-        today_et = NOW.date()
-        seven_days_ago = today_et - timedelta(days=7)
-        min_date = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))
-        
-        for entry in feed.entries[:8]:
-            title = clean(entry.get("title", ""))
-            if len(title) < 15:
-                continue
-           
-            link = entry.get("link", "")
-            if not link:
-                continue
-            
-            summary = extract_summary(entry)
-           
-            pub = None
-            for k in ("published_parsed", "updated_parsed"):
-                val = getattr(entry, k, None)
-                if val:
+        resp = requests.get(GOOGLE_OSS_BSS_RSS, timeout=10)
+        if resp.status_code == 200:
+            feed = feedparser.parse(resp.content)
+            NOW = datetime.now(ZoneInfo("America/New_York"))
+            seven_days_ago = NOW - timedelta(days=7)
+            for entry in feed.entries:
+                title = clean(entry.title or "")
+                if len(title) < 15:
+                    continue
+                link = entry.link or ""
+                if not link:
+                    continue
+                summary = extract_summary(entry)
+                pub = None
+                if 'published_parsed' in entry:
                     try:
-                        pub = datetime(*val[:6], tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/New_York"))
-                        break
+                        pub = datetime(*entry.published_parsed[:6], tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/New_York"))
                     except:
-                        pass
-           
-            if not pub:
-                pub = NOW
-           
-            pub_date = pub.date()
-            if pub_date < seven_days_ago or pub < min_date:
-                continue
-           
-            items.append({
-                "title": title,
-                "link": link,
-                "pub": pub,
-                "source": source,
-                "summary": summary
-            })
-       
-        items.sort(key=lambda x: x["pub"], reverse=True)
-        return items
-       
+                        pub = NOW
+                if not pub:
+                    pub = NOW
+                if pub >= seven_days_ago:
+                    items.append({
+                        "title": title,
+                        "link": link,
+                        "pub": pub,
+                        "source": "Google News OSS/BSS",
+                        "summary": summary
+                    })
+            items.sort(key=lambda x: x["pub"], reverse=True)
     except:
-        return items
+        pass
+    return items
 
-@st.cache_data(ttl=60, show_spinner=False)  # Short TTL for quick refresh
+@st.cache_data(ttl=60)
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
     
-    # 1. ALL Google News OSS/BSS FIRST (last 7 days, no limit)
+    # Google first - ALL items
     google_items = fetch_google_news_oss_bss()
-    for item in google_items:
-        categorized["telco"].append(item)
+    categorized["telco"].extend(google_items)
     
-    # 2. Regular RSS feeds AFTER Google
+    # Then regular RSS
     with ThreadPoolExecutor(max_workers=20) as executor:
-        futures = [executor.submit(fetch_feed, source, url) for source, url in RSS_FEEDS]
-       
+        futures = [executor.submit(lambda s, u: fetch_feed(s, u), s, u) for s, u in RSS_FEEDS]
         for future in as_completed(futures):
             try:
-                items = future.result()
+                source, items = future.result()
                 for item in items:
-                    category = SOURCE_CATEGORY_MAP.get(item["source"], "technology")
-                    categorized[category].append(item)
+                    cat = SOURCE_CATEGORY_MAP.get(source, "technology")
+                    categorized[cat].append(item)
             except:
                 pass
-   
+    
     for cat in categorized:
         categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
-   
+    
     return categorized
 
 def get_time_str(dt):
     now_et = datetime.now(ZoneInfo("America/New_York"))
     hrs = int((now_et - dt).total_seconds() / 3600)
-    if hrs < 1:
-        return "Now", "time-hot"
-    if hrs < 6:
-        return f"{hrs}h ago", "time-hot"
-    if hrs < 24:
-        return f"{hrs}h ago", "time-warm"
+    if hrs < 1: return "Now", "time-hot"
+    if hrs < 6: return f"{hrs}h ago", "time-hot"
+    if hrs < 24: return f"{hrs}h ago", "time-warm"
     return f"{hrs//24}d ago", "time-normal"
 
 def render_body(items):
@@ -415,9 +192,7 @@ def render_body(items):
         safe_link = html.escape(item["link"])
         safe_source = html.escape(item["source"])
         safe_summary = html.escape(item.get("summary", ""))
-        
         summary_html = f'<div class="news-summary">{safe_summary}</div>' if safe_summary else ''
-       
         cards += f'''<div class="news-card">
 <a href="{safe_link}" target="_blank" class="news-title">{safe_title}</a>
 {summary_html}
@@ -427,38 +202,28 @@ def render_body(items):
 <span>{safe_source}</span>
 </div>
 </div>'''
-   
     if not items:
-        cards = '<div class="empty-message">No fresh news in last 7 days (US Eastern Time)</div>'
-   
+        cards = '<div class="empty-message">No fresh news in last 7 days</div>'
     return f'<div class="col-body">{cards}</div>'
 
-# === LOADING MESSAGE ===
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading latest OSS/BSS intelligence...<br><small>All Google News OSS/BSS first - all items</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading latest OSS/BSS intelligence...<br><small>All Google OSS/BSS first</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_feeds()
 
 placeholder.empty()
 
-# === RENDER DASHBOARD ===
 cols = st.columns(4)
-cat_list = ["telco", "ott", "sports", "technology"]
-
-for idx, cat in enumerate(cat_list):
+for idx, cat in enumerate(["telco", "ott", "sports", "technology"]):
     sec = SECTIONS[cat]
     items = data.get(cat, [])
-   
     with cols[idx]:
         st.markdown(f'<div class="{sec["style"]}">{sec["icon"]} {sec["name"]}</div>', unsafe_allow_html=True)
         st.markdown(render_body(items), unsafe_allow_html=True)
 
-# Auto-refresh every 5 minutes
 st.markdown("""
 <script>
-setTimeout(function(){
-    window.location.reload();
-}, 300000);
+setTimeout(function(){ window.location.reload(); }, 300000);
 </script>
 """, unsafe_allow_html=True)
