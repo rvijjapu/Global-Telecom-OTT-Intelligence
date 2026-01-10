@@ -8,9 +8,7 @@ import time
 import re
 from zoneinfo import ZoneInfo
 
-# ==========================
-# 🔐 CEO TOKEN SECURITY GATE
-# ==========================
+# Security gate (unchanged)
 try:
     EXPECTED_TOKEN = st.secrets["CEO_ACCESS_TOKEN"]
 except FileNotFoundError:
@@ -210,7 +208,7 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-# Google News RSS - Query for OSS/BSS telecom news (last 7 days focus)
+# Google News RSS - Query for OSS/BSS telecom news
 GOOGLE_OSS_BSS_RSS = "https://news.google.com/rss/search?q=(OSS+BSS+OR+%22operations+support+systems%22+OR+%22business+support+systems%22)+telecom+after:2025-12-01&hl=en-US&gl=US&ceid=US:en"
 
 SECTIONS = {
@@ -274,7 +272,7 @@ def fetch_google_news_oss_bss():
         seven_days_ago = today_et - timedelta(days=7)
         min_date = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))
         
-        for entry in feed.entries:  # Take ALL results from Google
+        for entry in feed.entries:  # Take ALL Google results
             title = clean(entry.get("title", ""))
             if len(title) < 15:
                 continue
@@ -307,8 +305,9 @@ def fetch_google_news_oss_bss():
                 "summary": summary
             })
         
+        # Sort Google items by pub date (newest first), but they will be placed BEFORE regular news
         items.sort(key=lambda x: x["pub"], reverse=True)
-        return items  # ALL qualifying Google items
+        return items
     
     except Exception as e:
         return []
@@ -375,12 +374,12 @@ def fetch_feed(source, url):
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
     
-    # 1. ALL Google News OSS/BSS first in Telco (last 7 days, no limit)
+    # 1. ALL Google News OSS/BSS FIRST in Telco (last 7 days, no count limit)
     google_items = fetch_google_news_oss_bss()
     for item in google_items:
         categorized["telco"].append(item)
     
-    # 2. Regular RSS feeds after Google
+    # 2. Regular RSS feeds AFTER Google
     with ThreadPoolExecutor(max_workers=20) as executor:
         futures = [executor.submit(fetch_feed, source, url) for source, url in RSS_FEEDS]
        
@@ -437,7 +436,7 @@ def render_body(items):
 
 # === LOADING MESSAGE ===
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading latest OSS/BSS intelligence...<br><small>Google News first - all items</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading latest OSS/BSS intelligence...<br><small>All Google News first</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_feeds()
