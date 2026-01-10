@@ -6,19 +6,25 @@ import html
 import time
 from zoneinfo import ZoneInfo
 
-# Security gate (unchanged)
+# ===============================
+# 🔐 TOKEN SECURITY GATE (ROBUST)
+# ===============================
 try:
     EXPECTED_TOKEN = st.secrets["CEO_ACCESS_TOKEN"]
-except FileNotFoundError:
-    st.error("Missing secrets.toml – Add CEO_ACCESS_TOKEN")
-    st.stop()
-except KeyError:
-    st.error("CEO_ACCESS_TOKEN not found in secrets")
+except (FileNotFoundError, KeyError):
+    st.error("Missing or invalid CEO_ACCESS_TOKEN in secrets")
     st.stop()
 
-provided_token = st.query_params.get("token", [""])[0]
+# Safe query param reading (handles both list and string)
+token_param = st.query_params.get("token")
+if isinstance(token_param, list):
+    provided_token = token_param[0] if token_param else ""
+else:
+    provided_token = token_param if token_param else ""
+
 if provided_token != EXPECTED_TOKEN:
-    st.error("Unauthorized – Append ?token=your_token")
+    st.error("⛔ Unauthorized – Invalid or missing token")
+    st.info("Use: ?token=Vijay (exact match, no quotes)")
     st.stop()
 
 # Rate limiting
@@ -27,7 +33,7 @@ if "last_access" not in st.session_state:
 
 now = time.time()
 if now - st.session_state.last_access < 2:
-    st.warning("Too many requests – Wait a moment.")
+    st.warning("⏱ Too many requests – Wait a moment")
     st.stop()
 
 st.session_state.last_access = now
@@ -67,6 +73,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# RSS FEEDS (unchanged)
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed"),
     ("Light Reading", "https://www.lightreading.com/rss/simple"),
@@ -155,13 +162,13 @@ def fetch_google_news_oss_bss():
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
     
-    # Google first - ALL items
+    # Google OSS/BSS FIRST - ALL items (last 7 days)
     google_items = fetch_google_news_oss_bss()
     categorized["telco"].extend(google_items)
     
     # Then regular RSS
     with ThreadPoolExecutor(max_workers=20) as executor:
-        futures = [executor.submit(lambda s, u: fetch_feed(s, u), s, u) for s, u in RSS_FEEDS]
+        futures = [executor.submit(lambda s, u: (s, fetch_feed(s, u)), s, u) for s, u in RSS_FEEDS]
         for future in as_completed(futures):
             try:
                 source, items = future.result()
@@ -206,6 +213,7 @@ def render_body(items):
         cards = '<div class="empty-message">No fresh news in last 7 days</div>'
     return f'<div class="col-body">{cards}</div>'
 
+# Loading message
 placeholder = st.empty()
 placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading latest OSS/BSS intelligence...<br><small>All Google OSS/BSS first</small></h2>", unsafe_allow_html=True)
 
@@ -214,6 +222,7 @@ with st.spinner(""):
 
 placeholder.empty()
 
+# Render dashboard
 cols = st.columns(4)
 for idx, cat in enumerate(["telco", "ott", "sports", "technology"]):
     sec = SECTIONS[cat]
@@ -222,6 +231,7 @@ for idx, cat in enumerate(["telco", "ott", "sports", "technology"]):
         st.markdown(f'<div class="{sec["style"]}">{sec["icon"]} {sec["name"]}</div>', unsafe_allow_html=True)
         st.markdown(render_body(items), unsafe_allow_html=True)
 
+# Auto-refresh
 st.markdown("""
 <script>
 setTimeout(function(){ window.location.reload(); }, 300000);
