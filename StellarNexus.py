@@ -360,72 +360,164 @@ def extract_summary(entry, max_len=300):
         summary = summary[:max_len].rsplit(' ', 1)[0] + '...'
     return summary if summary else ""
 
-def ai_summarize_news(title, summary):
-    """AI algorithm to create 2-3 line executive summary"""
-    # Combine title and summary for context
-    full_text = f"{title}. {summary}"
+def fetch_full_article_content(url):
+    """Attempt to fetch full article text from URL"""
+    try:
+        resp = requests.get(url, headers=HEADERS, timeout=8)
+        if resp.status_code != 200:
+            return ""
+        
+        # Extract text from HTML (simple but effective)
+        from html.parser import HTMLParser
+        
+        class ArticleParser(HTMLParser):
+            def __init__(self):
+                super().__init__()
+                self.text = []
+                self.in_script = False
+                self.in_style = False
+            
+            def handle_starttag(self, tag, attrs):
+                if tag in ['script', 'style', 'nav', 'header', 'footer']:
+                    self.in_script = True
+            
+            def handle_endtag(self, tag):
+                if tag in ['script', 'style', 'nav', 'header', 'footer']:
+                    self.in_script = False
+            
+            def handle_data(self, data):
+                if not self.in_script and data.strip():
+                    self.text.append(data.strip())
+        
+        parser = ArticleParser()
+        parser.feed(resp.text)
+        full_text = ' '.join(parser.text)
+        
+        # Clean and limit
+        full_text = re.sub(r'\s+', ' ', full_text)
+        return full_text[:3000]  # First 3000 chars
+    except:
+        return ""
+
+def ai_summarize_news(title, summary, url=None):
+    """Advanced AI algorithm to create unique 2-3 line executive summary"""
     
-    # Extract key sentences using simple but effective algorithm
+    # Try to fetch full article content
+    article_content = ""
+    if url:
+        article_content = fetch_full_article_content(url)
+    
+    # Use article content if available, otherwise use summary
+    source_text = article_content if article_content else summary
+    full_text = f"{title}. {source_text}"
+    
+    # Split into sentences and clean
     sentences = re.split(r'[.!?]+', full_text)
-    sentences = [s.strip() for s in sentences if len(s.strip()) > 20]
+    sentences = [s.strip() for s in sentences if len(s.strip()) > 25]
     
     if not sentences:
         return summary[:200] + "..." if len(summary) > 200 else summary
     
-    # Score sentences by importance
+    # Remove duplicate/similar sentences
+    unique_sentences = []
+    seen_content = set()
+    
+    for sentence in sentences:
+        # Create fingerprint of sentence (first 50 chars, lowercase, no spaces)
+        fingerprint = sentence.lower().replace(' ', '')[:50]
+        if fingerprint not in seen_content:
+            unique_sentences.append(sentence)
+            seen_content.add(fingerprint)
+    
+    sentences = unique_sentences[:8]  # Top 8 unique sentences
+    
+    # Advanced scoring system
     scored_sentences = []
-    for sentence in sentences[:5]:  # First 5 sentences are usually most important
+    
+    for idx, sentence in enumerate(sentences):
         score = 0
         sentence_lower = sentence.lower()
         
-        # High-value keywords
-        critical_words = [
-            'announce', 'launch', 'partnership', 'agreement', 'merger', 'acquisition',
-            'revenue', 'profit', 'loss', 'billion', 'million', 'percent', '%',
-            'new', 'first', 'major', 'strategic', 'expand', 'growth', 'plan',
-            'ceo', 'executive', 'invest', 'deal', 'contract', 'customers', 'users'
-        ]
+        # Critical business keywords (high weight)
+        critical_words = {
+            'announce': 5, 'launch': 5, 'partnership': 5, 'agreement': 5,
+            'merger': 6, 'acquisition': 6, 'deal': 5, 'contract': 5,
+            'revenue': 4, 'profit': 4, 'billion': 5, 'million': 4,
+            'percent': 3, '%': 3, 'growth': 4, 'expand': 4,
+            'ceo': 4, 'president': 4, 'executive': 3, 'invest': 5,
+            'strategic': 4, 'plan': 3, 'customers': 3, 'users': 3,
+            'new': 3, 'first': 4, 'major': 3, 'significant': 3
+        }
         
-        for word in critical_words:
+        for word, weight in critical_words.items():
             if word in sentence_lower:
-                score += 3
+                score += weight
         
-        # Company/organization names (often capitalized)
-        if any(word[0].isupper() for word in sentence.split() if len(word) > 3):
-            score += 2
+        # Financial numbers boost
+        numbers = re.findall(r'\d+', sentence)
+        if numbers:
+            score += len(numbers) * 2
         
-        # Numbers indicate facts
-        if re.search(r'\d+', sentence):
-            score += 2
+        # Company/proper names (capitalized words)
+        caps = [w for w in sentence.split() if len(w) > 3 and w[0].isupper()]
+        score += min(len(caps), 3)
         
-        # Sentence position (earlier = more important)
-        position_bonus = (5 - sentences.index(sentence)) if sentence in sentences[:5] else 0
-        score += position_bonus
+        # Position bonus (earlier sentences more important, but not title)
+        if idx > 0 and idx < 4:
+            score += (4 - idx) * 2
         
-        scored_sentences.append((sentence, score))
+        # Length penalty (too short or too long)
+        if len(sentence) < 40 or len(sentence) > 200:
+            score -= 2
+        
+        # Avoid sentences that are just the title
+        if sentence.strip().lower() == title.strip().lower():
+            score = 0
+        
+        scored_sentences.append((sentence, score, idx))
     
-    # Sort by score and take top 2-3 sentences
-    scored_sentences.sort(key=lambda x: x[1], reverse=True)
+    # Sort by score, then by original position
+    scored_sentences.sort(key=lambda x: (-x[1], x[2]))
     
-    # Build executive summary (2-3 sentences max)
+    # Build executive summary with diversity
     exec_summary = []
     total_length = 0
-    max_length = 250  # Target length
+    max_length = 280
+    used_words = set()
     
-    for sentence, score in scored_sentences:
+    for sentence, score, idx in scored_sentences:
+        if score <= 0:
+            continue
+        
+        # Check for content diversity
+        sentence_words = set(sentence.lower().split())
+        overlap = len(sentence_words & used_words) / max(len(sentence_words), 1)
+        
+        # Skip if too similar to already selected content
+        if overlap > 0.6 and exec_summary:
+            continue
+        
         if total_length + len(sentence) <= max_length and len(exec_summary) < 3:
             exec_summary.append(sentence)
             total_length += len(sentence)
-        elif len(exec_summary) >= 2:  # At least 2 sentences
+            used_words.update(sentence_words)
+        
+        if len(exec_summary) >= 2 and total_length > 150:
             break
     
-    if not exec_summary and summary:
-        # Fallback: use first 200 chars of summary
-        return summary[:200] + "..."
+    # Fallback if no good sentences found
+    if not exec_summary:
+        if summary and len(summary) > 50:
+            return summary[:220] + "..."
+        return "Details available in full article."
     
+    # Join and clean
     result = '. '.join(exec_summary)
-    if not result.endswith('.'):
+    if not result.endswith(('.', '!', '?')):
         result += '.'
+    
+    # Final cleanup
+    result = re.sub(r'\s+', ' ', result).strip()
     
     return result
 
@@ -473,8 +565,8 @@ def fetch_google_oss_bss():
                 
                 summary = extract_summary(entry, max_len=300)
                 
-                # Generate AI executive summary
-                exec_summary = ai_summarize_news(title, summary)
+                # Generate AI executive summary from full article
+                exec_summary = ai_summarize_news(title, summary, direct_link)
                 
                 pub = NOW
                 if hasattr(entry, 'published_parsed') and entry.published_parsed:
@@ -529,8 +621,8 @@ def fetch_feed(source, url):
                 
                 summary = extract_summary(entry, max_len=300)
                 
-                # Generate AI executive summary
-                exec_summary = ai_summarize_news(title, summary)
+                # Generate AI executive summary from full article
+                exec_summary = ai_summarize_news(title, summary, link)
                
                 pub = NOW
                 for k in ("published_parsed", "updated_parsed"):
