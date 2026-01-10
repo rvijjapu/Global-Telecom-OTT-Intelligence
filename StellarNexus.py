@@ -167,12 +167,42 @@ st.markdown("""
     }
 
     .news-summary {
-        color: #64748b;
-        font-size: 0.82rem;
-        line-height: 1.45;
-        margin-bottom: 8px;
-        padding-left: 8px;
-        border-left: 3px solid #e2e8f0;
+        color: #475569;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        margin-bottom: 10px;
+        padding: 10px;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 8px;
+        border-left: 4px solid #3b82f6;
+        font-weight: 500;
+    }
+
+    .read-more-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    }
+
+    .read-more-btn:hover {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .hand-icon {
+        font-size: 1rem;
     }
 
     .news-meta {
@@ -315,7 +345,8 @@ def calculate_importance_score(title, summary, category):
     
     return score
 
-def extract_summary(entry, max_len=180):
+def extract_summary(entry, max_len=300):
+    """Extract comprehensive summary for AI processing"""
     summary = ""
     for field in ['summary', 'description', 'content']:
         if hasattr(entry, field):
@@ -328,6 +359,75 @@ def extract_summary(entry, max_len=180):
     if len(summary) > max_len:
         summary = summary[:max_len].rsplit(' ', 1)[0] + '...'
     return summary if summary else ""
+
+def ai_summarize_news(title, summary):
+    """AI algorithm to create 2-3 line executive summary"""
+    # Combine title and summary for context
+    full_text = f"{title}. {summary}"
+    
+    # Extract key sentences using simple but effective algorithm
+    sentences = re.split(r'[.!?]+', full_text)
+    sentences = [s.strip() for s in sentences if len(s.strip()) > 20]
+    
+    if not sentences:
+        return summary[:200] + "..." if len(summary) > 200 else summary
+    
+    # Score sentences by importance
+    scored_sentences = []
+    for sentence in sentences[:5]:  # First 5 sentences are usually most important
+        score = 0
+        sentence_lower = sentence.lower()
+        
+        # High-value keywords
+        critical_words = [
+            'announce', 'launch', 'partnership', 'agreement', 'merger', 'acquisition',
+            'revenue', 'profit', 'loss', 'billion', 'million', 'percent', '%',
+            'new', 'first', 'major', 'strategic', 'expand', 'growth', 'plan',
+            'ceo', 'executive', 'invest', 'deal', 'contract', 'customers', 'users'
+        ]
+        
+        for word in critical_words:
+            if word in sentence_lower:
+                score += 3
+        
+        # Company/organization names (often capitalized)
+        if any(word[0].isupper() for word in sentence.split() if len(word) > 3):
+            score += 2
+        
+        # Numbers indicate facts
+        if re.search(r'\d+', sentence):
+            score += 2
+        
+        # Sentence position (earlier = more important)
+        position_bonus = (5 - sentences.index(sentence)) if sentence in sentences[:5] else 0
+        score += position_bonus
+        
+        scored_sentences.append((sentence, score))
+    
+    # Sort by score and take top 2-3 sentences
+    scored_sentences.sort(key=lambda x: x[1], reverse=True)
+    
+    # Build executive summary (2-3 sentences max)
+    exec_summary = []
+    total_length = 0
+    max_length = 250  # Target length
+    
+    for sentence, score in scored_sentences:
+        if total_length + len(sentence) <= max_length and len(exec_summary) < 3:
+            exec_summary.append(sentence)
+            total_length += len(sentence)
+        elif len(exec_summary) >= 2:  # At least 2 sentences
+            break
+    
+    if not exec_summary and summary:
+        # Fallback: use first 200 chars of summary
+        return summary[:200] + "..."
+    
+    result = '. '.join(exec_summary)
+    if not result.endswith('.'):
+        result += '.'
+    
+    return result
 
 def get_article_hash(title, link):
     return hashlib.md5(f"{title}{link}".encode()).hexdigest()
@@ -371,7 +471,10 @@ def fetch_google_oss_bss():
                 # Extract direct URL from Google redirect
                 direct_link = extract_redirect_url(link)
                 
-                summary = extract_summary(entry, max_len=200)
+                summary = extract_summary(entry, max_len=300)
+                
+                # Generate AI executive summary
+                exec_summary = ai_summarize_news(title, summary)
                 
                 pub = NOW
                 if hasattr(entry, 'published_parsed') and entry.published_parsed:
@@ -388,7 +491,7 @@ def fetch_google_oss_bss():
                     "link": direct_link,
                     "pub": pub,
                     "source": "Google OSS/BSS",
-                    "summary": summary,
+                    "summary": exec_summary,
                     "is_google": True,
                     "hash": get_article_hash(title, direct_link)
                 })
@@ -424,7 +527,10 @@ def fetch_feed(source, url):
                 if not link:
                     continue
                 
-                summary = extract_summary(entry)
+                summary = extract_summary(entry, max_len=300)
+                
+                # Generate AI executive summary
+                exec_summary = ai_summarize_news(title, summary)
                
                 pub = NOW
                 for k in ("published_parsed", "updated_parsed"):
@@ -444,7 +550,7 @@ def fetch_feed(source, url):
                     "link": link,
                     "pub": pub,
                     "source": source,
-                    "summary": summary,
+                    "summary": exec_summary,
                     "is_google": False,
                     "hash": get_article_hash(title, link)
                 })
@@ -517,15 +623,18 @@ def render_google_section(google_items):
         safe_link = html.escape(item["link"])
         safe_summary = html.escape(item.get("summary", ""))
         
-        summary_html = f'<div class="news-summary">{safe_summary}</div>' if safe_summary else ''
+        summary_html = f'<div class="news-summary">📋 {safe_summary}</div>' if safe_summary else ''
         
         cards += f'''<div class="news-card news-card-google">
-<a href="{safe_link}" target="_blank" class="news-title">{safe_title}</a>
+<div class="news-title">{safe_title}</div>
 {summary_html}
 <div class="news-meta">
 <span class="{time_class}">{time_str}</span>
 <span>•</span>
 <span>Google OSS/BSS</span>
+<a href="{safe_link}" target="_blank" class="read-more-btn">
+<span class="hand-icon">👉</span> Read Full Article
+</a>
 </div>
 </div>'''
     
@@ -543,15 +652,18 @@ def render_regular_body(items):
         safe_source = html.escape(item["source"])
         safe_summary = html.escape(item.get("summary", ""))
         
-        summary_html = f'<div class="news-summary">{safe_summary}</div>' if safe_summary else ''
+        summary_html = f'<div class="news-summary">📋 {safe_summary}</div>' if safe_summary else ''
        
         cards += f'''<div class="news-card">
-<a href="{safe_link}" target="_blank" class="news-title">{safe_title}</a>
+<div class="news-title">{safe_title}</div>
 {summary_html}
 <div class="news-meta">
 <span class="{time_class}">{time_str}</span>
 <span>•</span>
 <span>{safe_source}</span>
+<a href="{safe_link}" target="_blank" class="read-more-btn">
+<span class="hand-icon">👉</span> Read Full Article
+</a>
 </div>
 </div>'''
    
@@ -562,7 +674,7 @@ def render_regular_body(items):
 
 # === LOADING ===
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Igniting AI-Powered Intelligence...<br><small>Please wait for a moment</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Igniting AI-Powered Intelligence...<br><small>Please wait a moment</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_feeds()
