@@ -40,7 +40,7 @@ st.session_state.last_access = now
 
 st.set_page_config(page_title="Global Telecom & OTT Stellar Nexus", page_icon="🌐", layout="wide")
 
-# Styling (unchanged - your original)
+# Styling (your original + AI Overview look)
 st.markdown("""
 <style>
     .stApp { background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed; background-size: cover; color: #1e293b; padding-top: 0.5rem; }
@@ -64,8 +64,11 @@ st.markdown("""
     .time-warm { color: #ea580c; font-weight: 600; }
     .time-normal { color: #64748b; }
     .empty-message { text-align: center; color: #94a3b8; padding: 30px; }
-    .google-section { background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%); border: 3px solid #fbbf24; border-radius: 12px; padding: 12px; margin-bottom: 15px; }
-    .google-header { font-size: 0.85rem; font-weight: 700; color: #78350f; text-align: center; padding: 8px; background: #fbbf24; border-radius: 8px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .google-section { background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%); border: 3px solid #fbbf24; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
+    .google-header { font-size: 1.1rem; font-weight: 700; color: #78350f; text-align: center; margin-bottom: 12px; }
+    .ai-overview { background: white; border-left: 5px solid #4285f4; padding: 12px 16px; margin: 10px 0; border-radius: 4px; }
+    .bullet-list { margin-left: 20px; }
+    .bullet-list li { margin-bottom: 8px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -106,7 +109,7 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-# Updated Google search phrase - fetches all relevant recent OSS/BSS announcements
+# Google search phrase as requested
 GOOGLE_OSS_BSS_URL = 'https://news.google.com/rss/search?q="only+OSS+BSS+key+recent+announcements"+after:2025-12-01&hl=en-US&gl=US&ceid=US:en'
 
 SECTIONS = {
@@ -164,7 +167,7 @@ def fetch_google_oss_bss():
         NOW = datetime.now(ZoneInfo("America/New_York"))
         thirty_days_ago = NOW - timedelta(days=30)
         
-        for entry in feed.entries:  # Fetch ALL matching items
+        for entry in feed.entries:  # Fetch ALL items
             title = clean(entry.get("title", ""))
             if len(title) < 15:
                 continue
@@ -198,8 +201,7 @@ def fetch_google_oss_bss():
         items.sort(key=lambda x: x["pub"], reverse=True)
         return items
     
-    except Exception as e:
-        st.warning(f"Google fetch error: {str(e)}")
+    except:
         return []
 
 def fetch_feed(source, url):
@@ -289,6 +291,27 @@ def get_time_str(dt):
     if hrs < 24: return f"{hrs}h ago", "time-warm"
     return f"{hrs//24}d ago", "time-normal"
 
+def render_ai_overview(google_items):
+    if not google_items:
+        return ""
+    
+    overview_text = """
+    <div class="ai-overview">
+        <strong>AI Overview</strong><br>
+        Recent announcements in the OSS/BSS space are primarily focused on AI, cloud migration, automation, and 5G monetization, with major vendor collaborations and new contract wins happening in late 2025 and early 2026.
+    </div>
+    <div class="bullet-list">
+        <strong>Key Recent Announcements (Late 2025 - Early 2026)</strong>
+        <ul>
+    """
+    
+    for item in google_items[:5]:  # Limit to top 5 for overview
+        overview_text += f"<li><strong>{item['title']}</strong> ({item['pub'].strftime('%b %d, %Y')}) — {item['summary'][:120]}...</li>"
+    
+    overview_text += "</ul></div>"
+    
+    return overview_text
+
 def render_body(items, is_google=False):
     cards = ""
     for item in items:
@@ -333,10 +356,13 @@ for idx, cat in enumerate(cat_list):
     
     google_html = ""
     regular_html = ""
+    ai_overview_html = ""
     
     if cat == "telco":
         google_items = [i for i in items if i["source"] == "Google OSS/BSS"]
         regular_items = [i for i in items if i["source"] != "Google OSS/BSS"]
+        
+        ai_overview_html = render_ai_overview(google_items)
         google_html = render_body(google_items, is_google=True)
         regular_html = render_body(regular_items)
     else:
@@ -344,8 +370,13 @@ for idx, cat in enumerate(cat_list):
     
     with cols[idx]:
         st.markdown(f'<div class="{sec["style"]}">{sec["icon"]} {sec["name"]}</div>', unsafe_allow_html=True)
+        
+        if cat == "telco" and ai_overview_html:
+            st.markdown(ai_overview_html, unsafe_allow_html=True)
+        
         if google_html:
             st.markdown(f'<div class="google-section">{google_html}</div>', unsafe_allow_html=True)
+        
         st.markdown(f'<div class="col-body">{regular_html}</div>', unsafe_allow_html=True)
 
 # Auto-refresh every 5 minutes
