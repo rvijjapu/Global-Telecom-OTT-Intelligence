@@ -273,11 +273,11 @@ def render_news(items):
     
     stats = ""
     if evergent_count:
-        stats += f'<span class="stats-badge">🎯 Evergent: {evergent_count}</span>'
+        stats += f'<span class="stats-badge">🎯 {evergent_count}</span>'
     if competitor_count:
-        stats += f'<span class="stats-badge" style="background:#dc2626">⚠️ Competitors: {competitor_count}</span>'
+        stats += f'<span class="stats-badge" style="background:#dc2626">⚠️ {competitor_count}</span>'
     if telco_count:
-        stats += f'<span class="stats-badge" style="background:#2563eb">📞 Telcos: {telco_count}</span>'
+        stats += f'<span class="stats-badge" style="background:#2563eb">📞 {telco_count}</span>'
     
     cards = stats
     
@@ -292,13 +292,13 @@ def render_news(items):
         
         if item["category"] == "evergent":
             card_class = "news-card news-card-evergent"
-            badge_html = f'<span class="badge badge-evergent">🎯 EVERGENT CLIENT</span>'
+            badge_html = f'<span class="badge badge-evergent">🎯</span>'
         elif item["category"] == "competitor":
             card_class = "news-card news-card-competitor"
-            badge_html = f'<span class="badge badge-competitor">⚠️ COMPETITOR</span>'
+            badge_html = f'<span class="badge badge-competitor">⚠️</span>'
         elif item["category"] == "telco":
             card_class = "news-card news-card-telco"
-            badge_html = f'<span class="badge badge-telco">📞 TELCO</span>'
+            badge_html = f'<span class="badge badge-telco">📞</span>'
         
         cards += f'''<div class="{card_class}">
 <div class="news-title"><a href="{safe_link}" target="_blank">{safe_title}</a></div>
