@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import html
 import time
 from zoneinfo import ZoneInfo
+from concurrent.futures import ThreadPoolExecutor, as_completed   # ← THIS WAS MISSING
 
 # ===============================
 # 🔐 TOKEN SECURITY GATE (ROBUST)
@@ -162,7 +163,7 @@ def fetch_google_news_oss_bss():
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
     
-    # Google OSS/BSS FIRST - ALL items (last 7 days)
+    # Google OSS/BSS FIRST - ALL items
     google_items = fetch_google_news_oss_bss()
     categorized["telco"].extend(google_items)
     
