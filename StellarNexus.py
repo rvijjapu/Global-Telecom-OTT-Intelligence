@@ -634,3 +634,93 @@ def load_feeds():
             full_query = f"({entity_query}) {FOCUS_PHRASES} after:2026-01-01"
             futures[executor.submit(fetch_google_news, full_query)] = cat
         
+        for future in as_completed(futures):
+            cat = futures[future]
+            try:
+                items = future.result()
+                for item in items:
+                    if item["hash"] not in seen_hashes:
+                        score = calculate_importance_score(item["title"], item["summary"], cat)
+                        item["importance"] = score
+                        categorized[cat].append(item)
+                        seen_hashes.add(item["hash"])
+            except:
+                pass  # Fail-safe, continue even if one fails
+   
+    for cat in categorized:
+        categorized[cat].sort(key=lambda x: (-x.get("importance", 0), -x["pub"].timestamp()))
+   
+    return categorized
+
+def get_time_str(dt):
+    now_et = datetime.now(ZoneInfo("America/New_York"))
+    diff = (now_et - dt).total_seconds()
+    hrs = int(diff / 3600)
+   
+    if hrs < 1:
+        return "Just now", "time-hot"
+    if hrs < 6:
+        return f"{hrs}h ago", "time-hot"
+    if hrs < 24:
+        return f"{hrs}h ago", "time-warm"
+    days = hrs // 24
+    return f"{days}d ago", "time-normal"
+
+def render_body(items):
+    cards = ""
+    for item in items:
+        time_str, time_class = get_time_str(item["pub"])
+        safe_title = html.escape(item["title"])
+        safe_summary = html.escape(item["summary"])
+        safe_source = html.escape(item["source"])
+       
+        cards += f'''<div class="news-card">
+<div class="news-title">{safe_title}</div>
+<div class="news-summary">{safe_summary}</div>
+<div class="news-meta">
+<span class="{time_class}">{time_str}</span>
+<span>•</span>
+<span>{safe_source}</span>
+</div>
+</div>'''
+   
+    if not cards:
+        cards = '<div class="empty-message">No recent news available. Retrying soon.</div>'
+   
+    return cards
+
+# Loading
+placeholder = st.empty()
+placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'> Igniting AI-Powered Intelligence...<br><small>Please wait for a moment</small></h2>", unsafe_allow_html=True)
+
+with st.spinner("Fetching latest news..."):
+    try:
+        data = load_feeds()
+    except:
+        st.error("Temporary fetch issue. Please refresh.")
+        st.stop()
+
+placeholder.empty()
+
+# Render Dashboard
+cols = st.columns(4)
+cat_list = ["telco", "ott", "sports", "technology"]
+
+for idx, cat in enumerate(cat_list):
+    sec = SECTIONS[cat]
+   
+    regular_items = data.get(cat, [])
+    regular_cards = render_body(regular_items)
+   
+    with cols[idx]:
+        st.markdown(f'<div class="{sec["style"]}">{sec["icon"]} {sec["name"]}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="col-body">{regular_cards}</div>', unsafe_allow_html=True)
+
+# Auto-refresh every 5 minutes
+st.markdown("""
+<script>
+setTimeout(function(){
+    window.location.reload();
+}, 300000);
+</script>
+""", unsafe_allow_html=True)
