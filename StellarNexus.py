@@ -7,6 +7,7 @@ import time
 from zoneinfo import ZoneInfo
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import re
+import hashlib
 
 # Security gate
 try:
@@ -123,67 +124,195 @@ st.markdown("""
         transform: translateY(-2px);
     }
 
-    .announcement-title a { color: #1e40af; font-size: 0.92rem; font-weight: 600; text-decoration: none; }
+    .announcement-title a { color: #1e40af; font-size: 0.92rem; font-weight: 600; text-decoration: none; display: block; margin-bottom: 8px; }
     .announcement-title a:hover { color: #1d4ed8; text-decoration: underline; }
     .announcement-summary { color: #475569; font-size: 0.85rem; line-height: 1.5; margin-bottom: 10px; padding: 10px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 8px; border-left: 4px solid #3b82f6; font-weight: 500; }
     .announcement-meta { font-size: 0.76rem; color: #64748b; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
     .time-hot { color: #dc2626; font-weight: 600; font-style: italic; }
     .time-warm { color: #ea580c; font-weight: 600; }
     .time-normal { color: #64748b; }
-    .empty-message { text-align: center; color: #94a3b8; padding: 30px; }
+    .empty-message { text-align: center; color: #94a3b8; padding: 30px; font-size: 0.9rem; }
 </style>
 """, unsafe_allow_html=True)
 
-# CEO-focused section configurations
-SECTIONS = {
-    "telco": {
-        "icon": "📡",
-        "name": "Telco & OSS/BSS",
-        "style": "col-header col-header-pink",
-        "phrases": [
-            "OSS BSS key announcements telecom last week",
-            "telecom OSS BSS recent deals mergers last 7 days",
-            "major OSS BSS contracts telecom acquisitions last week",
-            "important OSS BSS updates telecom launches last 7 days",
-            "OSS BSS telecom news key developments mergers contracts last week"
-        ]
-    },
-    "ott": {
-        "icon": "📺",
-        "name": "OTT & Streaming",
-        "style": "col-header col-header-purple",
-        "phrases": [
-            "OTT streaming key announcements last week",
-            "streaming platforms recent deals mergers last 7 days",
-            "major OTT content contracts acquisitions last week",
-            "important streaming updates launches last 7 days",
-            "OTT news key developments content deals mergers last week"
-        ]
-    },
-    "sports": {
-        "icon": "🏆",
-        "name": "Sports & Events",
-        "style": "col-header col-header-green",
-        "phrases": [
-            "sports events key announcements last week",
-            "sports rights recent deals mergers last 7 days",
-            "major sports contracts events acquisitions last week",
-            "important sports updates tournaments last 7 days",
-            "sports news key developments rights deals contracts last week"
-        ]
-    },
-    "technology": {
-        "icon": "⚡",
-        "name": "Technology",
-        "style": "col-header col-header-orange",
-        "phrases": [
-            "technology key announcements last week",
-            "tech industry recent deals mergers last 7 days",
-            "major tech contracts acquisitions last week",
-            "important tech updates launches last 7 days",
-            "technology news key developments AI cloud mergers last week"
-        ]
-    }
+# User-provided lists for CEO-focused monitoring
+EVERGENT_CLIENTS = {
+    "Astro": ["astro malaysia", "astro sooka", "astro njoi", "astro", "sooka", "njoi"],
+    "MongolTV": ["mongoltv", "mongol tv", "mongolia tv"],
+    "FOX": ["fox sports", "fox corporation", "fox networks", "fox"],
+    "AT&T": ["at&t", "att inc", "att wireless", "directv"],
+    "NBA": ["nba", "national basketball"],
+    "Shahid": ["shahid", "shahid vip", "mbc shahid"],
+    "MBC": ["mbc group", "mbc", "middle east broadcasting"],
+    "TV ASAHI": ["tv asahi", "asahi television", "asahi tv"],
+    "TV3": ["tv3 malaysia", "tv3", "media prima"],
+    "ABS-CBN": ["abs-cbn", "abscbn", "abs cbn", "philippine broadcast"],
+    "Viki": ["viki", "rakuten viki", "viki streaming"],
+    "TRT": ["trt world", "trt", "turkish radio"],
+    "Sinclair": ["sinclair broadcast", "sinclair", "bally sports"],
+    "FanDuel": ["fanduel", "fanduel group", "flutter"],
+    "Bally Sports": ["bally sports", "bally regional", "diamond sports"],
+    "Gotham": ["gotham advanced", "gotham fc"],
+    "Marquee": ["marquee sports", "marquee network"],
+    "Sony": ["sony pictures", "sony entertainment", "sonyliv", "sony india"],
+    "Aha": ["aha video", "aha ott", "aha telugu"],
+    "BBC": ["bbc", "british broadcasting", "bbc iplayer"],
+    "Lightbox": ["lightbox", "spark lightbox"],
+    "Sky": ["sky nz", "sky new zealand", "sky tv", "sky uk", "sky italia", "sky deutschland"],
+    "Cignal": ["cignal tv", "cignal", "cignal satellite"],
+    "ETV": ["etv network", "etv bharat"],
+    "Simple TV": ["simpletv", "simple tv venezuela"],
+    "Telekom Malaysia": ["telekom malaysia", "tm unifi", "unifi tv", "tm"],
+    "Britbox": ["britbox", "britbox international"],
+    "Quickplay": ["quickplay", "quickplay media"],
+    "Pilipinas": ["pilipinas", "abs-cbn"],
+}
+
+COMPETITORS = {
+    "Netcracker": ["netcracker", "netcracker technology", "nec netcracker"],
+    "Amdocs": ["amdocs", "amdocs ltd", "amdocs inc"],
+    "CSG": ["csg systems", "csg international", "csg"],
+    "Oracle": ["oracle communications", "oracle corporation", "oracle telecom"],
+    "Ericsson": ["ericsson", "telefonaktiebolaget lm ericsson"],
+    "Nokia": ["nokia", "nokia networks", "nokia corporation"],
+    "Huawei": ["huawei", "huawei technologies"],
+    "Comarch": ["comarch", "comarch bss"],
+    "Tecnotree": ["tecnotree", "tecnotree corporation"],
+    "MATRIXX": ["matrixx", "matrixx software"],
+    "Optiva": ["optiva", "optiva inc"],
+    "Cerillion": ["cerillion", "cerillion plc"],
+    "AsiaInfo": ["asiainfo", "asiainfo technologies"],
+    "Hansen": ["hansen technologies", "hansen"],
+    "Openet": ["openet", "openet telecom"],
+    "ZTE": ["zte", "zte corporation"],
+    "Mavenir": ["mavenir", "mavenir systems"],
+    "Infosys": ["infosys", "infosys telecom"],
+    "TCS": ["tata consultancy", "tcs", "tata communications"],
+    "Wipro": ["wipro", "wipro digital"],
+    "Tech Mahindra": ["tech mahindra", "mahindra comviva"],
+    "Accenture": ["accenture", "accenture telecom"],
+    "Capgemini": ["capgemini", "capgemini telecom"],
+    "IBM": ["ibm", "ibm telecom", "ibm watson"],
+    "SAP": ["sap", "sap telecom"],
+    "Salesforce": ["salesforce", "salesforce communications"],
+}
+
+TOP_TELCOS = {
+    # USA
+    "Verizon": ["verizon", "verizon wireless", "verizon fios"],
+    "AT&T": ["at&t", "att inc", "att mobility"],
+    "T-Mobile": ["t-mobile", "tmobile usa", "sprint"],
+    "Comcast": ["comcast", "xfinity", "comcast cable"],
+    "Charter": ["charter communications", "spectrum", "charter spectrum"],
+    "Cox": ["cox communications", "cox cable", "cox business"],
+    "Lumen": ["lumen technologies", "centurylink", "lumen"],
+    "Frontier": ["frontier communications", "frontier"],
+    "Windstream": ["windstream", "windstream enterprise"],
+    "Mediacom": ["mediacom communications", "mediacom"],
+    "Altice USA": ["altice usa", "optimum", "suddenlink"],
+   
+    # UK & Europe
+    "BT": ["bt group", "british telecom", "bt", "bt enterprise", "ee"],
+    "Vodafone": ["vodafone", "vodafone group"],
+    "O2": ["o2", "telefonica uk"],
+    "Virgin Media": ["virgin media", "virgin media o2"],
+    "Three": ["three uk", "three mobile"],
+    "Orange": ["orange", "orange sa"],
+    "Deutsche Telekom": ["deutsche telekom", "t-mobile europe", "telekom"],
+    "Telefónica": ["telefonica", "telefonica spain", "movistar"],
+    "Telecom Italia": ["telecom italia", "tim", "tim brasil"],
+    "Swisscom": ["swisscom", "swisscom ag"],
+    "KPN": ["kpn", "koninklijke pn"],
+    "Proximus": ["proximus", "belgacom"],
+    "Telenor": ["telenor", "telenor group"],
+    "Telia": ["telia", "telia company"],
+    "Bouygues": ["bouygues telecom", "bouygues"],
+   
+    # APAC - Singapore/Malaysia/NZ
+    "Singtel": ["singtel", "singapore telecom", "singapore telecommunications"],
+    "StarHub": ["starhub", "starhub singapore"],
+    "M1": ["m1 limited", "m1 singapore"],
+    "Maxis": ["maxis", "maxis communications", "maxis malaysia"],
+    "Celcom": ["celcom", "celcom axiata"],
+    "Digi": ["digi telecommunications", "digi malaysia", "digi.com"],
+    "Telekom Malaysia": ["telekom malaysia", "tm unifi", "unifi tv", "tm"],
+    "U Mobile": ["u mobile", "umobile malaysia"],
+    "Sky NZ": ["sky new zealand", "sky nz", "sky network television"],
+    "Spark": ["spark new zealand", "spark nz"],
+    "2degrees": ["2degrees", "2degrees mobile"],
+    "Vodafone NZ": ["vodafone new zealand", "vodafone nz"],
+   
+    # Australia
+    "Telstra": ["telstra", "telstra corporation"],
+    "Optus": ["optus", "singtel optus"],
+    "TPG": ["tpg telecom", "vodafone australia"],
+   
+    # Asia
+    "China Mobile": ["china mobile", "cmcc"],
+    "China Telecom": ["china telecom", "chinanet"],
+    "China Unicom": ["china unicom", "unicom"],
+    "NTT": ["ntt", "nippon telegraph", "ntt docomo"],
+    "SoftBank": ["softbank", "softbank corp"],
+    "KDDI": ["kddi", "kddi corporation", "au"],
+    "Reliance Jio": ["reliance jio", "jio", "jio platforms"],
+    "Airtel": ["bharti airtel", "airtel", "airtel india"],
+    "Vi": ["vodafone idea", "vi", "idea cellular"],
+    "BSNL": ["bsnl", "bharat sanchar"],
+    "SK Telecom": ["sk telecom", "skt"],
+    "KT": ["kt corporation", "kt"],
+    "LG Uplus": ["lg uplus", "lg u+"],
+    "Globe": ["globe telecom", "globe philippines"],
+    "PLDT": ["pldt", "philippine long distance"],
+    "Smart": ["smart communications", "smart philippines"],
+   
+    # Middle East
+    "Etisalat": ["etisalat", "emirates telecom", "e&"],
+    "Du": ["du", "emirates integrated"],
+    "STC": ["stc", "saudi telecom", "saudi telecom company"],
+    "Ooredoo": ["ooredoo", "ooredoo group"],
+    "Zain": ["zain", "zain group"],
+    "Mobily": ["mobily", "etihad etisalat"],
+   
+    # Americas
+    "América Móvil": ["america movil", "claro", "telmex"],
+    "Telus": ["telus", "telus communications"],
+    "Rogers": ["rogers communications", "rogers"],
+    "Bell": ["bell canada", "bce inc"],
+    "Shaw": ["shaw communications", "shaw"],
+   
+    # Africa
+    "MTN": ["mtn group", "mtn"],
+    "Vodacom": ["vodacom", "vodacom group"],
+    "Safaricom": ["safaricom", "safaricom plc"],
+}
+
+# Flatten lists for permutations
+def flatten_dict(d):
+    flat = []
+    for key, vals in d.items():
+        flat.extend(vals)
+        flat.append(key.lower())
+    return list(set(flat))  # Unique
+
+clients_flat = flatten_dict(EVERGENT_CLIENTS)
+competitors_flat = flatten_dict(COMPETITORS)
+telcos_flat = flatten_dict(TOP_TELCOS)
+
+# Brainstormed and optimized CEO phrases with permutations (using clients, competitors, telcos)
+def generate_ceo_phrases(base_terms, entities):
+    phrases = []
+    terms = ["key announcements", "major deals", "contracts", "mergers acquisitions", "strategic updates", "business developments"]
+    for term in terms:
+        # Permutations with entities
+        entity_perm = f"({ ' OR '.join(entities[:5]) })" if entities else ""  # Limit to avoid query length issues
+        phrases.append(f"{term} {base_terms} last week {entity_perm}")
+    return phrases
+
+SECTION_QUERIES = {
+    "telco": generate_ceo_phrases("telecom OSS BSS", telcos_flat + competitors_flat + clients_flat),
+    "ott": generate_ceo_phrases("OTT streaming content", clients_flat + competitors_flat),
+    "sports": generate_ceo_phrases("sports events rights", clients_flat + telcos_flat),
+    "technology": generate_ceo_phrases("technology AI cloud", competitors_flat + clients_flat)
 }
 
 HEADERS = {
@@ -201,7 +330,7 @@ def extract_summary(entry, max_len=300):
     for field in ['summary', 'description', 'content']:
         if hasattr(entry, field):
             content = getattr(entry, field)
-            if isinstance(content, list) and len(content):
+            if isinstance(content, list) and len(content) > 0:
                 content = content[0].get('value', '')
             summary = clean(content)
             if summary:
@@ -211,35 +340,34 @@ def extract_summary(entry, max_len=300):
     return summary if summary else ""
 
 def ai_summarize_news(title, summary):
-    # Human-brain like AI summarizer: Prioritize critical business elements (impact, numbers, strategy)
+    # AI algorithm mimicking human brain: Focus on critical elements (impact, numbers, strategy)
     full_text = f"{title}. {summary}"
     sentences = re.split(r'[.!?]+', full_text)
     sentences = [s.strip() for s in sentences if len(s.strip()) > 20]
     
-    # Scoring algorithm mimicking human priority
+    # Permutation-based scoring for best summary
     scored_sentences = []
     for sentence in sentences:
         score = 0
         lower = sentence.lower()
-        # High score for financial/strategic terms
-        if any(term in lower for term in ["billion", "million", "percent", "growth", "revenue", "profit", "market share"]):
+        # Permutations of key terms
+        if any(term in lower for term in all_critical_terms):  # From brainstormed lists
             score += 5
-        # Medium score for action terms
-        if any(term in lower for term in ["announce", "launch", "partnership", "merger", "acquisition", "deal", "contract"]):
-            score += 3
-        # Low score for leadership
-        if any(term in lower for term in ["ceo", "executive", "leadership", "strategic"]):
-            score += 2
         scored_sentences.append((sentence, score))
     
     scored_sentences.sort(key=lambda x: x[1], reverse=True)
     
-    exec_summary = [s for s, score in scored_sentences if score > 0][:3]  # Top 3 critical sentences
+    exec_summary = [s for s, score in scored_sentences if score > 0][:3]  # Top 3
     if not exec_summary:
         return summary[:220] + "..." if len(summary) > 220 else summary
     
     result = '. '.join(exec_summary)
     return result + '.' if not result.endswith('.') else result
+
+all_critical_terms = set()
+for d in [EVERGENT_CLIENTS, COMPETITORS, TOP_TELCOS]:
+    for vals in d.values():
+        all_critical_terms.update([v.lower() for v in vals])
 
 def fetch_news_for_section(phrases):
     items = []
@@ -292,16 +420,16 @@ def fetch_news_for_section(phrases):
         except:
             pass
     
-    # AI-optimized ranking: Sort by pub date and summary length (longer summaries often more informative)
+    # AI-optimized: Sort by recency and relevance (length of summary as proxy for info density)
     items.sort(key=lambda x: (x["pub"], len(x["summary"])), reverse=True)
-    return items[:10]  # Top 10 optimized
+    return items[:10]  # Best 10
 
-# Load AI-driven news for all sections
+# Load AI-driven news
 @st.cache_data(ttl=300)
 def load_ai_news():
     categorized = {}
     with ThreadPoolExecutor(max_workers=4) as executor:
-        futures = {executor.submit(fetch_news_for_section, SECTIONS[cat]["phrases"]): cat for cat in SECTIONS}
+        futures = {executor.submit(fetch_news_for_section, SECTION_QUERIES[cat]): cat for cat in SECTION_QUERIES}
         for future in as_completed(futures):
             cat = futures[future]
             try:
@@ -345,7 +473,7 @@ def render_section_news(items):
 
 # === LOADING ===
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading AI-Driven CEO Dashboard...<br><small>Fetching optimized key news</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading AI-Driven CEO Dashboard...<br><small>Fetching critical news summaries</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_ai_news()
@@ -354,10 +482,10 @@ placeholder.empty()
 
 # === RENDER DASHBOARD ===
 cols = st.columns(4)
-cat_list = list(SECTIONS.keys())
+cat_list = list(SECTION_QUERIES.keys())
 
 for idx, cat in enumerate(cat_list):
-    sec = SECTIONS[cat]
+    sec = SECTION_QUERIES[cat]
     items = data.get(cat, [])
     news_html = render_section_news(items)
     
