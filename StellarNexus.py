@@ -40,7 +40,7 @@ st.session_state.last_access = now
 
 st.set_page_config(page_title="Global Telecom & OTT Stellar Nexus", page_icon="🌐", layout="wide")
 
-# Styling (your original + AI Overview look)
+# Styling (simplified - no AI Overview styles)
 st.markdown("""
 <style>
     .stApp { background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed; background-size: cover; color: #1e293b; padding-top: 0.5rem; }
@@ -54,19 +54,18 @@ st.markdown("""
     .col-header-orange { background: linear-gradient(135deg, #fb923c, #f97316); }
     .col-body { background: white; border-radius: 0 0 14px 14px; padding: 12px; min-height: 520px; max-height: 620px; overflow-y: auto; box-shadow: 0 6px 20px rgba(0,0,0,0.08); margin-bottom: 1rem; }
     .news-card { background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
-    .news-title { color: #1e40af; font-size: 0.92rem; font-weight: 600; line-height: 1.35; margin-bottom: 8px; }
-    .news-summary { color: #475569; font-size: 0.85rem; line-height: 1.5; margin-bottom: 10px; padding: 10px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #3b82f6; }
-    .empty-message { text-align: center; color: #94a3b8; padding: 30px; }
-    .ai-overview { background: white; border-left: 5px solid #4285f4; padding: 12px 16px; margin: 10px 0; border-radius: 4px; }
-    .bullet-list { margin-left: 20px; }
-    .bullet-list li { margin-bottom: 8px; font-size: 0.9rem; }
+    .news-title a { color: #1e40af; font-size: 0.95rem; font-weight: 600; text-decoration: none; }
+    .news-title a:hover { color: #1d4ed8; text-decoration: underline; }
+    .news-summary { color: #475569; font-size: 0.85rem; line-height: 1.5; margin-top: 6px; }
+    .news-meta { font-size: 0.76rem; color: #64748b; margin-top: 6px; }
+    .empty-message { text-align: center; color: #94a3b8; padding: 30px; font-size: 0.9rem; }
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown("""
 <div class="header-container">
     <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
-    <p class="subtitle">AI-Powered Competitive Intelligence</p>
+    <p class="subtitle">Real-time Competitive Intelligence Dashboard</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -100,8 +99,8 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-# Google search phrase for AI Overview + recent announcements
-GOOGLE_SEARCH_PHRASE = "only OSS BSS key recent announcements within last one week"
+# Google News RSS for "only OSS BSS key recent announcements" (last week focus)
+GOOGLE_OSS_BSS_URL = "https://news.google.com/rss/search?q=only+OSS+BSS+key+recent+announcements+after:2026-01-03&hl=en-US&gl=US&ceid=US:en"
 
 SECTIONS = {
     "telco": {"icon": "📡", "name": "Telco & OSS/BSS", "style": "col-header col-header-pink"},
@@ -125,7 +124,7 @@ SOURCE_CATEGORY_MAP = {
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept": "application/rss+xml, application/xml, text/xml, */*",
 }
 
 def clean(raw):
@@ -141,41 +140,57 @@ def extract_summary(entry):
                 content = content[0].get('value', '')
             summary = clean(content)
             if summary:
-                return summary[:300] + '...' if len(summary) > 300 else summary
+                return summary[:280] + '...' if len(summary) > 280 else summary
     return ""
 
-def fetch_google_ai_overview():
-    """Fetch AI Overview + key announcements from Google search (dynamic)"""
-    try:
-        # Use a search API or direct fetch simulation (in production use SerpAPI or similar)
-        # For this demo, we simulate the real AI Overview content from your screenshot
-        # In real deployment, replace with actual search API call
-        overview = """
-        Recent announcements in the OSS/BSS space are primarily focused on AI, cloud migration, automation, and 5G monetization, with major vendor collaborations and new contract wins happening in late 2025 and early 2026.
-        """
-        
-        bullets = [
-            "Cerillion Contract Win (Jan 2026): Cerillion announced a major, five-year contract to supply its full BSS/OSS suite to Omantel, including hosting and managed services.",
-            "Amdocs Acquires Matrixx (Jan 2026): Amdocs acquired BSS player Matrixx for $200 million to enhance charging and data management for 5G services.",
-            "Modern OSS/BSS for 5G Monetization (Jan 2026): CSPs must embrace cloud-native, AI-driven OSS/BSS to unlock new revenue from 5G SA."
-        ]
-        
-        return overview, bullets
-    except:
-        return "AI Overview not available", []
-
 def fetch_google_oss_bss():
-    """Dynamic fetch - returns recent summaries only (no links)"""
     items = []
     try:
-        # In real deployment, use SerpAPI or scrape Google News
-        # For presentation safety, use real recent summaries (dynamic simulation)
-        items = [
-            {"title": "Cerillion Secures £42.5m BSS/OSS Contract", "summary": "Major five-year deal with Omantel including full BSS/OSS suite, hosting, and managed services.", "pub": datetime.now(ZoneInfo("America/New_York")) - timedelta(days=3), "source": "Google OSS/BSS"},
-            {"title": "Amdocs Acquires Matrixx for $200M", "summary": "Acquisition enhances Amdocs' charging and data management capabilities for 5G services.", "pub": datetime.now(ZoneInfo("America/New_York")) - timedelta(days=5), "source": "Google OSS/BSS"},
-            {"title": "Modern OSS/BSS Key to 5G Monetization", "summary": "CSPs need cloud-native, AI-driven systems to monetize 5G standalone networks.", "pub": datetime.now(ZoneInfo("America/New_York")) - timedelta(days=1), "source": "Google OSS/BSS"}
-        ]
+        resp = requests.get(GOOGLE_OSS_BSS_URL, headers=HEADERS, timeout=10)
+        if resp.status_code != 200:
+            return items
+        
+        feed = feedparser.parse(resp.content)
+        if not feed.entries:
+            return items
+        
+        NOW = datetime.now(ZoneInfo("America/New_York"))
+        thirty_days_ago = NOW - timedelta(days=30)
+        
+        for entry in feed.entries:
+            title = clean(entry.get("title", ""))
+            if len(title) < 15:
+                continue
+            
+            link = entry.get("link", "")
+            if not link:
+                continue
+            
+            summary = extract_summary(entry)
+            if not summary:
+                continue
+            
+            pub = NOW
+            if 'published_parsed' in entry:
+                try:
+                    pub = datetime(*entry.published_parsed[:6], tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/New_York"))
+                except:
+                    pass
+            
+            if pub < thirty_days_ago:
+                continue
+            
+            items.append({
+                "title": title,
+                "link": link,
+                "pub": pub,
+                "source": "Google OSS/BSS",
+                "summary": summary
+            })
+        
+        items.sort(key=lambda x: x["pub"], reverse=True)
         return items
+    
     except:
         return []
 
@@ -198,6 +213,10 @@ def fetch_feed(source, url):
             if len(title) < 15:
                 continue
             
+            link = entry.get("link", "")
+            if not link:
+                continue
+            
             summary = extract_summary(entry)
             if not summary:
                 continue
@@ -217,9 +236,10 @@ def fetch_feed(source, url):
             
             items.append({
                 "title": title,
-                "summary": summary,
+                "link": link,
                 "pub": pub,
-                "source": source
+                "source": source,
+                "summary": summary
             })
         
         items.sort(key=lambda x: x["pub"], reverse=True)
@@ -232,11 +252,11 @@ def fetch_feed(source, url):
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
     
-    # Google first for Telco
+    # Google OSS/BSS FIRST - ALL items
     google_items = fetch_google_oss_bss()
     categorized["telco"].extend(google_items)
     
-    # Regular RSS
+    # Then regular RSS
     with ThreadPoolExecutor(max_workers=20) as executor:
         futures = [executor.submit(fetch_feed, s, u) for s, u in RSS_FEEDS]
         for future in as_completed(futures):
@@ -266,11 +286,15 @@ def render_summary_only(items, is_google=False):
     for item in items:
         time_str = get_time_str(item["pub"])
         safe_title = html.escape(item["title"])
+        safe_link = html.escape(item["link"])
         safe_summary = html.escape(item["summary"])
         safe_source = html.escape(item["source"])
         
-        cards += f'''<div class="news-card{'-google' if is_google else ''}">
-<div class="news-title">{safe_title}</div>
+        # Title as small hyperlink
+        title_html = f'<div class="news-title"><a href="{safe_link}" target="_blank">{safe_title}</a></div>'
+        
+        cards += f'''<div class="news-card">
+{title_html}
 <div class="news-summary">{safe_summary}</div>
 <div class="news-meta">
 <span>{time_str}</span> • <span>{safe_source}</span>
@@ -282,24 +306,9 @@ def render_summary_only(items, is_google=False):
     
     return cards
 
-def render_ai_overview():
-    overview, bullets = fetch_google_ai_overview()
-    bullet_html = '<ul class="bullet-list">'
-    for bullet in bullets:
-        bullet_html += f'<li>{bullet}</li>'
-    bullet_html += '</ul>'
-    
-    return f'''
-    <div class="ai-overview">
-        <strong>AI Overview</strong><br>
-        {overview}
-        {bullet_html}
-    </div>
-    '''
-
 # Loading
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading AI-powered summaries...<br><small>Latest OSS/BSS announcements</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading latest OSS/BSS summaries...<br><small>Google first</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_feeds()
@@ -315,14 +324,11 @@ for idx, cat in enumerate(cat_list):
     items = data.get(cat, [])
     
     google_html = ""
-    ai_overview_html = ""
     regular_html = ""
     
     if cat == "telco":
         google_items = [i for i in items if i["source"] == "Google OSS/BSS"]
         regular_items = [i for i in items if i["source"] != "Google OSS/BSS"]
-        
-        ai_overview_html = render_ai_overview()
         google_html = render_summary_only(google_items, is_google=True)
         regular_html = render_summary_only(regular_items)
     else:
@@ -330,16 +336,11 @@ for idx, cat in enumerate(cat_list):
     
     with cols[idx]:
         st.markdown(f'<div class="{sec["style"]}">{sec["icon"]} {sec["name"]}</div>', unsafe_allow_html=True)
-        
-        if cat == "telco":
-            if ai_overview_html:
-                st.markdown(ai_overview_html, unsafe_allow_html=True)
-            if google_html:
-                st.markdown(f'<div class="google-section">{google_html}</div>', unsafe_allow_html=True)
-        
+        if google_html:
+            st.markdown(f'<div class="google-section">{google_html}</div>', unsafe_allow_html=True)
         st.markdown(f'<div class="col-body">{regular_html}</div>', unsafe_allow_html=True)
 
-# Auto-refresh
+# Auto-refresh every 5 minutes
 st.markdown("""
 <script>
 setTimeout(function(){ window.location.reload(); }, 300000);
