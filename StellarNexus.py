@@ -7,7 +7,6 @@ import time
 from zoneinfo import ZoneInfo
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import re
-import hashlib
 
 # Security gate
 try:
@@ -124,84 +123,67 @@ st.markdown("""
         transform: translateY(-2px);
     }
 
-    .announcement-title {
-        color: #1e40af;
-        font-size: 0.92rem;
-        font-weight: 600;
-        line-height: 1.35;
-        margin-bottom: 8px;
-    }
-
-    .announcement-summary {
-        color: #475569;
-        font-size: 0.85rem;
-        line-height: 1.5;
-        margin-bottom: 10px;
-        padding: 10px;
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        border-radius: 8px;
-        border-left: 4px solid #3b82f6;
-        font-weight: 500;
-    }
-
-    .announcement-meta {
-        font-size: 0.76rem;
-        color: #64748b;
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        flex-wrap: wrap;
-    }
-
+    .announcement-title a { color: #1e40af; font-size: 0.92rem; font-weight: 600; text-decoration: none; }
+    .announcement-title a:hover { color: #1d4ed8; text-decoration: underline; }
+    .announcement-summary { color: #475569; font-size: 0.85rem; line-height: 1.5; margin-bottom: 10px; padding: 10px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 8px; border-left: 4px solid #3b82f6; font-weight: 500; }
+    .announcement-meta { font-size: 0.76rem; color: #64748b; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
     .time-hot { color: #dc2626; font-weight: 600; font-style: italic; }
     .time-warm { color: #ea580c; font-weight: 600; }
     .time-normal { color: #64748b; }
-   
-    .empty-message {
-        text-align: center;
-        color: #94a3b8;
-        padding: 30px;
-    }
+    .empty-message { text-align: center; color: #94a3b8; padding: 30px; }
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("""
-<div class="header-container">
-    <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
-    <p class="subtitle">AI-Driven CEO Dashboard – Key Announcements (Last 7 Days)</p>
-</div>
-""", unsafe_allow_html=True)
-
-# Brainstormed and optimized search phrases (permutations for best data pull)
-SECTION_QUERIES = {
-    "telco": [
-        "OSS BSS key announcements telecom last week",
-        "telecom OSS BSS recent deals mergers last 7 days",
-        "major OSS BSS contracts telecom acquisitions last week",
-        "important OSS BSS updates telecom launches last 7 days",
-        "OSS BSS telecom news key developments mergers contracts last week"
-    ],
-    "ott": [
-        "OTT streaming key announcements last week",
-        "streaming platforms recent deals mergers last 7 days",
-        "major OTT content contracts acquisitions last week",
-        "important streaming updates launches last 7 days",
-        "OTT news key developments content deals mergers last week"
-    ],
-    "sports": [
-        "sports events key announcements last week",
-        "sports rights recent deals mergers last 7 days",
-        "major sports contracts events acquisitions last week",
-        "important sports updates tournaments last 7 days",
-        "sports news key developments rights deals contracts last week"
-    ],
-    "technology": [
-        "technology key announcements last week",
-        "tech industry recent deals mergers last 7 days",
-        "major tech contracts acquisitions last week",
-        "important tech updates launches last 7 days",
-        "technology news key developments AI cloud mergers last week"
-    ]
+# CEO-focused section configurations
+SECTIONS = {
+    "telco": {
+        "icon": "📡",
+        "name": "Telco & OSS/BSS",
+        "style": "col-header col-header-pink",
+        "phrases": [
+            "OSS BSS key announcements telecom last week",
+            "telecom OSS BSS recent deals mergers last 7 days",
+            "major OSS BSS contracts telecom acquisitions last week",
+            "important OSS BSS updates telecom launches last 7 days",
+            "OSS BSS telecom news key developments mergers contracts last week"
+        ]
+    },
+    "ott": {
+        "icon": "📺",
+        "name": "OTT & Streaming",
+        "style": "col-header col-header-purple",
+        "phrases": [
+            "OTT streaming key announcements last week",
+            "streaming platforms recent deals mergers last 7 days",
+            "major OTT content contracts acquisitions last week",
+            "important streaming updates launches last 7 days",
+            "OTT news key developments content deals mergers last week"
+        ]
+    },
+    "sports": {
+        "icon": "🏆",
+        "name": "Sports & Events",
+        "style": "col-header col-header-green",
+        "phrases": [
+            "sports events key announcements last week",
+            "sports rights recent deals mergers last 7 days",
+            "major sports contracts events acquisitions last week",
+            "important sports updates tournaments last 7 days",
+            "sports news key developments rights deals contracts last week"
+        ]
+    },
+    "technology": {
+        "icon": "⚡",
+        "name": "Technology",
+        "style": "col-header col-header-orange",
+        "phrases": [
+            "technology key announcements last week",
+            "tech industry recent deals mergers last 7 days",
+            "major tech contracts acquisitions last week",
+            "important tech updates launches last 7 days",
+            "technology news key developments AI cloud mergers last week"
+        ]
+    }
 }
 
 HEADERS = {
@@ -214,12 +196,12 @@ def clean(raw):
         return ""
     return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
 
-def extract_summary(entry, max_len=280):
+def extract_summary(entry, max_len=300):
     summary = ""
     for field in ['summary', 'description', 'content']:
         if hasattr(entry, field):
             content = getattr(entry, field)
-            if isinstance(content, list) and content:
+            if isinstance(content, list) and len(content):
                 content = content[0].get('value', '')
             summary = clean(content)
             if summary:
@@ -229,38 +211,42 @@ def extract_summary(entry, max_len=280):
     return summary if summary else ""
 
 def ai_summarize_news(title, summary):
-    # Enhanced AI summarizer for CEO view - prioritize human-brain like focus on business impact
+    # Human-brain like AI summarizer: Prioritize critical business elements (impact, numbers, strategy)
     full_text = f"{title}. {summary}"
     sentences = re.split(r'[.!?]+', full_text)
     sentences = [s.strip() for s in sentences if len(s.strip()) > 20]
     
-    # Scoring with CEO priorities (revenue, strategy, market impact)
+    # Scoring algorithm mimicking human priority
     scored_sentences = []
     for sentence in sentences:
         score = 0
         lower = sentence.lower()
-        if any(term in lower for term in ["revenue", "profit", "billion", "million", "growth", "market share", "strategic"]):
-            score += 4
-        if any(term in lower for term in ["merger", "acquisition", "deal", "contract", "partnership", "launch"]):
+        # High score for financial/strategic terms
+        if any(term in lower for term in ["billion", "million", "percent", "growth", "revenue", "profit", "market share"]):
+            score += 5
+        # Medium score for action terms
+        if any(term in lower for term in ["announce", "launch", "partnership", "merger", "acquisition", "deal", "contract"]):
             score += 3
-        if any(term in lower for term in ["ceo", "executive", "leadership"]):
+        # Low score for leadership
+        if any(term in lower for term in ["ceo", "executive", "leadership", "strategic"]):
             score += 2
         scored_sentences.append((sentence, score))
     
     scored_sentences.sort(key=lambda x: x[1], reverse=True)
     
-    exec_summary = [s for s, score in scored_sentences if score > 0][:3]  # Top 3 high-impact sentences
+    exec_summary = [s for s, score in scored_sentences if score > 0][:3]  # Top 3 critical sentences
     if not exec_summary:
         return summary[:220] + "..." if len(summary) > 220 else summary
     
     result = '. '.join(exec_summary)
     return result + '.' if not result.endswith('.') else result
 
-def fetch_news_for_section(queries):
+def fetch_news_for_section(phrases):
     items = []
-    for query in queries:
+    seen_titles = set()
+    for phrase in phrases:
         try:
-            url = f"https://news.google.com/rss/search?q={query.replace(' ', '+')}&hl=en-US&gl=US&ceid=US:en"
+            url = f"https://news.google.com/rss/search?q={phrase.replace(' ', '+')}&hl=en-US&gl=US&ceid=US:en"
             resp = requests.get(url, headers=HEADERS, timeout=10)
             if resp.status_code != 200:
                 continue
@@ -271,7 +257,7 @@ def fetch_news_for_section(queries):
             
             for entry in feed.entries:
                 title = clean(entry.get("title", ""))
-                if len(title) < 15:
+                if title in seen_titles or len(title) < 15:
                     continue
                 
                 link = entry.get("link", "")
@@ -282,7 +268,6 @@ def fetch_news_for_section(queries):
                 if not raw_summary:
                     continue
                 
-                # AI summarize
                 exec_summary = ai_summarize_news(title, raw_summary)
                 
                 pub = NOW
@@ -298,26 +283,25 @@ def fetch_news_for_section(queries):
                 items.append({
                     "title": title,
                     "link": link,
+                    "summary": exec_summary,
                     "pub": pub,
-                    "source": "AI Search",
-                    "summary": exec_summary
+                    "source": "AI Search"
                 })
+                seen_titles.add(title)
         
         except:
             pass
     
-    # Deduplicate and sort by date/importance
-    unique_items = {hashlib.md5(item["title"].encode()).hexdigest(): item for item in items}.values()
-    unique_items = sorted(unique_items, key=lambda x: x["pub"], reverse=True)[:5]  # Optimize to top 5 best
-    
-    return list(unique_items)
+    # AI-optimized ranking: Sort by pub date and summary length (longer summaries often more informative)
+    items.sort(key=lambda x: (x["pub"], len(x["summary"])), reverse=True)
+    return items[:10]  # Top 10 optimized
 
 # Load AI-driven news for all sections
 @st.cache_data(ttl=300)
 def load_ai_news():
     categorized = {}
     with ThreadPoolExecutor(max_workers=4) as executor:
-        futures = {executor.submit(fetch_news_for_section, SECTION_QUERIES[cat]): cat for cat in SECTION_QUERIES}
+        futures = {executor.submit(fetch_news_for_section, SECTIONS[cat]["phrases"]): cat for cat in SECTIONS}
         for future in as_completed(futures):
             cat = futures[future]
             try:
@@ -344,15 +328,13 @@ def render_section_news(items):
         safe_summary = html.escape(item["summary"])
         safe_source = html.escape(item["source"])
         
-        title_html = f'<a href="{safe_link}" target="_blank" style="color: #1e40af; font-size: 0.92rem; font-weight: 600; text-decoration: none;">{safe_title}</a>'
+        title_html = f'<a href="{safe_link}" target="_blank">{safe_title}</a>'
         
         cards += f'''<div class="news-card">
 <div class="announcement-title">{title_html}</div>
 <div class="announcement-summary">{safe_summary}</div>
 <div class="announcement-meta">
-<span class="{time_class if 'class' in locals() else ''}">{time_str}</span>
-<span>•</span>
-<span>{safe_source}</span>
+<span>{time_str}</span> • <span>{safe_source}</span>
 </div>
 </div>'''
     
@@ -372,10 +354,10 @@ placeholder.empty()
 
 # === RENDER DASHBOARD ===
 cols = st.columns(4)
-cat_list = list(SECTION_QUERIES.keys())
+cat_list = list(SECTIONS.keys())
 
 for idx, cat in enumerate(cat_list):
-    sec = SECTION_QUERIES[cat]
+    sec = SECTIONS[cat]
     items = data.get(cat, [])
     news_html = render_section_news(items)
     
@@ -383,7 +365,7 @@ for idx, cat in enumerate(cat_list):
         st.markdown(f'<div class="{sec["style"]}">{sec["icon"]} {sec["name"]}</div>', unsafe_allow_html=True)
         st.markdown(f'<div class="col-body">{news_html}</div>', unsafe_allow_html=True)
 
-# Auto-refresh every 5 minutes (updates news dynamically)
+# Auto-refresh every 5 minutes
 st.markdown("""
 <script>
 setTimeout(function(){
