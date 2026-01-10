@@ -41,7 +41,7 @@ st.session_state.last_access = now
 
 st.set_page_config(page_title="Global Telecom & OTT Stellar Nexus", page_icon="🌐", layout="wide")
 
-# Original styling + Google highlight (unchanged)
+# Original styling + Google highlight
 st.markdown("""
 <style>
     .stApp { background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed; background-size: cover; color: #1e293b; padding-top: 0.5rem; }
@@ -67,7 +67,6 @@ st.markdown("""
     .empty-message { text-align: center; color: #94a3b8; padding: 30px; }
     .google-section { background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%); border: 3px solid #fbbf24; border-radius: 12px; padding: 12px; margin-bottom: 15px; }
     .google-header { font-size: 0.85rem; font-weight: 700; color: #78350f; text-align: center; padding: 8px; background: #fbbf24; border-radius: 8px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .separator { height: 2px; background: linear-gradient(90deg, transparent, #e2e8f0, transparent); margin: 15px 0; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -108,7 +107,7 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-# New Google search phrase: "only OSS BSS key recent announcements"
+# Updated Google search phrase as requested
 GOOGLE_OSS_BSS_URL = 'https://news.google.com/rss/search?q="only+OSS+BSS+key+recent+announcements"+after:2025-12-01&hl=en-US&gl=US&ceid=US:en'
 
 SECTIONS = {
@@ -164,9 +163,9 @@ def fetch_google_oss_bss():
             return items
         
         NOW = datetime.now(ZoneInfo("America/New_York"))
-        seven_days_ago = NOW - timedelta(days=7)
+        thirty_days_ago = NOW - timedelta(days=30)  # Relaxed to show real content
         
-        for entry in feed.entries:
+        for entry in feed.entries:  # Fetch ALL items
             title = clean(entry.get("title", ""))
             if len(title) < 15:
                 continue
@@ -176,6 +175,8 @@ def fetch_google_oss_bss():
                 continue
             
             summary = extract_summary(entry)
+            if not summary:
+                continue
             
             pub = NOW
             if 'published_parsed' in entry:
@@ -184,7 +185,7 @@ def fetch_google_oss_bss():
                 except:
                     pass
             
-            if pub < seven_days_ago:
+            if pub < thirty_days_ago:
                 continue
             
             items.append({
@@ -213,9 +214,9 @@ def fetch_feed(source, url):
             return items
         
         NOW = datetime.now(ZoneInfo("America/New_York"))
-        seven_days_ago = NOW - timedelta(days=7)
+        thirty_days_ago = NOW - timedelta(days=30)
         
-        for entry in feed.entries[:8]:
+        for entry in feed.entries[:10]:
             title = clean(entry.get("title", ""))
             if len(title) < 15:
                 continue
@@ -225,6 +226,8 @@ def fetch_feed(source, url):
                 continue
             
             summary = extract_summary(entry)
+            if not summary:
+                continue
             
             pub = NOW
             for k in ("published_parsed", "updated_parsed"):
@@ -236,7 +239,7 @@ def fetch_feed(source, url):
                     except:
                         pass
             
-            if pub < seven_days_ago:
+            if pub < thirty_days_ago:
                 continue
             
             items.append({
@@ -257,11 +260,11 @@ def fetch_feed(source, url):
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
     
-    # Google OSS/BSS FIRST - ALL items (last 7 days)
+    # Google OSS/BSS FIRST - ALL items
     google_items = fetch_google_oss_bss()
     categorized["telco"].extend(google_items)
     
-    # Then regular RSS feeds
+    # Then regular RSS
     with ThreadPoolExecutor(max_workers=20) as executor:
         futures = [executor.submit(fetch_feed, s, u) for s, u in RSS_FEEDS]
         for future in as_completed(futures):
@@ -307,20 +310,20 @@ def render_body(items, is_google=False):
 </div>'''
     
     if not cards:
-        cards = '<div class="empty-message">No news in last 7 days</div>'
+        cards = '<div class="empty-message">No recent news found</div>'
     
     return cards
 
 # Loading
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading latest OSS/BSS intelligence...<br><small>Google first</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading latest OSS/BSS intelligence...<br><small>Google first - all announcements</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_feeds()
 
 placeholder.empty()
 
-# Render
+# Render dashboard
 cols = st.columns(4)
 cat_list = ["telco", "ott", "sports", "technology"]
 
@@ -345,7 +348,7 @@ for idx, cat in enumerate(cat_list):
             st.markdown(f'<div class="google-section">{google_html}</div>', unsafe_allow_html=True)
         st.markdown(f'<div class="col-body">{regular_html}</div>', unsafe_allow_html=True)
 
-# Auto-refresh
+# Auto-refresh every 5 minutes
 st.markdown("""
 <script>
 setTimeout(function(){ window.location.reload(); }, 300000);
