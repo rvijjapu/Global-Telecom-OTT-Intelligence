@@ -5,222 +5,522 @@ from datetime import datetime, timedelta
 import html
 import time
 from zoneinfo import ZoneInfo
-from concurrent.futures import ThreadPoolExecutor, as_completed
-
-# ===============================
-# TOKEN SECURITY GATE (ROBUST)
-# ===============================
-try:
+from concurrent.futures import ThreadPoolExecutor, as_completedSecurity gatetry:
     EXPECTED_TOKEN = st.secrets["CEO_ACCESS_TOKEN"]
-except (FileNotFoundError, KeyError):
-    st.error("Missing or invalid CEO_ACCESS_TOKEN in secrets")
+except FileNotFoundError:
+    st.error(" Missing secrets.toml – Add CEO_ACCESS_TOKEN in .streamlit/secrets.toml or Streamlit Cloud Secrets")
     st.stop()
-
-token_param = st.query_params.get("token")
-if isinstance(token_param, list):
-    provided_token = token_param[0] if token_param else ""
+except KeyError:
+    st.error(" CEO_ACCESS_TOKEN not found in secrets")
+    st.stop()provided_token = st.query_params.get("token")
+if provided_token is not None:
+    provided_token = provided_token[0] if isinstance(provided_token, list) else provided_token
 else:
-    provided_token = token_param if token_param else ""
-
-if provided_token != EXPECTED_TOKEN:
-    st.error("⛔ Unauthorized – Invalid or missing token")
-    st.info("Use: ?token=Vijay (exact match, no quotes)")
-    st.stop()
-
-# Rate limiting
-if "last_access" not in st.session_state:
-    st.session_state.last_access = 0
-
-now = time.time()
+    provided_token = ""if provided_token != EXPECTED_TOKEN:
+    st.error(" Unauthorized access – Invalid or missing token")
+    st.info("Append ?token=your_token to the URL or contact admin.")
+    st.stop()if "last_access" not in st.session_state:
+    st.session_state.last_access = 0now = time.time()
 if now - st.session_state.last_access < 2:
-    st.warning("⏱ Too many requests – Wait a moment")
-    st.stop()
+    st.warning(" Too many requests – Please wait a moment.")
+    st.stop()st.session_state.last_access = nowst.set_page_config(
+    page_title=" Global Telecom & OTT Stellar Nexus",
+    page_icon="",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)st.markdown("""<style>
+    .stApp {
+        background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
+        background-size: cover;
+        color: #1e293b;
+        padding-top: 0.5rem;
+    }
+   
+    .header-container {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 1.2rem 1.5rem;
+        text-align: center;
+        border-radius: 20px;
+        box-shadow: 0 6px 25px rgba(0,0,0,0.08);
+        margin: 0 1.5rem 1.8rem 1.5rem;
+        border-bottom: 4px solid #3b82f6;
+        backdrop-filter: blur(8px);
+    }
 
-st.session_state.last_access = now
+    .main-title {
+        font-size: 2.4rem;
+        font-weight: 800;
+        color: #1e40af;
+        margin: 0;
+        letter-spacing: -0.6px;
+    }
 
-st.set_page_config(page_title="Global Telecom & OTT Stellar Nexus", page_icon="🌐", layout="wide")
+    .subtitle {
+        font-size: 1.1rem;
+        color: #475569;
+        margin-top: 0.6rem;
+        margin-bottom: 0;
+        font-weight: 500;
+    }
 
-# Styling (simplified - no AI Overview styles)
-st.markdown("""
-<style>
-    .stApp { background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed; background-size: cover; color: #1e293b; padding-top: 0.5rem; }
-    .header-container { background: rgba(255,255,255,0.95); padding: 1.2rem 1.5rem; text-align: center; border-radius: 20px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); margin: 0 1.5rem 1.8rem 1.5rem; border-bottom: 4px solid #3b82f6; backdrop-filter: blur(8px); }
-    .main-title { font-size: 2.4rem; font-weight: 800; color: #1e40af; margin: 0; letter-spacing: -0.6px; }
-    .subtitle { font-size: 1.1rem; color: #475569; margin-top: 0.6rem; font-weight: 500; }
-    .col-header { padding: 10px 16px; border-radius: 14px 14px 0 0; color: white; font-weight: 700; font-size: 0.95rem; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .col-header {
+        padding: 10px 16px;
+        border-radius: 14px 14px 0 0;
+        color: white;
+        font-weight: 700;
+        font-size: 0.95rem;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
     .col-header-pink { background: linear-gradient(135deg, #ec4899, #db2777); }
     .col-header-purple { background: linear-gradient(135deg, #a78bfa, #8b5cf6); }
     .col-header-green { background: linear-gradient(135deg, #34d399, #10b981); }
     .col-header-orange { background: linear-gradient(135deg, #fb923c, #f97316); }
-    .col-body { background: white; border-radius: 0 0 14px 14px; padding: 12px; min-height: 520px; max-height: 620px; overflow-y: auto; box-shadow: 0 6px 20px rgba(0,0,0,0.08); margin-bottom: 1rem; }
-    .news-card { background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
-    .news-title a { color: #1e40af; font-size: 0.95rem; font-weight: 600; text-decoration: none; }
-    .news-title a:hover { color: #1d4ed8; text-decoration: underline; }
-    .news-summary { color: #475569; font-size: 0.85rem; line-height: 1.5; margin-top: 6px; }
-    .news-meta { font-size: 0.76rem; color: #64748b; margin-top: 6px; }
-    .empty-message { text-align: center; color: #94a3b8; padding: 30px; font-size: 0.9rem; }
-</style>
-""", unsafe_allow_html=True)
 
-st.markdown("""
-<div class="header-container">
-    <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
-    <p class="subtitle">Real-time Competitive Intelligence Dashboard</p>
+    .col-body {
+        background: white;
+        border-radius: 0 0 14px 14px;
+        padding: 12px;
+        min-height: 520px;
+        max-height: 620px;
+        overflow-y: auto;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        margin-bottom: 1rem;
+    }
+
+    .google-section {
+        background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
+        border: 3px solid #fbbf24;
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 15px;
+    }
+
+    .google-header {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #78350f;
+        text-align: center;
+        padding: 8px;
+        background: #fbbf24;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .news-card {
+        background: #fafbfc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .news-card:hover {
+        background: #f1f5f9;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+        transform: translateY(-2px);
+    }
+
+    .news-card-google {
+        background: #fffef5;
+        border: 2px solid #fbbf24;
+        border-left: 5px solid #f59e0b;
+    }
+
+    .news-title {
+        color: #1e40af;
+        font-size: 0.92rem;
+        font-weight: 600;
+        line-height: 1.35;
+        text-decoration: none;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .news-title:hover {
+        color: #1d4ed8;
+        text-decoration: underline;
+    }
+
+    .news-summary {
+        color: #475569;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        margin-bottom: 10px;
+        padding: 10px;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 8px;
+        border-left: 4px solid #3b82f6;
+        font-weight: 500;
+    }
+
+    .news-meta {
+        font-size: 0.76rem;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        flex-wrap: wrap;
+    }
+
+    .time-hot { color: #dc2626; font-weight: 600; font-style: italic; }
+    .time-warm { color: #ea580c; font-weight: 600; }
+    .time-normal { color: #64748b; }
+   
+    .empty-message {
+        text-align: center;
+        color: #94a3b8;
+        padding: 30px;
+    }
+
+    .separator {
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+        margin: 15px 0;
+    }
+</style>
+""", unsafe_allow_html=True)st.markdown("""<div class="header-container">
+    <h1 class="main-title"> Global Telecom & OTT Stellar Nexus</h1>
+    <p class="subtitle">AI-Powered Competitive Intelligence</p>
 </div>
 """, unsafe_allow_html=True)
 
-# RSS FEEDS (unchanged)
-RSS_FEEDS = [
+=== RSS FEEDS ===RSS_FEEDS = [
+    # Telco & OSS/BSS
     ("Telecoms.com", "https://www.telecoms.com/feed"),
     ("Light Reading", "https://www.lightreading.com/rss/simple"),
-    ("Fierce Telecom", "https://www.fierce-network.com/rss.xml"),
     ("RCR Wireless", "https://www.rcrwireless.com/feed"),
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/"),
     ("ET Telecom", "https://telecom.economictimes.indiatimes.com/rss/topstories"),
     ("The Fast Mode", "https://www.thefastmode.com/rss-feeds"),
-    ("Variety", "https://variety.com/feed/"),
-    ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/"),
-    ("Deadline", "https://deadline.com/feed/"),
-    ("Digital TV Europe", "https://www.digitaltveurope.com/feed/"),
-    ("Advanced Television", "https://advanced-television.com/feed/"),
-    ("ESPN", "https://www.espn.com/espn/rss/news"),
-    ("BBC Sport", "https://feeds.bbci.co.uk/sport/rss.xml"),
-    ("Front Office Sports", "https://frontofficesports.com/feed/"),
-    ("Sportico", "https://www.sportico.com/feed/"),
-    ("SportsPro", "https://www.sportspromedia.com/feed/"),
-    ("Sports Business", "https://rss.app/feeds/qDuU3qpiuafUec6u.xml"),
-    ("TechCrunch", "https://techcrunch.com/feed/"),
-    ("The Verge", "https://www.theverge.com/rss/index.xml"),
-    ("Wired", "https://www.wired.com/feed/rss"),
-    ("Ars Technica", "https://arstechnica.com/rss/"),
-    ("VentureBeat", "https://venturebeat.com/feed/"),
-    ("ZDNet", "https://www.zdnet.com/news/rss.xml"),
-    ("Engadget", "https://www.engadget.com/rss.xml"),
-    ("Techmeme", "https://www.techmeme.com/feed.xml"),
-]
+    ("TelecomTV", "https://www.telecomtv.com/feed/"),# OTT & Streaming
+("Variety", "https://variety.com/feed/"),
+("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/"),
+("Deadline", "https://deadline.com/feed/"),
+("Digital TV Europe", "https://www.digitaltveurope.com/feed/"),
+("Advanced Television", "https://advanced-television.com/feed/"),
+("StreamingMedia", "https://www.streamingmedia.com/RSS/"),
 
-# Google News RSS for "only OSS BSS key recent announcements" (last week focus)
-GOOGLE_OSS_BSS_URL = "https://news.google.com/rss/search?q=only+OSS+BSS+key+recent+announcements+after:2026-01-03&hl=en-US&gl=US&ceid=US:en"
+# Sports
+("ESPN", "https://www.espn.com/espn/rss/news"),
+("BBC Sport", "https://feeds.bbci.co.uk/sport/rss.xml"),
+("Front Office Sports", "https://frontofficesports.com/feed/"),
+("Sportico", "https://www.sportico.com/feed/"),
+("SportsPro", "https://www.sportspromedia.com/feed/"),
+("Sports Business", "https://rss.app/feeds/qDuU3qpiuafUec6u.xml"),
 
-SECTIONS = {
-    "telco": {"icon": "📡", "name": "Telco & OSS/BSS", "style": "col-header col-header-pink"},
-    "ott": {"icon": "📺", "name": "OTT & Streaming", "style": "col-header col-header-purple"},
-    "sports": {"icon": "🏆", "name": "Sports & Events", "style": "col-header col-header-green"},
-    "technology": {"icon": "⚡", "name": "Technology", "style": "col-header col-header-orange"},
-}
-
-SOURCE_CATEGORY_MAP = {
-    "Telecoms.com": "telco", "Light Reading": "telco", "Fierce Telecom": "telco",
+# Technology
+("TechCrunch", "https://techcrunch.com/feed/"),
+("The Verge", "https://www.theverge.com/rss/index.xml"),
+("Wired", "https://www.wired.com/feed/rss"),
+("Ars Technica", "https://arstechnica.com/rss/"),
+("VentureBeat", "https://venturebeat.com/feed/"),
+("ZDNet", "https://www.zdnet.com/news/rss.xml"),
+("Engadget", "https://www.engadget.com/rss.xml"),
+("Techmeme", "https://www.techmeme.com/feed.xml"),]Google search URL for OSS/BSS announcementsGOOGLE_OSS_BSS_URL = "https://news.google.com/rss/search?q=only+OSS+BSS+key+recent+announcements+after:2026-01-03&hl=en-US&gl=US&ceid=US:en"SECTIONS = {
+    "telco": {"icon": "", "name": "Telco & OSS/BSS", "style": "col-header col-header-pink"},
+    "ott": {"icon": "", "name": "OTT & Streaming", "style": "col-header col-header-purple"},
+    "sports": {"icon": "", "name": "Sports & Events", "style": "col-header col-header-green"},
+    "technology": {"icon": "", "name": "Technology", "style": "col-header col-header-orange"},
+}SOURCE_CATEGORY_MAP = {
+    "Telecoms.com": "telco", "Light Reading": "telco",
     "RCR Wireless": "telco", "Mobile World Live": "telco", "ET Telecom": "telco",
-    "The Fast Mode": "telco",
+    "The Fast Mode": "telco", "TelecomTV": "telco",
     "Variety": "ott", "Hollywood Reporter": "ott", "Deadline": "ott",
-    "Digital TV Europe": "ott", "Advanced Television": "ott",
+    "Digital TV Europe": "ott", "Advanced Television": "ott", "StreamingMedia": "ott",
     "ESPN": "sports", "BBC Sport": "sports", "Front Office Sports": "sports",
     "Sportico": "sports", "SportsPro": "sports", "Sports Business": "sports",
     "TechCrunch": "technology", "The Verge": "technology", "Wired": "technology",
     "Ars Technica": "technology", "VentureBeat": "technology", "ZDNet": "technology",
     "Engadget": "technology", "Techmeme": "technology",
-}
-
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-    "Accept": "application/rss+xml, application/xml, text/xml, */*",
-}
-
-def clean(raw):
+}HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "application/rss+xml, application/xml, text/xml, /",
+}def clean(raw):
     if not raw:
         return ""
-    return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
+    return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()def calculate_importance_score(title, summary, category):
+    score = 0
+    text = (title + " " + summary).lower()keywords = CRITICAL_KEYWORDS.get(category, [])
+for keyword in keywords:
+    if keyword in text:
+        score += 2
 
-def extract_summary(entry):
+if len(title) > 60:
+    score += 1
+
+if len(summary) > 50:
+    score += 2
+
+critical_terms = ["acquisition", "merger", "partnership", "launch", "announce", "billion",
+                 "million", "breakthrough", "first", "new", "major", "strategic"]
+for term in critical_terms:
+    if term in text:
+        score += 3
+
+return scoredef extract_summary(entry, max_len=300):
+    """Extract comprehensive summary for AI processing"""
+    summary = ""
     for field in ['summary', 'description', 'content']:
         if hasattr(entry, field):
             content = getattr(entry, field)
-            if isinstance(content, list) and content:
+            if isinstance(content, list) and len(content) > 0:
                 content = content[0].get('value', '')
             summary = clean(content)
             if summary:
-                return summary[:280] + '...' if len(summary) > 280 else summary
-    return ""
+                break
+    if len(summary) > max_len:
+        summary = summary[:max_len].rsplit(' ', 1)[0] + '...'
+    return summary if summary else ""def fetch_full_article_content(url):
+    """Attempt to fetch full article text from URL"""
+    try:
+        resp = requests.get(url, headers=HEADERS, timeout=8)
+        if resp.status_code != 200:
+            return ""    # Extract text from HTML (simple but effective)
+    from html.parser import HTMLParser
+   
+    class ArticleParser(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.text = []
+            self.in_script = False
+            self.in_style = False
+       
+        def handle_starttag(self, tag, attrs):
+            if tag in ['script', 'style', 'nav', 'header', 'footer']:
+                self.in_script = True
+       
+        def handle_endtag(self, tag):
+            if tag in ['script', 'style', 'nav', 'header', 'footer']:
+                self.in_script = False
+       
+        def handle_data(self, data):
+            if not self.in_script and data.strip():
+                self.text.append(data.strip())
+   
+    parser = ArticleParser()
+    parser.feed(resp.text)
+    full_text = ' '.join(parser.text)
+   
+    # Clean and limit
+    full_text = re.sub(r'\s+', ' ', full_text)
+    return full_text[:3000]  # First 3000 chars
+except:
+    return ""def ai_summarize_news(title, summary, url=None):
+    """Advanced AI algorithm to create unique 2-3 line executive summary"""# Try to fetch full article content
+article_content = ""
+if url:
+    article_content = fetch_full_article_content(url)
 
-def fetch_google_oss_bss():
+# Use article content if available, otherwise use summary
+source_text = article_content if article_content else summary
+full_text = f"{title}. {source_text}"
+
+# Split into sentences and clean
+sentences = re.split(r'[.!?]+', full_text)
+sentences = [s.strip() for s in sentences if len(s.strip()) > 25]
+
+if not sentences:
+    return summary[:200] + "..." if len(summary) > 200 else summary
+
+# Remove duplicate/similar sentences
+unique_sentences = []
+seen_content = set()
+
+for sentence in sentences:
+    # Create fingerprint of sentence (first 50 chars, lowercase, no spaces)
+    fingerprint = sentence.lower().replace(' ', '')[:50]
+    if fingerprint not in seen_content:
+        unique_sentences.append(sentence)
+        seen_content.add(fingerprint)
+
+sentences = unique_sentences[:8]  # Top 8 unique sentences
+
+# Advanced scoring system
+scored_sentences = []
+
+for idx, sentence in enumerate(sentences):
+    score = 0
+    sentence_lower = sentence.lower()
+   
+    # Critical business keywords (high weight)
+    critical_words = {
+        'announce': 5, 'launch': 5, 'partnership': 5, 'agreement': 5,
+        'merger': 6, 'acquisition': 6, 'deal': 5, 'contract': 5,
+        'revenue': 4, 'profit': 4, 'billion': 5, 'million': 4,
+        'percent': 3, '%': 3, 'growth': 4, 'expand': 4,
+        'ceo': 4, 'president': 4, 'executive': 3, 'invest': 5,
+        'strategic': 4, 'plan': 3, 'customers': 3, 'users': 3,
+        'new': 3, 'first': 4, 'major': 3, 'significant': 3
+    }
+   
+    for word, weight in critical_words.items():
+        if word in sentence_lower:
+            score += weight
+   
+    # Financial numbers boost
+    numbers = re.findall(r'\d+', sentence)
+    if numbers:
+        score += len(numbers) * 2
+   
+    # Company/proper names (capitalized words)
+    caps = [w for w in sentence.split() if len(w) > 3 and w[0].isupper()]
+    score += min(len(caps), 3)
+   
+    # Position bonus (earlier sentences more important, but not title)
+    if idx > 0 and idx < 4:
+        score += (4 - idx) * 2
+   
+    # Length penalty (too short or too long)
+    if len(sentence) < 40 or len(sentence) > 200:
+        score -= 2
+   
+    # Avoid sentences that are just the title
+    if sentence.strip().lower() == title.strip().lower():
+        score = 0
+   
+    scored_sentences.append((sentence, score, idx))
+
+# Sort by score, then by original position
+scored_sentences.sort(key=lambda x: (-x[1], x[2]))
+
+# Build executive summary with diversity
+exec_summary = []
+total_length = 0
+max_length = 280
+used_words = set()
+
+for sentence, score, idx in scored_sentences:
+    if score <= 0:
+        continue
+   
+    # Check for content diversity
+    sentence_words = set(sentence.lower().split())
+    overlap = len(sentence_words & used_words) / max(len(sentence_words), 1)
+   
+    # Skip if too similar to already selected content
+    if overlap > 0.6 and exec_summary:
+        continue
+   
+    if total_length + len(sentence) <= max_length and len(exec_summary) < 3:
+        exec_summary.append(sentence)
+        total_length += len(sentence)
+        used_words.update(sentence_words)
+   
+    if len(exec_summary) >= 2 and total_length > 150:
+        break
+
+# Fallback if no good sentences found
+if not exec_summary:
+    if summary and len(summary) > 50:
+        return summary[:220] + "..."
+    return "Details available in full article."
+
+# Join and clean
+result = '. '.join(exec_summary)
+if not result.endswith(('.', '!', '?')):
+    result += '.'
+
+# Final cleanup
+result = re.sub(r'\s+', ' ', result).strip()
+
+return resultdef get_article_hash(title, link):
+    return hashlib.md5(f"{title}{link}".encode()).hexdigest()def extract_redirect_url(google_url):
+    """Extract actual article URL from Google News redirect"""
+    try:
+        # Google News URLs contain the actual URL in the 'url' parameter
+        if 'google.com' in google_url and '/articles/' in google_url:
+            resp = requests.get(google_url, headers=HEADERS, timeout=10, allow_redirects=True)
+            return resp.url
+        return google_url
+    except:
+        return google_urldef fetch_google_oss_bss():
+    """Fetch ALL Google OSS/BSS news with direct links"""
     items = []
     try:
-        resp = requests.get(GOOGLE_OSS_BSS_URL, headers=HEADERS, timeout=10)
+        resp = requests.get(GOOGLE_OSS_BSS_URL, headers=HEADERS, timeout=15)
         if resp.status_code != 200:
-            return items
-        
-        feed = feedparser.parse(resp.content)
-        if not feed.entries:
-            return items
-        
-        NOW = datetime.now(ZoneInfo("America/New_York"))
-        thirty_days_ago = NOW - timedelta(days=30)
-        
-        for entry in feed.entries:
+            return items    feed = feedparser.parse(resp.content)
+    if not feed.entries:
+        return items
+   
+    NOW = datetime.now(ZoneInfo("America/New_York"))
+    cutoff_date = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))
+   
+    for entry in feed.entries:  # ALL entries
+        try:
             title = clean(entry.get("title", ""))
             if len(title) < 15:
                 continue
-            
+           
             link = entry.get("link", "")
             if not link:
                 continue
-            
-            summary = extract_summary(entry)
-            if not summary:
-                continue
-            
+           
+            # Extract direct URL from Google redirect
+            direct_link = extract_redirect_url(link)
+           
+            summary = extract_summary(entry, max_len=300)
+           
+            # Generate AI executive summary from full article
+            exec_summary = ai_summarize_news(title, summary, direct_link)
+           
             pub = NOW
-            if 'published_parsed' in entry:
+            if hasattr(entry, 'published_parsed') and entry.published_parsed:
                 try:
                     pub = datetime(*entry.published_parsed[:6], tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/New_York"))
                 except:
                     pass
-            
-            if pub < thirty_days_ago:
+           
+            if pub < cutoff_date:
                 continue
-            
+           
             items.append({
                 "title": title,
-                "link": link,
+                "link": direct_link,
                 "pub": pub,
                 "source": "Google OSS/BSS",
-                "summary": summary
+                "summary": exec_summary,
+                "is_google": True,
+                "hash": get_article_hash(title, direct_link)
             })
-        
-        items.sort(key=lambda x: x["pub"], reverse=True)
-        return items
-    
-    except:
-        return []
-
-def fetch_feed(source, url):
+        except:
+            continue
+   
+    items.sort(key=lambda x: x["pub"], reverse=True)
+    return items
+except:
+    return []def fetch_feed(source, url):
     items = []
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=10)
+        resp = requests.get(url, headers=HEADERS, timeout=12)
         if resp.status_code != 200:
-            return items
-        
-        feed = feedparser.parse(resp.content)
-        if not feed.entries:
-            return items
-        
-        NOW = datetime.now(ZoneInfo("America/New_York"))
-        thirty_days_ago = NOW - timedelta(days=30)
-        
-        for entry in feed.entries[:8]:
+            return items    feed = feedparser.parse(resp.content)
+    if not feed.entries:
+        return items
+   
+    NOW = datetime.now(ZoneInfo("America/New_York"))
+    cutoff_date = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))
+   
+    for entry in feed.entries[:10]:
+        try:
             title = clean(entry.get("title", ""))
             if len(title) < 15:
                 continue
-            
+           
             link = entry.get("link", "")
             if not link:
                 continue
-            
-            summary = extract_summary(entry)
-            if not summary:
-                continue
-            
+           
+            summary = extract_summary(entry, max_len=300)
+           
+            # Generate AI executive summary from full article
+            exec_summary = ai_summarize_news(title, summary, link)
+           
             pub = NOW
             for k in ("published_parsed", "updated_parsed"):
                 val = getattr(entry, k, None)
@@ -230,119 +530,129 @@ def fetch_feed(source, url):
                         break
                     except:
                         pass
-            
-            if pub < thirty_days_ago:
+           
+            if pub < cutoff_date:
                 continue
-            
+           
             items.append({
                 "title": title,
                 "link": link,
                 "pub": pub,
                 "source": source,
-                "summary": summary
+                "summary": exec_summary,
+                "is_google": False,
+                "hash": get_article_hash(title, link)
             })
-        
-        items.sort(key=lambda x: x["pub"], reverse=True)
-        return items
-    
-    except:
-        return items
-
-@st.cache_data(ttl=300)
+        except:
+            continue
+   
+    return items
+except:
+    return []@st
+.cache_data(ttl=300, show_spinner=False)
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
-    
-    # Google OSS/BSS FIRST - ALL items
-    google_items = fetch_google_oss_bss()
-    categorized["telco"].extend(google_items)
-    
-    # Then regular RSS
-    with ThreadPoolExecutor(max_workers=20) as executor:
-        futures = [executor.submit(fetch_feed, s, u) for s, u in RSS_FEEDS]
-        for future in as_completed(futures):
-            try:
-                items = future.result()
-                for item in items:
-                    cat = SOURCE_CATEGORY_MAP.get(item["source"], "technology")
-                    categorized[cat].append(item)
-            except:
-                pass
-    
-    for cat in categorized:
-        categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
-    
-    return categorized
+    seen_hashes = set()# STEP 1: Fetch ALL Google OSS/BSS news first
+google_items = fetch_google_oss_bss()
 
-def get_time_str(dt):
+# STEP 2: Fetch regular RSS feeds
+regular_items = {"telco": [], "ott": [], "sports": [], "technology": []}
+
+with ThreadPoolExecutor(max_workers=25) as executor:
+    futures = [executor.submit(fetch_feed, source, url) for source, url in RSS_FEEDS]
+   
+    for future in as_completed(futures):
+        try:
+            items = future.result()
+            for item in items:
+                if item["hash"] not in seen_hashes:
+                    category = SOURCE_CATEGORY_MAP.get(item["source"], "technology")
+                    score = calculate_importance_score(item["title"], item["summary"], category)
+                    item["importance"] = score
+                    regular_items[category].append(item)
+                    seen_hashes.add(item["hash"])
+        except:
+            pass
+
+# STEP 3: Sort regular items by importance
+for cat in regular_items:
+    regular_items[cat].sort(key=lambda x: (-x.get("importance", 0), -x["pub"].timestamp()))
+
+# STEP 4: Return separated lists
+return {
+    "google_oss_bss": google_items,
+    "regular": regular_items
+}def get_time_str(dt):
     now_et = datetime.now(ZoneInfo("America/New_York"))
-    hrs = int((now_et - dt).total_seconds() / 3600)
-    if hrs < 1: return "Now"
-    if hrs < 6: return f"{hrs}h ago"
-    if hrs < 24: return f"{hrs}h ago"
-    return f"{hrs//24}d ago"
-
-def render_summary_only(items, is_google=False):
-    cards = ""
-    for item in items:
-        time_str = get_time_str(item["pub"])
-        safe_title = html.escape(item["title"])
-        safe_link = html.escape(item["link"])
-        safe_summary = html.escape(item["summary"])
-        safe_source = html.escape(item["source"])
-        
-        # Title as small hyperlink
-        title_html = f'<div class="news-title"><a href="{safe_link}" target="_blank">{safe_title}</a></div>'
-        
-        cards += f'''<div class="news-card">
-{title_html}
-<div class="news-summary">{safe_summary}</div>
+    diff = (now_et - dt).total_seconds()
+    hrs = int(diff / 3600)if hrs < 1:
+    return "Just now", "time-hot"
+if hrs < 6:
+    return f"{hrs}h ago", "time-hot"
+if hrs < 24:
+    return f"{hrs}h ago", "time-warm"
+days = hrs // 24
+return f"{days}d ago", "time-normal"def render_google_section(google_items):
+    if not google_items:
+        return ""cards = ""
+for item in google_items:
+    time_str, time_class = get_time_str(item["pub"])
+    safe_title = html.escape(item["title"])
+    safe_link = html.escape(item["link"])
+   
+    cards += f'''<div class="news-card news-card-google"><div class="news-title">{safe_title}</div>
 <div class="news-meta">
-<span>{time_str}</span> • <span>{safe_source}</span>
+<span class="{time_class}">{time_str}</span>
+<span>•</span>
+<span>Google OSS/BSS</span>
+<a href="{safe_link}" target="_blank" class="read-more-btn">
+<span class="hand-icon"></span> Read Full Article
+</a>
 </div>
 </div>'''
-    
-    if not cards:
-        cards = '<div class="empty-message">No recent summaries found</div>'
-    
-    return cards
+   
+return f'''<div class="google-section">{cards}</div>
+<div class="separator"></div>'''
 
-# Loading
-placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading latest OSS/BSS summaries...<br><small>Google first</small></h2>", unsafe_allow_html=True)
+def render_regular_body(items):
+    cards = ""
+    for item in items:
+        time_str, time_class = get_time_str(item["pub"])
+        safe_title = html.escape(item["title"])
+        safe_link = html.escape(item["link"])
+        safe_source = html.escape(item["source"])    cards += f'''<div class="news-card"><div class="news-title">{safe_title}</div>
+<div class="news-meta">
+<span class="{time_class}">{time_str}</span>
+<span>•</span>
+<span>{safe_source}</span>
+<a href="{safe_link}" target="_blank" class="read-more-btn">
+<span class="hand-icon"></span> Read Full Article
+</a>
+</div>
+</div>'''
+   
+if not cards:
+    cards = '<div class="empty-message">No news available</div>'
 
-with st.spinner(""):
-    data = load_feeds()
+return cards=== LOADING ===placeholder = st.empty()
+placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'> Igniting AI-Powered Intelligence...
+<small>Please wait for a moment</small></h2>", unsafe_allow_html=True)with st.spinner(""):
+    data = load_feeds()placeholder.empty()=== RENDER DASHBOARD ===cols = st.columns(4)
+cat_list = ["telco", "ott", "sports", "technology"]for idx, cat in enumerate(cat_list):
+    sec = SECTIONS[cat]# Google section only for telco
+google_section = ""
+if cat == "telco":
+    google_section = render_google_section(data["google_oss_bss"])
 
-placeholder.empty()
+regular_items = data["regular"].get(cat, [])
+regular_cards = render_regular_body(regular_items)
 
-# Render dashboard
-cols = st.columns(4)
-cat_list = ["telco", "ott", "sports", "technology"]
-
-for idx, cat in enumerate(cat_list):
-    sec = SECTIONS[cat]
-    items = data.get(cat, [])
-    
-    google_html = ""
-    regular_html = ""
-    
-    if cat == "telco":
-        google_items = [i for i in items if i["source"] == "Google OSS/BSS"]
-        regular_items = [i for i in items if i["source"] != "Google OSS/BSS"]
-        google_html = render_summary_only(google_items, is_google=True)
-        regular_html = render_summary_only(regular_items)
-    else:
-        regular_html = render_summary_only(items)
-    
-    with cols[idx]:
-        st.markdown(f'<div class="{sec["style"]}">{sec["icon"]} {sec["name"]}</div>', unsafe_allow_html=True)
-        if google_html:
-            st.markdown(f'<div class="google-section">{google_html}</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="col-body">{regular_html}</div>', unsafe_allow_html=True)
-
-# Auto-refresh every 5 minutes
-st.markdown("""
-<script>
-setTimeout(function(){ window.location.reload(); }, 300000);
+with cols[idx]:
+    st.markdown(f'<div class="{sec["style"]}">{sec["icon"]} {sec["name"]}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="col-body">{google_section}{regular_cards}</div>', unsafe_allow_html=True)Auto-refresh every 5 minutesst.markdown("""<script>
+setTimeout(function(){
+    window.location.reload();
+}, 300000);
 </script>
 """, unsafe_allow_html=True)
+
