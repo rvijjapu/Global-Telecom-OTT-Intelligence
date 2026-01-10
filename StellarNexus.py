@@ -288,7 +288,7 @@ def fetch_google_news_oss_bss():
                 try:
                     pub = datetime(*entry.published_parsed[:6], tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/New_York"))
                 except:
-                    pass
+                    pub = NOW  # Fallback if date parse fails
             
             if not pub:
                 pub = NOW
@@ -305,7 +305,7 @@ def fetch_google_news_oss_bss():
                 "summary": summary
             })
         
-        # Sort Google items by pub date (newest first), but they will be placed BEFORE regular news
+        # Sort Google by date (newest first), but place ALL before regular news
         items.sort(key=lambda x: x["pub"], reverse=True)
         return items
     
@@ -370,11 +370,11 @@ def fetch_feed(source, url):
     except:
         return items
 
-@st.cache_data(ttl=180, show_spinner=False)
+@st.cache_data(ttl=60, show_spinner=False)  # Short TTL for quick testing
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
     
-    # 1. ALL Google News OSS/BSS FIRST in Telco (last 7 days, no count limit)
+    # 1. ALL Google News OSS/BSS FIRST in Telco (last 7 days, no limit)
     google_items = fetch_google_news_oss_bss()
     for item in google_items:
         categorized["telco"].append(item)
