@@ -214,7 +214,6 @@ RSS_FEEDS = [
     # Telco & OSS/BSS
     ("Telecoms.com", "https://www.telecoms.com/feed"),
     ("Light Reading", "https://www.lightreading.com/rss/simple"),
-    ("Fierce Telecom", "https://www.fierce-network.com/rss.xml"),
     ("RCR Wireless", "https://www.rcrwireless.com/feed"),
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/"),
     ("ET Telecom", "https://telecom.economictimes.indiatimes.com/rss/topstories"),
@@ -259,7 +258,7 @@ SECTIONS = {
 }
 
 SOURCE_CATEGORY_MAP = {
-    "Telecoms.com": "telco", "Light Reading": "telco", "Fierce Telecom": "telco",
+    "Telecoms.com": "telco", "Light Reading": "telco",
     "RCR Wireless": "telco", "Mobile World Live": "telco", "ET Telecom": "telco",
     "The Fast Mode": "telco", "TelecomTV": "telco",
     "Variety": "ott", "Hollywood Reporter": "ott", "Deadline": "ott",
