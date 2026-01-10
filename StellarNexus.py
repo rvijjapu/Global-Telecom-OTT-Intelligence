@@ -333,8 +333,19 @@ def extract_summary(entry, max_len=180):
 def get_article_hash(title, link):
     return hashlib.md5(f"{title}{link}".encode()).hexdigest()
 
+def extract_redirect_url(google_url):
+    """Extract actual article URL from Google News redirect"""
+    try:
+        # Google News URLs contain the actual URL in the 'url' parameter
+        if 'google.com' in google_url and '/articles/' in google_url:
+            resp = requests.get(google_url, headers=HEADERS, timeout=10, allow_redirects=True)
+            return resp.url
+        return google_url
+    except:
+        return google_url
+
 def fetch_google_oss_bss():
-    """Fetch ALL Google OSS/BSS news"""
+    """Fetch ALL Google OSS/BSS news with direct links"""
     items = []
     try:
         resp = requests.get(GOOGLE_OSS_BSS_URL, headers=HEADERS, timeout=15)
@@ -358,6 +369,9 @@ def fetch_google_oss_bss():
                 if not link:
                     continue
                 
+                # Extract direct URL from Google redirect
+                direct_link = extract_redirect_url(link)
+                
                 summary = extract_summary(entry, max_len=200)
                 
                 pub = NOW
@@ -372,12 +386,12 @@ def fetch_google_oss_bss():
                 
                 items.append({
                     "title": title,
-                    "link": link,
+                    "link": direct_link,
                     "pub": pub,
                     "source": "Google OSS/BSS",
                     "summary": summary,
                     "is_google": True,
-                    "hash": get_article_hash(title, link)
+                    "hash": get_article_hash(title, direct_link)
                 })
             except:
                 continue
@@ -517,7 +531,6 @@ def render_google_section(google_items):
 </div>'''
     
     return f'''<div class="google-section">
-<div class="google-header">🔍 Google OSS/BSS Intelligence ({len(google_items)} Articles)</div>
 {cards}
 </div>
 <div class="separator"></div>'''
@@ -550,7 +563,7 @@ def render_regular_body(items):
 
 # === LOADING ===
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading Google OSS/BSS + Premium Sources<br><small>AI-powered intelligence...</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Igniting AI-Powered Intelligence...<br><small>Please wait a moment</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_feeds()
