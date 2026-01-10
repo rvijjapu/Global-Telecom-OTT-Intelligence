@@ -288,7 +288,7 @@ def fetch_google_news_oss_bss():
                 try:
                     pub = datetime(*entry.published_parsed[:6], tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/New_York"))
                 except:
-                    pub = NOW
+                    pub = NOW  # Fallback
             
             if not pub:
                 pub = NOW
@@ -306,9 +306,9 @@ def fetch_google_news_oss_bss():
             })
         
         items.sort(key=lambda x: x["pub"], reverse=True)
-        return items
+        return items  # ALL Google items
     
-    except:
+    except Exception as e:
         return []
 
 def fetch_feed(source, url):
@@ -373,7 +373,7 @@ def fetch_feed(source, url):
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
     
-    # 1. ALL Google News OSS/BSS FIRST in Telco (last 7 days)
+    # 1. ALL Google News OSS/BSS FIRST (last 7 days, no limit)
     google_items = fetch_google_news_oss_bss()
     for item in google_items:
         categorized["telco"].append(item)
@@ -435,7 +435,7 @@ def render_body(items):
 
 # === LOADING MESSAGE ===
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading latest OSS/BSS intelligence...<br><small>All Google News OSS/BSS first</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading latest OSS/BSS intelligence...<br><small>All Google News OSS/BSS first - all items</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_feeds()
