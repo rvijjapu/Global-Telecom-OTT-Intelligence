@@ -37,126 +37,112 @@ if now - st.session_state.last_access < 2:
 
 st.session_state.last_access = now
 
-st.set_page_config(page_title="🌐 World's #1 Telecom Intelligence Hub", page_icon="🌐", layout="wide")
+st.set_page_config(page_title="🌐 Global Telecom & OTT Stellar Nexus", page_icon="🌐", layout="wide")
 
 # ────────────────────────────────────────────────
-# PREMIUM CEO STYLING
+# CLEAN PROFESSIONAL STYLING
 # ────────────────────────────────────────────────
 st.markdown("""
 <style>
     .stApp { background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed; background-size: cover; color: #1e293b; padding-top: 0.5rem; }
-    .header-container { background: rgba(255,255,255,0.98); padding: 1.5rem 2rem; text-align: center; border-radius: 20px; box-shadow: 0 8px 35px rgba(0,0,0,0.12); margin: 0 1.5rem 2rem 1.5rem; border-bottom: 5px solid #3b82f6; backdrop-filter: blur(12px); }
-    .main-title { font-size: 2.6rem; font-weight: 900; background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; letter-spacing: -0.8px; }
-    .subtitle { font-size: 1.15rem; color: #475569; margin-top: 0.7rem; font-weight: 600; }
-    .col-header { padding: 12px 18px; border-radius: 14px 14px 0 0; color: white; font-weight: 800; font-size: 1rem; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); text-transform: uppercase; letter-spacing: 0.5px; }
+    .header-container { background: rgba(255,255,255,0.95); padding: 1.2rem 1.5rem; text-align: center; border-radius: 20px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); margin: 0 1.5rem 1.8rem 1.5rem; border-bottom: 4px solid #3b82f6; backdrop-filter: blur(8px); }
+    .main-title { font-size: 2.4rem; font-weight: 800; color: #1e40af; margin: 0; letter-spacing: -0.6px; }
+    .subtitle { font-size: 1.1rem; color: #475569; margin-top: 0.6rem; font-weight: 500; }
+    .col-header { padding: 10px 16px; border-radius: 14px 14px 0 0; color: white; font-weight: 700; font-size: 0.95rem; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     .col-header-pink { background: linear-gradient(135deg, #ec4899, #db2777); }
     .col-header-purple { background: linear-gradient(135deg, #a78bfa, #8b5cf6); }
     .col-header-green { background: linear-gradient(135deg, #34d399, #10b981); }
     .col-header-orange { background: linear-gradient(135deg, #fb923c, #f97316); }
-    .col-body { background: white; border-radius: 0 0 14px 14px; padding: 14px; min-height: 540px; max-height: 640px; overflow-y: auto; box-shadow: 0 6px 25px rgba(0,0,0,0.1); margin-bottom: 1rem; }
-    .news-card { background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 12px; transition: all 0.3s ease; position: relative; }
-    .news-card:hover { background: #f1f5f9; box-shadow: 0 6px 20px rgba(59,130,246,0.15); transform: translateY(-3px); border-color: #3b82f6; }
-    .news-card-evergent { background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%); border: 2px solid #f59e0b; border-left: 6px solid #f59e0b; }
-    .news-card-competitor { background: linear-gradient(135deg, #fee2e2 0%, #fef2f2 100%); border: 2px solid #ef4444; border-left: 6px solid #dc2626; }
-    .news-card-telco { background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%); border: 2px solid #3b82f6; border-left: 6px solid #2563eb; }
-    .news-title a { color: #1e40af; font-size: 0.97rem; font-weight: 700; text-decoration: none; display: block; line-height: 1.4; }
+    .col-body { background: white; border-radius: 0 0 14px 14px; padding: 12px; min-height: 520px; max-height: 620px; overflow-y: auto; box-shadow: 0 6px 20px rgba(0,0,0,0.08); margin-bottom: 1rem; }
+    .news-card { background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 10px; transition: all 0.3s ease; }
+    .news-card:hover { background: #f1f5f9; box-shadow: 0 6px 16px rgba(0,0,0,0.08); transform: translateY(-2px); }
+    .news-title a { color: #1e40af; font-size: 0.92rem; font-weight: 600; text-decoration: none; display: block; line-height: 1.4; }
     .news-title a:hover { color: #1d4ed8; text-decoration: underline; }
-    .news-meta { font-size: 0.78rem; color: #64748b; margin-top: 10px; display: flex; align-items: center; gap: 8px; }
-    .badge { padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
-    .badge-evergent { background: #f59e0b; color: white; }
-    .badge-competitor { background: #dc2626; color: white; }
-    .badge-telco { background: #2563eb; color: white; }
-    .time-hot { color: #dc2626; font-weight: 700; }
-    .time-warm { color: #ea580c; font-weight: 700; }
+    .news-meta { font-size: 0.76rem; color: #64748b; margin-top: 8px; }
+    .time-hot { color: #dc2626; font-weight: 600; }
+    .time-warm { color: #ea580c; font-weight: 600; }
     .time-normal { color: #64748b; }
-    .empty-message { text-align: center; color: #94a3b8; padding: 40px; font-size: 0.95rem; }
-    .stats-badge { display: inline-block; padding: 4px 10px; background: #3b82f6; color: white; border-radius: 8px; font-size: 0.75rem; font-weight: 700; margin-left: 8px; }
+    .empty-message { text-align: center; color: #94a3b8; padding: 30px; font-size: 0.9rem; }
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown("""
 <div class="header-container">
-    <h1 class="main-title">🌐 World's #1 Telecom Intelligence Hub</h1>
-    <p class="subtitle">Evergent-Focused • Competitor Tracking • Global Telco News • Real-Time Intelligence</p>
+    <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
+    <p class="subtitle">AI-Powered Intelligence • Real-Time Industry News</p>
 </div>
 """, unsafe_allow_html=True)
 
 # ────────────────────────────────────────────────
-# EVERGENT, COMPETITORS & TELCOS DATABASE
-# ────────────────────────────────────────────────
-EVERGENT_CLIENTS = ["astro", "mongoltv", "fox sports", "at&t", "nba", "shahid", "mbc", "tv asahi", "tv3", "abs-cbn", 
-                    "viki", "trt", "sinclair", "fanduel", "bally sports", "gotham", "marquee", "sony", "aha", "bbc",
-                    "lightbox", "sky", "cignal", "etv", "simpletv", "telekom malaysia", "britbox", "quickplay", "sooka", "directv"]
-
-COMPETITORS = ["netcracker", "amdocs", "csg", "oracle communications", "ericsson", "nokia", "huawei", "comarch", 
-               "tecnotree", "matrixx", "optiva", "cerillion", "asiainfo", "hansen", "openet", "zte", "mavenir"]
-
-TOP_TELCOS = ["verizon", "at&t", "t-mobile", "comcast", "charter", "bt group", "vodafone", "o2", "orange", "deutsche telekom",
-              "telefonica", "singtel", "maxis", "telstra", "optus", "china mobile", "ntt docomo", "softbank", "reliance jio",
-              "airtel", "etisalat", "stc", "telus", "rogers", "bell canada", "mtn", "telekom malaysia", "spark"]
-
-# ────────────────────────────────────────────────
-# WORLD-CLASS SEARCH INTELLIGENCE
+# OPTIMIZED SEARCH PHRASES - KEY ANNOUNCEMENTS
 # ────────────────────────────────────────────────
 SECTION_QUERIES = {
     "telco": {
         "icon": "📡", "name": "Telco & OSS/BSS", "style": "col-header col-header-pink",
         "phrases": [
-            # Evergent Clients
-            "Astro Malaysia announcement", "MongolTV deal", "FOX Sports streaming", "Shahid VIP update", "MBC Group news",
-            "TV Asahi announcement", "ABS-CBN streaming", "Viki Rakuten deal", "Sinclair Broadcast news", "FanDuel sports",
-            "Bally Sports announcement", "Sony Pictures OTT", "BBC streaming", "Sky NZ announcement", "Cignal TV news",
-            "Telekom Malaysia Unifi", "Britbox announcement", "DirectTV streaming",
-            # Competitors
-            "Netcracker contract win", "Amdocs BSS deal", "CSG Systems announcement", "Oracle Communications BSS",
-            "Ericsson OSS deployment", "Nokia BSS contract", "Huawei BSS news", "Comarch BSS deal", "Tecnotree announcement",
-            "MATRIXX Software contract", "Optiva BSS deal", "Cerillion contract win", "Hansen Technologies news",
-            # Telcos
-            "Verizon network announcement", "AT&T 5G deployment", "T-Mobile network", "Comcast Xfinity", "BT Group announcement",
-            "Vodafone digital transformation", "Deutsche Telekom news", "Singtel announcement", "Telstra network",
-            "China Mobile 5G", "NTT Docomo announcement", "Reliance Jio news", "Airtel India", "Etisalat announcement",
-            # Core Topics
-            "5G BSS monetization", "cloud native BSS", "AI OSS automation", "digital BSS transformation", "telecom BSS SaaS"
+            # Mergers & Acquisitions
+            "telecom merger acquisition 2026", "OSS BSS acquisition deal", "telecom company acquisition announcement",
+            "BSS vendor merger 2026", "OSS platform acquisition", "telecom M&A deal announced",
+            # Major Deals & Contracts
+            "OSS BSS contract win announcement", "telecom operator contract deal", "5G network contract awarded",
+            "BSS platform deployment deal", "OSS implementation contract", "telecom infrastructure deal 2026",
+            # Technology Launches
+            "5G BSS platform launch", "cloud native OSS announcement", "AI powered BSS launch",
+            "digital BSS transformation deal", "OSS automation platform", "next-gen BSS launch 2026",
+            # Partnerships
+            "telecom strategic partnership 2026", "OSS BSS partnership deal", "5G monetization partnership",
+            "digital transformation partnership telecom", "cloud BSS partnership announced",
+            # Company News
+            "Amdocs announcement 2026", "Oracle Communications deal", "Ericsson OSS news",
+            "Nokia BSS announcement", "Netcracker contract", "CSG Systems deal 2026"
         ]
     },
     "ott": {
         "icon": "📺", "name": "OTT & Streaming", "style": "col-header col-header-purple",
         "phrases": [
-            # Major Platforms
-            "Netflix subscriber announcement", "Disney+ streaming news", "HBO Max Warner Bros", "Paramount+ announcement",
-            "Peacock NBCUniversal", "Amazon Prime Video", "Apple TV+ content", "Hulu streaming", "YouTube TV announcement",
-            # Evergent Client OTT
-            "Astro Sooka streaming", "Shahid VIP content", "MBC streaming", "Viki streaming", "Sony LIV announcement",
-            "BBC iPlayer", "Sky streaming", "Britbox content",
-            # Business & Tech
-            "streaming ad tier launch", "password sharing crackdown", "streaming bundle", "SVOD AVOD", "streaming price increase",
-            "OTT sports rights", "streaming original content", "4K HDR streaming", "streaming technology", "OTT monetization"
+            # Platform Announcements
+            "Netflix announcement 2026", "Disney+ streaming deal", "HBO Max Warner Bros announcement",
+            "Paramount+ news 2026", "Amazon Prime Video deal", "Apple TV+ content announcement",
+            # Business Moves
+            "streaming merger acquisition 2026", "OTT platform acquisition deal", "streaming service partnership",
+            "OTT bundle launch announced", "streaming price change 2026", "subscriber growth announcement",
+            # Content Deals
+            "streaming content deal 2026", "OTT sports rights acquisition", "exclusive content licensing deal",
+            "streaming original series announcement", "movie streaming rights deal",
+            # Technology
+            "streaming technology launch", "OTT monetization platform", "ad-supported streaming launch 2026",
+            "streaming AI personalization", "4K streaming announcement"
         ]
     },
     "sports": {
         "icon": "🏆", "name": "Sports & Events", "style": "col-header col-header-green",
         "phrases": [
-            # Major Leagues
-            "NFL broadcasting rights", "NBA streaming deal", "MLB broadcast", "Premier League rights", "FIFA World Cup",
-            "Formula 1 broadcast", "UEFA Champions League", "Super Bowl broadcast",
+            # Major Rights Deals
+            "NFL broadcasting rights deal 2026", "NBA streaming contract announcement", "MLB broadcast deal",
+            "Premier League rights deal 2026", "FIFA broadcasting contract", "Formula 1 media rights 2026",
             # Streaming Sports
-            "Amazon Prime sports", "Apple TV+ sports", "Peacock sports", "ESPN+ streaming", "DAZN sports rights",
-            "FanDuel sports betting", "Bally Sports regional", "FOX Sports streaming",
-            # Events
-            "Olympic Games broadcasting", "tennis streaming rights", "golf tournament broadcast", "esports streaming"
+            "sports streaming rights deal", "Amazon Prime sports announcement", "Apple TV+ sports deal 2026",
+            "ESPN+ streaming rights", "sports betting partnership 2026",
+            # Events & Franchises
+            "Olympic broadcasting deal", "sports franchise acquisition 2026", "stadium naming rights deal",
+            "sports league expansion announcement", "regional sports network deal 2026"
         ]
     },
     "technology": {
         "icon": "⚡", "name": "Technology", "style": "col-header col-header-orange",
         "phrases": [
-            # AI & Cloud
-            "OpenAI ChatGPT announcement", "Google AI Gemini", "Microsoft Copilot", "NVIDIA AI chip", "AWS cloud announcement",
-            "Microsoft Azure deal", "Google Cloud contract",
+            # AI & Innovation
+            "AI announcement 2026", "ChatGPT update announcement", "Google AI deal",
+            "generative AI partnership 2026", "AI chip announcement", "machine learning platform launch",
+            # Cloud & Enterprise
+            "AWS cloud announcement 2026", "Microsoft Azure deal", "Google Cloud contract win",
+            "enterprise software acquisition", "SaaS platform funding 2026",
             # Major Tech
-            "Apple product launch", "Google announcement", "Microsoft acquisition", "Meta announcement", "Amazon AWS",
-            # Enterprise
-            "cybersecurity announcement", "SaaS platform funding", "tech IPO", "semiconductor announcement", "5G infrastructure",
-            "quantum computing", "edge computing", "data center expansion"
+            "Apple product launch 2026", "Microsoft acquisition announcement", "Meta announcement",
+            "Amazon announcement 2026", "Google product launch",
+            # Infrastructure
+            "data center expansion 2026", "semiconductor deal announcement", "5G infrastructure deployment",
+            "cybersecurity acquisition 2026", "tech IPO announcement", "quantum computing breakthrough"
         ]
     }
 }
@@ -169,23 +155,17 @@ HEADERS = {
 def clean(raw):
     return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip() if raw else ""
 
-def categorize_news(title, link):
-    """Intelligent categorization: Evergent client, competitor, or major telco"""
-    text = (title + " " + link).lower()
+def is_valid_article(title, pub_date):
+    """Filter out 2025 articles and ensure recent news only"""
+    # Exclude if title contains "2025"
+    if "2025" in title:
+        return False
     
-    for client in EVERGENT_CLIENTS:
-        if client.lower() in text:
-            return "evergent", client.title()
+    # Must be from 2026
+    if pub_date.year < 2026:
+        return False
     
-    for comp in COMPETITORS:
-        if comp.lower() in text:
-            return "competitor", comp.title()
-    
-    for telco in TOP_TELCOS:
-        if telco.lower() in text:
-            return "telco", telco.title()
-    
-    return "general", "Industry"
+    return True
 
 def fetch_news_for_section(phrases):
     items = []
@@ -218,26 +198,23 @@ def fetch_news_for_section(phrases):
                     except:
                         pass
                 
-                if pub < seven_days_ago:
+                # Skip old articles and 2025 content
+                if pub < seven_days_ago or not is_valid_article(title, pub):
                     continue
-                
-                category, entity = categorize_news(title, link)
                 
                 items.append({
                     "title": title,
                     "link": link,
                     "pub": pub,
-                    "category": category,
-                    "entity": entity
+                    "source": "Industry News"
                 })
                 seen_titles.add(title)
         except:
             continue
     
-    # Sort: Evergent first, then competitors, then telcos, then by date
-    priority = {"evergent": 0, "competitor": 1, "telco": 2, "general": 3}
-    items.sort(key=lambda x: (priority.get(x["category"], 3), -x["pub"].timestamp()))
-    return items[:20]
+    # Sort by newest first
+    items.sort(key=lambda x: x["pub"], reverse=True)
+    return items[:15]
 
 @st.cache_data(ttl=300)
 def load_news():
@@ -258,55 +235,26 @@ def get_time_str(dt):
     if hrs < 1:
         return "Just now", "time-hot"
     if hrs < 6:
-        return f"{hrs}h", "time-hot"
+        return f"{hrs}h ago", "time-hot"
     if hrs < 24:
-        return f"{hrs}h", "time-warm"
-    return f"{hrs//24}d", "time-normal"
+        return f"{hrs}h ago", "time-warm"
+    return f"{hrs//24}d ago", "time-normal"
 
 def render_news(items):
     if not items:
         return '<div class="empty-message">No news in last 7 days</div>'
     
-    evergent_count = sum(1 for x in items if x["category"] == "evergent")
-    competitor_count = sum(1 for x in items if x["category"] == "competitor")
-    telco_count = sum(1 for x in items if x["category"] == "telco")
-    
-    stats = ""
-    if evergent_count:
-        stats += f'<span class="stats-badge">🎯 {evergent_count}</span>'
-    if competitor_count:
-        stats += f'<span class="stats-badge" style="background:#dc2626">⚠️ {competitor_count}</span>'
-    if telco_count:
-        stats += f'<span class="stats-badge" style="background:#2563eb">📞 {telco_count}</span>'
-    
-    cards = stats
-    
+    cards = ""
     for item in items:
         time_str, time_class = get_time_str(item["pub"])
         safe_title = html.escape(item["title"])
         safe_link = html.escape(item["link"])
-        safe_entity = html.escape(item["entity"])
+        safe_source = html.escape(item["source"])
         
-        card_class = "news-card"
-        badge_html = ""
-        
-        if item["category"] == "evergent":
-            card_class = "news-card news-card-evergent"
-            badge_html = f'<span class="badge badge-evergent">🎯</span>'
-        elif item["category"] == "competitor":
-            card_class = "news-card news-card-competitor"
-            badge_html = f'<span class="badge badge-competitor">⚠️</span>'
-        elif item["category"] == "telco":
-            card_class = "news-card news-card-telco"
-            badge_html = f'<span class="badge badge-telco">📞</span>'
-        
-        cards += f'''<div class="{card_class}">
+        cards += f'''<div class="news-card">
 <div class="news-title"><a href="{safe_link}" target="_blank">{safe_title}</a></div>
 <div class="news-meta">
-{badge_html}
-<span class="{time_class}">{time_str}</span>
-<span>•</span>
-<span>{safe_entity}</span>
+<span class="{time_class}">{time_str}</span> • <span>{safe_source}</span>
 </div>
 </div>'''
     
@@ -314,7 +262,7 @@ def render_news(items):
 
 # ─── LOADING ─────────────────────────────────────
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Igniting World-Class Intelligence...<br><small>Scanning Evergent Clients • Competitors • Global Telcos</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Igniting AI-Powered Intelligence...<br><small>Please wait a moment</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_news()
