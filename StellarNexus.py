@@ -182,27 +182,20 @@ st.markdown("""
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 6px 12px;
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        color: white;
+        color: #3b82f6;
         text-decoration: none;
-        border-radius: 8px;
         font-size: 0.8rem;
         font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        transition: all 0.2s ease;
     }
 
     .read-more-btn:hover {
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-        color: white;
-        text-decoration: none;
+        color: #1d4ed8;
+        text-decoration: underline;
     }
 
     .hand-icon {
-        font-size: 1rem;
+        font-size: 0.9rem;
     }
 
     .news-meta {
@@ -758,7 +751,7 @@ def render_regular_body(items):
 
 # === LOADING ===
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Igniting AI-Powered Intelligence...<br><small>Please wait for a moment</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Igniting AI-Powered Intelligence...<br><small>Please wait a moment</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_feeds()
