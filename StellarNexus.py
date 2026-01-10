@@ -713,13 +713,9 @@ def render_google_section(google_items):
         time_str, time_class = get_time_str(item["pub"])
         safe_title = html.escape(item["title"])
         safe_link = html.escape(item["link"])
-        safe_summary = html.escape(item.get("summary", ""))
-        
-        summary_html = f'<div class="news-summary">📋 {safe_summary}</div>' if safe_summary else ''
         
         cards += f'''<div class="news-card news-card-google">
 <div class="news-title">{safe_title}</div>
-{summary_html}
 <div class="news-meta">
 <span class="{time_class}">{time_str}</span>
 <span>•</span>
@@ -742,13 +738,9 @@ def render_regular_body(items):
         safe_title = html.escape(item["title"])
         safe_link = html.escape(item["link"])
         safe_source = html.escape(item["source"])
-        safe_summary = html.escape(item.get("summary", ""))
-        
-        summary_html = f'<div class="news-summary">📋 {safe_summary}</div>' if safe_summary else ''
        
         cards += f'''<div class="news-card">
 <div class="news-title">{safe_title}</div>
-{summary_html}
 <div class="news-meta">
 <span class="{time_class}">{time_str}</span>
 <span>•</span>
@@ -766,7 +758,7 @@ def render_regular_body(items):
 
 # === LOADING ===
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Igniting AI-Powered Intelligence...<br><small>Please wait a moment</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Igniting AI-Powered Intelligence...<br><small>Please wait for a moment</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_feeds()
