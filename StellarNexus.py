@@ -16,7 +16,6 @@ except (FileNotFoundError, KeyError):
     st.error("Missing or invalid CEO_ACCESS_TOKEN in secrets")
     st.stop()
 
-# Safe query param reading
 token_param = st.query_params.get("token")
 if isinstance(token_param, list):
     provided_token = token_param[0] if token_param else ""
@@ -41,7 +40,7 @@ st.session_state.last_access = now
 
 st.set_page_config(page_title="Global Telecom & OTT Stellar Nexus", page_icon="🌐", layout="wide")
 
-# Original styling + Google highlight
+# Your original styling (unchanged)
 st.markdown("""
 <style>
     .stApp { background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed; background-size: cover; color: #1e293b; padding-top: 0.5rem; }
@@ -163,7 +162,7 @@ def fetch_google_oss_bss():
             return items
         
         NOW = datetime.now(ZoneInfo("America/New_York"))
-        thirty_days_ago = NOW - timedelta(days=30)  # Relaxed to show real content
+        thirty_days_ago = NOW - timedelta(days=30)  # Shows real content
         
         for entry in feed.entries:  # Fetch ALL items
             title = clean(entry.get("title", ""))
@@ -310,13 +309,13 @@ def render_body(items, is_google=False):
 </div>'''
     
     if not cards:
-        cards = '<div class="empty-message">No recent news found</div>'
+        cards = '<div class="empty-message">No recent announcements found</div>'
     
     return cards
 
 # Loading
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading latest OSS/BSS intelligence...<br><small>Google first - all announcements</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading latest OSS/BSS key announcements...<br><small>Google first</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_feeds()
