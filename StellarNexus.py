@@ -7,9 +7,8 @@ import html
 import time
 import re
 from zoneinfo import ZoneInfo
-import hashlib
 
-# Security gate
+# Security gate (unchanged)
 try:
     EXPECTED_TOKEN = st.secrets["CEO_ACCESS_TOKEN"]
 except FileNotFoundError:
@@ -30,6 +29,7 @@ if provided_token != EXPECTED_TOKEN:
     st.info("Append `?token=your_token` to the URL or contact admin.")
     st.stop()
 
+# Rate limiting
 if "last_access" not in st.session_state:
     st.session_state.last_access = 0
 
@@ -47,6 +47,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# === ORIGINAL STYLING WITH BACKGROUND IMAGE ===
 st.markdown("""
 <style>
     .stApp {
@@ -124,12 +125,6 @@ st.markdown("""
         transform: translateY(-2px);
     }
 
-    .news-card-google {
-        background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
-        border: 2px solid #fbbf24;
-        border-left: 5px solid #f59e0b;
-    }
-
     .news-title {
         color: #1e40af;
         font-size: 0.92rem;
@@ -172,29 +167,19 @@ st.markdown("""
         color: #94a3b8;
         padding: 30px;
     }
-
-    .google-badge {
-        background: #fbbf24;
-        color: #78350f;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-size: 0.7rem;
-        font-weight: 700;
-        text-transform: uppercase;
-    }
 </style>
 """, unsafe_allow_html=True)
 
+# === HEADER ===
 st.markdown("""
 <div class="header-container">
     <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
-    <p class="subtitle">AI-Powered Competitive Intelligence • All Critical News in One Place</p>
+    <p class="subtitle">Real-time Competitive Intelligence Dashboard</p>
 </div>
 """, unsafe_allow_html=True)
 
-# === COMPREHENSIVE RSS FEEDS ===
+# === RSS FEEDS ===
 RSS_FEEDS = [
-    # Telco & OSS/BSS (Enhanced Coverage)
     ("Telecoms.com", "https://www.telecoms.com/feed"),
     ("Light Reading", "https://www.lightreading.com/rss/simple"),
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml"),
@@ -202,25 +187,17 @@ RSS_FEEDS = [
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/"),
     ("ET Telecom", "https://telecom.economictimes.indiatimes.com/rss/topstories"),
     ("The Fast Mode", "https://www.thefastmode.com/rss-feeds"),
-    ("TelecomTV", "https://www.telecomtv.com/feed/"),
-    
-    # OTT & Streaming (Enhanced Coverage)
     ("Variety", "https://variety.com/feed/"),
     ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/"),
     ("Deadline", "https://deadline.com/feed/"),
     ("Digital TV Europe", "https://www.digitaltveurope.com/feed/"),
     ("Advanced Television", "https://advanced-television.com/feed/"),
-    ("StreamingMedia", "https://www.streamingmedia.com/RSS/"),
-    
-    # Sports
     ("ESPN", "https://www.espn.com/espn/rss/news"),
     ("BBC Sport", "https://feeds.bbci.co.uk/sport/rss.xml"),
     ("Front Office Sports", "https://frontofficesports.com/feed/"),
     ("Sportico", "https://www.sportico.com/feed/"),
     ("SportsPro", "https://www.sportspromedia.com/feed/"),
     ("Sports Business", "https://rss.app/feeds/qDuU3qpiuafUec6u.xml"),
-    
-    # Technology
     ("TechCrunch", "https://techcrunch.com/feed/"),
     ("The Verge", "https://www.theverge.com/rss/index.xml"),
     ("Wired", "https://www.wired.com/feed/rss"),
@@ -231,12 +208,8 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-# Google News RSS for OSS/BSS
-GOOGLE_NEWS_QUERIES = [
-    ("OSS BSS Telecom", "https://news.google.com/rss/search?q=(OSS+BSS+OR+%22operations+support+systems%22+OR+%22business+support+systems%22)+telecom+after:2026-01-01&hl=en-US&gl=US&ceid=US:en"),
-    ("5G Network", "https://news.google.com/rss/search?q=5G+telecom+network+after:2026-01-01&hl=en-US&gl=US&ceid=US:en"),
-    ("OTT Streaming", "https://news.google.com/rss/search?q=(OTT+OR+streaming+OR+%22video+platform%22)+after:2026-01-01&hl=en-US&gl=US&ceid=US:en"),
-]
+# Google News RSS - Targeted for OSS/BSS telecom news
+GOOGLE_OSS_BSS_RSS = "https://news.google.com/rss/search?q=(OSS+BSS+OR+%22operations+support+systems%22+OR+%22business+support+systems%22)+telecom+after:2025-12-01&hl=en-US&gl=US&ceid=US:en"
 
 SECTIONS = {
     "telco": {"icon": "📡", "name": "Telco & OSS/BSS", "style": "col-header col-header-pink"},
@@ -248,32 +221,20 @@ SECTIONS = {
 SOURCE_CATEGORY_MAP = {
     "Telecoms.com": "telco", "Light Reading": "telco", "Fierce Telecom": "telco",
     "RCR Wireless": "telco", "Mobile World Live": "telco", "ET Telecom": "telco",
-    "The Fast Mode": "telco", "TelecomTV": "telco",
+    "The Fast Mode": "telco",
     "Variety": "ott", "Hollywood Reporter": "ott", "Deadline": "ott",
-    "Digital TV Europe": "ott", "Advanced Television": "ott", "StreamingMedia": "ott",
+    "Digital TV Europe": "ott", "Advanced Television": "ott",
     "ESPN": "sports", "BBC Sport": "sports", "Front Office Sports": "sports",
     "Sportico": "sports", "SportsPro": "sports", "Sports Business": "sports",
     "TechCrunch": "technology", "The Verge": "technology", "Wired": "technology",
     "Ars Technica": "technology", "VentureBeat": "technology", "ZDNet": "technology",
     "Engadget": "technology", "Techmeme": "technology",
-    "Google News": "telco",
+    "Google News OSS/BSS": "telco",
 }
 
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
     "Accept": "application/rss+xml, application/xml, text/xml, */*",
-}
-
-# AI-powered importance scoring keywords
-CRITICAL_KEYWORDS = {
-    "telco": ["5g", "oss", "bss", "network", "spectrum", "carrier", "wireless", "fiber", "broadband", 
-              "telecom", "mvno", "mobile operator", "infrastructure", "tower", "antenna", "satellite"],
-    "ott": ["streaming", "netflix", "disney", "hbo", "paramount", "peacock", "hulu", "prime video",
-            "subscription", "svod", "avod", "content", "original series", "licensing", "bundle"],
-    "sports": ["nfl", "nba", "mlb", "soccer", "premier league", "espn", "rights deal", "broadcast",
-               "sports betting", "fantasy", "athlete", "championship", "tournament"],
-    "technology": ["ai", "artificial intelligence", "machine learning", "cloud", "saas", "cybersecurity",
-                   "blockchain", "quantum", "semiconductor", "chip", "startup", "venture capital"]
 }
 
 def clean(raw):
@@ -281,35 +242,7 @@ def clean(raw):
         return ""
     return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
 
-def calculate_importance_score(title, summary, category):
-    """AI algorithm to score news importance"""
-    score = 0
-    text = (title + " " + summary).lower()
-    
-    # Keywords matching
-    keywords = CRITICAL_KEYWORDS.get(category, [])
-    for keyword in keywords:
-        if keyword in text:
-            score += 2
-    
-    # Title length (more detailed = more important)
-    if len(title) > 60:
-        score += 1
-    
-    # Summary availability
-    if len(summary) > 50:
-        score += 2
-    
-    # Critical terms boost
-    critical_terms = ["acquisition", "merger", "partnership", "launch", "announce", "billion", 
-                     "million", "breakthrough", "first", "new", "major", "strategic"]
-    for term in critical_terms:
-        if term in text:
-            score += 3
-    
-    return score
-
-def extract_summary(entry, max_len=180):
+def extract_summary(entry, max_len=160):
     summary = ""
     for field in ['summary', 'description', 'content']:
         if hasattr(entry, field):
@@ -323,15 +256,10 @@ def extract_summary(entry, max_len=180):
         summary = summary[:max_len].rsplit(' ', 1)[0] + '...'
     return summary if summary else ""
 
-def get_article_hash(title, link):
-    """Generate unique hash to avoid duplicates"""
-    return hashlib.md5(f"{title}{link}".encode()).hexdigest()
-
-def fetch_google_news(query_name, url):
-    """Fetch ALL Google News results (no limit)"""
+def fetch_google_news_oss_bss():
     items = []
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=15)
+        resp = requests.get(GOOGLE_OSS_BSS_RSS, headers=HEADERS, timeout=10)
         if resp.status_code != 200:
             return items
         
@@ -340,51 +268,53 @@ def fetch_google_news(query_name, url):
             return items
         
         NOW = datetime.now(ZoneInfo("America/New_York"))
-        cutoff_date = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))
+        today_et = NOW.date()
+        seven_days_ago = today_et - timedelta(days=7)
+        min_date = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))
         
-        for entry in feed.entries:  # ALL entries, no limit
-            try:
-                title = clean(entry.get("title", ""))
-                if len(title) < 15:
-                    continue
-                
-                link = entry.get("link", "")
-                if not link:
-                    continue
-                
-                summary = extract_summary(entry, max_len=200)
-                
-                pub = NOW
-                if hasattr(entry, 'published_parsed') and entry.published_parsed:
-                    try:
-                        pub = datetime(*entry.published_parsed[:6], tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/New_York"))
-                    except:
-                        pass
-                
-                if pub < cutoff_date:
-                    continue
-                
-                items.append({
-                    "title": title,
-                    "link": link,
-                    "pub": pub,
-                    "source": "Google News",
-                    "summary": summary,
-                    "is_google": True,
-                    "hash": get_article_hash(title, link)
-                })
-            except:
+        for entry in feed.entries:  # Take ALL Google results
+            title = clean(entry.get("title", ""))
+            if len(title) < 15:
                 continue
+            
+            link = entry.get("link", "")
+            if not link:
+                continue
+            
+            summary = extract_summary(entry)
+            
+            pub = None
+            if hasattr(entry, 'published_parsed'):
+                try:
+                    pub = datetime(*entry.published_parsed[:6], tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/New_York"))
+                except:
+                    pub = NOW
+            
+            if not pub:
+                pub = NOW
+            
+            pub_date = pub.date()
+            if pub_date < seven_days_ago or pub < min_date:
+                continue
+            
+            items.append({
+                "title": title,
+                "link": link,
+                "pub": pub,
+                "source": "Google News OSS/BSS",
+                "summary": summary
+            })
         
+        items.sort(key=lambda x: x["pub"], reverse=True)
         return items
+    
     except:
         return []
 
 def fetch_feed(source, url):
-    """Fetch RSS feed with error handling"""
     items = []
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=12)
+        resp = requests.get(url, headers=HEADERS, timeout=10)
         if resp.status_code != 200:
             return items
        
@@ -393,115 +323,89 @@ def fetch_feed(source, url):
             return items
        
         NOW = datetime.now(ZoneInfo("America/New_York"))
-        cutoff_date = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))
+        today_et = NOW.date()
+        seven_days_ago = today_et - timedelta(days=7)
+        min_date = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))
         
-        for entry in feed.entries[:10]:  # Top 10 per source
-            try:
-                title = clean(entry.get("title", ""))
-                if len(title) < 15:
-                    continue
-               
-                link = entry.get("link", "")
-                if not link:
-                    continue
-                
-                summary = extract_summary(entry)
-               
-                pub = NOW
-                for k in ("published_parsed", "updated_parsed"):
-                    val = getattr(entry, k, None)
-                    if val:
-                        try:
-                            pub = datetime(*val[:6], tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/New_York"))
-                            break
-                        except:
-                            pass
-               
-                if pub < cutoff_date:
-                    continue
-               
-                items.append({
-                    "title": title,
-                    "link": link,
-                    "pub": pub,
-                    "source": source,
-                    "summary": summary,
-                    "is_google": False,
-                    "hash": get_article_hash(title, link)
-                })
-            except:
+        for entry in feed.entries[:8]:
+            title = clean(entry.get("title", ""))
+            if len(title) < 15:
                 continue
+           
+            link = entry.get("link", "")
+            if not link:
+                continue
+            
+            summary = extract_summary(entry)
+           
+            pub = None
+            for k in ("published_parsed", "updated_parsed"):
+                val = getattr(entry, k, None)
+                if val:
+                    try:
+                        pub = datetime(*val[:6], tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/New_York"))
+                        break
+                    except:
+                        pass
+           
+            if not pub:
+                pub = NOW
+           
+            pub_date = pub.date()
+            if pub_date < seven_days_ago or pub < min_date:
+                continue
+           
+            items.append({
+                "title": title,
+                "link": link,
+                "pub": pub,
+                "source": source,
+                "summary": summary
+            })
        
+        items.sort(key=lambda x: x["pub"], reverse=True)
         return items
+       
     except:
-        return []
+        return items
 
-@st.cache_data(ttl=300, show_spinner=False)
+@st.cache_data(ttl=60, show_spinner=False)  # Short TTL for quick refresh
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
-    seen_hashes = set()
     
-    # STEP 1: Fetch ALL Google News first (highest priority)
-    google_items = []
-    for query_name, url in GOOGLE_NEWS_QUERIES:
-        items = fetch_google_news(query_name, url)
-        google_items.extend(items)
-    
-    # Add Google News to telco/ott
+    # 1. ALL Google News OSS/BSS FIRST in Telco (last 7 days)
+    google_items = fetch_google_news_oss_bss()
     for item in google_items:
-        if item["hash"] not in seen_hashes:
-            # Categorize based on title/summary
-            text = (item["title"] + " " + item["summary"]).lower()
-            if any(k in text for k in ["ott", "streaming", "netflix", "disney", "hbo", "video"]):
-                categorized["ott"].append(item)
-            else:
-                categorized["telco"].append(item)
-            seen_hashes.add(item["hash"])
+        categorized["telco"].append(item)
     
-    # STEP 2: Fetch regular RSS feeds
-    with ThreadPoolExecutor(max_workers=25) as executor:
+    # 2. Regular RSS feeds AFTER Google
+    with ThreadPoolExecutor(max_workers=20) as executor:
         futures = [executor.submit(fetch_feed, source, url) for source, url in RSS_FEEDS]
        
         for future in as_completed(futures):
             try:
                 items = future.result()
                 for item in items:
-                    if item["hash"] not in seen_hashes:
-                        category = SOURCE_CATEGORY_MAP.get(item["source"], "technology")
-                        
-                        # Calculate importance score
-                        score = calculate_importance_score(item["title"], item["summary"], category)
-                        item["importance"] = score
-                        
-                        categorized[category].append(item)
-                        seen_hashes.add(item["hash"])
+                    category = SOURCE_CATEGORY_MAP.get(item["source"], "technology")
+                    categorized[category].append(item)
             except:
                 pass
-    
-    # STEP 3: Sort each category by importance + recency
+   
     for cat in categorized:
-        # Google News always first, then by importance score + recency
-        categorized[cat].sort(key=lambda x: (
-            not x.get("is_google", False),  # Google first
-            -x.get("importance", 0),        # Then by importance
-            -x["pub"].timestamp()            # Then by recency
-        ))
+        categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
    
     return categorized
 
 def get_time_str(dt):
     now_et = datetime.now(ZoneInfo("America/New_York"))
-    diff = (now_et - dt).total_seconds()
-    hrs = int(diff / 3600)
-    
+    hrs = int((now_et - dt).total_seconds() / 3600)
     if hrs < 1:
-        return "Just now", "time-hot"
+        return "Now", "time-hot"
     if hrs < 6:
         return f"{hrs}h ago", "time-hot"
     if hrs < 24:
         return f"{hrs}h ago", "time-warm"
-    days = hrs // 24
-    return f"{days}d ago", "time-normal"
+    return f"{hrs//24}d ago", "time-normal"
 
 def render_body(items):
     cards = ""
@@ -512,17 +416,12 @@ def render_body(items):
         safe_source = html.escape(item["source"])
         safe_summary = html.escape(item.get("summary", ""))
         
-        is_google = item.get("is_google", False)
-        card_class = "news-card news-card-google" if is_google else "news-card"
-        google_badge = '<span class="google-badge">🔍 GOOGLE</span>' if is_google else ''
-        
         summary_html = f'<div class="news-summary">{safe_summary}</div>' if safe_summary else ''
        
-        cards += f'''<div class="{card_class}">
+        cards += f'''<div class="news-card">
 <a href="{safe_link}" target="_blank" class="news-title">{safe_title}</a>
 {summary_html}
 <div class="news-meta">
-{google_badge}
 <span class="{time_class}">{time_str}</span>
 <span>•</span>
 <span>{safe_source}</span>
@@ -530,13 +429,13 @@ def render_body(items):
 </div>'''
    
     if not items:
-        cards = '<div class="empty-message">No news available</div>'
+        cards = '<div class="empty-message">No fresh news in last 7 days (US Eastern Time)</div>'
    
     return f'<div class="col-body">{cards}</div>'
 
-# === LOADING ===
+# === LOADING MESSAGE ===
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ AI-Powered News Aggregation<br><small>Analyzing all sources...</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading latest OSS/BSS intelligence...<br><small>All Google News OSS/BSS first</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_feeds()
