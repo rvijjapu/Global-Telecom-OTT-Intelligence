@@ -6,6 +6,8 @@ import html
 import time
 from zoneinfo import ZoneInfo
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import re
+import hashlib
 
 # Security gate
 try:
@@ -107,28 +109,7 @@ st.markdown("""
         margin-bottom: 1rem;
     }
 
-    .ai-overview {
-        background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
-        border: 3px solid #fbbf24;
-        border-radius: 12px;
-        padding: 12px;
-        margin-bottom: 15px;
-    }
-
-    .ai-header {
-        font-size: 0.85rem;
-        font-weight: 700;
-        color: #78350f;
-        text-align: center;
-        padding: 8px;
-        background: #fbbf24;
-        border-radius: 8px;
-        margin-bottom: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .key-announcement {
+    .news-card {
         background: #fafbfc;
         border: 1px solid #e2e8f0;
         border-radius: 10px;
@@ -137,7 +118,7 @@ st.markdown("""
         transition: all 0.3s ease;
     }
 
-    .key-announcement:hover {
+    .news-card:hover {
         background: #f1f5f9;
         box-shadow: 0 6px 16px rgba(0,0,0,0.08);
         transform: translateY(-2px);
@@ -181,75 +162,140 @@ st.markdown("""
         color: #94a3b8;
         padding: 30px;
     }
-
-    .separator {
-        height: 2px;
-        background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
-        margin: 15px 0;
-    }
 </style>
 """, unsafe_allow_html=True)
 
-# Sections and their AI search queries for key announcements last week
+st.markdown("""
+<div class="header-container">
+    <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
+    <p class="subtitle">AI-Driven CEO Dashboard</p>
+</div>
+""", unsafe_allow_html=True)
+
+# Define CEO-focused search queries for each section
 SECTIONS = {
     "telco": {
         "icon": "📡",
         "name": "Telco & OSS/BSS",
         "style": "col-header col-header-pink",
-        "search_query": "key recent announcements in OSS BSS telecom last week"
+        "search_query": "key announcements OSS BSS telecom mergers acquisitions deals contracts last week CEO view"
     },
     "ott": {
         "icon": "📺",
         "name": "OTT & Streaming",
         "style": "col-header col-header-purple",
-        "search_query": "key recent announcements in OTT streaming last week"
+        "search_query": "key announcements OTT streaming mergers acquisitions deals contracts last week CEO view"
     },
     "sports": {
         "icon": "🏆",
         "name": "Sports & Events",
         "style": "col-header col-header-green",
-        "search_query": "key recent announcements in sports events last week"
+        "search_query": "key announcements sports events mergers acquisitions deals contracts last week CEO view"
     },
     "technology": {
         "icon": "⚡",
         "name": "Technology",
         "style": "col-header col-header-orange",
-        "search_query": "key recent announcements in technology last week"
+        "search_query": "key announcements technology mergers acquisitions deals contracts last week CEO view"
     },
 }
 
-# Function to fetch AI-driven news for a section
-def fetch_ai_news(query):
-    # Use Grok's web_search tool simulation - in practice, integrate with an API like Serper or Bing
-    # For this code, we use a placeholder fetch from Google News RSS with the query
-    url = f"https://news.google.com/rss/search?q={query.replace(' ', '+')}+after:{(datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')}&hl=en-US&gl=US&ceid=US:en"
-    resp = requests.get(url, headers=HEADERS, timeout=10)
-    if resp.status_code != 200:
-        return []
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "application/rss+xml, application/xml, text/xml, */*",
+}
+
+def clean(raw):
+    if not raw:
+        return ""
+    return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
+
+def extract_summary(entry, max_len=300):
+    summary = ""
+    for field in ['summary', 'description', 'content']:
+        if hasattr(entry, field):
+            content = getattr(entry, field)
+            if isinstance(content, list) and len(content) > 0:
+                content = content[0].get('value', '')
+            summary = clean(content)
+            if summary:
+                break
+    if len(summary) > max_len:
+        summary = summary[:max_len].rsplit(' ', 1)[0] + '...'
+    return summary if summary else ""
+
+def ai_summarize_news(title, summary):
+    # Simple AI-like summarizer for CEO view - focus on key business impacts
+    full_text = f"{title}. {summary}"
+    sentences = re.split(r'[.!?]+', full_text)
+    sentences = [s.strip() for s in sentences if len(s.strip()) > 20]
     
-    feed = feedparser.parse(resp.content)
+    exec_summary = []
+    for sentence in sentences[:5]:  # Top 5 sentences for summary
+        if any(term in sentence.lower() for term in ["announce", "launch", "partnership", "merger", "acquisition", "deal", "contract", "billion", "million", "growth"]):
+            exec_summary.append(sentence)
+    
+    if not exec_summary:
+        return summary[:220] + "..." if len(summary) > 220 else summary
+    
+    result = '. '.join(exec_summary[:3])  # 3 key sentences
+    return result + '.' if not result.endswith('.') else result
+
+def fetch_ai_announcements(search_query):
     items = []
-    for entry in feed.entries[:10]:  # Top 10 key announcements
-        title = clean(entry.get("title", ""))
-        summary = extract_summary(entry)
-        if title and summary:
+    try:
+        # Use Google News RSS for dynamic fetch
+        url = f"https://news.google.com/rss/search?q={search_query.replace(' ', '+')}+after:{(datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')}&hl=en-US&gl=US&ceid=US:en"
+        resp = requests.get(url, headers=HEADERS, timeout=15)
+        if resp.status_code != 200:
+            return items
+        
+        feed = feedparser.parse(resp.content)
+        NOW = datetime.now(ZoneInfo("America/New_York"))
+        
+        for entry in feed.entries:
+            title = clean(entry.get("title", ""))
+            if len(title) < 15:
+                continue
+            
+            link = entry.get("link", "")
+            if not link:
+                continue
+            
+            raw_summary = extract_summary(entry)
+            if not raw_summary:
+                continue
+            
+            # AI summarize for CEO view
+            exec_summary = ai_summarize_news(title, raw_summary)
+            
+            pub = NOW
+            if hasattr(entry, 'published_parsed') and entry.published_parsed:
+                try:
+                    pub = datetime(*entry.published_parsed[:6], tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/New_York"))
+                except:
+                    pass
+            
             items.append({
                 "title": title,
-                "summary": summary,
-                "pub": datetime.now(ZoneInfo("America/New_York")) - timedelta(days=len(items)),  # Simulate dates
-                "source": "AI Search"
+                "summary": exec_summary,
+                "pub": pub,
+                "source": "AI Search",
+                "link": link  # Kept for potential use, but not displayed
             })
-    
-    return items
+        
+        items.sort(key=lambda x: x["pub"], reverse=True)
+        return items
+    except:
+        return []
 
-# Fetch news for all sections using AI algorithms
+# Load AI-driven announcements for all sections
 @st.cache_data(ttl=300, show_spinner=False)
-def load_ai_news():
+def load_ai_announcements():
     categorized = {}
     with ThreadPoolExecutor(max_workers=4) as executor:
-        futures = {executor.submit(fetch_ai_news, sec["search_query"]): cat for cat, sec in SECTIONS.items()}
-        for future in as_completed(futures):
-            cat = futures[future]
+        futures = [executor.submit(fetch_ai_announcements, sec["search_query"]) for sec in SECTIONS.values()]
+        for cat, future in zip(SECTIONS.keys(), futures):
             try:
                 categorized[cat] = future.result()
             except:
@@ -259,22 +305,27 @@ def load_ai_news():
 
 def get_time_str(dt):
     now_et = datetime.now(ZoneInfo("America/New_York"))
-    hrs = int((now_et - dt).total_seconds() / 3600)
-    if hrs < 1: return "Just now", "time-hot"
-    if hrs < 6: return f"{hrs}h ago", "time-hot"
-    if hrs < 24: return f"{hrs}h ago", "time-warm"
+    diff = (now_et - dt).total_seconds()
+    hrs = int(diff / 3600)
+   
+    if hrs < 1:
+        return "Just now", "time-hot"
+    if hrs < 6:
+        return f"{hrs}h ago", "time-hot"
+    if hrs < 24:
+        return f"{hrs}h ago", "time-warm"
     days = hrs // 24
     return f"{days}d ago", "time-normal"
 
-def render_section_news(items):
+def render_announcements(items):
     cards = ""
     for item in items:
         time_str, time_class = get_time_str(item["pub"])
         safe_title = html.escape(item["title"])
         safe_summary = html.escape(item["summary"])
         safe_source = html.escape(item["source"])
-        
-        cards += f'''<div class="key-announcement">
+       
+        cards += f'''<div class="news-card">
 <div class="announcement-title">{safe_title}</div>
 <div class="announcement-summary">{safe_summary}</div>
 <div class="announcement-meta">
@@ -283,18 +334,18 @@ def render_section_news(items):
 <span>{safe_source}</span>
 </div>
 </div>'''
-    
+   
     if not cards:
-        cards = '<div class="empty-message">No key announcements found in last week</div>'
-    
+        cards = '<div class="empty-message">No key announcements in last week</div>'
+   
     return cards
 
-# Loading
+# === LOADING ===
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading AI-Driven Key Announcements...<br><small>Fetching latest summaries for all sections</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading AI-Driven Key Announcements...<br><small>Fetching CEO-level summaries for last week</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
-    data = load_ai_news()
+    data = load_ai_announcements()
 
 placeholder.empty()
 
@@ -305,8 +356,8 @@ cat_list = list(SECTIONS.keys())
 for idx, cat in enumerate(cat_list):
     sec = SECTIONS[cat]
     items = data.get(cat, [])
-    news_html = render_section_news(items)
-    
+    news_html = render_announcements(items)
+   
     with cols[idx]:
         st.markdown(f'<div class="{sec["style"]}">{sec["icon"]} {sec["name"]}</div>', unsafe_allow_html=True)
         st.markdown(f'<div class="col-body">{news_html}</div>', unsafe_allow_html=True)
