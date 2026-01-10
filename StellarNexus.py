@@ -178,24 +178,20 @@ st.markdown("""
         font-weight: 500;
     }
 
+    .news-summary {
+        color: #475569;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        margin-bottom: 10px;
+        padding: 10px;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 8px;
+        border-left: 4px solid #3b82f6;
+        font-weight: 500;
+    }
+
     .read-more-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        color: #3b82f6;
-        text-decoration: none;
-        font-size: 0.8rem;
-        font-weight: 600;
-        transition: all 0.2s ease;
-    }
-
-    .read-more-btn:hover {
-        color: #1d4ed8;
-        text-decoration: underline;
-    }
-
-    .hand-icon {
-        font-size: 0.9rem;
+        display: none;
     }
 
     .news-meta {
@@ -270,8 +266,8 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-# Google OSS/BSS specific search
-GOOGLE_OSS_BSS_URL = "https://news.google.com/rss/search?q=(OSS+BSS+OR+%22operations+support+systems%22+OR+%22business+support+systems%22)+telecom+after:2026-01-01&hl=en-US&gl=US&ceid=US:en"
+# Google OSS/BSS specific search with exact phrase
+GOOGLE_OSS_BSS_URL = "https://news.google.com/rss/search?q=only+OSS+BSS+key+recent+announcements&hl=en-US&gl=US&ceid=US:en"
 
 SECTIONS = {
     "telco": {"icon": "📡", "name": "Telco & OSS/BSS", "style": "col-header col-header-pink"},
@@ -705,17 +701,17 @@ def render_google_section(google_items):
     for item in google_items:
         time_str, time_class = get_time_str(item["pub"])
         safe_title = html.escape(item["title"])
-        safe_link = html.escape(item["link"])
+        safe_summary = html.escape(item.get("summary", ""))
+        
+        summary_html = f'<div class="news-summary">📋 {safe_summary}</div>' if safe_summary else ''
         
         cards += f'''<div class="news-card news-card-google">
 <div class="news-title">{safe_title}</div>
+{summary_html}
 <div class="news-meta">
 <span class="{time_class}">{time_str}</span>
 <span>•</span>
-<span>Google OSS/BSS</span>
-<a href="{safe_link}" target="_blank" class="read-more-btn">
-<span class="hand-icon">👉</span> Read Full Article
-</a>
+<span>OSS/BSS Intelligence</span>
 </div>
 </div>'''
     
@@ -733,14 +729,11 @@ def render_regular_body(items):
         safe_source = html.escape(item["source"])
        
         cards += f'''<div class="news-card">
-<div class="news-title">{safe_title}</div>
+<a href="{safe_link}" target="_blank" class="news-title">{safe_title}</a>
 <div class="news-meta">
 <span class="{time_class}">{time_str}</span>
 <span>•</span>
 <span>{safe_source}</span>
-<a href="{safe_link}" target="_blank" class="read-more-btn">
-<span class="hand-icon">👉</span> Read Full Article
-</a>
 </div>
 </div>'''
    
