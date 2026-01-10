@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # ===============================
-# 🔐 TOKEN SECURITY GATE (ROBUST)
+# TOKEN SECURITY GATE (ROBUST)
 # ===============================
 try:
     EXPECTED_TOKEN = st.secrets["CEO_ACCESS_TOKEN"]
@@ -40,7 +40,7 @@ st.session_state.last_access = now
 
 st.set_page_config(page_title="Global Telecom & OTT Stellar Nexus", page_icon="🌐", layout="wide")
 
-# Your original styling (unchanged)
+# Styling (unchanged - your original)
 st.markdown("""
 <style>
     .stApp { background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed; background-size: cover; color: #1e293b; padding-top: 0.5rem; }
@@ -106,7 +106,7 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-# Updated Google search phrase as requested
+# Updated Google search phrase - fetches all relevant recent OSS/BSS announcements
 GOOGLE_OSS_BSS_URL = 'https://news.google.com/rss/search?q="only+OSS+BSS+key+recent+announcements"+after:2025-12-01&hl=en-US&gl=US&ceid=US:en'
 
 SECTIONS = {
@@ -162,9 +162,9 @@ def fetch_google_oss_bss():
             return items
         
         NOW = datetime.now(ZoneInfo("America/New_York"))
-        thirty_days_ago = NOW - timedelta(days=30)  # Shows real content
+        thirty_days_ago = NOW - timedelta(days=30)
         
-        for entry in feed.entries:  # Fetch ALL items
+        for entry in feed.entries:  # Fetch ALL matching items
             title = clean(entry.get("title", ""))
             if len(title) < 15:
                 continue
@@ -198,7 +198,8 @@ def fetch_google_oss_bss():
         items.sort(key=lambda x: x["pub"], reverse=True)
         return items
     
-    except:
+    except Exception as e:
+        st.warning(f"Google fetch error: {str(e)}")
         return []
 
 def fetch_feed(source, url):
