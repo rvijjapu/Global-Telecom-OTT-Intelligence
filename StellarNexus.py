@@ -109,6 +109,27 @@ st.markdown("""
         margin-bottom: 1rem;
     }
 
+    .google-section {
+        background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
+        border: 3px solid #fbbf24;
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 15px;
+    }
+
+    .google-header {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #78350f;
+        text-align: center;
+        padding: 8px;
+        background: #fbbf24;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
     .news-card {
         background: #fafbfc;
         border: 1px solid #e2e8f0;
@@ -125,7 +146,7 @@ st.markdown("""
     }
 
     .news-card-google {
-        background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
+        background: #fffef5;
         border: 2px solid #fbbf24;
         border-left: 5px solid #f59e0b;
     }
@@ -173,14 +194,10 @@ st.markdown("""
         padding: 30px;
     }
 
-    .google-badge {
-        background: #fbbf24;
-        color: #78350f;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-size: 0.7rem;
-        font-weight: 700;
-        text-transform: uppercase;
+    .separator {
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+        margin: 15px 0;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -188,13 +205,13 @@ st.markdown("""
 st.markdown("""
 <div class="header-container">
     <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
-    <p class="subtitle">AI-Powered Competitive Intelligence • All Critical News in One Place</p>
+    <p class="subtitle">AI-Powered Competitive Intelligence • Google OSS/BSS First</p>
 </div>
 """, unsafe_allow_html=True)
 
-# === COMPREHENSIVE RSS FEEDS ===
+# === RSS FEEDS ===
 RSS_FEEDS = [
-    # Telco & OSS/BSS (Enhanced Coverage)
+    # Telco & OSS/BSS
     ("Telecoms.com", "https://www.telecoms.com/feed"),
     ("Light Reading", "https://www.lightreading.com/rss/simple"),
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml"),
@@ -204,7 +221,7 @@ RSS_FEEDS = [
     ("The Fast Mode", "https://www.thefastmode.com/rss-feeds"),
     ("TelecomTV", "https://www.telecomtv.com/feed/"),
     
-    # OTT & Streaming (Enhanced Coverage)
+    # OTT & Streaming
     ("Variety", "https://variety.com/feed/"),
     ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/"),
     ("Deadline", "https://deadline.com/feed/"),
@@ -231,12 +248,8 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-# Google News RSS for OSS/BSS
-GOOGLE_NEWS_QUERIES = [
-    ("OSS BSS Telecom", "https://news.google.com/rss/search?q=(OSS+BSS+OR+%22operations+support+systems%22+OR+%22business+support+systems%22)+telecom+after:2026-01-01&hl=en-US&gl=US&ceid=US:en"),
-    ("5G Network", "https://news.google.com/rss/search?q=5G+telecom+network+after:2026-01-01&hl=en-US&gl=US&ceid=US:en"),
-    ("OTT Streaming", "https://news.google.com/rss/search?q=(OTT+OR+streaming+OR+%22video+platform%22)+after:2026-01-01&hl=en-US&gl=US&ceid=US:en"),
-]
+# Google OSS/BSS specific search
+GOOGLE_OSS_BSS_URL = "https://news.google.com/rss/search?q=(OSS+BSS+OR+%22operations+support+systems%22+OR+%22business+support+systems%22)+telecom+after:2026-01-01&hl=en-US&gl=US&ceid=US:en"
 
 SECTIONS = {
     "telco": {"icon": "📡", "name": "Telco & OSS/BSS", "style": "col-header col-header-pink"},
@@ -256,7 +269,6 @@ SOURCE_CATEGORY_MAP = {
     "TechCrunch": "technology", "The Verge": "technology", "Wired": "technology",
     "Ars Technica": "technology", "VentureBeat": "technology", "ZDNet": "technology",
     "Engadget": "technology", "Techmeme": "technology",
-    "Google News": "telco",
 }
 
 HEADERS = {
@@ -264,7 +276,7 @@ HEADERS = {
     "Accept": "application/rss+xml, application/xml, text/xml, */*",
 }
 
-# AI-powered importance scoring keywords
+# AI importance scoring keywords
 CRITICAL_KEYWORDS = {
     "telco": ["5g", "oss", "bss", "network", "spectrum", "carrier", "wireless", "fiber", "broadband", 
               "telecom", "mvno", "mobile operator", "infrastructure", "tower", "antenna", "satellite"],
@@ -282,25 +294,20 @@ def clean(raw):
     return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
 
 def calculate_importance_score(title, summary, category):
-    """AI algorithm to score news importance"""
     score = 0
     text = (title + " " + summary).lower()
     
-    # Keywords matching
     keywords = CRITICAL_KEYWORDS.get(category, [])
     for keyword in keywords:
         if keyword in text:
             score += 2
     
-    # Title length (more detailed = more important)
     if len(title) > 60:
         score += 1
     
-    # Summary availability
     if len(summary) > 50:
         score += 2
     
-    # Critical terms boost
     critical_terms = ["acquisition", "merger", "partnership", "launch", "announce", "billion", 
                      "million", "breakthrough", "first", "new", "major", "strategic"]
     for term in critical_terms:
@@ -324,14 +331,13 @@ def extract_summary(entry, max_len=180):
     return summary if summary else ""
 
 def get_article_hash(title, link):
-    """Generate unique hash to avoid duplicates"""
     return hashlib.md5(f"{title}{link}".encode()).hexdigest()
 
-def fetch_google_news(query_name, url):
-    """Fetch ALL Google News results (no limit)"""
+def fetch_google_oss_bss():
+    """Fetch ALL Google OSS/BSS news"""
     items = []
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=15)
+        resp = requests.get(GOOGLE_OSS_BSS_URL, headers=HEADERS, timeout=15)
         if resp.status_code != 200:
             return items
         
@@ -342,7 +348,7 @@ def fetch_google_news(query_name, url):
         NOW = datetime.now(ZoneInfo("America/New_York"))
         cutoff_date = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))
         
-        for entry in feed.entries:  # ALL entries, no limit
+        for entry in feed.entries:  # ALL entries
             try:
                 title = clean(entry.get("title", ""))
                 if len(title) < 15:
@@ -368,7 +374,7 @@ def fetch_google_news(query_name, url):
                     "title": title,
                     "link": link,
                     "pub": pub,
-                    "source": "Google News",
+                    "source": "Google OSS/BSS",
                     "summary": summary,
                     "is_google": True,
                     "hash": get_article_hash(title, link)
@@ -376,12 +382,12 @@ def fetch_google_news(query_name, url):
             except:
                 continue
         
+        items.sort(key=lambda x: x["pub"], reverse=True)
         return items
     except:
         return []
 
 def fetch_feed(source, url):
-    """Fetch RSS feed with error handling"""
     items = []
     try:
         resp = requests.get(url, headers=HEADERS, timeout=12)
@@ -395,7 +401,7 @@ def fetch_feed(source, url):
         NOW = datetime.now(ZoneInfo("America/New_York"))
         cutoff_date = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))
         
-        for entry in feed.entries[:10]:  # Top 10 per source
+        for entry in feed.entries[:10]:
             try:
                 title = clean(entry.get("title", ""))
                 if len(title) < 15:
@@ -441,24 +447,12 @@ def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
     seen_hashes = set()
     
-    # STEP 1: Fetch ALL Google News first (highest priority)
-    google_items = []
-    for query_name, url in GOOGLE_NEWS_QUERIES:
-        items = fetch_google_news(query_name, url)
-        google_items.extend(items)
-    
-    # Add Google News to telco/ott
-    for item in google_items:
-        if item["hash"] not in seen_hashes:
-            # Categorize based on title/summary
-            text = (item["title"] + " " + item["summary"]).lower()
-            if any(k in text for k in ["ott", "streaming", "netflix", "disney", "hbo", "video"]):
-                categorized["ott"].append(item)
-            else:
-                categorized["telco"].append(item)
-            seen_hashes.add(item["hash"])
+    # STEP 1: Fetch ALL Google OSS/BSS news first
+    google_items = fetch_google_oss_bss()
     
     # STEP 2: Fetch regular RSS feeds
+    regular_items = {"telco": [], "ott": [], "sports": [], "technology": []}
+    
     with ThreadPoolExecutor(max_workers=25) as executor:
         futures = [executor.submit(fetch_feed, source, url) for source, url in RSS_FEEDS]
        
@@ -468,26 +462,22 @@ def load_feeds():
                 for item in items:
                     if item["hash"] not in seen_hashes:
                         category = SOURCE_CATEGORY_MAP.get(item["source"], "technology")
-                        
-                        # Calculate importance score
                         score = calculate_importance_score(item["title"], item["summary"], category)
                         item["importance"] = score
-                        
-                        categorized[category].append(item)
+                        regular_items[category].append(item)
                         seen_hashes.add(item["hash"])
             except:
                 pass
     
-    # STEP 3: Sort each category by importance + recency
-    for cat in categorized:
-        # Google News always first, then by importance score + recency
-        categorized[cat].sort(key=lambda x: (
-            not x.get("is_google", False),  # Google first
-            -x.get("importance", 0),        # Then by importance
-            -x["pub"].timestamp()            # Then by recency
-        ))
-   
-    return categorized
+    # STEP 3: Sort regular items by importance
+    for cat in regular_items:
+        regular_items[cat].sort(key=lambda x: (-x.get("importance", 0), -x["pub"].timestamp()))
+    
+    # STEP 4: Return separated lists
+    return {
+        "google_oss_bss": google_items,
+        "regular": regular_items
+    }
 
 def get_time_str(dt):
     now_et = datetime.now(ZoneInfo("America/New_York"))
@@ -503,7 +493,36 @@ def get_time_str(dt):
     days = hrs // 24
     return f"{days}d ago", "time-normal"
 
-def render_body(items):
+def render_google_section(google_items):
+    if not google_items:
+        return ""
+    
+    cards = ""
+    for item in google_items:
+        time_str, time_class = get_time_str(item["pub"])
+        safe_title = html.escape(item["title"])
+        safe_link = html.escape(item["link"])
+        safe_summary = html.escape(item.get("summary", ""))
+        
+        summary_html = f'<div class="news-summary">{safe_summary}</div>' if safe_summary else ''
+        
+        cards += f'''<div class="news-card news-card-google">
+<a href="{safe_link}" target="_blank" class="news-title">{safe_title}</a>
+{summary_html}
+<div class="news-meta">
+<span class="{time_class}">{time_str}</span>
+<span>•</span>
+<span>Google OSS/BSS</span>
+</div>
+</div>'''
+    
+    return f'''<div class="google-section">
+<div class="google-header">🔍 Google OSS/BSS Intelligence ({len(google_items)} Articles)</div>
+{cards}
+</div>
+<div class="separator"></div>'''
+
+def render_regular_body(items):
     cards = ""
     for item in items:
         time_str, time_class = get_time_str(item["pub"])
@@ -512,31 +531,26 @@ def render_body(items):
         safe_source = html.escape(item["source"])
         safe_summary = html.escape(item.get("summary", ""))
         
-        is_google = item.get("is_google", False)
-        card_class = "news-card news-card-google" if is_google else "news-card"
-        google_badge = '<span class="google-badge">🔍 GOOGLE</span>' if is_google else ''
-        
         summary_html = f'<div class="news-summary">{safe_summary}</div>' if safe_summary else ''
        
-        cards += f'''<div class="{card_class}">
+        cards += f'''<div class="news-card">
 <a href="{safe_link}" target="_blank" class="news-title">{safe_title}</a>
 {summary_html}
 <div class="news-meta">
-{google_badge}
 <span class="{time_class}">{time_str}</span>
 <span>•</span>
 <span>{safe_source}</span>
 </div>
 </div>'''
    
-    if not items:
+    if not cards:
         cards = '<div class="empty-message">No news available</div>'
    
-    return f'<div class="col-body">{cards}</div>'
+    return cards
 
 # === LOADING ===
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ AI-Powered News Aggregation<br><small>Analyzing all sources...</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading Google OSS/BSS + Premium Sources<br><small>AI-powered intelligence...</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_feeds()
@@ -549,11 +563,18 @@ cat_list = ["telco", "ott", "sports", "technology"]
 
 for idx, cat in enumerate(cat_list):
     sec = SECTIONS[cat]
-    items = data.get(cat, [])
+    
+    # Google section only for telco
+    google_section = ""
+    if cat == "telco":
+        google_section = render_google_section(data["google_oss_bss"])
+    
+    regular_items = data["regular"].get(cat, [])
+    regular_cards = render_regular_body(regular_items)
    
     with cols[idx]:
         st.markdown(f'<div class="{sec["style"]}">{sec["icon"]} {sec["name"]}</div>', unsafe_allow_html=True)
-        st.markdown(render_body(items), unsafe_allow_html=True)
+        st.markdown(f'<div class="col-body">{google_section}{regular_cards}</div>', unsafe_allow_html=True)
 
 # Auto-refresh every 5 minutes
 st.markdown("""
