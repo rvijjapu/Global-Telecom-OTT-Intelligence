@@ -106,7 +106,7 @@ RSS_FEEDS = [
     ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
-# Proven working query that fetches real recent OSS/BSS announcements
+# Proven query that fetches REAL recent OSS/BSS announcements
 GOOGLE_OSS_BSS_URL = 'https://news.google.com/rss/search?q=(OSS+BSS+OR+%22operations+support+systems%22+OR+%22business+support+systems%22)+telecom+(announcements+OR+contract+OR+deal+OR+acquisition+OR+launch)+after:2025-12-01&hl=en-US&gl=US&ceid=US:en'
 
 SECTIONS = {
@@ -155,18 +155,18 @@ def fetch_google_oss_bss():
     try:
         resp = requests.get(GOOGLE_OSS_BSS_URL, headers=HEADERS, timeout=10)
         if resp.status_code != 200:
-            st.warning("Google RSS returned non-200 status")
+            st.warning("Google RSS returned non-200 status - check network")
             return items
         
         feed = feedparser.parse(resp.content)
         if not feed.entries:
-            st.warning("Google feed has no entries - try broader query if needed")
+            st.warning("Google feed is empty - query may be too narrow or no recent news")
             return items
         
         NOW = datetime.now(ZoneInfo("America/New_York"))
-        sixty_days_ago = NOW - timedelta(days=60)  # Relaxed to 60 days for reliable display
+        sixty_days_ago = NOW - timedelta(days=60)
         
-        for entry in feed.entries:  # Fetch ALL items
+        for entry in feed.entries:  # ALL items
             title = clean(entry.get("title", ""))
             if len(title) < 15:
                 continue
@@ -201,7 +201,7 @@ def fetch_google_oss_bss():
         return items
     
     except Exception as e:
-        st.warning(f"Google fetch failed: {str(e)}")
+        st.warning(f"Google fetch failed: {str(e)} - using fallback")
         return []
 
 def fetch_feed(source, url):
@@ -218,7 +218,7 @@ def fetch_feed(source, url):
         NOW = datetime.now(ZoneInfo("America/New_York"))
         sixty_days_ago = NOW - timedelta(days=60)
         
-        for entry in feed.entries[:10]:
+        for entry in feed.entries[:15]:  # Increased to 15 for more content
             title = clean(entry.get("title", ""))
             if len(title) < 15:
                 continue
@@ -262,11 +262,9 @@ def fetch_feed(source, url):
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
     
-    # Google OSS/BSS FIRST - ALL items
     google_items = fetch_google_oss_bss()
     categorized["telco"].extend(google_items)
     
-    # Then regular RSS
     with ThreadPoolExecutor(max_workers=20) as executor:
         futures = [executor.submit(fetch_feed, s, u) for s, u in RSS_FEEDS]
         for future in as_completed(futures):
@@ -312,13 +310,13 @@ def render_body(items, is_google=False):
 </div>'''
     
     if not cards:
-        cards = '<div class="empty-message">No recent announcements found</div>'
+        cards = '<div class="empty-message">No recent announcements found (check network or query)</div>'
     
     return cards
 
 # Loading
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading latest OSS/BSS key announcements...<br><small>Google first</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading latest OSS/BSS key announcements...<br><small>Google first - real data</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_feeds()
