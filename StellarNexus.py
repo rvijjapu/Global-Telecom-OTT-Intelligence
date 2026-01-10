@@ -25,7 +25,7 @@ else:
 
 if provided_token != EXPECTED_TOKEN:
     st.error("⛔ Unauthorized – Invalid or missing token")
-    st.info("Use: ?token=Vijay (exact match)")
+    st.info("Use: ?token=your_token")
     st.stop()
 
 # Rate limit
@@ -58,10 +58,12 @@ st.markdown("""
     .col-body { background: white; border-radius: 0 0 14px 14px; padding: 12px; min-height: 520px; max-height: 620px; overflow-y: auto; box-shadow: 0 6px 20px rgba(0,0,0,0.08); margin-bottom: 1rem; }
     .news-card { background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 10px; transition: all 0.3s ease; }
     .news-card:hover { background: #f1f5f9; box-shadow: 0 6px 16px rgba(0,0,0,0.08); transform: translateY(-2px); }
-    .announcement-title a { color: #1e40af; font-size: 0.95rem; font-weight: 600; text-decoration: none; display: block; margin-bottom: 8px; }
-    .announcement-title a:hover { color: #1d4ed8; text-decoration: underline; }
-    .announcement-summary { color: #475569; font-size: 0.85rem; line-height: 1.5; margin-bottom: 10px; padding: 10px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 8px; border-left: 4px solid #3b82f6; font-weight: 500; }
-    .announcement-meta { font-size: 0.76rem; color: #64748b; margin-top: 6px; }
+    .news-title a { color: #1e40af; font-size: 0.95rem; font-weight: 600; text-decoration: none; display: block; }
+    .news-title a:hover { color: #1d4ed8; text-decoration: underline; }
+    .news-meta { font-size: 0.76rem; color: #64748b; margin-top: 8px; }
+    .time-hot { color: #dc2626; font-weight: 600; }
+    .time-warm { color: #ea580c; font-weight: 600; }
+    .time-normal { color: #64748b; }
     .empty-message { text-align: center; color: #94a3b8; padding: 30px; font-size: 0.9rem; }
 </style>
 """, unsafe_allow_html=True)
@@ -74,40 +76,123 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ────────────────────────────────────────────────
-# OPTIMIZED CEO-FOCUSED SEARCH PHRASES
+# COMPREHENSIVE 20+ SEARCH PHRASES PER SECTION
 # ────────────────────────────────────────────────
 SECTION_QUERIES = {
     "telco": {
         "icon": "📡", "name": "Telco & OSS/BSS", "style": "col-header col-header-pink",
         "phrases": [
-            "OSS BSS key announcements telecom last week",
-            "telecom OSS BSS recent deals mergers last 7 days",
-            "major OSS BSS contracts telecom acquisitions last week",
-            "important OSS BSS updates telecom launches last 7 days"
+            "OSS BSS announcement telecom",
+            "operations support systems news",
+            "business support systems telecom",
+            "OSS BSS contract award",
+            "telecom OSS BSS merger acquisition",
+            "OSS BSS platform launch",
+            "BSS billing system announcement",
+            "OSS network management announcement",
+            "telecom BSS charging system",
+            "OSS orchestration announcement",
+            "BSS revenue management news",
+            "OSS service assurance telecom",
+            "BSS customer management announcement",
+            "telecom OSS automation",
+            "BSS order management news",
+            "OSS inventory management telecom",
+            "BSS policy management announcement",
+            "telecom OSS BSS vendor",
+            "OSS BSS deal partnership",
+            "BSS monetization platform announcement",
+            "OSS BSS cloud migration",
+            "telecom BSS digital transformation",
+            "OSS network orchestration announcement",
+            "BSS subscription management news"
         ]
     },
     "ott": {
         "icon": "📺", "name": "OTT & Streaming", "style": "col-header col-header-purple",
         "phrases": [
-            "OTT streaming key announcements last week",
-            "streaming platforms recent deals mergers last 7 days",
-            "major OTT content contracts acquisitions last week"
+            "OTT streaming announcement",
+            "streaming platform launch",
+            "OTT content deal",
+            "streaming service merger acquisition",
+            "OTT video platform announcement",
+            "streaming rights agreement",
+            "OTT subscription announcement",
+            "streaming original content deal",
+            "OTT partnership announcement",
+            "streaming technology announcement",
+            "OTT monetization announcement",
+            "streaming advertising deal",
+            "OTT bundle announcement",
+            "streaming expansion announcement",
+            "OTT content licensing deal",
+            "streaming platform upgrade",
+            "OTT revenue announcement",
+            "streaming user growth announcement",
+            "OTT international expansion",
+            "streaming content library announcement",
+            "OTT pricing announcement",
+            "streaming device partnership",
+            "OTT distribution deal",
+            "streaming quality enhancement announcement"
         ]
     },
     "sports": {
         "icon": "🏆", "name": "Sports & Events", "style": "col-header col-header-green",
         "phrases": [
-            "sports events key announcements last week",
-            "sports rights recent deals mergers last 7 days",
-            "major sports contracts events last week"
+            "sports rights deal announcement",
+            "sports broadcasting agreement",
+            "sports event announcement",
+            "sports league partnership",
+            "sports streaming rights deal",
+            "sports sponsorship announcement",
+            "sports media rights agreement",
+            "sports franchise announcement",
+            "sports venue deal",
+            "sports technology partnership",
+            "sports betting announcement",
+            "sports league expansion",
+            "sports broadcast contract",
+            "sports digital rights deal",
+            "sports team announcement",
+            "sports event hosting announcement",
+            "sports merchandise deal",
+            "sports content distribution agreement",
+            "sports international rights deal",
+            "sports platform announcement",
+            "sports analytics partnership",
+            "sports streaming platform announcement",
+            "sports event rights acquisition",
+            "sports league broadcasting deal"
         ]
     },
     "technology": {
         "icon": "⚡", "name": "Technology", "style": "col-header col-header-orange",
         "phrases": [
-            "technology key announcements last week",
-            "tech industry recent deals mergers last 7 days",
-            "major tech contracts acquisitions last week"
+            "technology company announcement",
+            "tech merger acquisition",
+            "AI artificial intelligence announcement",
+            "cloud computing deal announcement",
+            "software platform launch",
+            "technology partnership announcement",
+            "tech startup funding announcement",
+            "cybersecurity deal announcement",
+            "technology investment announcement",
+            "tech product launch",
+            "enterprise software announcement",
+            "technology infrastructure deal",
+            "SaaS platform announcement",
+            "tech acquisition deal",
+            "semiconductor technology announcement",
+            "data center announcement",
+            "technology expansion announcement",
+            "tech collaboration partnership",
+            "innovation technology announcement",
+            "digital transformation deal",
+            "technology solution announcement",
+            "tech IPO announcement",
+            "technology contract award",
+            "tech platform integration announcement"
         ]
     }
 }
@@ -122,64 +207,53 @@ def clean(raw):
         return ""
     return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
 
-def extract_summary(entry, max_len=280):
-    summary = ""
-    for field in ['summary', 'description', 'content']:
-        if hasattr(entry, field):
-            content = getattr(entry, field)
-            if isinstance(content, list) and content:
-                content = content[0].get('value', '')
-            summary = clean(content)
-            if summary:
-                break
-    if len(summary) > max_len:
-        summary = summary[:max_len].rsplit(' ', 1)[0] + '...'
-    return summary if summary else ""
-
 def fetch_news_for_section(phrases):
     items = []
-    seen = set()
+    seen_titles = set()
+    
     for phrase in phrases:
         try:
             url = f"https://news.google.com/rss/search?q={phrase.replace(' ', '+')}&hl=en-US&gl=US&ceid=US:en"
             resp = requests.get(url, headers=HEADERS, timeout=10)
             if resp.status_code != 200:
                 continue
+            
             feed = feedparser.parse(resp.content)
             NOW = datetime.now(ZoneInfo("America/New_York"))
             seven_days_ago = NOW - timedelta(days=7)
-            for entry in feed.entries:
+            
+            for entry in feed.entries[:5]:  # Top 5 per phrase
                 title = clean(entry.get("title", ""))
-                if not title or title in seen or len(title) < 15:
+                if not title or title in seen_titles or len(title) < 15:
                     continue
+                
                 link = entry.get("link", "")
                 if not link:
                     continue
-                summary = extract_summary(entry)
-                if not summary:
-                    continue
+                
                 pub = NOW
                 if 'published_parsed' in entry:
                     try:
                         pub = datetime(*entry.published_parsed[:6], tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/New_York"))
                     except:
                         pass
+                
                 if pub < seven_days_ago:
                     continue
+                
                 items.append({
                     "title": title,
                     "link": link,
-                    "summary": summary,
                     "pub": pub,
-                    "source": "AI Search"
+                    "source": "Google News"
                 })
-                seen.add(title)
+                seen_titles.add(title)
         except:
-            pass
+            continue
     
-    # Sort: newest first, then longer summary (more info)
-    items.sort(key=lambda x: (x["pub"], len(x["summary"])), reverse=True)
-    return items[:8]  # Best 8 per section
+    # Sort by newest first
+    items.sort(key=lambda x: x["pub"], reverse=True)
+    return items[:15]  # Top 15 most recent
 
 @st.cache_data(ttl=300)
 def load_news():
@@ -197,38 +271,37 @@ def load_news():
 def get_time_str(dt):
     now_et = datetime.now(ZoneInfo("America/New_York"))
     hrs = int((now_et - dt).total_seconds() / 3600)
-    if hrs < 1: return "Just now"
-    if hrs < 6: return f"{hrs}h ago"
-    if hrs < 24: return f"{hrs}h ago"
-    return f"{hrs//24}d ago"
+    if hrs < 1:
+        return "Just now", "time-hot"
+    if hrs < 6:
+        return f"{hrs}h ago", "time-hot"
+    if hrs < 24:
+        return f"{hrs}h ago", "time-warm"
+    return f"{hrs//24}d ago", "time-normal"
 
 def render_news(items):
     cards = ""
     for item in items:
-        time_str = get_time_str(item["pub"])
+        time_str, time_class = get_time_str(item["pub"])
         safe_title = html.escape(item["title"])
         safe_link = html.escape(item["link"])
-        safe_summary = html.escape(item["summary"])
         safe_source = html.escape(item["source"])
         
-        title_html = f'<a href="{safe_link}" target="_blank">{safe_title}</a>'
-        
         cards += f'''<div class="news-card">
-<div class="announcement-title">{title_html}</div>
-<div class="announcement-summary">{safe_summary}</div>
-<div class="announcement-meta">
-<span>{time_str}</span> • <span>{safe_source}</span>
+<div class="news-title"><a href="{safe_link}" target="_blank">{safe_title}</a></div>
+<div class="news-meta">
+<span class="{time_class}">{time_str}</span> • <span>{safe_source}</span>
 </div>
 </div>'''
     
     if not cards:
-        cards = '<div class="empty-message">No key news in last week</div>'
+        cards = '<div class="empty-message">No key news in last 7 days</div>'
     
     return cards
 
 # ─── LOADING ─────────────────────────────────────
 placeholder = st.empty()
-placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Loading CEO Dashboard...<br><small>Fetching critical news</small></h2>", unsafe_allow_html=True)
+placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Igniting AI-Powered Intelligence...<br><small>Please wait a moment</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_news()
