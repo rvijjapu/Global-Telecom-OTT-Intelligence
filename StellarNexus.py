@@ -9,6 +9,7 @@ import hashlib
 from difflib import SequenceMatcher
 import json
 import urllib.parse
+from bs4 import BeautifulSoup
 
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE CONFIG
@@ -26,58 +27,52 @@ if 'keep_alive' not in st.session_state:
 GROQ_API_KEY = "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"
 
 # ══════════════════════════════════════════════════════════════════════════════
-# ENHANCED 2026-FOCUSED SEARCH QUERIES
+# SPECIFIC GOOGLE SEARCH URLS FOR EACH SECTION - 2026 FOCUSED
 # ══════════════════════════════════════════════════════════════════════════════
-SECTION_MULTI_QUERIES = {
+SECTION_URLS = {
+    "telco": "https://www.google.com/search?q=recent+telecom+OSS+BSS+key+announcements+providers+organizers+news+key+announcements+mergers+acquisitions+deals+profit+losses&udm=50",
+    "ott": "https://www.google.com/search?q=recent+OTT+providers+key+announcements+providers+organizers+news+key+announcements+mergers+acquisitions+deals+profit+losses&udm=50",
+    "sports": "https://www.google.com/search?q=recent+Sports+Events+organizers+key+announcements+provider+organizers+news+key+announcements+mergers+acquisitions+deals+profit+losses&udm=50",
+    "technology": "https://www.google.com/search?q=recent+Technology+key+announcements+provider+organizers+news+key+announcements+mergers+acquisitions+deals+profit+losses&udm=50"
+}
+
+# Enhanced RSS queries as fallback for 2026-specific news
+SECTION_RSS_QUERIES = {
     "telco": [
-        "recent telecom OSS BSS merger acquisition 2026",
-        "recent billing charging system contract award 2026",
-        "recent revenue management digital BSS deal 2026",
-        "recent 5G network partnership infrastructure 2026",
-        "recent telecom CRM customer management announcement 2026",
-        "recent OSS BSS implementation transformation 2026",
-        "recent private 5G contract deployment 2026",
-        "recent telecom software vendor acquisition deal 2026"
+        "telecom OSS BSS deal 2026",
+        "5G network partnership 2026",
+        "billing system contract 2026",
+        "telecom merger acquisition 2026"
     ],
     "ott": [
-        "recent OTT streaming merger acquisition 2026",
-        "recent video streaming platform subscriber growth 2026",
-        "recent Netflix Disney streaming revenue earnings 2026",
-        "recent digital video service partnership deal 2026",
-        "recent content licensing original investment 2026",
-        "recent ARPU streaming profit loss report 2026",
-        "recent SVOD AVOD platform announcement merger 2026",
-        "recent streaming service acquisition deal 2026"
+        "OTT streaming deal 2026",
+        "streaming platform merger 2026",
+        "Netflix Disney news  2026",
+        "video streaming acquisition 2026"
     ],
     "sports": [
-        "recent sports media rights broadcast deal 2026",
-        "recent league broadcasting contract agreement 2026",
-        "recent sports streaming rights exclusive coverage 2026",
-        "recent sports betting merger sportsbook acquisition 2026",
-        "recent betting platform gambling deal partnership 2026",
-        "recent tournament sponsorship league partnership 2026",
-        "recent NFL NBA MLB broadcasting rights 2026",
-        "recent esports gaming media rights deal 2026"
+        "sports media rights 2026",
+        "sports broadcasting deal 2026",
+        "sports betting merger 2026",
+        "league partnership 2026"
     ],
     "technology": [
-        "recent AI platform partnership contract 2026",
-        "recent cloud telecom SaaS digital platform deal 2026",
-        "recent machine learning deployment technology 2026",
-        "recent eKYC digital identity fintech partnership 2026",
-        "recent 5G technology infrastructure agreement 2026",
-        "recent cloud service national digital rollout 2026",
-        "recent AI technology machine learning contract 2026",
-        "recent enterprise software platform acquisition 2026"
+        "AI platform deal 2026",
+        "cloud computing partnership 2026",
+        "fintech merger 2026",
+        "digital platform acquisition 2026"
     ]
 }
 
-# EXCLUSION KEYWORDS
 TECH_EXCLUSIONS = ["semiconductor", "chip", "oil", "gas", "petroleum", "mining", "coal"]
+YEAR_EXCLUSIONS = ["2024", "2025", "2023", "2022"]
 
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.5"
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Connection": "keep-alive"
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -303,19 +298,24 @@ def title_similarity(a, b):
     """Calculate similarity between titles"""
     return SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
-def is_2026_news(entry):
-    """Check if news is from 2026"""
-    pub_date = entry.get("published", "")
-    if "2026" in pub_date:
+def is_2026_only(text):
+    """Strict check - ONLY 2026 news, exclude all past years"""
+    text_lower = text.lower()
+    
+    # REJECT if contains any past year
+    for year in YEAR_EXCLUSIONS:
+        if year in text_lower:
+            return False
+    
+    # ACCEPT if contains 2026 or recent time indicators
+    if "2026" in text_lower:
         return True
-    # Check if recent (within last 30 days from current date)
-    try:
-        from dateutil import parser
-        pub_dt = parser.parse(pub_date)
-        days_old = (datetime.now() - pub_dt).days
-        return days_old <= 30
-    except:
-        return True  # Include if can't parse
+    
+    # Check for recent time indicators (last week, this month, etc)
+    recent_indicators = ["hours ago", "hour ago", "minutes ago", "today", "yesterday", 
+                        "this week", "last week", "this month", "days ago", "day ago"]
+    
+    return any(indicator in text_lower for indicator in recent_indicators)
 
 def should_exclude_tech(title, summary):
     """Check if tech news should be excluded"""
@@ -323,12 +323,14 @@ def should_exclude_tech(title, summary):
     return any(keyword in text for keyword in TECH_EXCLUSIONS)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# GOOGLE NEWS RSS FETCHER
+# GOOGLE NEWS RSS FETCHER WITH 2026 FILTER
 # ══════════════════════════════════════════════════════════════════════════════
 def fetch_google_news_rss(query, max_results=20):
-    """Fetch news from Google News RSS"""
+    """Fetch 2026-only news from Google News RSS"""
     try:
-        encoded_query = urllib.parse.quote(query)
+        # Add 2026 to query
+        query_2026 = f"{query} 2026"
+        encoded_query = urllib.parse.quote(query_2026)
         url = f"https://news.google.com/rss/search?q={encoded_query}&hl=en-US&gl=US&ceid=US:en"
         
         resp = requests.get(url, headers=HEADERS, timeout=12)
@@ -339,22 +341,24 @@ def fetch_google_news_rss(query, max_results=20):
         results = []
         
         for entry in feed.entries[:max_results]:
-            if not is_2026_news(entry):
-                continue
-                
             title = clean_text(entry.get("title", ""))
             link = entry.get("link", "")
+            pub_date = entry.get("published", "")
+            summary = extract_summary(entry) or title
+            
+            # Strict 2026 filter
+            full_text = f"{title} {summary} {pub_date}"
+            if not is_2026_only(full_text):
+                continue
             
             if len(title) < 30 or not link.startswith("http"):
                 continue
-            
-            summary = extract_summary(entry) or title
             
             results.append({
                 "title": title,
                 "link": link,
                 "summary": summary,
-                "published": entry.get("published", ""),
+                "published": pub_date,
                 "hash": get_hash(title)
             })
         
@@ -362,14 +366,23 @@ def fetch_google_news_rss(query, max_results=20):
     except:
         return []
 
+def fetch_from_google_search(section_url):
+    """Fetch news from Google Search URL (backup method)"""
+    try:
+        # This is a simplified approach - Google Search scraping is complex
+        # We'll use RSS as primary method with 2026 filter
+        return []
+    except:
+        return []
+
 @st.cache_data(ttl=180, show_spinner=False)
 def fetch_section_news(section):
-    """Fetch and deduplicate news for a section"""
+    """Fetch and deduplicate 2026-only news for a section"""
     all_items = []
     seen_hashes = set()
     seen_titles = []
     
-    queries = SECTION_MULTI_QUERIES.get(section, [])
+    queries = SECTION_RSS_QUERIES.get(section, [])
     
     with ThreadPoolExecutor(max_workers=8) as executor:
         futures = {executor.submit(fetch_google_news_rss, q): q for q in queries}
@@ -378,11 +391,16 @@ def fetch_section_news(section):
             try:
                 items = future.result()
                 for item in items:
+                    # Double-check 2026 filter
+                    full_text = f"{item['title']} {item['summary']} {item.get('published', '')}"
+                    if not is_2026_only(full_text):
+                        continue
+                    
                     # Skip duplicates
                     if item["hash"] in seen_hashes:
                         continue
                     
-                    # Skip similar titles
+                    # Skip similar titles (catch near-duplicates like Amdocs/Matrixx)
                     is_similar = any(title_similarity(item["title"], t) > 0.70 for t in seen_titles)
                     if is_similar:
                         continue
@@ -401,7 +419,7 @@ def fetch_section_news(section):
 
 @st.cache_data(ttl=180, show_spinner=False)
 def fetch_all_sections():
-    """Fetch news for all sections in parallel"""
+    """Fetch 2026-only news for all sections in parallel"""
     all_news = {}
     sections = ["telco", "ott", "sports", "technology"]
     
@@ -421,7 +439,7 @@ def fetch_all_sections():
 # AI DESCRIPTION GENERATOR
 # ══════════════════════════════════════════════════════════════════════════════
 def generate_ai_descriptions(news_items, section_name):
-    """Generate AI summaries using Groq"""
+    """Generate AI summaries using Groq - 2026 focused"""
     if not news_items:
         return []
     
@@ -431,10 +449,10 @@ def generate_ai_descriptions(news_items, section_name):
     ])
     
     section_context = {
-        "Telco OSS/BSS": "telecom OSS/BSS, billing, charging, revenue management, 5G, digital transformation",
-        "OTT & Streaming": "OTT streaming, video platforms, subscriber growth, content deals, ARPU",
-        "Sports & Events": "sports media rights, broadcasting, betting, leagues, esports",
-        "Technology": "AI, cloud, digital platforms, 5G tech, enterprise software, fintech"
+        "Telco OSS/BSS": "telecom OSS/BSS, billing, charging, revenue management, 5G, digital transformation in 2026",
+        "OTT & Streaming": "OTT streaming, video platforms, subscriber growth, content deals, ARPU in 2026",
+        "Sports & Events": "sports media rights, broadcasting, betting, leagues, esports in 2026",
+        "Technology": "AI, cloud, digital platforms, 5G tech, enterprise software, fintech in 2026"
     }
     
     context = section_context.get(section_name, section_name)
@@ -451,27 +469,30 @@ def generate_ai_descriptions(news_items, section_name):
                 "messages": [
                     {
                         "role": "system",
-                        "content": f"""You are a {section_name} industry analyst for CEO briefings.
+                        "content": f"""You are a {section_name} industry analyst for 2026 CEO briefings.
 Focus: {context}
 
-RULES:
-1. Create EXACTLY 14 highlights from provided 2026 news
-2. Each needs: title (max 15 words), summary (2-3 sentences, 50-80 words)
-3. Focus: M&A, deals, partnerships, earnings, strategic moves
-4. Use EXACT URLs from news - do not modify
-5. CEO-ready: business impact, metrics, strategic significance
-6. Return valid JSON only"""
+CRITICAL RULES:
+1. Create EXACTLY 14 highlights from provided 2026 news ONLY
+2. IGNORE any news from 2024, 2025, or earlier years
+3. Each needs: title (max 15 words), summary (2-3 sentences, 50-80 words)
+4. Focus: M&A, deals, partnerships, earnings, strategic moves in 2026
+5. Use EXACT URLs from news - do not modify
+6. CEO-ready: business impact, metrics, strategic significance
+7. Return valid JSON only"""
                     },
                     {
                         "role": "user",
-                        "content": f"""Create 14 executive highlights from this {section_name} news.
+                        "content": f"""Create 14 executive highlights from this {section_name} 2026 news.
+
+IMPORTANT: Only use news from 2026. Ignore all 2024/2025 news.
 
 Return ONLY:
 {{"highlights": [
   {{"title": "Compelling headline", "description": "2-3 sentence executive summary", "link": "exact url"}}
 ]}}
 
-NEWS:
+2026 NEWS:
 {news_text}"""
                     }
                 ],
@@ -539,7 +560,7 @@ def render_section(icon, name, highlights, header_class, color):
     if highlights:
         cards = "".join([render_card(h, color) for h in highlights])
     else:
-        cards = '<div class="loading-spinner"><p>⏳ Fetching latest news...</p></div>'
+        cards = '<div class="loading-spinner"><p>⏳ Fetching latest 2026 news...</p></div>'
     
     return f'''
     <div class="col-header {header_class}">
@@ -560,14 +581,14 @@ st.markdown(f'''
 <div class="header-container">
     <h1 class="main-title">
         🌐 Global Telecom & OTT Stellar Nexus
-        <span class="live-badge">● LIVE</span>
+        <span class="live-badge">● LIVE 2026</span>
     </h1>
-    <p class="subtitle">AI-Powered Competitive Intelligence Dashboard for Executive Leadership</p>
+    <p class="subtitle">AI-Powered 2026 Competitive Intelligence Dashboard</p>
 </div>
 ''', unsafe_allow_html=True)
 
-# Fetch news
-with st.spinner("⚡ Fetching latest 2026 news..."):
+# Fetch 2026-only news
+with st.spinner("⚡ Fetching latest 2026 news only..."):
     all_news = fetch_all_sections()
 
 # Generate AI descriptions
@@ -615,12 +636,12 @@ total_items = sum(len(highlights.get(s, [])) for s in ["telco", "ott", "sports",
 st.markdown(f'''
 <div class="footer">
     <p>
-        <strong>📊 Total Insights:</strong> {total_items} | 
+        <strong>📊 2026 Insights:</strong> {total_items} | 
         <strong>🕐 Last Updated:</strong> {datetime.now().strftime("%B %d, %Y at %I:%M:%S %p")} | 
         <strong>🔄 Auto-refresh:</strong> Every 5 minutes
     </p>
     <p style="margin-top: 8px; font-size: 0.75rem; opacity: 0.85;">
-        Powered by Google News RSS + Groq AI • 2026 Executive Intelligence
+        Powered by Google News RSS + Groq AI • 2026-Only Executive Intelligence
     </p>
 </div>
 ''', unsafe_allow_html=True)
