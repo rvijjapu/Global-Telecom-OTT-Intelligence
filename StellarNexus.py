@@ -23,7 +23,7 @@ if "keep_alive" not in st.session_state:
 # ══════════════════════════════════════════════════════════════════════════════
 # API KEY
 # ══════════════════════════════════════════════════════════════════════════════
-GROQ_API_KEY = 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"
+GROQ_API_KEY = "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"
 
 # ══════════════════════════════════════════════════════════════════════════════
 # SECTION URLS — ONLY SOURCE
