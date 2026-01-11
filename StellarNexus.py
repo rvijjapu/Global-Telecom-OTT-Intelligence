@@ -4,14 +4,14 @@ import requests
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import html
-import time
 import re
 import hashlib
 from difflib import SequenceMatcher
 import json
+import urllib.parse
 
 # ══════════════════════════════════════════════════════════════════════════════
-# PAGE CONFIG - MUST BE FIRST
+# PAGE CONFIG
 # ══════════════════════════════════════════════════════════════════════════════
 st.set_page_config(
     page_title="Global Telecom & OTT Stellar Nexus",
@@ -20,9 +20,6 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ══════════════════════════════════════════════════════════════════════════════
-# KEEP ALIVE - PREVENTS STREAMLIT SLEEP
-# ══════════════════════════════════════════════════════════════════════════════
 if 'keep_alive' not in st.session_state:
     st.session_state.keep_alive = datetime.now()
 
@@ -32,158 +29,48 @@ if 'keep_alive' not in st.session_state:
 GROQ_API_KEY = "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"
 
 # ══════════════════════════════════════════════════════════════════════════════
-# ENTITY DATABASES
+# AI SEARCH PHRASES - DYNAMIC QUERIES FOR EACH SECTION
 # ══════════════════════════════════════════════════════════════════════════════
-EVERGENT_CLIENTS = {
-    "Astro": ["astro malaysia", "astro sooka", "astro njoi", "astro", "sooka", "njoi"],
-    "MongolTV": ["mongoltv", "mongol tv", "mongolia tv"],
-    "FOX": ["fox sports", "fox corporation", "fox networks", "fox"],
-    "AT&T": ["at&t", "att inc", "att wireless", "directv"],
-    "NBA": ["nba", "national basketball"],
-    "Shahid": ["shahid", "shahid vip", "mbc shahid"],
-    "MBC": ["mbc group", "mbc", "middle east broadcasting"],
-    "TV ASAHI": ["tv asahi", "asahi television", "asahi tv"],
-    "TV3": ["tv3 malaysia", "tv3", "media prima"],
-    "ABS-CBN": ["abs-cbn", "abscbn", "abs cbn", "philippine broadcast"],
-    "Viki": ["viki", "rakuten viki", "viki streaming"],
-    "TRT": ["trt world", "trt", "turkish radio"],
-    "Sinclair": ["sinclair broadcast", "sinclair"],
-    "FanDuel": ["fanduel", "fanduel group", "flutter"],
-    "Bally Sports": ["bally sports", "bally regional", "diamond sports"],
-    "Gotham": ["gotham advanced", "gotham fc"],
-    "Marquee": ["marquee sports", "marquee network"],
-    "Sony": ["sony pictures", "sony entertainment", "sonyliv", "sony india"],
-    "Aha": ["aha video", "aha ott", "aha telugu"],
-    "BBC": ["bbc", "british broadcasting", "bbc iplayer"],
-    "Lightbox": ["lightbox", "spark lightbox"],
-    "Sky": ["sky nz", "sky new zealand", "sky tv", "sky uk", "sky italia", "sky deutschland"],
-    "Cignal": ["cignal tv", "cignal", "cignal satellite"],
-    "ETV": ["etv network", "etv bharat"],
-    "Simple TV": ["simpletv", "simple tv venezuela"],
-    "Telekom Malaysia": ["telekom malaysia", "tm unifi", "unifi tv"],
-    "Britbox": ["britbox", "britbox international"],
-    "Quickplay": ["quickplay", "quickplay media"],
-}
-
-COMPETITORS = {
-    "Netcracker": ["netcracker", "netcracker technology", "nec netcracker"],
-    "Amdocs": ["amdocs", "amdocs ltd", "amdocs inc"],
-    "CSG": ["csg systems", "csg international", "csg"],
-    "Oracle": ["oracle communications", "oracle corporation", "oracle telecom"],
-    "Ericsson": ["ericsson", "telefonaktiebolaget lm ericsson"],
-    "Nokia": ["nokia", "nokia networks", "nokia corporation"],
-    "Huawei": ["huawei", "huawei technologies"],
-    "Comarch": ["comarch", "comarch bss"],
-    "Tecnotree": ["tecnotree", "tecnotree corporation"],
-    "MATRIXX": ["matrixx", "matrixx software"],
-    "Optiva": ["optiva", "optiva inc"],
-    "Cerillion": ["cerillion", "cerillion plc"],
-    "AsiaInfo": ["asiainfo", "asiainfo technologies"],
-    "Hansen": ["hansen technologies", "hansen"],
-    "Openet": ["openet", "openet telecom"],
-    "ZTE": ["zte", "zte corporation"],
-    "Mavenir": ["mavenir", "mavenir systems"],
-    "Infosys": ["infosys", "infosys telecom"],
-    "TCS": ["tata consultancy", "tcs", "tata communications"],
-    "Wipro": ["wipro", "wipro digital"],
-    "Tech Mahindra": ["tech mahindra", "mahindra comviva"],
-    "Accenture": ["accenture", "accenture telecom"],
-    "Capgemini": ["capgemini", "capgemini telecom"],
-    "IBM": ["ibm", "ibm telecom", "ibm watson"],
-    "SAP": ["sap", "sap telecom"],
-    "Salesforce": ["salesforce", "salesforce communications"],
-}
-
-TOP_TELCOS = {
-    "Verizon": ["verizon", "verizon wireless", "verizon fios"],
-    "AT&T": ["at&t", "att mobility"],
-    "T-Mobile": ["t-mobile", "tmobile usa", "sprint"],
-    "Comcast": ["comcast", "xfinity", "comcast cable"],
-    "BT": ["bt group", "british telecom", "bt enterprise", "ee"],
-    "Vodafone": ["vodafone", "vodafone group"],
-    "Orange": ["orange", "orange sa"],
-    "Deutsche Telekom": ["deutsche telekom", "t-mobile europe", "telekom"],
-    "Telefónica": ["telefonica", "telefonica spain", "movistar"],
-    "Swisscom": ["swisscom", "swisscom ag"],
-    "Singtel": ["singtel", "singapore telecom"],
-    "Maxis": ["maxis", "maxis communications", "maxis malaysia"],
-    "Telstra": ["telstra", "telstra corporation"],
-    "NTT": ["ntt", "nippon telegraph", "ntt docomo"],
-    "SoftBank": ["softbank", "softbank corp"],
-    "Reliance Jio": ["reliance jio", "jio", "jio platforms"],
-    "Airtel": ["bharti airtel", "airtel", "airtel india"],
-    "Etisalat": ["etisalat", "emirates telecom", "e&"],
-    "STC": ["stc", "saudi telecom", "saudi telecom company"],
-    "Ooredoo": ["ooredoo", "ooredoo group"],
-    "MTN": ["mtn group", "mtn"],
-    "Safaricom": ["safaricom", "safaricom plc"],
-    "Globe": ["globe telecom", "globe philippines"],
-    "PLDT": ["pldt", "philippine long distance"],
-    "Telus": ["telus", "telus communications"],
-    "Rogers": ["rogers communications", "rogers"],
-    "Rakuten": ["rakuten", "rakuten mobile"],
-    "Omantel": ["omantel", "oman telecommunications"],
-    "Zain": ["zain", "zain group"],
-    "Axiata": ["axiata", "axiata group"],
-}
-
-OTT_PLATFORMS = {
-    "Netflix": ["netflix"], "Disney+": ["disney+", "disney plus", "hotstar"],
-    "Prime Video": ["prime video", "amazon prime"], "HBO Max": ["hbo max", "max"],
-    "Peacock": ["peacock"], "Paramount+": ["paramount+", "paramount plus"],
-    "Apple TV+": ["apple tv+", "apple tv plus"], "Hulu": ["hulu"],
-    "Roku": ["roku"], "Tubi": ["tubi"], "DAZN": ["dazn"],
-    "ESPN+": ["espn+", "espn plus"], "YouTube TV": ["youtube tv"],
-    "Pluto TV": ["pluto tv"], "Crunchyroll": ["crunchyroll"],
-}
-
-SPORTS_ENTITIES = {
-    "NBA": ["nba", "national basketball association"],
-    "NFL": ["nfl", "national football league"],
-    "MLB": ["mlb", "major league baseball"],
-    "NHL": ["nhl", "national hockey league"],
-    "ESPN": ["espn"], "FanDuel": ["fanduel"], "DraftKings": ["draftkings"],
-    "Bally Sports": ["bally sports", "bally"], "Premier League": ["premier league", "epl"],
-    "UEFA": ["uefa", "champions league"], "UFC": ["ufc"], "Sky Sports": ["sky sports"],
-    "F1": ["formula 1", "f1"], "WWE": ["wwe", "world wrestling"],
-    "PGA": ["pga", "pga tour"], "FIFA": ["fifa"],
-}
-
-# ══════════════════════════════════════════════════════════════════════════════
-# RSS FEEDS
-# ══════════════════════════════════════════════════════════════════════════════
-RSS_FEEDS = {
+AI_SEARCH_PHRASES = {
     "telco": [
-        ("Google OSS/BSS", "https://news.google.com/rss/search?q=(OSS+BSS+OR+telecom+billing+OR+BSS+transformation)+when:7d&hl=en-US&gl=US&ceid=US:en"),
-        ("Google 5G", "https://news.google.com/rss/search?q=(5G+network+OR+telecom+operator)+when:7d&hl=en-US&gl=US&ceid=US:en"),
-        ("Light Reading", "https://www.lightreading.com/rss/simple"),
-        ("RCR Wireless", "https://www.rcrwireless.com/feed"),
-        ("Mobile World Live", "https://www.mobileworldlive.com/feed/"),
-        ("ET Telecom", "https://telecom.economictimes.indiatimes.com/rss/topstories"),
-        ("The Fast Mode", "https://www.thefastmode.com/rss-feeds"),
+        "telecom OSS BSS merger acquisition deal contract 2024 2025",
+        "telecom billing transformation announcement partnership",
+        "5G network operator deal partnership announcement",
+        "telecommunications BSS vendor contract award",
+        "mobile network digital transformation deal",
+        "telecom operator revenue profit loss announcement",
+        "OSS BSS platform modernization contract",
     ],
     "ott": [
-        ("Google Streaming", "https://news.google.com/rss/search?q=(streaming+OR+OTT+OR+netflix+OR+disney)+when:7d&hl=en-US&gl=US&ceid=US:en"),
-        ("Variety", "https://variety.com/feed/"),
-        ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/"),
-        ("Deadline", "https://deadline.com/feed/"),
-        ("Digital TV Europe", "https://www.digitaltveurope.com/feed/"),
+        "OTT streaming merger acquisition deal 2024 2025",
+        "Netflix Disney streaming announcement partnership",
+        "streaming service subscriber growth revenue",
+        "OTT platform content deal partnership",
+        "streaming media merger acquisition announcement",
+        "video streaming profit loss earnings report",
+        "SVOD AVOD platform deal contract",
     ],
     "sports": [
-        ("Google Sports", "https://news.google.com/rss/search?q=(sports+media+OR+sports+streaming+OR+sports+betting)+when:7d&hl=en-US&gl=US&ceid=US:en"),
-        ("ESPN", "https://www.espn.com/espn/rss/news"),
-        ("BBC Sport", "https://feeds.bbci.co.uk/sport/rss.xml"),
-        ("Sportico", "https://www.sportico.com/feed/"),
+        "sports media rights deal contract 2024 2025",
+        "sports streaming partnership announcement",
+        "sports betting merger acquisition deal",
+        "sports league broadcast deal announcement",
+        "sports event organizer partnership contract",
+        "esports gaming media deal announcement",
+        "sports team ownership acquisition deal",
     ],
     "technology": [
-        ("Google Tech", "https://news.google.com/rss/search?q=(5G+AI+cloud+telecom)+when:7d&hl=en-US&gl=US&ceid=US:en"),
-        ("TechCrunch", "https://techcrunch.com/feed/"),
-        ("The Verge", "https://www.theverge.com/rss/index.xml"),
-        ("VentureBeat", "https://venturebeat.com/feed/"),
+        "5G AI technology merger acquisition deal 2024 2025",
+        "cloud telecom partnership announcement contract",
+        "tech company earnings profit loss announcement",
+        "semiconductor chip deal partnership",
+        "AI technology platform deal contract",
+        "network infrastructure merger acquisition",
+        "enterprise technology transformation deal",
     ],
 }
 
-HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0"}
 
 # ══════════════════════════════════════════════════════════════════════════════
 # STYLING
@@ -207,11 +94,14 @@ st.markdown("""
     .highlight-card.purple {border-left-color: #8b5cf6;}
     .highlight-card.green {border-left-color: #10b981;}
     .highlight-card.orange {border-left-color: #f97316;}
-    .highlight-title {color: #1e293b; font-size: 0.88rem; font-weight: 700; margin-bottom: 6px; line-height: 1.25;}
-    .highlight-description {color: #475569; font-size: 0.82rem; line-height: 1.45; margin-bottom: 8px;}
+    .highlight-title {color: #1e293b; font-size: 0.88rem; font-weight: 700; margin-bottom: 6px; line-height: 1.3;}
+    .highlight-description {color: #475569; font-size: 0.82rem; line-height: 1.5; margin-bottom: 8px;}
     .read-more {color: #2563eb; font-weight: 600; font-size: 0.78rem; text-decoration: none;}
     .read-more:hover {color: #1d4ed8; text-decoration: underline;}
-    .footer {text-align: center; color: rgba(255,255,255,0.8); font-size: 0.75rem; margin-top: 15px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 10px;}
+    .footer {text-align: center; color: rgba(255,255,255,0.85); font-size: 0.75rem; margin-top: 15px; padding: 12px; background: rgba(0,0,0,0.25); border-radius: 10px;}
+    .col-body::-webkit-scrollbar {width: 5px;}
+    .col-body::-webkit-scrollbar-track {background: #f1f5f9;}
+    .col-body::-webkit-scrollbar-thumb {background: #cbd5e1; border-radius: 10px;}
     #MainMenu, footer, header {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
@@ -221,90 +111,84 @@ st.markdown("""
 # ══════════════════════════════════════════════════════════════════════════════
 def clean(raw):
     if not raw: return ""
-    return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
+    text = html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
+    text = re.sub(r'\s*[-|]\s*[A-Za-z\s]+$', '', text)  # Remove source suffix
+    return text
 
-def extract_summary(entry, max_len=350):
+def extract_summary(entry, max_len=400):
     for field in ['summary', 'description', 'content']:
         if hasattr(entry, field):
             content = getattr(entry, field)
             if isinstance(content, list) and content: content = content[0].get('value', '')
             summary = clean(content)
-            if summary: return summary[:max_len] + ('...' if len(summary) > max_len else '')
+            if summary and len(summary) > 50:
+                return summary[:max_len].rsplit(' ', 1)[0] + '...' if len(summary) > max_len else summary
     return ""
 
-def get_hash(text): return hashlib.md5(text.encode()).hexdigest()[:12]
-
+def get_hash(text): return hashlib.md5(text.lower().encode()).hexdigest()[:12]
 def title_similarity(a, b): return SequenceMatcher(None, a.lower(), b.lower()).ratio()
-
-def detect_company(text, section):
-    text_lower = text.lower()
-    sources = {"telco": [EVERGENT_CLIENTS, TOP_TELCOS, COMPETITORS], "ott": [EVERGENT_CLIENTS, OTT_PLATFORMS], "sports": [EVERGENT_CLIENTS, SPORTS_ENTITIES], "technology": [TOP_TELCOS, COMPETITORS]}
-    for db in sources.get(section, []):
-        for name, keywords in db.items():
-            if any(k in text_lower for k in keywords): return name
-    return None
+def build_google_news_url(query):
+    return f"https://news.google.com/rss/search?q={urllib.parse.quote(query)}+when:7d&hl=en-US&gl=US&ceid=US:en"
 
 # ══════════════════════════════════════════════════════════════════════════════
-# FEED FETCHING - FAST & DEDUPLICATED
+# AI-POWERED NEWS FETCHING
 # ══════════════════════════════════════════════════════════════════════════════
-def fetch_feed(source, url):
+def fetch_google_news(query):
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=10)
+        resp = requests.get(build_google_news_url(query), headers=HEADERS, timeout=12)
         if resp.status_code != 200: return []
         feed = feedparser.parse(resp.content)
-        return [{"title": clean(e.get("title","")), "link": e.get("link",""), "source": source, "summary": extract_summary(e), "hash": get_hash(clean(e.get("title","")))} for e in feed.entries[:25] if len(clean(e.get("title",""))) > 25 and e.get("link","").startswith("http")]
+        return [{"title": clean(e.get("title","")), "link": e.get("link",""), "summary": extract_summary(e), "hash": get_hash(clean(e.get("title","")))} 
+                for e in feed.entries[:15] if len(clean(e.get("title",""))) > 30 and e.get("link","").startswith("http")]
     except: return []
 
 @st.cache_data(ttl=180, show_spinner=False)
-def fetch_all_news():
+def fetch_all_news_ai():
     all_news = {}
-    for section, feeds in RSS_FEEDS.items():
+    for section, queries in AI_SEARCH_PHRASES.items():
         items, seen_hashes, seen_titles = [], set(), []
-        with ThreadPoolExecutor(max_workers=12) as executor:
-            for result in executor.map(lambda f: fetch_feed(*f), feeds):
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            for result in executor.map(fetch_google_news, queries):
                 for item in result:
-                    if item["hash"] in seen_hashes or any(title_similarity(item["title"], t) > 0.75 for t in seen_titles): continue
+                    if item["hash"] in seen_hashes or any(title_similarity(item["title"], t) > 0.7 for t in seen_titles): continue
                     items.append(item); seen_hashes.add(item["hash"]); seen_titles.append(item["title"])
-        all_news[section] = items[:40]
+        all_news[section] = items[:35]
     return all_news
 
 # ══════════════════════════════════════════════════════════════════════════════
-# AI HIGHLIGHTS - 14 PER SECTION
+# AI HIGHLIGHTS GENERATION - NO TAGS, DESCRIPTIVE TITLES
 # ══════════════════════════════════════════════════════════════════════════════
 def generate_highlights_ai(news_items, section, section_name):
     if not news_items: return []
-    news_entries = [{"title": n['title'], "summary": n.get('summary','')[:200], "link": n['link'], "company": detect_company(n['title']+' '+n.get('summary',''), section)} for n in news_items[:28]]
-    news_text = "\n".join([f"[{i+1}] {e['title']} | Company: {e['company'] or 'Unknown'} | Link: {e['link']}" for i, e in enumerate(news_entries)])
     
-    clients = {"telco": list(TOP_TELCOS.keys())[:20]+list(COMPETITORS.keys())[:15], "ott": list(OTT_PLATFORMS.keys())+list(EVERGENT_CLIENTS.keys())[:15], "sports": list(SPORTS_ENTITIES.keys())+["FanDuel","Bally Sports","ESPN","NBA"], "technology": list(COMPETITORS.keys())[:20]+list(TOP_TELCOS.keys())[:15]}
+    news_text = "\n".join([f"[{i+1}] Title: {n['title']}\nSummary: {n.get('summary','')[:250]}\nLink: {n['link']}" for i, n in enumerate(news_items[:25])])
+    
+    focus = {"telco": "telecom OSS/BSS, 5G, billing, digital transformation", "ott": "streaming, OTT, content deals, subscribers", 
+             "sports": "sports media rights, broadcasting, betting", "technology": "5G, AI, cloud, semiconductor"}
     
     try:
-        resp = requests.post("https://api.groq.com/openai/v1/chat/completions", headers={"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"},
+        resp = requests.post("https://api.groq.com/openai/v1/chat/completions",
+            headers={"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"},
             json={"model": "llama-3.1-8b-instant", "messages": [
-                {"role": "system", "content": f"You are a {section_name} analyst. RULES: 1. Use ONLY real company names as titles (Vodafone, Netflix, Ericsson) 2. NEVER generic titles 3. Focus on: {', '.join(clients.get(section,[])[:25])}"},
-                {"role": "user", "content": f"Create 14 unique client highlights. Title=Company Name. Return JSON only:\n{{\"highlights\": [{{\"title\": \"Company\", \"description\": \"2-3 sentences\", \"link\": \"url\"}}]}}\n\nNEWS:\n{news_text}"}
-            ], "max_tokens": 3000, "temperature": 0.3}, timeout=50)
+                {"role": "system", "content": f"You are a {section_name} analyst. Focus: {focus.get(section,'')}. RULES: 1. Descriptive titles (NOT just company names) 2. Title = What happened 3. 2-3 sentence impact description 4. Include exact source link"},
+                {"role": "user", "content": f"Create 14 unique highlights. Title should describe the news (e.g. '$2B Merger Announced', 'New 5G Partnership'). Return JSON:\n{{\"highlights\": [{{\"title\": \"News Title\", \"description\": \"Impact...\", \"link\": \"url\"}}]}}\n\nNEWS:\n{news_text}"}
+            ], "max_tokens": 3500, "temperature": 0.25}, timeout=55)
         
         if resp.status_code == 200:
             match = re.search(r'\{[\s\S]*\}', resp.json()["choices"][0]["message"]["content"])
             if match:
                 highlights = json.loads(match.group()).get("highlights", [])[:14]
+                valid_links = {n['link'] for n in news_items}
                 for h in highlights:
-                    if not h.get("link","").startswith("http"): h["link"] = news_entries[0]['link'] if news_entries else "#"
+                    if not h.get("link","").startswith("http") or h.get("link") not in valid_links:
+                        h['link'] = news_items[0]['link'] if news_items else "#"
                 return highlights
     except: pass
     
-    # Fallback
-    highlights, used = [], set()
-    for n in news_items[:20]:
-        company = detect_company(n['title']+' '+n.get('summary',''), section)
-        if company and company not in used:
-            highlights.append({"title": company, "description": n['title'][:150], "link": n['link']}); used.add(company)
-            if len(highlights) >= 14: break
-    return highlights
+    return [{"title": n['title'][:100], "description": n.get('summary','')[:200], "link": n['link']} for n in news_items[:14]]
 
 # ══════════════════════════════════════════════════════════════════════════════
-# RENDER
+# RENDER - CLEAN, NO TAGS
 # ══════════════════════════════════════════════════════════════════════════════
 def render_card(h, color):
     link = h.get("link", "#")
@@ -320,7 +204,9 @@ def render_section(icon, name, highlights, hdr_class, color):
 # ══════════════════════════════════════════════════════════════════════════════
 st.markdown('<div class="header-container"><h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1><p class="subtitle">AI-Powered Competitive Intelligence for CEO</p></div>', unsafe_allow_html=True)
 
-all_news = fetch_all_news()
+with st.spinner("⚡ AI searching latest industry news..."):
+    all_news = fetch_all_news_ai()
+
 highlights = {sec: generate_highlights_ai(all_news.get(sec,[]), sec, name) for sec, name in [("telco","Telco OSS/BSS"),("ott","OTT & Streaming"),("sports","Sports & Events"),("technology","Technology")]}
 
 c1,c2,c3,c4 = st.columns(4)
@@ -329,8 +215,7 @@ with c2: st.markdown(render_section("📺","OTT & Streaming",highlights.get("ott
 with c3: st.markdown(render_section("🏆","Sports & Events",highlights.get("sports",[]),"col-header-green","green"), unsafe_allow_html=True)
 with c4: st.markdown(render_section("⚡","Technology",highlights.get("technology",[]),"col-header-orange","orange"), unsafe_allow_html=True)
 
-st.markdown(f'<div class="footer"><p>Last Updated: {datetime.now().strftime("%I:%M:%S %p")} • Auto-refreshes every 5 minutes</p></div>', unsafe_allow_html=True)
+st.markdown(f'<div class="footer"><p>Last Updated: {datetime.now().strftime("%I:%M:%S %p")} • Auto-refreshes every 5 minutes • Powered by AI Search</p></div>', unsafe_allow_html=True)
 st.markdown("<script>setTimeout(function(){window.location.reload();},300000);</script>", unsafe_allow_html=True)
 
-# Keep-alive
 if (datetime.now() - st.session_state.keep_alive).seconds > 240: st.session_state.keep_alive = datetime.now(); st.rerun()
