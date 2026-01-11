@@ -12,7 +12,7 @@ from difflib import SequenceMatcher
 import json
 
 # ══════════════════════════════════════════════════════════════════════════════
-# API & SECURITY CONFIG (hardcoded as requested)
+# API KEY & TOKEN (move Groq key to secrets later for security)
 # ══════════════════════════════════════════════════════════════════════════════
 GROQ_API_KEY = "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"
 CEO_ACCESS_TOKEN = "Vijay"
@@ -43,15 +43,32 @@ st.set_page_config(
 )
 
 # ══════════════════════════════════════════════════════════════════════════════
-# STYLING (enhanced with badges)
+# STYLING (enhanced with badges – no Groq mention)
 # ══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
 <style>
-    .stApp { background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed; background-size: cover; color: #1e293b; padding-top: 0.5rem; }
-    .header-container { background: rgba(255, 255, 255, 0.95); padding: 1.2rem 1.5rem; text-align: center; border-radius: 20px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); margin: 0 1.5rem 1.8rem 1.5rem; border-bottom: 4px solid #3b82f6; backdrop-filter: blur(8px); }
+    .stApp {
+        background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
+        background-size: cover;
+        color: #1e293b;
+        padding-top: 0.5rem;
+    }
+    .header-container {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 1.2rem 1.5rem;
+        text-align: center;
+        border-radius: 20px;
+        box-shadow: 0 6px 25px rgba(0,0,0,0.08);
+        margin: 0 1.5rem 1.8rem 1.5rem;
+        border-bottom: 4px solid #3b82f6;
+        backdrop-filter: blur(8px);
+    }
     .main-title { font-size: 2.4rem; font-weight: 800; color: #1e40af; margin: 0; letter-spacing: -0.6px; }
     .subtitle { font-size: 1.1rem; color: #475569; margin-top: 0.6rem; margin-bottom: 0; font-weight: 500; }
-    .ai-insights-panel { background: linear-gradient(135deg, #eef2ff 0%, #faf5ff 100%); border: 2px solid #c7d2fe; border-radius: 16px; padding: 24px; margin: 0 1.5rem 1.5rem 1.5rem; }
+    .ai-insights-panel {
+        background: linear-gradient(135deg, #eef2ff 0%, #faf5ff 100%);
+        border: 2px solid #c7d2fe; border-radius: 16px; padding: 24px; margin: 0 1.5rem 1.5rem 1.5rem;
+    }
     .ai-insights-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
     .ai-insights-title { font-size: 1.4rem; font-weight: 700; color: #4338ca; margin: 0; }
     .ceo-badge { background: #4f46e5; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
@@ -232,21 +249,15 @@ def get_article_hash(title, link):
 def get_priority_score(title, summary):
     text = (title + " " + (summary or "")).lower()
     score = 0
-
-    entity, match_type = detect_entity(text)
+    entity, mtype = detect_entity(text)
     if entity:
-        if match_type == "CLIENT":
-            score += 5000
-        elif match_type == "COMPETITOR":
-            score += 3000
-        elif match_type == "TELCO":
-            score += 2000
-
+        if mtype == "CLIENT": score += 5000
+        elif mtype == "COMPETITOR": score += 3000
+        elif mtype == "TELCO": score += 2000
     keywords = ["deal", "contract", "partnership", "acquisition", "billion", "million",
                 "oss", "bss", "billing", "revenue", "award", "win", "launch", "expansion"]
     for word in keywords:
-        if word in text:
-            score += 100
+        if word in text: score += 100
     return score
 
 def simple_title_similarity(a, b):
@@ -362,7 +373,7 @@ def load_feeds():
     return {"google_oss_bss": google_items, "regular": categorized}
 
 # ══════════════════════════════════════════════════════════════════════════════
-# AI INSIGHTS WITH GROQ (FAST & RELIABLE)
+# AI INSIGHTS USING GROQ
 # ══════════════════════════════════════════════════════════════════════════════
 def generate_ai_insights(news_items):
     try:
@@ -378,18 +389,18 @@ def generate_ai_insights(news_items):
                 "messages": [
                     {
                         "role": "system",
-                        "content": "You are a senior telecom & OTT analyst. Provide concise, executive-level insights."
+                        "content": "You are a telecom industry analyst providing executive insights for a CEO dashboard. Focus on OSS/BSS, telecom deals, streaming/OTT news, and major partnerships. Provide concise, business-focused insights."
                     },
                     {
                         "role": "user",
-                        "content": f"""Analyze recent telecom/OTT news and return JSON only:
-{{
-  "key_announcements": [{{"title": "short title", "description": "1-sentence impact"}}],
-  "market_trends": ["short trend"],
-  "client_highlights": ["highlight"]
-}}
+                        "content": f"""Analyze these telecom and OTT news headlines and provide:
+1. KEY ANNOUNCEMENTS (max 5): Most important business announcements with 1-line descriptions
+2. MARKET TRENDS (max 3): Emerging industry trends
+3. CLIENT HIGHLIGHTS (max 3): Notable client/partner news
 News:
-{news_text}"""
+{news_text}
+Return JSON format only:
+{{"key_announcements": [{{"title": "...", "description": "..."}}], "market_trends": ["..."], "client_highlights": ["..."]}}"""
                     }
                 ],
                 "max_tokens": 800,
@@ -401,7 +412,7 @@ News:
             content = response.json()["choices"][0]["message"]["content"]
             json_match = re.search(r'\{[\s\S]*\}', content)
             if json_match:
-                return json.loads(json_match.group(0))
+                return json.loads(json_match.group())
         return None
     except:
         return None
@@ -466,9 +477,32 @@ def render_ai_insights(insights):
     </div>
     '''
 
+def render_google_section(google_items):
+    if not google_items:
+        return ""
+    html_content = '''<div class="google-section">
+    <div class="google-header">
+        🔍 Google OSS/BSS Intelligence
+        <span class="ai-badge">AI Search Results</span>
+    </div>'''
+    for item in google_items[:5]:
+        time_str, time_class = get_time_str(item["pub"])
+        safe_title = html.escape(item["title"])
+        safe_link = html.escape(item["link"])
+        html_content += f'''<div class="news-card">
+            <a href="{safe_link}" target="_blank" class="news-title">{safe_title}</a>
+            <div class="news-meta">
+                <span class="{time_class}">{time_str}</span>
+                <span>•</span>
+                <span>Google OSS/BSS</span>
+                <a href="{safe_link}" target="_blank" class="read-more-btn">👉 Read More</a>
+            </div>
+        </div>'''
+    return html_content + '</div><div class="separator"></div>'
+
 def render_news_cards(items):
     if not items:
-        return '<div class="empty-message">No recent news available</div>'
+        return '<div class="empty-message">📭 No recent news available</div>'
     cards = ""
     for item in items[:15]:
         time_str, time_class = get_time_str(item["pub"])
@@ -498,11 +532,11 @@ def render_news_cards(items):
     return cards
 
 # ══════════════════════════════════════════════════════════════════════════════
-# MAIN DASHBOARD FLOW
+# MAIN DASHBOARD
 # ══════════════════════════════════════════════════════════════════════════════
 placeholder = st.empty()
 placeholder.markdown(
-    "<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Igniting AI Powered Intelligence... Aggregating 20+ sources</h2>",
+    "<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Preparing CEO Intelligence View... Aggregating 20+ sources</h2>",
     unsafe_allow_html=True
 )
 
@@ -513,13 +547,13 @@ with st.spinner(""):
 
 placeholder.empty()
 
-# Render AI Insights
+# AI Panel
 if ai_insights:
     st.markdown(render_ai_insights(ai_insights), unsafe_allow_html=True)
 else:
-    st.info("AI Insights powered by advanced models – key active")
+    st.info("AI Insights powered by advanced intelligence – key active")
 
-# Render 4-column layout (no duplicates)
+# 4 Sections News (no duplicates)
 cols = st.columns(4)
 for idx, cat in enumerate(["telco", "ott", "sports", "technology"]):
     sec = SECTIONS[cat]
@@ -533,7 +567,7 @@ for idx, cat in enumerate(["telco", "ott", "sports", "technology"]):
 st.markdown(f"""
 <div style="text-align: center; color: #64748b; font-size: 0.8rem; margin-top: 20px;">
     🌐 Global Telecom & OTT Stellar Nexus • AI-Powered Intelligence<br>
-    Last Updated: {datetime.now().strftime("%I:%M:%S %p %Z")}
+    Last Updated: {datetime.now().strftime("%I:%M:%S %p")}
 </div>
 """, unsafe_allow_html=True)
 
