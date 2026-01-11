@@ -47,7 +47,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ── STYLING (UNCHANGED) ────────────────────────────────────────────────────
+# ── STYLING ────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
     .stApp {
@@ -104,11 +104,29 @@ st.markdown("""
         margin-bottom: 1rem;
     }
     .google-section {
-        background: white;
-        border: 2px solid #e5e7eb;
+        background: linear-gradient(to right, #eff6ff, #ffffff);
+        border: 2px solid #3b82f6;
+        border-left: 4px solid #3b82f6;
         border-radius: 12px;
         padding: 12px;
         margin-bottom: 15px;
+    }
+    .google-header {
+        font-weight: 700;
+        color: #1e40af;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .ai-badge {
+        background: #3b82f6;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        font-weight: 600;
     }
     .news-card {
         background: #fafbfc;
@@ -136,16 +154,6 @@ st.markdown("""
         color: #1d4ed8;
         text-decoration: none;
     }
-    .client-badge {
-        background: #10b981;
-        color: white;
-        padding: 2px 8px;
-        border-radius: 6px;
-        font-size: 0.72rem;
-        font-weight: 700;
-        margin-left: 8px;
-        vertical-align: middle;
-    }
     .news-meta {
         font-size: 0.76rem;
         color: #64748b;
@@ -167,6 +175,17 @@ st.markdown("""
         background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
         margin: 15px 0;
     }
+    .read-more-btn {
+        color: #2563eb;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .read-more-btn:hover {
+        color: #1d4ed8;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -177,44 +196,30 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ── EVERGENT CLIENT DETECTION (minimal but effective) ───────────────────────
-EVERGENT_CLIENT_KEYWORDS = {
-    "astro", "sooka", "njoi",
-    "shahid",
-    "sonyliv", "sony liv",
-    "aha video", "aha ott",
-    "sky nz", "sky uk", "sky tv", "sky deutschland",
-    "bbc iplayer",
-    "abs-cbn",
-    "rakuten viki", "viki",
-    "lightbox",
-    "britbox",
-    "cignal", "unifi tv", "telekom malaysia",
-}
-
-def is_evergent_client_related(text):
-    if not text:
-        return False
-    text = text.lower()
-    return any(kw in text for kw in EVERGENT_CLIENT_KEYWORDS)
-
+# ── PRIORITY SCORING ───────────────────────────────────────────────────────
 def get_priority_score(title, summary):
     text = (title + " " + (summary or "")).lower()
     score = 0
-    if is_evergent_client_related(text):
-        score += 1000
-    for word in ["deal", "contract", "partnership", "expansion", "renew", "launch",
-                 "migration", "acquisition", "monetization", "billion", "million"]:
+    
+    # High priority business keywords
+    high_priority = ["deal", "contract", "partnership", "expansion", "renew", "launch",
+                     "migration", "acquisition", "monetization", "billion", "million",
+                     "oss", "bss", "billing", "revenue management", "subscriber",
+                     "award", "win", "modernization", "transformation"]
+    for word in high_priority:
         if word in text:
-            score += 80
+            score += 100
+    
+    # Evergent mention gets highest priority
     if "evergent" in text:
-        score += 250
+        score += 500
+    
     return score
 
 def simple_title_similarity(a, b):
     return SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
-# ── RSS FEEDS & CONFIG (unchanged list) ─────────────────────────────────────
+# ── RSS FEEDS & CONFIG ─────────────────────────────────────────────────────
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed"),
     ("Light Reading", "https://www.lightreading.com/rss/simple"),
@@ -343,7 +348,7 @@ def fetch_google_oss_bss():
                 "source": "Google OSS/BSS",
                 "summary": summary,
                 "hash": get_article_hash(title, direct_link),
-                "score": get_priority_score(title, summary)
+                "score": get_priority_score(title, summary) + 3000  # Boost Google results
             })
         
         items.sort(key=lambda x: (-x["score"], -x["pub"].timestamp()))
@@ -404,7 +409,7 @@ def fetch_feed(source, url):
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
     seen_hashes = set()
-    seen_titles = {}  # for basic semantic dedup
+    seen_titles = {}
     
     google_items = fetch_google_oss_bss()
     
@@ -430,7 +435,6 @@ def load_feeds():
                     skip = False
                     for prev_title in seen_titles:
                         if simple_title_similarity(item["title"], prev_title) > 0.82:
-                            # Keep better scored / newer
                             if item["score"] > seen_titles[prev_title]["score"] or item["pub"] > seen_titles[prev_title]["pub"]:
                                 seen_titles[prev_title] = item
                             skip = True
@@ -446,11 +450,9 @@ def load_feeds():
             except:
                 pass
     
-    # Final sorting: client-related first, then score, then newest
+    # Sort by score then newest
     for cat in categorized:
-        categorized[cat].sort(key=lambda x: (-(10000 if is_evergent_client_related(x["title"] + " " + x.get("summary","")) else 0),
-                                            -x.get("score",0),
-                                            -x["pub"].timestamp()))
+        categorized[cat].sort(key=lambda x: (-x.get("score", 0), -x["pub"].timestamp()))
     
     return {
         "google_oss_bss": google_items,
@@ -472,28 +474,31 @@ def render_google_section(google_items):
     if not google_items:
         return ""
     
-    cards = ""
-    for item in google_items:
+    html_content = '''<div class="google-section">
+<div class="google-header">
+    🔍 Google OSS/BSS Intelligence
+    <span class="ai-badge">AI Search Results</span>
+</div>'''
+    
+    for item in google_items[:5]:
         time_str, time_class = get_time_str(item["pub"])
         safe_title = html.escape(item["title"])
         safe_link = html.escape(item["link"])
         
-        is_client = is_evergent_client_related(item["title"] + " " + item.get("summary", ""))
-        badge = ' <span class="client-badge">CLIENT</span>' if is_client else ""
-        
-        cards += f'''<div class="news-card news-card-google">
-<div class="news-title">{safe_title}{badge}</div>
+        html_content += f'''<div class="news-card">
+<a href="{safe_link}" target="_blank" rel="noopener noreferrer" class="news-title">{safe_title}</a>
 <div class="news-meta">
 <span class="{time_class}">{time_str}</span>
 <span>•</span>
 <span>Google OSS/BSS</span>
 <a href="{safe_link}" target="_blank" rel="noopener noreferrer" class="read-more-btn">
-<span class="hand-icon">👉</span> Read Full Article
+👉 Read More
 </a>
 </div>
 </div>'''
     
-    return f'''<div class="google-section">{cards}</div><div class="separator"></div>'''
+    html_content += '</div><div class="separator"></div>'
+    return html_content
 
 def render_regular_body(items):
     cards = ""
@@ -503,17 +508,14 @@ def render_regular_body(items):
         safe_link = html.escape(item["link"])
         safe_source = html.escape(item["source"])
         
-        is_client = is_evergent_client_related(item["title"] + " " + item.get("summary", ""))
-        badge = ' <span class="client-badge">CLIENT</span>' if is_client else ""
-        
         cards += f'''<div class="news-card">
-<div class="news-title">{safe_title}{badge}</div>
+<a href="{safe_link}" target="_blank" rel="noopener noreferrer" class="news-title">{safe_title}</a>
 <div class="news-meta">
 <span class="{time_class}">{time_str}</span>
 <span>•</span>
 <span>{safe_source}</span>
 <a href="{safe_link}" target="_blank" rel="noopener noreferrer" class="read-more-btn">
-<span class="hand-icon">👉</span> Read Full Article
+👉 Read More
 </a>
 </div>
 </div>'''
@@ -557,6 +559,6 @@ st.markdown("""
 <script>
 setInterval(function(){
     window.location.reload();
-}, 300000);  // 5 minutes
+}, 300000);  // 5 minutes auto-refresh
 </script>
 """, unsafe_allow_html=True)
