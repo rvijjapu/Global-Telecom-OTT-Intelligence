@@ -9,16 +9,24 @@ import re
 from zoneinfo import ZoneInfo
 import hashlib
 from difflib import SequenceMatcher
+import json
+from openai import OpenAI
 
 # Security gate
 try:
     EXPECTED_TOKEN = st.secrets["CEO_ACCESS_TOKEN"]
 except FileNotFoundError:
-    st.error("🔧 Missing secrets.toml – Add CEO_ACCESS_TOKEN in .streamlit/secrets.toml or Streamlit Cloud Secrets")
+    st.error("🔧 Missing secrets.toml – Add CEO_ACCESS_TOKEN in .streamlit/secrets.toml")
     st.stop()
 except KeyError:
     st.error("🔧 CEO_ACCESS_TOKEN not found in secrets")
     st.stop()
+
+# OpenAI API Key for AI Insights
+try:
+    OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
+except:
+    OPENAI_API_KEY = None
 
 provided_token = st.query_params.get("token")
 if provided_token is not None:
@@ -80,6 +88,93 @@ st.markdown("""
         margin-bottom: 0;
         font-weight: 500;
     }
+    
+    /* AI Insights Panel */
+    .ai-insights-panel {
+        background: linear-gradient(135deg, #eef2ff 0%, #faf5ff 100%);
+        border: 2px solid #c7d2fe;
+        border-radius: 16px;
+        padding: 24px;
+        margin: 0 1.5rem 1.5rem 1.5rem;
+    }
+    .ai-insights-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    .ai-insights-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #4338ca;
+        margin: 0;
+    }
+    .ceo-badge {
+        background: #4f46e5;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    .insights-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+    .insight-card {
+        background: white;
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .insight-card-title {
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .announcement-item {
+        margin-bottom: 12px;
+    }
+    .announcement-title {
+        font-weight: 600;
+        color: #4338ca;
+        font-size: 0.9rem;
+    }
+    .announcement-desc {
+        color: #6b7280;
+        font-size: 0.8rem;
+        margin-top: 2px;
+    }
+    .trend-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+        color: #374151;
+    }
+    .trend-dot {
+        color: #10b981;
+        font-size: 0.7rem;
+        margin-top: 4px;
+    }
+    .highlight-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+        color: #374151;
+    }
+    .highlight-star {
+        color: #f59e0b;
+    }
+    
+    /* Column styles */
     .col-header {
         padding: 10px 16px;
         border-radius: 14px 14px 0 0;
@@ -152,7 +247,6 @@ st.markdown("""
     }
     .news-title:hover {
         color: #1d4ed8;
-        text-decoration: none;
     }
     .news-meta {
         font-size: 0.76rem;
@@ -179,12 +273,12 @@ st.markdown("""
         color: #2563eb;
         font-weight: 600;
         text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
     }
-    .read-more-btn:hover {
-        color: #1d4ed8;
+    
+    @media (max-width: 768px) {
+        .insights-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -192,32 +286,9 @@ st.markdown("""
 st.markdown("""
 <div class="header-container">
     <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
-    <p class="subtitle">AI-Powered Competitive Intelligence</p>
+    <p class="subtitle">AI-Powered Competitive Intelligence for CEO</p>
 </div>
 """, unsafe_allow_html=True)
-
-# ── PRIORITY SCORING ───────────────────────────────────────────────────────
-def get_priority_score(title, summary):
-    text = (title + " " + (summary or "")).lower()
-    score = 0
-    
-    # High priority business keywords
-    high_priority = ["deal", "contract", "partnership", "expansion", "renew", "launch",
-                     "migration", "acquisition", "monetization", "billion", "million",
-                     "oss", "bss", "billing", "revenue management", "subscriber",
-                     "award", "win", "modernization", "transformation"]
-    for word in high_priority:
-        if word in text:
-            score += 100
-    
-    # Evergent mention gets highest priority
-    if "evergent" in text:
-        score += 500
-    
-    return score
-
-def simple_title_similarity(a, b):
-    return SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
 # ── RSS FEEDS & CONFIG ─────────────────────────────────────────────────────
 RSS_FEEDS = [
@@ -233,13 +304,11 @@ RSS_FEEDS = [
     ("Deadline", "https://deadline.com/feed/"),
     ("Digital TV Europe", "https://www.digitaltveurope.com/feed/"),
     ("Advanced Television", "https://advanced-television.com/feed/"),
-    ("StreamingMedia", "https://www.streamingmedia.com/RSS/"),
     ("ESPN", "https://www.espn.com/espn/rss/news"),
     ("BBC Sport", "https://feeds.bbci.co.uk/sport/rss.xml"),
     ("Front Office Sports", "https://frontofficesports.com/feed/"),
     ("Sportico", "https://www.sportico.com/feed/"),
     ("SportsPro", "https://www.sportspromedia.com/feed/"),
-    ("Sports Business", "https://rss.app/feeds/qDuU3qpiuafUec6u.xml"),
     ("TechCrunch", "https://techcrunch.com/feed/"),
     ("The Verge", "https://www.theverge.com/rss/index.xml"),
     ("Wired", "https://www.wired.com/feed/rss"),
@@ -247,7 +316,6 @@ RSS_FEEDS = [
     ("VentureBeat", "https://venturebeat.com/feed/"),
     ("ZDNet", "https://www.zdnet.com/news/rss.xml"),
     ("Engadget", "https://www.engadget.com/rss.xml"),
-    ("Techmeme", "https://www.techmeme.com/feed.xml"),
 ]
 
 GOOGLE_OSS_BSS_URL = "https://news.google.com/rss/search?q=(OSS+BSS+OR+%22operations+support+systems%22+OR+%22business+support+systems%22)+telecom+after:2025-12-01&hl=en-US&gl=US&ceid=US:en"
@@ -263,16 +331,16 @@ SOURCE_CATEGORY_MAP = {
     "Telecoms.com":"telco", "Light Reading":"telco", "RCR Wireless":"telco", "Mobile World Live":"telco",
     "ET Telecom":"telco", "The Fast Mode":"telco", "TelecomTV":"telco",
     "Variety":"ott", "Hollywood Reporter":"ott", "Deadline":"ott",
-    "Digital TV Europe":"ott", "Advanced Television":"ott", "StreamingMedia":"ott",
+    "Digital TV Europe":"ott", "Advanced Television":"ott",
     "ESPN":"sports", "BBC Sport":"sports", "Front Office Sports":"sports",
-    "Sportico":"sports", "SportsPro":"sports", "Sports Business":"sports",
+    "Sportico":"sports", "SportsPro":"sports",
     "TechCrunch":"technology", "The Verge":"technology", "Wired":"technology",
     "Ars Technica":"technology", "VentureBeat":"technology", "ZDNet":"technology",
-    "Engadget":"technology", "Techmeme":"technology",
+    "Engadget":"technology",
 }
 
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
     "Accept": "application/rss+xml, application/xml, text/xml, */*",
 }
 
@@ -299,14 +367,18 @@ def extract_summary(entry, max_len=280):
 def get_article_hash(title, link):
     return hashlib.md5(f"{title}{link}".encode()).hexdigest()
 
-def extract_redirect_url(google_url):
-    try:
-        if 'google.com' in google_url and '/articles/' in google_url:
-            resp = requests.get(google_url, headers=HEADERS, timeout=10, allow_redirects=True)
-            return resp.url
-        return google_url
-    except:
-        return google_url
+def get_priority_score(title, summary):
+    text = (title + " " + (summary or "")).lower()
+    score = 0
+    keywords = ["deal", "contract", "partnership", "acquisition", "billion", "million", 
+                "oss", "bss", "billing", "revenue", "award", "win", "launch"]
+    for word in keywords:
+        if word in text:
+            score += 100
+    return score
+
+def simple_title_similarity(a, b):
+    return SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
 def fetch_google_oss_bss():
     items = []
@@ -314,43 +386,31 @@ def fetch_google_oss_bss():
         resp = requests.get(GOOGLE_OSS_BSS_URL, headers=HEADERS, timeout=15)
         if resp.status_code != 200:
             return items
-        
         feed = feedparser.parse(resp.content)
         if not feed.entries:
             return items
-        
         NOW = datetime.now(ZoneInfo("America/New_York"))
         cutoff = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))
         
-        for entry in feed.entries:
+        for entry in feed.entries[:10]:
             title = clean(entry.get("title", ""))
             if len(title) < 20: continue
-            
             link = entry.get("link", "")
             if not link: continue
-            
-            direct_link = extract_redirect_url(link)
             summary = extract_summary(entry)
-            
             pub = NOW
-            if hasattr(entry, 'published_parsed'):
+            if hasattr(entry, 'published_parsed') and entry.published_parsed:
                 try:
                     pub = datetime(*entry.published_parsed[:6], tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/New_York"))
                 except:
                     pass
-            
             if pub < cutoff: continue
-            
             items.append({
-                "title": title,
-                "link": direct_link,
-                "pub": pub,
-                "source": "Google OSS/BSS",
-                "summary": summary,
-                "hash": get_article_hash(title, direct_link),
-                "score": get_priority_score(title, summary) + 3000  # Boost Google results
+                "title": title, "link": link, "pub": pub,
+                "source": "Google OSS/BSS", "summary": summary,
+                "hash": get_article_hash(title, link),
+                "score": get_priority_score(title, summary) + 3000
             })
-        
         items.sort(key=lambda x: (-x["score"], -x["pub"].timestamp()))
         return items
     except:
@@ -362,23 +422,18 @@ def fetch_feed(source, url):
         resp = requests.get(url, headers=HEADERS, timeout=12)
         if resp.status_code != 200:
             return items
-        
         feed = feedparser.parse(resp.content)
         if not feed.entries:
             return items
-        
         NOW = datetime.now(ZoneInfo("America/New_York"))
         cutoff = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))
         
         for entry in feed.entries[:12]:
             title = clean(entry.get("title", ""))
             if len(title) < 20: continue
-            
             link = entry.get("link", "")
             if not link: continue
-            
             summary = extract_summary(entry)
-            
             pub = NOW
             for k in ("published_parsed", "updated_parsed"):
                 val = getattr(entry, k, None)
@@ -388,22 +443,55 @@ def fetch_feed(source, url):
                         break
                     except:
                         pass
-            
             if pub < cutoff: continue
-            
             items.append({
-                "title": title,
-                "link": link,
-                "pub": pub,
-                "source": source,
-                "summary": summary,
+                "title": title, "link": link, "pub": pub,
+                "source": source, "summary": summary,
                 "hash": get_article_hash(title, link),
                 "score": get_priority_score(title, summary)
             })
-        
         return items
     except:
         return []
+
+def generate_ai_insights(news_items):
+    """Generate AI insights using OpenAI"""
+    if not OPENAI_API_KEY:
+        return None
+    
+    try:
+        client = OpenAI(api_key=OPENAI_API_KEY)
+        
+        news_text = "\n".join([f"- {item['title']} ({item['source']})" for item in news_items[:30]])
+        
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are a telecom industry analyst providing executive insights for a CEO dashboard. Focus on OSS/BSS, telecom deals, streaming/OTT news, and major partnerships."},
+                {"role": "user", "content": f"""Analyze these telecom and OTT news headlines and provide:
+
+1. KEY ANNOUNCEMENTS (max 5): Most important business announcements with 1-line descriptions
+2. MARKET TRENDS (max 3): Emerging industry trends
+3. CLIENT HIGHLIGHTS (max 3): Notable client/partner news
+
+News:
+{news_text}
+
+Return JSON format:
+{{"key_announcements": [{{"title": "...", "description": "..."}}], "market_trends": ["..."], "client_highlights": ["..."]}}"""}
+            ],
+            max_tokens=800,
+            temperature=0.3
+        )
+        
+        content = response.choices[0].message.content
+        json_match = re.search(r'\{[\s\S]*\}', content)
+        if json_match:
+            return json.loads(json_match.group())
+        return None
+    except Exception as e:
+        st.warning(f"AI insights unavailable: {str(e)[:50]}")
+        return None
 
 @st.cache_data(ttl=300, show_spinner=False)
 def load_feeds():
@@ -412,37 +500,26 @@ def load_feeds():
     seen_titles = {}
     
     google_items = fetch_google_oss_bss()
-    
-    # Process Google items
     for item in google_items:
-        if item["hash"] in seen_hashes:
-            continue
-        cat = "telco"
-        categorized[cat].append(item)
-        seen_hashes.add(item["hash"])
+        if item["hash"] not in seen_hashes:
+            categorized["telco"].append(item)
+            seen_hashes.add(item["hash"])
     
     with ThreadPoolExecutor(max_workers=20) as executor:
         futures = [executor.submit(fetch_feed, s, u) for s, u in RSS_FEEDS]
-        
         for future in as_completed(futures):
             try:
                 items = future.result()
                 for item in items:
                     if item["hash"] in seen_hashes:
                         continue
-                        
-                    # Basic title similarity dedup
                     skip = False
                     for prev_title in seen_titles:
                         if simple_title_similarity(item["title"], prev_title) > 0.82:
-                            if item["score"] > seen_titles[prev_title]["score"] or item["pub"] > seen_titles[prev_title]["pub"]:
-                                seen_titles[prev_title] = item
                             skip = True
                             break
-                    
                     if skip:
                         continue
-                        
                     cat = SOURCE_CATEGORY_MAP.get(item["source"], "technology")
                     categorized[cat].append(item)
                     seen_hashes.add(item["hash"])
@@ -450,115 +527,127 @@ def load_feeds():
             except:
                 pass
     
-    # Sort by score then newest
     for cat in categorized:
         categorized[cat].sort(key=lambda x: (-x.get("score", 0), -x["pub"].timestamp()))
     
-    return {
-        "google_oss_bss": google_items,
-        "regular": categorized
-    }
+    return {"google_oss_bss": google_items, "regular": categorized}
 
 def get_time_str(dt):
     now_et = datetime.now(ZoneInfo("America/New_York"))
     diff = (now_et - dt).total_seconds()
     hrs = int(diff / 3600)
+    if hrs < 1: return "Just now", "time-hot"
+    if hrs < 6: return f"{hrs}h ago", "time-hot"
+    if hrs < 24: return f"{hrs}h ago", "time-warm"
+    return f"{hrs // 24}d ago", "time-normal"
+
+def render_ai_insights(insights):
+    if not insights:
+        return ""
     
-    if hrs < 1:    return "Just now", "time-hot"
-    if hrs < 6:    return f"{hrs}h ago", "time-hot"
-    if hrs < 24:   return f"{hrs}h ago", "time-warm"
-    days = hrs // 24
-    return f"{days}d ago", "time-normal"
+    announcements_html = ""
+    for item in insights.get("key_announcements", [])[:5]:
+        if isinstance(item, dict):
+            announcements_html += f'''<div class="announcement-item">
+                <div class="announcement-title">{html.escape(str(item.get("title", "")))}</div>
+                <div class="announcement-desc">{html.escape(str(item.get("description", "")))}</div>
+            </div>'''
+    
+    trends_html = ""
+    for trend in insights.get("market_trends", [])[:3]:
+        trends_html += f'''<div class="trend-item">
+            <span class="trend-dot">●</span>
+            <span>{html.escape(str(trend))}</span>
+        </div>'''
+    
+    highlights_html = ""
+    for highlight in insights.get("client_highlights", [])[:3]:
+        highlights_html += f'''<div class="highlight-item">
+            <span class="highlight-star">★</span>
+            <span>{html.escape(str(highlight))}</span>
+        </div>'''
+    
+    return f'''
+    <div class="ai-insights-panel">
+        <div class="ai-insights-header">
+            <span style="font-size: 1.5rem;">🤖</span>
+            <h2 class="ai-insights-title">AI-Powered Industry Insights</h2>
+            <span class="ceo-badge">CEO Brief</span>
+        </div>
+        <div class="insights-grid">
+            <div class="insight-card">
+                <div class="insight-card-title">📢 Key Announcements</div>
+                {announcements_html if announcements_html else '<div class="empty-message">No announcements</div>'}
+            </div>
+            <div class="insight-card">
+                <div class="insight-card-title">📈 Market Trends</div>
+                {trends_html if trends_html else '<div class="empty-message">No trends</div>'}
+            </div>
+            <div class="insight-card">
+                <div class="insight-card-title">⭐ Client Highlights</div>
+                {highlights_html if highlights_html else '<div class="empty-message">No highlights</div>'}
+            </div>
+        </div>
+    </div>
+    '''
 
 def render_google_section(google_items):
     if not google_items:
         return ""
-    
     html_content = '''<div class="google-section">
-<div class="google-header">
-    🔍 Google OSS/BSS Intelligence
-    <span class="ai-badge">AI Search Results</span>
-</div>'''
-    
+    <div class="google-header">🔍 Google OSS/BSS Intelligence <span class="ai-badge">AI Search Results</span></div>'''
     for item in google_items[:5]:
         time_str, time_class = get_time_str(item["pub"])
-        safe_title = html.escape(item["title"])
-        safe_link = html.escape(item["link"])
-        
         html_content += f'''<div class="news-card">
-<a href="{safe_link}" target="_blank" rel="noopener noreferrer" class="news-title">{safe_title}</a>
-<div class="news-meta">
-<span class="{time_class}">{time_str}</span>
-<span>•</span>
-<span>Google OSS/BSS</span>
-<a href="{safe_link}" target="_blank" rel="noopener noreferrer" class="read-more-btn">
-👉 Read More
-</a>
-</div>
-</div>'''
-    
-    html_content += '</div><div class="separator"></div>'
-    return html_content
+        <a href="{html.escape(item["link"])}" target="_blank" class="news-title">{html.escape(item["title"])}</a>
+        <div class="news-meta">
+            <span class="{time_class}">{time_str}</span>
+            <span>•</span><span>Google OSS/BSS</span>
+            <a href="{html.escape(item["link"])}" target="_blank" class="read-more-btn">👉 Read More</a>
+        </div></div>'''
+    return html_content + '</div><div class="separator"></div>'
 
-def render_regular_body(items):
-    cards = ""
-    for item in items:
-        time_str, time_class = get_time_str(item["pub"])
-        safe_title = html.escape(item["title"])
-        safe_link = html.escape(item["link"])
-        safe_source = html.escape(item["source"])
-        
-        cards += f'''<div class="news-card">
-<a href="{safe_link}" target="_blank" rel="noopener noreferrer" class="news-title">{safe_title}</a>
-<div class="news-meta">
-<span class="{time_class}">{time_str}</span>
-<span>•</span>
-<span>{safe_source}</span>
-<a href="{safe_link}" target="_blank" rel="noopener noreferrer" class="read-more-btn">
-👉 Read More
-</a>
-</div>
-</div>'''
-    
-    if not cards:
+def render_news_cards(items):
+    if not items:
         return '<div class="empty-message">No recent news available</div>'
+    cards = ""
+    for item in items[:15]:
+        time_str, time_class = get_time_str(item["pub"])
+        cards += f'''<div class="news-card">
+        <a href="{html.escape(item["link"])}" target="_blank" class="news-title">{html.escape(item["title"])}</a>
+        <div class="news-meta">
+            <span class="{time_class}">{time_str}</span>
+            <span>•</span><span>{html.escape(item["source"])}</span>
+            <a href="{html.escape(item["link"])}" target="_blank" class="read-more-btn">👉 Read More</a>
+        </div></div>'''
     return cards
 
 # ── MAIN LAYOUT ────────────────────────────────────────────────────────────
 placeholder = st.empty()
-placeholder.markdown(
-    "<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>"
-    "⚡ Preparing CEO Intelligence View...<br><small>Please wait</small>"
-    "</h2>",
-    unsafe_allow_html=True
-)
+placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Preparing CEO Intelligence View...<br><small>Please wait</small></h2>", unsafe_allow_html=True)
 
 with st.spinner(""):
     data = load_feeds()
+    all_news = data["google_oss_bss"] + data["regular"]["telco"][:10] + data["regular"]["ott"][:5]
+    ai_insights = generate_ai_insights(all_news)
 
 placeholder.empty()
 
-cols = st.columns(4)
-cat_list = ["telco", "ott", "sports", "technology"]
+# Render AI Insights Panel
+if ai_insights:
+    st.markdown(render_ai_insights(ai_insights), unsafe_allow_html=True)
 
-for idx, cat in enumerate(cat_list):
+# Render 4 columns
+cols = st.columns(4)
+for idx, cat in enumerate(["telco", "ott", "sports", "technology"]):
     sec = SECTIONS[cat]
-    
-    google_section = ""
-    if cat == "telco":
-        google_section = render_google_section(data["google_oss_bss"])
-    
-    regular_items = data["regular"].get(cat, [])
-    regular_cards = render_regular_body(regular_items)
+    google_section = render_google_section(data["google_oss_bss"]) if cat == "telco" else ""
+    news_cards = render_news_cards(data["regular"].get(cat, []))
     
     with cols[idx]:
         st.markdown(f'<div class="{sec["style"]}">{sec["icon"]} {sec["name"]}</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="col-body">{google_section}{regular_cards}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="col-body">{google_section}{news_cards}</div>', unsafe_allow_html=True)
 
-st.markdown("""
-<script>
-setInterval(function(){
-    window.location.reload();
-}, 300000);  // 5 minutes auto-refresh
-</script>
-""", unsafe_allow_html=True)
+# Auto-refresh
+st.markdown("""<script>setInterval(function(){window.location.reload();}, 300000);</script>""", unsafe_allow_html=True)
+Required requiremen
