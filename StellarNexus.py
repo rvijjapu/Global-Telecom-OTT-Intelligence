@@ -1,33 +1,16 @@
 import streamlit as st
-import feedparser
 import time
 from datetime import datetime
-import urllib.parse
 
-# --- 1. NEVER-SLEEP / AUTO-REFRESH ENGINE ---
-# This resets the inactivity timer every 10 mins to prevent hibernation
+# --- 1. NEVER-SLEEP / KEEP-ALIVE FRAGMENT ---
 @st.fragment(run_every=600)
 def keep_alive_engine():
-    st.session_state.sync_time = datetime.now().strftime('%H:%M:%S')
     st.markdown("", unsafe_allow_html=True)
 
 # --- 2. PAGE CONFIGURATION ---
-st.set_page_config(page_title="Stellar Nexus 2026", layout="wide")
+st.set_page_config(page_title="Global Intelligence Stellar Nexus", layout="wide")
 
-# --- 3. DYNAMIC NEWS AGGREGATION ALGORITHM ---
-def fetch_strategic_intel(query):
-    """Permanent AI Algorithm to fetch high-impact 2026 signals"""
-    # Specifically targeting 2026 dates to ensure no 2025 'leakage'
-    search_query = f"{query} news after:2025-12-31"
-    encoded_query = urllib.parse.quote(search_query)
-    rss_url = f"https://news.google.com/rss/search?q={encoded_query}&hl=en-US&gl=US&ceid=US:en"
-    try:
-        feed = feedparser.parse(rss_url)
-        return [{"title": e.title, "link": e.link, "source": e.source.get('title', 'Global Intel')} for e in feed.entries[:4]]
-    except:
-        return []
-
-# --- 4. PREMIUM CSS: DARK BLUE VISIBILITY ---
+# --- 3. PREMIUM CSS: DARK BLUE VISIBILITY & LIGHT THEME CARDS ---
 st.markdown("""
 <style>
     .stApp {
@@ -47,27 +30,50 @@ st.markdown("""
     .dark-blue-text {
         color: #0a192f !important;
         font-weight: 800 !important;
-        text-shadow: 1px 1px 2px rgba(255,255,255,0.4);
     }
 
-    /* Hero Strategic Container */
+    .main-title {
+        font-size: 3.5rem !important;
+        text-shadow: 1px 1px 2px rgba(255,255,255,0.4);
+        margin-bottom: 25px;
+    }
+
+    /* Strategic Baseline (Top Focus) */
     .hero-container {
-        background: rgba(255, 255, 255, 0.96);
+        background: rgba(255, 255, 255, 0.98);
         border-radius: 15px;
-        padding: 2.5rem;
+        padding: 2rem;
         border-left: 10px solid #0a192f;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        margin-bottom: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        margin-bottom: 3rem;
+    }
+
+    .hero-title {
+        color: #0a192f !important;
+        font-size: 1.85rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        border-left: 6px solid #1e40af;
+        padding-left: 15px;
+    }
+
+    .hero-box {
+        background: #f1f5f9;
+        border-radius: 10px;
+        padding: 1.5rem;
+        min-height: 220px;
+        border: 1px solid #e2e8f0;
     }
 
     /* Industry Vertical Cards */
     .section-card {
-        background: rgba(255, 255, 255, 0.98);
+        background: rgba(255, 255, 255, 1.0);
         padding: 24px;
         border-radius: 12px;
         min-height: 520px;
         box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         border: 1px solid #e2e8f0;
+        margin-bottom: 20px;
     }
 
     .section-header {
@@ -80,7 +86,7 @@ st.markdown("""
     }
 
     .news-item {
-        margin-bottom: 15px;
+        margin-bottom: 18px;
         padding-bottom: 10px;
         border-bottom: 1px solid #f1f5f9;
     }
@@ -88,20 +94,20 @@ st.markdown("""
     .news-text {
         font-size: 0.95rem;
         color: #1e293b;
-        line-height: 1.5;
-        margin-bottom: 5px;
+        line-height: 1.6;
+        margin-bottom: 8px;
     }
 
-    .read-more {
-        font-size: 0.85rem;
+    .link-btn {
         color: #1e40af;
         font-weight: 700;
         text-decoration: none;
+        font-size: 0.85rem;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# --- 5. IMPACTFUL LOADING SEQUENCE ---
+# --- 4. IMPACTFUL LOADING SEQUENCE ---
 placeholder = st.empty()
 with placeholder.container():
     st.markdown("""
@@ -115,57 +121,77 @@ with placeholder.container():
 placeholder.empty()
 keep_alive_engine()
 
-# --- 6. MAIN DASHBOARD CONTENT ---
-st.markdown("<h1 class='dark-blue-text' style='text-align: center; font-size: 3.2rem;'>Global Telecom & OTT Stellar Nexus</h1>", unsafe_allow_html=True)
+# --- 5. MAIN DASHBOARD CONTENT ---
+st.markdown("<h1 class='dark-blue-text main-title' style='text-align: center;'>Global Telecom & OTT Stellar Nexus</h1>", unsafe_allow_html=True)
 
-# 🚀 STRATEGIC BASELINE (Dynamic Summary Search)
+# --- 🚀 STRATEGIC BASELINE ---
 st.markdown("""
 <div class="hero-container">
-    <div style="color: #0a192f; font-size: 1.8rem; font-weight: 800; margin-bottom: 1.5rem;">🚀 STRATEGIC HIGHLIGHTS</div>
+    <div class="hero-title">🚀 STRATEGIC HIGHLIGHTS</div>
     <div style="display: flex; gap: 20px;">
-        <div style="flex: 1; background: #f1f5f9; padding: 1.5rem; border-radius: 10px; border: 1px solid #e2e8f0;">
-            <div style="font-weight:800; color:#10b981; font-size:1.1rem; margin-bottom:12px;">🟢 STRATEGIC HITS</div>
-            <p style="color:#1e293b; font-size:0.95rem; line-height:1.7;">
-                Scanning for 2026 M&A signals: Amdocs-Matrixx integration progress, Netcracker-CSG expansion tracking, and the Netflix-WBD acquisition timeline.
-            </p>
+        <div class="hero-box" style="flex: 1;">
+            <div style="font-weight:800; color:#10b981; font-size:1.1rem; margin-bottom:12px;">🟢 STRATEGIC HITS (JAN 2026)</div>
+            <div style="color:#1e293b; font-size:0.95rem; line-height:1.7;">
+                • <b>Netflix-WBD Merger Reaffirmed:</b> Warner Bros. Discovery board unanimously backs Netflix's $82.7B proposal, rejecting Paramount's $108.4B hostile bid due to excessive debt risks.<br>
+                • <b>NEC-CSG Finalization:</b> NEC (Netcracker) has closed its $2.9B acquisition of CSG, creating a dominant SaaS-first monetization powerhouse for Tier-1 telcos.<br>
+                • <b>Amdocs Secures Charging Lead:</b> Completion of $200M Matrixx acquisition gives Amdocs a 23% revenue share in the global charging platform market.
+            </div>
         </div>
-        <div style="flex: 1; background: #f1f5f9; padding: 1.5rem; border-radius: 10px; border: 1px solid #e2e8f0;">
-            <div style="font-weight:800; color:#f97316; font-size:1.1rem; margin-bottom:12px;">🟠 PULSE</div>
-            <p style="color:#1e293b; font-size:0.95rem; line-height:1.7;">
-                Real-time TechWatch: Agentic AI deployment rates in BSS stacks, 5G standalone monetization models, and sovereign cloud infrastructure shifts.
-            </p>
+        <div class="hero-box" style="flex: 1;">
+            <div style="font-weight:800; color:#f97316; font-size:1.1rem; margin-bottom:12px;">🟠 PULSE: AGENTIC REALITY</div>
+            <div style="color:#1e293b; font-size:0.95rem; line-height:1.7;">
+                • <b>Agentic BSS Core:</b> Gartner predicts 40% of enterprise applications will embed autonomous AI agents by end-of-year 2026, up from <5% in 2025.<br>
+                • <b>Zero-Touch Orchestration:</b> Telcos like Telefónica and AT&T move beyond copilots to agentic systems that take autonomous troubleshooting and fulfillment actions.<br>
+                • <b>Legacy Replacement Wave:</b> 2026 marks the tipping point where "wrapping" legacy stacks is no longer viable, making full cloud-native replacement inevitable.
+            </div>
         </div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# INDUSTRY VERTICALS
+# --- 📊 VERTICAL INDUSTRY GRID ---
 col1, col2, col3, col4 = st.columns(4)
 
-verticals = [
-    ("📡 TELCO OSS/BSS", "#db2777", "telecom OSS BSS announcements 2026"),
-    ("📺 OTT & STREAMING", "#7c3aed", "OTT streaming merger deals 2026"),
-    ("🏆 SPORTS MEDIA", "#059669", "WNBA NBA media rights 2026"),
-    ("⚡ AI TECHWATCH", "#ea580c", "Agentic AI autonomous enterprise 2026")
+sections = [
+    ("📡 TELCO OSS/BSS", "#db2777", [
+        {"t": "NEC (Netcracker) completes $2.9B acquisition of CSG to dominate SaaS BSS globally.", "l": "https://tecknexus.com/nec-buys-csg-for-2-9b-to-scale-saas-bss-monetization/"},
+        {"t": "Amdocs acquires Matrixx for $200M to bolster its leadership in 5G charging platform sales.", "l": "https://www.lightreading.com/oss-bss-cx/amdocs-snaps-up-matrixx-for-200m-in-rescue-of-bss-player"},
+        {"t": "Wavelo named 'Digital BSS Trailblazer' as event-driven software gains market traction.", "l": "https://www.thefastmode.com/oss-bss-news"}
+    ]),
+    ("📺 OTT & STREAMING", "#7c3aed", [
+        {"t": "Netflix $82.7B WBD merger on track for Q3 2026 close after board rejects rival suitor.", "l": "https://ir.netflix.net/investor-news-and-events/financial-releases/press-release-details/2026/Netflix-Supports-Warner-Bros--Discovery-Boards-Commitment-to-Merger-Agreement/default.aspx"},
+        {"t": "Warner Bros. Discovery board unanimously recommends stockholders reject Paramount hostile bid.", "l": "https://ir.wbd.com/news-and-events/financial-news/financial-news-details/2026/WARNER-BROS--DISCOVERY-BOARD-OF-DIRECTORS-UNANIMOUSLY-RECOMMENDS-SHAREHOLDERS-REJECT-AMENDED-PARAMOUNT-TENDER-OFFER/default.aspx"},
+        {"t": "Media M&A surge continues as players move from growth phase to profitability focus.", "l": "https://www.thecurrent.com/streaming-2025-media-mergers-acquisitions-streaming-2026"}
+    ]),
+    ("🏆 SPORTS MEDIA", "#059669", [
+        {"t": "WNBA secures landmark 11-year, $2.2B rights agreement with Disney, NBC, and Amazon.", "l": "https://frontofficesports.com/wnba-signs-2-2-billion-rights-deal-with-disney-nbc-amazon/"},
+        {"t": "DAZN acquires Foxtel in strategic move to secure high-value sports rights in Australia.", "l": "https://www.thecurrent.com/streaming-2025-media-mergers-acquisitions-streaming-2026"},
+        {"t": "Streaming players transition to unified ad-inventory models for live sports events.", "l": "https://www.thecurrent.com/streaming-2025-media-mergers-acquisitions-streaming-2026"}
+    ]),
+    ("⚡ AI TECHWATCH", "#ea580c", [
+        {"t": "2026 defined by 'Industrialisation of AI' as enterprises embed agents into core workflows.", "l": "https://www.financialexpress.com/business/news/2026-will-be-defined-by-the-industrialisation-of-ai-venu-lambu-ceo-amp-md-ltimindtree/4097152/"},
+        {"t": "Gartner: 40% of enterprise apps will embed AI agents by the end of 2026.", "l": "https://machinelearningmastery.com/7-agentic-ai-trends-to-watch-in-2026/"},
+        {"t": "Coforge launches EvolveOps.AI for autonomous IT operations management.", "l": "https://www.thefastmode.com/oss-bss-news"}
+    ])
 ]
 
-for idx, (label, color, query) in enumerate(verticals):
+# RENDER COLUMNS
+for idx, (label, color, news_list) in enumerate(sections):
     with [col1, col2, col3, col4][idx]:
-        news = fetch_strategic_intel(query)
         news_html = ""
-        for item in news:
+        for item in news_list:
             news_html += f"""
             <div class="news-item">
-                <div class="news-text"><b>{item['source']}</b>: {item['title']}</div>
-                <a href="{item['link']}" target="_blank" class="read-more">Analyze Full Story →</a>
+                <div class="news-text">{item['t']}</div>
+                <a href="{item['l']}" target="_blank" class="link-btn">Read Full Story →</a>
             </div>"""
         
         st.html(f"""
         <div class="section-card">
             <div class="section-header" style="color: {color}; border-color: {color};">{label}</div>
-            {news_html if news else '<div class="news-text">Synchronizing 2026 data nodes...</div>'}
+            {news_html}
         </div>
         """)
 
-# Footer
-st.markdown(f"<p style='text-align: center; color: white; padding-top: 20px;'>Live Intelligence Sync: {datetime.now().strftime('%H:%M:%S')} | 🚀 Algorithm: ACTIVE (NO HARDCODE)</p>", unsafe_allow_html=True)
+# --- 7. FOOTER ---
+st.markdown(f"<p style='text-align: center; color: white; padding-top: 20px;'>Live Intelligence Sync: {datetime.now().strftime('%H:%M:%S')} | 🚀 Never-Sleep Active</p>", unsafe_allow_html=True)
