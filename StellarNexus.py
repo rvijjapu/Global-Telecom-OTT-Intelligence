@@ -2,140 +2,126 @@ import streamlit as st
 import time
 from datetime import datetime
 
-# 1. PAGE CONFIGURATION
-st.set_page_config(page_title="Global Intelligence Stellar Nexus", layout="wide")
+# 1. Page Configuration
+st.set_page_config(page_title="Global Telecom & OTT Stellar Nexus", layout="wide")
 
-# 2. CUSTOM CSS FOR BACKGROUND & LOADING
+# 2. Custom CSS for Professional Dark Blue Styling & Background
 st.markdown("""
 <style>
+    /* Custom Background */
     .stApp {
         background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
         background-size: cover;
-        color: #1e293b;
     }
     
-    /* Center the loading text */
+    /* Center the Loading State */
     .loading-container {
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         height: 80vh;
-        color: #ffffff;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        text-align: center;
     }
     
-    .loading-text {
-        font-size: 2.5rem;
-        font-weight: 800;
-        text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
-        margin-bottom: 20px;
+    /* Dark Blue Impactful Font for Loading and Title */
+    .dark-blue-title {
+        color: #0a192f !important;
+        font-size: 3.2rem !important;
+        font-weight: 800 !important;
+        text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+        margin-bottom: 0px;
     }
 
-    /* Professional Card Styling for Sections */
-    .vertical-section {
+    /* Card Containers for News */
+    .section-card {
         background: rgba(255, 255, 255, 0.95);
-        padding: 20px;
+        padding: 24px;
         border-radius: 12px;
-        min-height: 480px;
+        min-height: 450px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         border: 1px solid #e2e8f0;
         margin-bottom: 20px;
     }
 
-    .vertical-header {
-        font-size: 1.2rem;
+    .section-header {
+        font-size: 1.25rem;
         font-weight: 800;
-        margin-bottom: 15px;
-        padding-bottom: 10px;
+        padding-bottom: 12px;
         border-bottom: 3px solid;
         text-transform: uppercase;
+        margin-bottom: 15px;
     }
 
     .news-item {
-        margin-bottom: 15px;
-        padding-bottom: 8px;
+        margin-bottom: 16px;
+        padding-bottom: 10px;
         border-bottom: 1px solid #f1f5f9;
     }
 
     .news-text {
         font-size: 0.95rem;
         color: #334155;
-        line-height: 1.4;
+        line-height: 1.5;
+        margin-bottom: 5px;
     }
 
-    .read-more {
-        font-size: 0.85rem;
+    .link-btn {
         color: #1e40af;
         font-weight: 700;
         text-decoration: none;
+        font-size: 0.85rem;
+    }
+    .link-btn:hover {
+        text-decoration: underline;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# 3. LOADING SCREEN (st.empty used to replace content)
+# 3. IMPACTFUL LOADING SCREEN
 placeholder = st.empty()
 with placeholder.container():
     st.markdown("""
         <div class="loading-container">
-            <div class="loading-text">🔥 Igniting AI-powered intelligence...</div>
-            <div style="color: #cbd5e1;">Please wait while we synchronize global nodes.</div>
+            <h1 class="dark-blue-title">Igniting AI-powered intelligence...</h1>
+            <p style="color: #0a192f; font-weight: 600;">Synchronizing global strategic nodes</p>
         </div>
     """, unsafe_allow_html=True)
-    time.sleep(1.5)  # Simulate fast loading
+    time.sleep(1.8) # Quick delay for effect
 
+# Replace loading screen with main content
 placeholder.empty()
 
-# 4. DASHBOARD CONTENT
-# Header
-st.markdown("<h1 style='text-align: center; color: white; text-shadow: 2px 2px 5px #000;'>Global Telecom & OTT Stellar Nexus</h1>", unsafe_allow_html=True)
+# 4. MAIN DASHBOARD CONTENT
+st.markdown("<h1 class='dark-blue-title' style='text-align: center;'>Global Telecom & OTT Stellar Nexus</h1>", unsafe_allow_html=True)
 
-# TOP SECTION: STRATEGIC BASELINE
-st.markdown("""
-<div style="background: rgba(255,255,255,0.9); padding: 25px; border-radius: 15px; margin-bottom: 30px; border-left: 8px solid #1e40af;">
-    <h2 style="color: #0f172a; margin: 0 0 15px 0;">🚀 STRATEGIC BASELINE</h2>
-    <div style="display: flex; gap: 20px;">
-        <div style="flex: 1; background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
-            <div style="font-weight:800; color:#10b981; margin-bottom:8px;">🟢 STRATEGIC HITS (JAN 2026)</div>
-            <div style="font-size:0.95rem; color:#334155;"><b>Netflix-WBD Merger:</b> Netflix confirms definitive agreement to acquire Warner Bros. for $82.7B to unify HBO Max with its global platform.</div>
-            <div style="font-size:0.95rem; color:#334155; margin-top:8px;"><b>Amdocs-Matrixx Deal:</b> Amdocs completes $200M acquisition of Matrixx Software to dominate 5G cloud-native charging.</div>
-        </div>
-        <div style="flex: 1; background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
-            <div style="font-weight:800; color:#f97316; margin-bottom:8px;">🟠 TECH PULSE: AGENTIC REALITY</div>
-            <div style="font-size:0.95rem; color:#334155;"><b>Agentic AI Core:</b> 40% of upcoming agentic projects predicted to fail unless organizations redesign operations for silicon-based workforces.</div>
-            <div style="font-size:0.95rem; color:#334155; margin-top:8px;"><b>Autonomous Networks:</b> Ericsson and Nokia advance self-healing "sensing" networks capable of real-time anomaly detection.</div>
-        </div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# INDUSTRY SECTIONS
+# Industry Sections Layout
 col1, col2, col3, col4 = st.columns(4)
 
 sections = [
     ("📡 TELCO OSS/BSS", "#db2777", [
-        {"t": "Amdocs snaps up Matrixx for $200M to consolidate charging product market share.", "l": "https://www.lightreading.com"},
-        {"t": "BSS/OSS modernization deemed essential for monetizing 5G Standalone and network slicing.", "l": "https://www.rcrwireless.com"},
-        {"t": "NEC completes acquisition of CSG to scale Netcracker's global BSS footprint.", "l": "https://www.netcracker.com"}
+        {"t": "Amdocs completes $200M Matrixx acquisition to dominate cloud-native 5G charging.", "l": "https://www.lightreading.com"},
+        {"t": "NEC scales Netcracker's footprint via $2.9B CSG acquisition.", "l": "https://www.netcracker.com"},
+        {"t": "SaaS BSS adoption surges 25% as legacy billing stacks are decommissioned.", "l": "https://www.vanillaplus.com"}
     ]),
     ("📺 OTT & STREAMING", "#7c3aed", [
-        {"t": "Netflix board rejects Paramount's $77.9B offer, favoring WBD $72B proposal for studios.", "l": "https://www.variety.com"},
-        {"t": "Warner Bros. Discovery separation into Discovery Global expected in Q3 2026.", "l": "https://about.netflix.com"},
-        {"t": "Consolidation unease grows in Indian market over content concentration risk.", "l": "https://www.outlookindia.com"}
+        {"t": "Netflix board moves to finalize $82.7B WBD merger, securing HBO and Warner studios.", "l": "https://www.variety.com"},
+        {"t": "Discovery Global spin-off finalized to partition legacy debt from growth assets.", "l": "https://www.hollywoodreporter.com"},
+        {"t": "Ad-supported revenue overtakes premium subscriptions for top OTT giants.", "l": "https://www.digitaltveurope.com"}
     ]),
     ("🏆 SPORTS MEDIA", "#059669", [
-        {"t": "WNBA secures landmark 11-year rights deal with Disney, Amazon, and NBCUniversal.", "l": "https://www.wnba.com"},
-        {"t": "NBA Sunday Night Basketball series to debut on NBC and Peacock for 2025-26 season.", "l": "https://www.nbcuniversal.com"},
-        {"t": "Prime Video expands global distribution rights for WNBA League Pass through 2036.", "l": "https://www.amazon.com"}
+        {"t": "WNBA historic 11-year rights deal begins, elevating package value to $200M/year.", "l": "https://www.espn.com"},
+        {"t": "NBA domestic rights officially transition to Disney and Amazon ecosystems.", "l": "https://www.sportspromedia.com"},
+        {"t": "FanDuel and DraftKings expand real-time fan engagement through AI highlights.", "l": "https://www.sportico.com"}
     ]),
     ("⚡ CORE TECHNOLOGY", "#ea580c", [
-        {"t": "Amazon deploys 1 millionth robot; DeepFleet AI improves travel efficiency by 10%.", "l": "https://www.deloitte.com"},
-        {"t": "Enterprises shift from cloud-first to strategic hybrid for AI inference economics.", "l": "https://www.gartner.com"},
-        {"t": "Multi-agent systems (MAS) evolve to automate complex cross-platform workflows.", "l": "https://digitalmara.com"}
+        {"t": "Agentic AI market projected to hit $8.5B by EOY 2026.", "l": "https://www.techcrunch.com"},
+        {"t": "Industrial robotics reach new 5.5M global unit record as automation peaks.", "l": "https://www.venturebeat.com"},
+        {"t": "NVIDIA and AWS launch sovereign AI infrastructure for regional data compliance.", "l": "https://www.zdnet.com"}
     ])
 ]
 
-# Render industry section cards
+# Rendering function to keep news INSIDE cards
 for idx, (label, color, news_list) in enumerate(sections):
     with [col1, col2, col3, col4][idx]:
         news_html = ""
@@ -143,15 +129,15 @@ for idx, (label, color, news_list) in enumerate(sections):
             news_html += f"""
             <div class="news-item">
                 <div class="news-text">{item['t']}</div>
-                <a href="{item['l']}" target="_blank" class="read-more">Read Full Story →</a>
+                <a href="{item['l']}" target="_blank" class="link-btn">Read Full Story →</a>
             </div>"""
         
         st.markdown(f"""
-        <div class="vertical-section">
-            <div class="vertical-header" style="color: {color}; border-color: {color};">{label}</div>
+        <div class="section-card">
+            <div class="section-header" style="color: {color}; border-color: {color};">{label}</div>
             {news_html}
         </div>
         """, unsafe_allow_html=True)
 
 # Footer
-st.markdown(f"<div style='text-align: center; color: white; padding: 20px;'>Live Intelligence Sync: {datetime.now().strftime('%H:%M:%S')}</div>", unsafe_allow_html=True)
+st.markdown(f"<p style='text-align: center; color: white;'>Sync Time: {datetime.now().strftime('%H:%M:%S')}</p>", unsafe_allow_html=True)
