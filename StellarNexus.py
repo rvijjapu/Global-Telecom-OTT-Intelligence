@@ -12,7 +12,7 @@ st.set_page_config(
 )
 
 # ─────────────────────────────────────────────
-# SECTION URLS (EXACTLY YOUR URLS)
+# SECTION URLS (EXACT)
 # ─────────────────────────────────────────────
 SECTION_URLS = {
     "TELCO OSS/BSS":
@@ -34,30 +34,54 @@ SECTION_URLS = {
 st.markdown("## 🌐 Global Telecom & OTT Stellar Nexus — LIVE 2026")
 
 st.caption(
-    f"Updated: {datetime.now().strftime('%d %b %Y %I:%M %p')} • Auto-refresh every 5 minutes"
+    f"Updated: {datetime.now().strftime('%d %b %Y %I:%M %p')}"
 )
 
 # ─────────────────────────────────────────────
-# DISPLAY EACH SECTION IMMEDIATELY
+# IMMEDIATE DISPLAY PER SECTION (NO IFRAME)
 # ─────────────────────────────────────────────
 cols = st.columns(4)
 
-for col, (section_name, url) in zip(cols, SECTION_URLS.items()):
+for col, (section, url) in zip(cols, SECTION_URLS.items()):
     with col:
-        st.markdown(f"### {section_name}")
-        st.components.v1.iframe(
-            src=url,
-            height=750,     # fits neatly inside each section
-            scrolling=True
+        st.subheader(section)
+
+        st.markdown(
+            f"""
+            <div style="
+                background:#ffffff;
+                padding:18px;
+                border-radius:12px;
+                border-left:6px solid #2563eb;
+                box-shadow:0 4px 12px rgba(0,0,0,0.08);
+                text-align:center;
+            ">
+                <p style="font-size:0.9rem;color:#475569;margin-bottom:12px;">
+                    Live Google Search results for <b>{section}</b>
+                </p>
+                <a href="{url}" target="_blank"
+                   style="
+                     display:inline-block;
+                     padding:10px 18px;
+                     background:#2563eb;
+                     color:white;
+                     text-decoration:none;
+                     border-radius:8px;
+                     font-weight:600;
+                   ">
+                   🔎 Open Live Results
+                </a>
+            </div>
+            """,
+            unsafe_allow_html=True
         )
 
 # ─────────────────────────────────────────────
-# AUTO REFRESH
+# FOOTER
 # ─────────────────────────────────────────────
 st.markdown("""
-<script>
-setTimeout(function () {
-    window.location.reload();
-}, 300000);
-</script>
+<br>
+<p style="text-align:center;color:#64748b;font-size:0.8rem;">
+Each section opens live Google Search intelligence in a new tab.
+</p>
 """, unsafe_allow_html=True)
