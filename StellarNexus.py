@@ -5,124 +5,173 @@ from datetime import datetime
 # 1. PAGE CONFIGURATION
 st.set_page_config(page_title="Global Intelligence Stellar Nexus", layout="wide")
 
-# 2. BEAUTIFUL CUSTOM CSS & BACKGROUND
+# 2. PREMIUM CUSTOM CSS
 st.markdown("""
 <style>
-    /* Background Image */
+    /* Background Image with optimized overlay */
     .stApp {
         background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
         background-size: cover;
-        color: #f8fafc;
     }
     
-    /* Transparent Background for main container */
+    /* Main Content Container: Clean and readable */
     [data-testid="stAppViewBlockContainer"] {
-        background-color: rgba(15, 23, 42, 0.85); /* Dark slate overlay for readability */
-        padding: 2rem;
-        border-radius: 20px;
-        margin-top: 2rem;
+        background-color: rgba(248, 250, 252, 0.05); /* Very subtle overlay */
+        padding: 2.5rem;
     }
 
-    /* Header Styling */
-    .header-box { 
-        text-align: center; 
-        padding-bottom: 2rem;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
+    /* DARK BLUE HEADER: Professional Visibility */
+    .main-header {
+        background: rgba(15, 23, 42, 0.95); /* Deep Navy */
+        padding: 2.5rem;
+        border-radius: 15px;
+        text-align: center;
+        border-bottom: 4px solid #3b82f6; /* Modern Blue accent */
+        margin-bottom: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    
-    /* Card Styling */
-    .news-card { 
-        background: rgba(30, 41, 59, 0.95); 
-        border-left: 5px solid #3b82f6; 
-        border-radius: 10px; 
-        padding: 1.5rem; 
+    .main-header h1 {
+        color: #f8fafc !important; /* Crisp white-blue text */
+        font-size: 3.2rem !important;
+        font-weight: 800 !important;
+        letter-spacing: -1px;
+        margin: 0;
+    }
+    .main-header p {
+        color: #94a3b8 !important;
+        font-size: 1.3rem;
+        margin-top: 10px;
+    }
+
+    /* HERO SECTION CARDS: Strategic Hits & Tech Pulse */
+    .hero-card {
+        background: rgba(15, 23, 42, 0.9);
+        border-radius: 12px;
+        padding: 2rem;
+        min-height: 250px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+    .hero-title {
+        font-size: 1.4rem;
+        font-weight: 700;
         margin-bottom: 1.2rem;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
-    .hit-card { 
-        background: linear-gradient(135deg, rgba(30, 58, 138, 0.9), rgba(30, 41, 59, 0.9));
-        border-left: 5px solid #10b981;
+
+    /* VERTICAL SECTIONS: Clean & Modular */
+    .vertical-section {
+        background: rgba(255, 255, 255, 0.98); /* White background for maximum data visibility */
+        color: #0f172a; /* Dark text on white for readability */
+        padding: 1.5rem;
+        border-radius: 12px;
+        min-height: 420px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
     }
-    .pulse-card { 
-        background: linear-gradient(135deg, rgba(88, 28, 135, 0.9), rgba(30, 41, 59, 0.9));
-        border-left: 5px solid #f97316;
+    .vertical-header {
+        font-size: 1.1rem;
+        font-weight: 800;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #e2e8f0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .vertical-list {
+        list-style: none;
+        padding: 0;
+    }
+    .vertical-list li {
+        margin-bottom: 12px;
+        font-size: 0.92rem;
+        line-height: 1.5;
+        border-left: 3px solid #3b82f6;
+        padding-left: 10px;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# 3. HEADER
+# 3. DARK BLUE MAIN HEADER
 st.markdown("""
-<div class="header-box">
-    <h1 style='font-size: 3rem; font-weight: 800; margin-bottom: 0;'>Global Telecom & OTT Stellar Nexus</h1>
-    <p style='color: #94a3b8; font-size: 1.2rem;'>2026 Executive Intelligence Dashboard | Live Updates</p>
+<div class="main-header">
+    <h1>Global Telecom & OTT Stellar Nexus</h1>
+    <p>2026 Executive Competitive Briefing | Intelligence Redefined</p>
 </div>
 """, unsafe_allow_html=True)
 
-# 4. TOP SECTION: STRATEGIC HITS & TECH PULSE
-st.markdown("### 🚀 Strategic Baseline")
+# 4. HERO SECTION: STRATEGIC HITS & TECH PULSE
+st.markdown("<h2 style='color: white; margin-bottom: 1.5rem;'>🚀 Strategic Baseline</h2>", unsafe_allow_html=True)
 col_hits, col_pulse = st.columns(2)
 
 with col_hits:
     st.markdown("""
-    <div class="news-card hit-card">
-        <h4 style='color: #10b981; margin:0;'>STRATEGIC HITS (JAN 2026)</h4>
-        <ul style='font-size: 0.95rem; line-height: 1.6;'>
-            <li><b>Netflix-WBD Merger:</b> Board reaffirms commitment to the $82.7B merger despite Paramount's $108B hostile bid. Expected close: Q3 2026.</li>
-            <li><b>Amdocs Acquires Matrixx:</b> Amdocs finalizes $200M deal for Matrixx Software, consolidating 23% of the charging market.</li>
-            <li><b>JioHotstar Dominance:</b> Emerging as the leader in India OTT, forcing global players to rethink local licensing.</li>
+    <div class="hero-card">
+        <div class="hero-title" style="color: #10b981;">🟢 STRATEGIC HITS (JAN 2026)</div>
+        <ul style="color: #cbd5e1; font-size: 1rem; line-height: 1.7;">
+            <li><b>Netflix-WBD Consolidation:</b> $82.7B board-approved merger enters final regulatory phase. Expected H2 close.</li>
+            <li><b>BSS Market Shift:</b> Amdocs finalizes $200M Matrixx acquisition, securing the architecture edge in 5G charging.</li>
+            <li><b>JioHotstar IPO:</b> Reliance initiating India's largest tech IPO for H1 2026 launch.</li>
         </ul>
     </div>
     """, unsafe_allow_html=True)
 
 with col_pulse:
     st.markdown("""
-    <div class="news-card pulse-card">
-        <h4 style='color: #f97316; margin:0;'>TECH PULSE: AGENTIC REALITY</h4>
-        <ul style='font-size: 0.95rem; line-height: 1.6;'>
-            <li><b>Agentic Baseline:</b> Autonomous AI agents are now the default for enterprise speed, moving from "tools" to "core components."</li>
-            <li><b>Gen UI Discovery:</b> AI digital assistants are replacing traditional menus, allowing users to express "intent" to navigate content.</li>
-            <li><b>Sovereign AI:</b> Increasing geopolitical tension is driving a shift toward regionally compliant, sovereign cloud platforms.</li>
+    <div class="hero-card">
+        <div class="hero-title" style="color: #f97316;">🟠 TECH PULSE: AGENTIC REALITY</div>
+        <ul style="color: #cbd5e1; font-size: 1rem; line-height: 1.7;">
+            <li><b>Agentic Baseline:</b> Autonomous AI agents move from "experimental" to "mission-critical" for tier-1 telcos.</li>
+            <li><b>Zero-Touch Ops:</b> 40% of BSS workflows now use predictive Agentic AI to resolve billing disputes autonomously.</li>
+            <li><b>Inference Edge:</b> Data center power demand peaks as AI inference accounts for 2/3 of compute workloads.</li>
         </ul>
     </div>
     """, unsafe_allow_html=True)
 
-# 5. BOTTOM SECTION: INDUSTRY DEEP-DIVES
-st.markdown("### 📊 Vertical Intelligence")
-col1, col2, col3, col4 = st.columns(4)
+st.markdown("<br>", unsafe_allow_html=True)
+
+# 5. VERTICAL INTELLIGENCE: Professional White Grid
+st.markdown("<h2 style='color: white; margin-bottom: 1.5rem;'>📊 Vertical Intelligence</h2>", unsafe_allow_html=True)
+v_col1, v_col2, v_col3, v_col4 = st.columns(4)
 
 sections = [
     ("📡 TELCO OSS/BSS", "#db2777", [
-        "NEC finalizes $2.9B CSG acquisition to bolster Netcracker's global position.",
-        "Consolidation wave: BSS market shrinks as major vendors absorb specialized players.",
-        "Matrixx architecture remains a favorite for MVNOs under Amdocs ownership."
+        "Amdocs leverages Matrixx assets to counter NEC/Netcracker's $2.9B expansion.",
+        "SaaS-based BSS adoption grows 25% among Tier-2 telcos.",
+        "Legacy billing stack decommission rates at record high for 2026."
     ]),
     ("📺 OTT & STREAMING", "#7c3aed", [
-        "Warner Bros. film studio and HBO Max to unify under Netflix's premium tier.",
-        "Discovery Global separation remains on track for Q3 2026 completion.",
-        "Theater revenues under pressure as Netflix tests 'OTT-first' movie launches."
+        "Netflix-HBO unified tier pilot launches in 5 test markets.",
+        "Discovery Global separation successfully partitions linear liabilities.",
+        "Ad-tier revenue surpasses subscription-only revenue for major platforms."
     ]),
     ("🏆 SPORTS MEDIA", "#059669", [
-        "VERSANT (NBCU spin-off) secures 11-year WNBA rights starting in 2026.",
-        "USA Network to broadcast 50+ WNBA games annually with primetime doubleheaders.",
-        "Sky Sports to distribute all NBCU-NBA/WNBA games across international markets."
+        "WNBA 11-year rights deal begins, valued at ~$200M/year package.",
+        "NBA global rights shift to Disney/Amazon officially kicks off.",
+        "Fan engagement platforms pivot to real-time generative highlights."
     ]),
-    ("⚡ CORE TECH", "#ea580c", [
-        "Relational foundation models (SAP-RPT-1) now optimize ERP/Finance ops.",
-        "World models grounded in real-world physics unlock advanced digital twins.",
-        "ESim-enabled AR glasses launch at CES 2026, merging mobility and wearable AI."
+    ("⚡ CORE TECHNOLOGY", "#ea580c", [
+        "Standalone Gen AI tools lose market share to embedded "passive" AI.",
+        "Autonomous AI agent market projected to hit $8.5B by year-end.",
+        "Industrial robotics installations reach 5.5M units worldwide."
     ])
 ]
 
 for idx, (label, color, bullets) in enumerate(sections):
-    with [col1, col2, col3, col4][idx]:
-        bullet_html = "".join([f"<li style='margin-bottom:10px;'>{b}</li>" for b in bullets])
+    with [v_col1, v_col2, v_col3, v_col4][idx]:
+        bullet_html = "".join([f"<li>{b}</li>" for b in bullets])
         st.markdown(f"""
-        <div style='background: rgba(30, 41, 59, 0.9); border-top: 4px solid {color}; padding: 1rem; border-radius: 0 0 10px 10px; min-height: 400px;'>
-            <h5 style='color: {color}; margin-top: 0;'>{label}</h5>
-            <ul style='font-size: 0.85rem; padding-left: 1rem;'>{bullet_html}</ul>
+        <div class="vertical-section">
+            <div class="vertical-header" style="color: {color}; border-color: {color};">{label}</div>
+            <ul class="vertical-list">{bullet_html}</ul>
         </div>
         """, unsafe_allow_html=True)
 
-# 6. FOOTER
-st.markdown("---")
-st.markdown(f"<p style='text-align: center; color: #64748b;'>Dashboard Sync: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Data Sources: Light Reading, Advanced TV, WNBA, SAP News</p>", unsafe_allow_html=True)
+# 6. PROFESSIONAL FOOTER
+st.markdown("<br>", unsafe_allow_html=True)
+st.markdown(f"""
+<div style='text-align: center; color: #94a3b8; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);'>
+    Confidential Executive Intelligence Portfolio | Sync: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | © 2026 Stellar Nexus
+</div>
+""", unsafe_allow_html=True)
