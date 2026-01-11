@@ -26,7 +26,7 @@ st.set_page_config(
 GROQ_API_KEY = "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"
 
 # ══════════════════════════════════════════════════════════════════════════════
-# EVERGENT CLIENTS - COMPLETE LIST
+# YOUR COMPLETE ENTITY DATABASES (unchanged)
 # ══════════════════════════════════════════════════════════════════════════════
 EVERGENT_CLIENTS = {
     "Astro": ["astro malaysia", "astro sooka", "astro njoi", "astro", "sooka", "njoi"],
@@ -60,7 +60,6 @@ EVERGENT_CLIENTS = {
     "Pilipinas": ["pilipinas", "abs-cbn"],
 }
 
-# COMPETITORS
 COMPETITORS = {
     "Netcracker": ["netcracker", "netcracker technology", "nec netcracker"],
     "Amdocs": ["amdocs", "amdocs ltd", "amdocs inc"],
@@ -90,7 +89,6 @@ COMPETITORS = {
     "Salesforce": ["salesforce", "salesforce communications"],
 }
 
-# TOP GLOBAL TELCOS
 TOP_TELCOS = {
     "Verizon": ["verizon", "verizon wireless", "verizon fios"],
     "AT&T": ["at&t", "att mobility"],
@@ -120,7 +118,6 @@ TOP_TELCOS = {
     "Rogers": ["rogers communications", "rogers"],
 }
 
-# OTT PLATFORMS
 OTT_PLATFORMS = {
     "Netflix": ["netflix"], "Disney+": ["disney+", "disney plus", "hotstar"],
     "Prime Video": ["prime video", "amazon prime"], "HBO Max": ["hbo max", "max"],
@@ -130,7 +127,6 @@ OTT_PLATFORMS = {
     "ESPN+": ["espn+", "espn plus"], "YouTube TV": ["youtube tv"],
 }
 
-# SPORTS ENTITIES
 SPORTS_ENTITIES = {
     "NBA": ["nba", "national basketball association"],
     "NFL": ["nfl", "national football league"],
@@ -284,18 +280,6 @@ st.markdown("""
         margin-top: 20px;
         padding: 15px;
     }
-    .loading-container {
-        text-align: center;
-        padding: 100px 20px;
-        background: rgba(255,255,255,0.9);
-        border-radius: 20px;
-    }
-    .loading-title {
-        font-size: 1.6rem;
-        font-weight: 700;
-        color: #f97316;
-        margin-bottom: 10px;
-    }
     #MainMenu, footer, header {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
@@ -331,7 +315,7 @@ def detect_client(text, section):
     return None
 
 # ══════════════════════════════════════════════════════════════════════════════
-# FEED FETCHING
+# FEED FETCHING - NOW SAVES ORIGINAL LINK
 # ══════════════════════════════════════════════════════════════════════════════
 def fetch_feed(source, url):
     try:
@@ -342,7 +326,10 @@ def fetch_feed(source, url):
         for entry in feed.entries[:20]:
             title = clean(entry.get("title", ""))
             if len(title) < 20: continue
-            items.append({"title": title, "source": source, "summary": extract_summary(entry)})
+            link = entry.get("link", "")  # ← SAVE ORIGINAL LINK HERE
+            if not link: continue
+            summary = extract_summary(entry)
+            items.append({"title": title, "link": link, "source": source, "summary": summary})
         return items
     except: return []
 
@@ -358,11 +345,12 @@ def fetch_all_news():
     return all_news
 
 # ══════════════════════════════════════════════════════════════════════════════
-# AI HIGHLIGHTS - 12+ with Read More
+# AI HIGHLIGHTS - NOW USES REAL LINKS FOR READ MORE
 # ══════════════════════════════════════════════════════════════════════════════
 def generate_highlights_ai(news_items, section, section_name):
     if not news_items: return []
-    news_text = "\n".join([f"- {n['title']}: {n.get('summary','')[:150]}" for n in news_items[:20]])
+    # Include real links in prompt so Groq can use them
+    news_text = "\n".join([f"- {n['title']}: {n.get('summary','')[:150]} [link: {n.get('link','')}]" for n in news_items[:20]])
     
     clients = {
         "telco": list(EVERGENT_CLIENTS.keys()) + list(COMPETITORS.keys())[:10] + list(TOP_TELCOS.keys())[:15],
@@ -377,8 +365,8 @@ def generate_highlights_ai(news_items, section, section_name):
             json={
                 "model": "llama-3.1-8b-instant",
                 "messages": [
-                    {"role": "system", "content": f"You are a {section_name} analyst. Focus on: {', '.join(clients.get(section,[])[:30])}. Only use real company/operator names."},
-                    {"role": "user", "content": f"Create 12 client highlights from this news. No duplicates, latest only, no generic tags like Industry/Amdocs. Return JSON: {{\"highlights\": [{{\"title\": \"Client/Partner\", \"description\": \"2-3 sentences benefit/impact\", \"source_link\": \"original news url\"}}]}}\n\nNews:\n{news_text}"}
+                    {"role": "system", "content": f"You are a {section_name} analyst. Focus on: {', '.join(clients.get(section,[])[:30])}. Only use real company/operator names. No generic tags."},
+                    {"role": "user", "content": f"Create 12 client highlights from this news. No duplicates, latest only, no tags like Industry/Amdocs. Each highlight must include source link for Read More.\n\nNews:\n{news_text}\n\nReturn JSON only:\n{{ \"highlights\": [{{ \"title\": \"Client/Partner\", \"description\": \"2-3 sentences benefit/impact\", \"source_link\": \"original news url from [link: ...]\" }} ] }}\n"}
                 ],
                 "max_tokens": 2000,
                 "temperature": 0.4
@@ -386,10 +374,16 @@ def generate_highlights_ai(news_items, section, section_name):
         
         if resp.status_code == 200:
             match = re.search(r'\{[\s\S]*\}', resp.json()["choices"][0]["message"]["content"])
-            if match: return json.loads(match.group()).get("highlights", [])[:15]
+            if match:
+                data = json.loads(match.group())
+                # Clean up any invalid links
+                for h in data.get("highlights", []):
+                    if not h.get("source_link", "").startswith("http"):
+                        h["source_link"] = "#"
+                return data.get("highlights", [])[:15]
     except: pass
     
-    # Fallback - clean, no tags
+    # Fallback with real links
     return [{"title": detect_client(n["title"], section) or n["source"], "description": n["title"][:120] + "...", "source_link": n.get("link", "#")} for n in news_items[:12]]
 
 @st.cache_data(ttl=300)
@@ -397,7 +391,7 @@ def get_highlights(section, name, news_hash):
     return generate_highlights_ai(st.session_state.get(f"news_{section}", []), section, name)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# RENDER
+# RENDER - WITH WORKING READ MORE
 # ══════════════════════════════════════════════════════════════════════════════
 def render_card(h, color):
     title = html.escape(h.get("title", "Client"))
@@ -434,10 +428,10 @@ for sec, name in [("telco","Telco OSS/BSS"), ("ott","OTT & Streaming"), ("sports
 
 # Display
 c1,c2,c3,c4 = st.columns(4)
-with c1: st.markdown(render_section("📡", "Telco OSS/BSS", highlights.get("telco",[]), "col-header-pink", "pink"), unsafe_allow_html=True)
-with c2: st.markdown(render_section("📺", "OTT & Streaming", highlights.get("ott",[]), "col-header-purple", "purple"), unsafe_allow_html=True)
-with c3: st.markdown(render_section("🏆", "Sports & Events", highlights.get("sports",[]), "col-header-green", "green"), unsafe_allow_html=True)
-with c4: st.markdown(render_section("⚡", "Technology", highlights.get("technology",[]), "col-header-orange", "orange"), unsafe_allow_html=True)
+with c1: st.markdown(render_section("📡","Telco OSS/BSS",highlights.get("telco",[]),"col-header-pink","pink"), unsafe_allow_html=True)
+with c2: st.markdown(render_section("📺","OTT & Streaming",highlights.get("ott",[]),"col-header-purple","purple"), unsafe_allow_html=True)
+with c3: st.markdown(render_section("🏆","Sports & Events",highlights.get("sports",[]),"col-header-green","green"), unsafe_allow_html=True)
+with c4: st.markdown(render_section("⚡","Technology",highlights.get("technology",[]),"col-header-orange","orange"), unsafe_allow_html=True)
 
 st.markdown(f'<div class="footer"><p>Last Updated: {datetime.now().strftime("%I:%M:%S %p")} • Auto-refreshes every 5 minutes</p></div>', unsafe_allow_html=True)
 
