@@ -682,7 +682,7 @@ def render_google_section(google_items):
 <span class="{time_class}">{time_str}</span>
 <span>•</span>
 <span>Google OSS/BSS</span>
-<a href="{safe_link}" target="_blank" class="read-more-btn">
+<a href="{safe_link}" target="_blank" rel="noopener noreferrer" class="read-more-btn">
 <span class="hand-icon">👉</span> Read Full Article
 </a>
 </div>
@@ -707,7 +707,7 @@ def render_regular_body(items):
 <span class="{time_class}">{time_str}</span>
 <span>•</span>
 <span>{safe_source}</span>
-<a href="{safe_link}" target="_blank" class="read-more-btn">
+<a href="{safe_link}" target="_blank" rel="noopener noreferrer" class="read-more-btn">
 <span class="hand-icon">👉</span> Read Full Article
 </a>
 </div>
