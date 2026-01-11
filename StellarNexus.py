@@ -641,7 +641,7 @@ st.markdown(f'''
         <strong>🔄 Auto-refresh:</strong> Every 5 minutes
     </p>
     <p style="margin-top: 8px; font-size: 0.75rem; opacity: 0.85;">
-        Powered by Google News RSS + Groq AI • 2026-Only Executive Intelligence
+        Powered by AI
     </p>
 </div>
 ''', unsafe_allow_html=True)
