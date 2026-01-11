@@ -110,8 +110,8 @@ st.markdown("""
     }
 
     .google-section {
-        background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
-        border: 3px solid #fbbf24;
+        background: white;
+        border: 2px solid #e5e7eb;
         border-radius: 12px;
         padding: 12px;
         margin-bottom: 15px;
@@ -120,10 +120,10 @@ st.markdown("""
     .google-header {
         font-size: 0.85rem;
         font-weight: 700;
-        color: #78350f;
+        color: #374151;
         text-align: center;
         padding: 8px;
-        background: #fbbf24;
+        background: #f3f4f6;
         border-radius: 8px;
         margin-bottom: 10px;
         text-transform: uppercase;
@@ -146,9 +146,8 @@ st.markdown("""
     }
 
     .news-card-google {
-        background: #fffef5;
-        border: 2px solid #fbbf24;
-        border-left: 5px solid #f59e0b;
+        background: #fafbfc;
+        border: 1px solid #e2e8f0;
     }
 
     .news-title {
@@ -163,7 +162,7 @@ st.markdown("""
 
     .news-title:hover {
         color: #1d4ed8;
-        text-decoration: underline;
+        text-decoration: none;
     }
 
     .news-summary {
@@ -191,7 +190,6 @@ st.markdown("""
 
     .read-more-btn:hover {
         color: #1d4ed8;
-        text-decoration: underline;
     }
 
     .hand-icon {
@@ -360,7 +358,6 @@ def fetch_full_article_content(url):
         if resp.status_code != 200:
             return ""
         
-        # Extract text from HTML (simple but effective)
         from html.parser import HTMLParser
         
         class ArticleParser(HTMLParser):
@@ -386,52 +383,44 @@ def fetch_full_article_content(url):
         parser.feed(resp.text)
         full_text = ' '.join(parser.text)
         
-        # Clean and limit
         full_text = re.sub(r'\s+', ' ', full_text)
-        return full_text[:3000]  # First 3000 chars
+        return full_text[:3000]
     except:
         return ""
 
 def ai_summarize_news(title, summary, url=None):
     """Advanced AI algorithm to create unique 2-3 line executive summary"""
     
-    # Try to fetch full article content
     article_content = ""
     if url:
         article_content = fetch_full_article_content(url)
     
-    # Use article content if available, otherwise use summary
     source_text = article_content if article_content else summary
     full_text = f"{title}. {source_text}"
     
-    # Split into sentences and clean
     sentences = re.split(r'[.!?]+', full_text)
     sentences = [s.strip() for s in sentences if len(s.strip()) > 25]
     
     if not sentences:
         return summary[:200] + "..." if len(summary) > 200 else summary
     
-    # Remove duplicate/similar sentences
     unique_sentences = []
     seen_content = set()
     
     for sentence in sentences:
-        # Create fingerprint of sentence (first 50 chars, lowercase, no spaces)
         fingerprint = sentence.lower().replace(' ', '')[:50]
         if fingerprint not in seen_content:
             unique_sentences.append(sentence)
             seen_content.add(fingerprint)
     
-    sentences = unique_sentences[:8]  # Top 8 unique sentences
+    sentences = unique_sentences[:8]
     
-    # Advanced scoring system
     scored_sentences = []
     
     for idx, sentence in enumerate(sentences):
         score = 0
         sentence_lower = sentence.lower()
         
-        # Critical business keywords (high weight)
         critical_words = {
             'announce': 5, 'launch': 5, 'partnership': 5, 'agreement': 5,
             'merger': 6, 'acquisition': 6, 'deal': 5, 'contract': 5,
@@ -446,33 +435,26 @@ def ai_summarize_news(title, summary, url=None):
             if word in sentence_lower:
                 score += weight
         
-        # Financial numbers boost
         numbers = re.findall(r'\d+', sentence)
         if numbers:
             score += len(numbers) * 2
         
-        # Company/proper names (capitalized words)
         caps = [w for w in sentence.split() if len(w) > 3 and w[0].isupper()]
         score += min(len(caps), 3)
         
-        # Position bonus (earlier sentences more important, but not title)
         if idx > 0 and idx < 4:
             score += (4 - idx) * 2
         
-        # Length penalty (too short or too long)
         if len(sentence) < 40 or len(sentence) > 200:
             score -= 2
         
-        # Avoid sentences that are just the title
         if sentence.strip().lower() == title.strip().lower():
             score = 0
         
         scored_sentences.append((sentence, score, idx))
     
-    # Sort by score, then by original position
     scored_sentences.sort(key=lambda x: (-x[1], x[2]))
     
-    # Build executive summary with diversity
     exec_summary = []
     total_length = 0
     max_length = 280
@@ -482,11 +464,9 @@ def ai_summarize_news(title, summary, url=None):
         if score <= 0:
             continue
         
-        # Check for content diversity
         sentence_words = set(sentence.lower().split())
         overlap = len(sentence_words & used_words) / max(len(sentence_words), 1)
         
-        # Skip if too similar to already selected content
         if overlap > 0.6 and exec_summary:
             continue
         
@@ -498,18 +478,15 @@ def ai_summarize_news(title, summary, url=None):
         if len(exec_summary) >= 2 and total_length > 150:
             break
     
-    # Fallback if no good sentences found
     if not exec_summary:
         if summary and len(summary) > 50:
             return summary[:220] + "..."
         return "Details available in full article."
     
-    # Join and clean
     result = '. '.join(exec_summary)
     if not result.endswith(('.', '!', '?')):
         result += '.'
     
-    # Final cleanup
     result = re.sub(r'\s+', ' ', result).strip()
     
     return result
@@ -520,7 +497,6 @@ def get_article_hash(title, link):
 def extract_redirect_url(google_url):
     """Extract actual article URL from Google News redirect"""
     try:
-        # Google News URLs contain the actual URL in the 'url' parameter
         if 'google.com' in google_url and '/articles/' in google_url:
             resp = requests.get(google_url, headers=HEADERS, timeout=10, allow_redirects=True)
             return resp.url
@@ -543,7 +519,7 @@ def fetch_google_oss_bss():
         NOW = datetime.now(ZoneInfo("America/New_York"))
         cutoff_date = datetime(2026, 1, 1, tzinfo=ZoneInfo("America/New_York"))
         
-        for entry in feed.entries:  # ALL entries
+        for entry in feed.entries:
             try:
                 title = clean(entry.get("title", ""))
                 if len(title) < 15:
@@ -553,12 +529,10 @@ def fetch_google_oss_bss():
                 if not link:
                     continue
                 
-                # Extract direct URL from Google redirect
                 direct_link = extract_redirect_url(link)
                 
                 summary = extract_summary(entry, max_len=300)
                 
-                # Generate AI executive summary from full article
                 exec_summary = ai_summarize_news(title, summary, direct_link)
                 
                 pub = NOW
@@ -614,7 +588,6 @@ def fetch_feed(source, url):
                 
                 summary = extract_summary(entry, max_len=300)
                 
-                # Generate AI executive summary from full article
                 exec_summary = ai_summarize_news(title, summary, link)
                
                 pub = NOW
@@ -651,10 +624,8 @@ def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
     seen_hashes = set()
     
-    # STEP 1: Fetch ALL Google OSS/BSS news first
     google_items = fetch_google_oss_bss()
     
-    # STEP 2: Fetch regular RSS feeds
     regular_items = {"telco": [], "ott": [], "sports": [], "technology": []}
     
     with ThreadPoolExecutor(max_workers=25) as executor:
@@ -673,11 +644,9 @@ def load_feeds():
             except:
                 pass
     
-    # STEP 3: Sort regular items by importance
     for cat in regular_items:
         regular_items[cat].sort(key=lambda x: (-x.get("importance", 0), -x["pub"].timestamp()))
     
-    # STEP 4: Return separated lists
     return {
         "google_oss_bss": google_items,
         "regular": regular_items
@@ -749,7 +718,6 @@ def render_regular_body(items):
    
     return cards
 
-# === LOADING ===
 placeholder = st.empty()
 placeholder.markdown("<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Igniting AI-Powered Intelligence...<br><small>Please wait for a moment</small></h2>", unsafe_allow_html=True)
 
@@ -758,14 +726,12 @@ with st.spinner(""):
 
 placeholder.empty()
 
-# === RENDER DASHBOARD ===
 cols = st.columns(4)
 cat_list = ["telco", "ott", "sports", "technology"]
 
 for idx, cat in enumerate(cat_list):
     sec = SECTIONS[cat]
     
-    # Google section only for telco
     google_section = ""
     if cat == "telco":
         google_section = render_google_section(data["google_oss_bss"])
@@ -777,11 +743,10 @@ for idx, cat in enumerate(cat_list):
         st.markdown(f'<div class="{sec["style"]}">{sec["icon"]} {sec["name"]}</div>', unsafe_allow_html=True)
         st.markdown(f'<div class="col-body">{google_section}{regular_cards}</div>', unsafe_allow_html=True)
 
-# Auto-refresh every 5 minutes
 st.markdown("""
 <script>
-setTimeout(function(){
+setInterval(function(){
     window.location.reload();
-}, 300000);
+}, 240000);
 </script>
 """, unsafe_allow_html=True)
