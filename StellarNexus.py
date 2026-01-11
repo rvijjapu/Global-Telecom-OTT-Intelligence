@@ -1,1049 +1,180 @@
 import streamlit as st
-
 import feedparser
-
 import requests
-
 from datetime import datetime
-
 from concurrent.futures import ThreadPoolExecutor, as_completed
-
 import html
-
+import time
 import re
-
+from zoneinfo import ZoneInfo
 import hashlib
-
-from difflib import SequenceMatcher
-
 import json
-
 import urllib.parse
 
-
-
 # ══════════════════════════════════════════════════════════════════════════════
-
-# PAGE CONFIG
-
+# SECURE ACCESS & CONFIG
 # ══════════════════════════════════════════════════════════════════════════════
+GROQ_API_KEY = "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"
+CEO_ACCESS_TOKEN = "Vijay"
 
 st.set_page_config(
-
-    page_title="Global Telecom & OTT Stellar Nexus",
-
+    page_title="Global Telecom & OTT Stellar Nexus | 2026",
     page_icon="🌐",
-
     layout="wide",
-
     initial_sidebar_state="collapsed"
-
 )
 
-
-
-if 'keep_alive' not in st.session_state:
-
-    st.session_state.keep_alive = datetime.now()
-
-
-
-GROQ_API_KEY = "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"
-
-
-
 # ══════════════════════════════════════════════════════════════════════════════
-
-# EXACT QUERIES FROM YOUR URLS - 2026 FOCUSED
-
+# STRATEGIC FILTERS (2026 CEO FOCUS)
 # ══════════════════════════════════════════════════════════════════════════════
-
-SECTION_QUERIES = {
-
-    "telco": "recent telecom OSS BSS key announcements providers organizers news 2026 ",
-
-    "ott": "recent OTT providers key announcements mergers acquisitions deals profit losses 2026 ",
-
-    "sports": "recent Sports Events organizers key announcements mergers acquisitions deals profit losses 2026 ",
-
-    "technology": "recent Technology key announcements mergers acquisitions deals profit losses 2026"
-
+# These queries ensure we only get high-impact "business" news, not consumer fluff.
+STRATEGIC_QUERIES = {
+    "telco": '(OSS OR BSS OR "digital transformation" OR "5G core") AND (merger OR acquisition OR "major deal" OR contract) after:2025-12-31',
+    "ott": '(OTT OR streaming OR "content rights") AND (merger OR acquisition OR "subscriber growth" OR "profitability") after:2025-12-31',
+    "sports": '("broadcast rights" OR "streaming rights" OR "media deal") AND (NBA OR NFL OR FIFA OR EPL OR "Bally Sports") after:2025-12-31',
+    "technology": '("Generative AI" OR "Cloud Infrastructure" OR "SaaS") AND (telecom OR media) AND (investment OR partnership) after:2025-12-31'
 }
 
-
-
-# Backup queries for comprehensive coverage
-
-SECTION_BACKUP_QUERIES = {
-
-    "telco": [
-
-        "telecom OSS BSS merger acquisition 2026",
-
-        "5G network operator deal announcement 2026",
-
-        "telecom billing revenue management 2026",
-
-        "Ericsson Nokia telecom deal 2026"
-
-    ],
-
-    "ott": [
-
-        "OTT streaming merger acquisition 2026",
-
-        "Netflix Disney streaming news 2026",
-
-        "streaming platform subscriber 2026",
-
-        "video streaming deal partnership 2026"
-
-    ],
-
-    "sports": [
-
-        "sports media rights deal 2026",
-
-        "sports broadcasting streaming 2026",
-
-        "NFL NBA broadcasting deal 2026",
-
-        "sports league broadcast rights 2026"
-
-    ],
-
-    "technology": [
-
-        "technology merger acquisition 2026",
-
-        "AI artificial intelligence deal 2026",
-
-        "tech company earnings 2026",
-
-        "cloud computing AWS Azure 2026"
-
-    ]
-
-}
-
-
-
-HEADERS = {
-
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-
-    "Accept-Language": "en-US,en;q=0.5"
-
-}
-
-
+EVERGENT_CLIENTS = ["Astro", "NBA", "Shahid", "MBC", "Sky NZ", "Singtel", "Sony", "Aha", "AT&T", "FOX", "Bally Sports"]
+COMPETITORS = ["Netcracker", "Amdocs", "CSG", "Oracle", "Ericsson", "Nokia"]
 
 # ══════════════════════════════════════════════════════════════════════════════
-
-# PREMIUM STYLING - CEO READY (NO COUNTS)
-
+# PREMIUM CSS STYLING
 # ══════════════════════════════════════════════════════════════════════════════
-
 st.markdown("""
-
 <style>
-
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+    .stApp { background-color: #0f172a; font-family: 'Inter', sans-serif; }
     
-
-    .stApp {
-
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-
-        font-family: 'Inter', sans-serif;
-
-    }
-
-    
-
     .header-container {
-
-        background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.98) 100%);
-
-        padding: 1.5rem 2.5rem;
-
-        text-align: center;
-
-        border-radius: 20px;
-
-        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-
-        margin: 0 0 1.5rem 0;
-
-        position: relative;
-
+        background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%);
+        padding: 2rem; text-align: center; border-radius: 15px; margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-
+    .main-title { color: white; font-size: 2.5rem; font-weight: 800; margin: 0; }
     
-
-    .header-container::after {
-
-        content: '';
-
-        position: absolute;
-
-        bottom: 0;
-
-        left: 0;
-
-        right: 0;
-
-        height: 4px;
-
-        background: linear-gradient(90deg, #ec4899, #8b5cf6, #10b981, #f97316);
-
-        border-radius: 0 0 20px 20px;
-
-    }
-
-    
-
-    .main-title {
-
-        font-size: 2.2rem;
-
-        font-weight: 800;
-
-        background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #06b6d4 100%);
-
-        -webkit-background-clip: text;
-
-        -webkit-text-fill-color: transparent;
-
-        background-clip: text;
-
-        margin: 0;
-
-    }
-
-    
-
-    .subtitle {
-
-        font-size: 1rem;
-
-        color: #64748b;
-
-        margin-top: 0.5rem;
-
-        font-weight: 500;
-
-    }
-
-    
-
-    .live-badge {
-
-        display: inline-flex;
-
-        align-items: center;
-
-        gap: 6px;
-
-        background: linear-gradient(135deg, #10b981, #059669);
-
-        color: white;
-
-        padding: 4px 12px;
-
-        border-radius: 20px;
-
-        font-size: 0.75rem;
-
-        font-weight: 600;
-
-        margin-left: 12px;
-
-        animation: pulse 2s infinite;
-
-    }
-
-    
-
-    @keyframes pulse {
-
-        0%, 100% { opacity: 1; }
-
-        50% { opacity: 0.7; }
-
-    }
-
-    
-
     .col-header {
-
-        padding: 14px 16px;
-
-        border-radius: 16px 16px 0 0;
-
-        color: white;
-
-        font-weight: 700;
-
-        font-size: 0.95rem;
-
-        text-align: center;
-
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        gap: 8px;
-
-        text-transform: uppercase;
-
-        letter-spacing: 0.5px;
-
+        padding: 15px; border-radius: 12px 12px 0 0; color: white;
+        font-weight: 800; text-align: center; text-transform: uppercase; letter-spacing: 1px;
     }
-
-    
-
-    .col-header-pink {background: linear-gradient(135deg, #ec4899, #db2777);}
-
-    .col-header-purple {background: linear-gradient(135deg, #a78bfa, #7c3aed);}
-
-    .col-header-green {background: linear-gradient(135deg, #34d399, #059669);}
-
-    .col-header-orange {background: linear-gradient(135deg, #fb923c, #ea580c);}
-
-    
+    .pink-h { background: #db2777; } .purple-h { background: #7c3aed; }
+    .green-h { background: #059669; } .orange-h { background: #ea580c; }
 
     .col-body {
-
-        background: rgba(255,255,255,0.98);
-
-        border-radius: 0 0 16px 16px;
-
-        padding: 12px;
-
-        min-height: 650px;
-
-        max-height: 750px;
-
-        overflow-y: auto;
-
-        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-
+        background: #f8fafc; border-radius: 0 0 12px 12px; padding: 10px;
+        min-height: 700px; max-height: 800px; overflow-y: auto;
     }
 
-    
-
-    .highlight-card {
-
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-
-        border: 1px solid #e2e8f0;
-
-        border-left: 4px solid #3b82f6;
-
-        border-radius: 12px;
-
-        padding: 14px 16px;
-
-        margin-bottom: 12px;
-
-        transition: all 0.2s ease;
-
+    .news-card {
+        background: white; border-radius: 8px; padding: 15px; margin-bottom: 12px;
+        border-left: 5px solid #cbd5e1; transition: transform 0.2s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
-
+    .news-card:hover { transform: scale(1.02); border-left-color: #3b82f6; }
     
+    .client-hit { border-left: 6px solid #10b981 !important; background: #f0fdf4; }
+    .comp-hit { border-left: 6px solid #ef4444 !important; background: #fef2f2; }
 
-    .highlight-card:hover {
-
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-
-        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-
-        transform: translateY(-2px);
-
-        border-left-width: 5px;
-
+    .badge {
+        font-size: 0.65rem; font-weight: 800; padding: 2px 8px; border-radius: 10px;
+        text-transform: uppercase; margin-bottom: 5px; display: inline-block;
     }
+    .badge-client { background: #10b981; color: white; }
+    .badge-comp { background: #ef4444; color: white; }
+    .badge-strat { background: #3b82f6; color: white; }
 
-    
-
-    .highlight-card.pink {border-left-color: #ec4899;}
-
-    .highlight-card.purple {border-left-color: #8b5cf6;}
-
-    .highlight-card.green {border-left-color: #10b981;}
-
-    .highlight-card.orange {border-left-color: #f97316;}
-
-    
-
-    .highlight-title {
-
-        color: #0f172a;
-
-        font-size: 0.9rem;
-
-        font-weight: 700;
-
-        margin-bottom: 8px;
-
-        line-height: 1.4;
-
+    .news-title { 
+        color: #1e293b; font-weight: 700; font-size: 0.95rem; 
+        text-decoration: none; line-height: 1.4; display: block;
     }
-
-    
-
-    .highlight-description {
-
-        color: #475569;
-
-        font-size: 0.84rem;
-
-        line-height: 1.6;
-
-        margin-bottom: 10px;
-
-    }
-
-    
-
-    .read-more {
-
-        color: #2563eb;
-
-        font-weight: 600;
-
-        font-size: 0.8rem;
-
-        text-decoration: none;
-
-        display: inline-flex;
-
-        align-items: center;
-
-        gap: 4px;
-
-    }
-
-    
-
-    .read-more:hover {
-
-        color: #1d4ed8;
-
-        gap: 8px;
-
-    }
-
-    
-
-    .footer {
-
-        text-align: center;
-
-        color: rgba(255,255,255,0.9);
-
-        font-size: 0.8rem;
-
-        margin-top: 20px;
-
-        padding: 16px 24px;
-
-        background: linear-gradient(135deg, rgba(15,23,42,0.9), rgba(30,41,59,0.9));
-
-        border-radius: 12px;
-
-        border: 1px solid rgba(255,255,255,0.1);
-
-    }
-
-    
-
-    .col-body::-webkit-scrollbar {width: 6px;}
-
-    .col-body::-webkit-scrollbar-track {background: #f1f5f9; border-radius: 10px;}
-
-    .col-body::-webkit-scrollbar-thumb {background: linear-gradient(180deg, #94a3b8, #64748b); border-radius: 10px;}
-
-    
-
-    #MainMenu, footer, header {visibility: hidden;}
-
-    .stDeployButton {display: none;}
-
+    .news-desc { color: #64748b; font-size: 0.8rem; margin-top: 8px; line-height: 1.5; }
 </style>
-
 """, unsafe_allow_html=True)
 
-
-
+# ══════════════════════════════════════════════════════════════════════════════
+# DATA CORE
 # ══════════════════════════════════════════════════════════════════════════════
 
-# UTILITY FUNCTIONS
-
-# ══════════════════════════════════════════════════════════════════════════════
-
-def clean_text(raw):
-
-    if not raw:
-
-        return ""
-
-    text = html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
-
-    text = re.sub(r'\s*[-–|]\s*[A-Za-z][A-Za-z0-9\s\.,&\']+$', '', text)
-
-    text = re.sub(r'\s+', ' ', text)
-
-    return text.strip()
-
-
-
-def extract_summary(entry, max_len=500):
-
-    for field in ['summary', 'description', 'content']:
-
-        if hasattr(entry, field):
-
-            content = getattr(entry, field)
-
-            if isinstance(content, list) and content:
-
-                content = content[0].get('value', '')
-
-            summary = clean_text(content)
-
-            if summary and len(summary) > 50:
-
-                return summary[:max_len] + '...' if len(summary) > max_len else summary
-
-    return ""
-
-
-
-def get_hash(text):
-
-    return hashlib.md5(text.lower().strip().encode()).hexdigest()[:12]
-
-
-
-def title_similarity(a, b):
-
-    return SequenceMatcher(None, a.lower(), b.lower()).ratio()
-
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-
-# GOOGLE NEWS RSS FETCHER
-
-# ══════════════════════════════════════════════════════════════════════════════
-
-def fetch_google_news_rss(query, max_results=25):
-
+def fetch_2026_news(category, query):
+    encoded = urllib.parse.quote(query)
+    url = f"https://news.google.com/rss/search?q={encoded}&hl=en-US&gl=US&ceid=US:en"
     try:
-
-        encoded_query = urllib.parse.quote(query)
-
-        url = f"https://news.google.com/rss/search?q={encoded_query}&hl=en-US&gl=US&ceid=US:en"
-
-        
-
-        resp = requests.get(url, headers=HEADERS, timeout=15)
-
-        if resp.status_code != 200:
-
-            return []
-
-        
-
-        feed = feedparser.parse(resp.content)
-
+        feed = feedparser.parse(url)
         results = []
-
-        
-
-        for entry in feed.entries[:max_results]:
-
-            title = clean_text(entry.get("title", ""))
-
-            link = entry.get("link", "")
-
+        for entry in feed.entries[:15]:
+            title = html.unescape(entry.title)
+            desc = html.unescape(re.sub(r'<[^>]+>', '', entry.summary))[:180] + "..."
             
-
-            if len(title) < 25 or not link.startswith("http"):
-
-                continue
-
+            # Entity Detection
+            tag = "Strategic"
+            if any(c.lower() in title.lower() for c in EVERGENT_CLIENTS): tag = "Client"
+            if any(cp.lower() in title.lower() for cp in COMPETITORS): tag = "Competitor"
             
-
-            summary = extract_summary(entry) or title
-
-            
-
             results.append({
-
                 "title": title,
-
-                "link": link,
-
-                "summary": summary,
-
-                "hash": get_hash(title)
-
+                "link": entry.link,
+                "desc": desc,
+                "tag": tag,
+                "date": entry.published
             })
-
-        
-
         return results
-
     except:
-
         return []
 
-
-
-@st.cache_data(ttl=180, show_spinner=False)
-
-def fetch_section_news(section):
-
-    all_items = []
-
-    seen_hashes = set()
-
-    seen_titles = []
-
-    
-
-    queries = [SECTION_QUERIES.get(section, "")]
-
-    queries.extend(SECTION_BACKUP_QUERIES.get(section, []))
-
-    
-
-    with ThreadPoolExecutor(max_workers=6) as executor:
-
-        futures = {executor.submit(fetch_google_news_rss, q): q for q in queries}
-
-        
-
-        for future in as_completed(futures, timeout=30):
-
-            try:
-
-                items = future.result()
-
-                for item in items:
-
-                    if item["hash"] in seen_hashes:
-
-                        continue
-
-                    is_similar = any(title_similarity(item["title"], t) > 0.65 for t in seen_titles)
-
-                    if is_similar:
-
-                        continue
-
-                    all_items.append(item)
-
-                    seen_hashes.add(item["hash"])
-
-                    seen_titles.append(item["title"])
-
-            except:
-
-                continue
-
-    
-
-    return all_items[:20]
-
-
-
-@st.cache_data(ttl=180, show_spinner=False)
-
-def fetch_all_sections():
-
-    all_news = {}
-
-    sections = ["telco", "ott", "sports", "technology"]
-
-    
-
-    with ThreadPoolExecutor(max_workers=4) as executor:
-
-        futures = {executor.submit(fetch_section_news, sec): sec for sec in sections}
-
-        
-
-        for future in as_completed(futures, timeout=45):
-
-            section = futures[future]
-
-            try:
-
-                all_news[section] = future.result()
-
-            except:
-
-                all_news[section] = []
-
-    
-
-    return all_news
-
-
-
+# ══════════════════════════════════════════════════════════════════════════════
+# RENDER ENGINE
 # ══════════════════════════════════════════════════════════════════════════════
 
-# AI DESCRIPTION GENERATOR - GROQ
+st.markdown('<div class="header-container"><h1 class="main-title">2026 Global Intelligence Nexus</h1><p style="color: #bfdbfe; margin-top: 10px;">Executive Competitive Dashboard for CEO</p></div>', unsafe_allow_html=True)
 
-# ══════════════════════════════════════════════════════════════════════════════
 
-def generate_ai_descriptions(news_items, section_name):
 
-    if not news_items:
-
-        return []
-
-    
-
-    news_text = "\n\n".join([
-
-        f"[{i+1}] TITLE: {item['title']}\nSUMMARY: {item['summary'][:350]}\nLINK: {item['link']}"
-
-        for i, item in enumerate(news_items[:18])
-
-    ])
-
-    
-
-    section_context = {
-
-        "Telco OSS/BSS": "telecom OSS/BSS systems, network operators, 5G, billing",
-
-        "OTT & Streaming": "OTT streaming platforms, content providers, media",
-
-        "Sports & Events": "sports broadcasting, media rights, leagues, events",
-
-        "Technology": "tech companies, AI, cloud computing, software"
-
-    }
-
-    
-
-    context = section_context.get(section_name, section_name)
-
-    
-
-    try:
-
-        response = requests.post(
-
-            "https://api.groq.com/openai/v1/chat/completions",
-
-            headers={
-
-                "Authorization": f"Bearer {GROQ_API_KEY}",
-
-                "Content-Type": "application/json"
-
-            },
-
-            json={
-
-                "model": "llama-3.1-8b-instant",
-
-                "messages": [
-
-                    {
-
-                        "role": "system",
-
-                        "content": f"""You are a {section_name} analyst creating CEO briefings.
-
-Focus: {context}
-
-
-
-RULES:
-
-1. Create 14 highlights from news
-
-2. Title: max 12 words, Description: 2-3 sentences (60-80 words)
-
-3. Focus on deals, partnerships, announcements
-
-4. Use EXACT links - never modify
-
-5. Return valid JSON only"""
-
-                    },
-
-                    {
-
-                        "role": "user",
-
-                        "content": f"""Create 14 highlights. Return ONLY JSON:
-
-{{"highlights": [{{"title": "headline", "description": "summary", "link": "exact url"}}]}}
-
-
-
-NEWS:
-
-{news_text}"""
-
-                    }
-
-                ],
-
-                "max_tokens": 4000,
-
-                "temperature": 0.15
-
-            },
-
-            timeout=60
-
-        )
-
-        
-
-        if response.status_code == 200:
-
-            content = response.json()["choices"][0]["message"]["content"]
-
-            json_match = re.search(r'\{[\s\S]*\}', content)
-
-            if json_match:
-
-                data = json.loads(json_match.group())
-
-                highlights = data.get("highlights", [])[:14]
-
-                
-
-                valid_links = {item['link'] for item in news_items}
-
-                for i, h in enumerate(highlights):
-
-                    link = h.get("link", "")
-
-                    if not link.startswith("http") or link not in valid_links:
-
-                        if i < len(news_items):
-
-                            h['link'] = news_items[i]['link']
-
-                        elif news_items:
-
-                            h['link'] = news_items[0]['link']
-
-                
-
-                return highlights
-
-    except:
-
-        pass
-
-    
-
-    return [{"title": item['title'][:100], "description": item['summary'][:300], "link": item['link']} for item in news_items[:14]]
-
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-
-# RENDER FUNCTIONS (NO COUNTS)
-
-# ══════════════════════════════════════════════════════════════════════════════
-
-def render_card(highlight, color):
-
-    title = html.escape(str(highlight.get("title", "No Title")))
-
-    description = html.escape(str(highlight.get("description", "")))
-
-    link = highlight.get("link", "#")
-
-    if not link.startswith("http"):
-
-        link = "#"
-
-    
-
-    return f'''
-
-    <div class="highlight-card {color}">
-
-        <div class="highlight-title">{title}</div>
-
-        <div class="highlight-description">{description}</div>
-
-        <a href="{html.escape(link)}" target="_blank" rel="noopener noreferrer" class="read-more">Read Full Story →</a>
-
-    </div>
-
-    '''
-
-
-
-def render_section(icon, name, highlights, header_class, color):
-
-    if highlights:
-
-        cards = "".join([render_card(h, color) for h in highlights])
-
-    else:
-
-        cards = '<div style="text-align:center;padding:60px;color:#64748b;"><p>⏳ Loading news...</p></div>'
-
-    
-
-    return f'''
-
-    <div class="col-header {header_class}">
-
-        <span style="font-size: 1.2rem;">{icon}</span>
-
-        <span>{name}</span>
-
-    </div>
-
-    <div class="col-body">{cards}</div>
-
-    '''
-
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-
-# MAIN APPLICATION
-
-# ══════════════════════════════════════════════════════════════════════════════
-
-
-
-st.markdown('''
-
-<div class="header-container">
-
-    <h1 class="main-title">
-
-        🌐 Global Telecom & OTT Stellar Nexus
-
-        <span class="live-badge">● LIVE</span>
-
-    </h1>
-
-    <p class="subtitle">AI-Powered Competitive Intelligence Dashboard for Executive Leadership</p>
-
-</div>
-
-''', unsafe_allow_html=True)
-
-
-
-with st.spinner("⚡ Fetching 2026 news from Google..."):
-
-    all_news = fetch_all_sections()
-
-
-
-section_configs = [
-
-    ("telco", "Telco OSS/BSS"),
-
-    ("ott", "OTT & Streaming"),
-
-    ("sports", "Sports & Events"),
-
-    ("technology", "Technology")
-
+cols = st.columns(4)
+sections = [
+    ("telco", "📡 Telco OSS/BSS", "pink-h"),
+    ("ott", "📺 OTT & Streaming", "purple-h"),
+    ("sports", "🏆 Sports Rights", "green-h"),
+    ("technology", "⚡ AI & Tech Ops", "orange-h")
 ]
 
+with st.spinner("Analyzing 2026 Strategic Signals..."):
+    for i, (key, label, color_class) in enumerate(sections):
+        with cols[i]:
+            st.markdown(f'<div class="col-header {color_class}">{label}</div>', unsafe_allow_html=True)
+            news_items = fetch_2026_news(key, STRATEGIC_QUERIES[key])
+            
+            # Sort: Clients first, then Competitors, then others
+            news_items.sort(key=lambda x: (x['tag'] != 'Client', x['tag'] != 'Competitor'))
+            
+            body_html = '<div class="col-body">'
+            if not news_items:
+                body_html += '<p style="text-align:center; padding:20px; color:#94a3b8;">Scanning for 2026 deals...</p>'
+            
+            for item in news_items:
+                card_class = "news-card"
+                badge_class = "badge-strat"
+                if item['tag'] == "Client":
+                    card_class += " client-hit"
+                    badge_class = "badge-client"
+                elif item['tag'] == "Competitor":
+                    card_class += " comp-hit"
+                    badge_class = "badge-comp"
+                
+                body_html += f'''
+                <div class="{card_class}">
+                    <span class="badge {badge_class}">{item['tag']}</span>
+                    <a href="{item['link']}" target="_blank" class="news-title">{item['title']}</a>
+                    <div class="news-desc">{item['desc']}</div>
+                    <div style="font-size:0.65rem; color:#94a3b8; margin-top:10px;">{item['date']}</div>
+                </div>
+                '''
+            body_html += '</div>'
+            st.markdown(body_html, unsafe_allow_html=True)
 
-
-highlights = {}
-
-for section_key, section_name in section_configs:
-
-    news_items = all_news.get(section_key, [])
-
-    highlights[section_key] = generate_ai_descriptions(news_items, section_name)
-
-
-
-col1, col2, col3, col4 = st.columns(4)
-
-
-
-with col1:
-
-    st.markdown(render_section("📡", "TELCO OSS/BSS", highlights.get("telco", []), "col-header-pink", "pink"), unsafe_allow_html=True)
-
-
-
-with col2:
-
-    st.markdown(render_section("📺", "OTT & STREAMING", highlights.get("ott", []), "col-header-purple", "purple"), unsafe_allow_html=True)
-
-
-
-with col3:
-
-    st.markdown(render_section("🏆", "SPORTS & EVENTS", highlights.get("sports", []), "col-header-green", "green"), unsafe_allow_html=True)
-
-
-
-with col4:
-
-    st.markdown(render_section("⚡", "TECHNOLOGY", highlights.get("technology", []), "col-header-orange", "orange"), unsafe_allow_html=True)
-
-
-
-st.markdown(f'''
-
-<div class="footer">
-
-    <p>
-
-        <strong>🕐 Last Updated:</strong> {datetime.now().strftime("%B %d, %Y at %I:%M:%S %p")} | 
-
-        <strong>🔄 Auto-refresh:</strong> Every 5 minutes
-
-    </p>
-
-    <p style="margin-top: 8px; font-size: 0.75rem; opacity: 0.8;">
-
-        Powered by Google News + Groq AI • Executive Intelligence Platform
-
-    </p>
-
+# Auto-refresh and Footer
+st.markdown(f"""
+<div style="text-align: center; color: #94a3b8; font-size: 0.8rem; margin-top: 30px; padding: 20px;">
+    System Status: Live | Last Update: {datetime.now().strftime("%H:%M:%S")} | Strategy Engine: Active
 </div>
-
-''', unsafe_allow_html=True)
-
-
-
-st.markdown("""<script>setTimeout(function(){window.location.reload();},300000);</script>""", unsafe_allow_html=True)
-
-
-
-if (datetime.now() - st.session_state.keep_alive).seconds > 280:
-
-    st.session_state.keep_alive = datetime.now()
-
-    st.cache_data.clear()
-
-    st.rerun()
+<script>setTimeout(function(){{ window.location.reload(); }}, 300000);</script>
+""", unsafe_allow_html=True)
