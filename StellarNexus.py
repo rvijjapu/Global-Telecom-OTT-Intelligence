@@ -9,7 +9,6 @@ import hashlib
 from difflib import SequenceMatcher
 import json
 import urllib.parse
-from bs4 import BeautifulSoup
 
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE CONFIG
@@ -42,24 +41,24 @@ SECTION_RSS_QUERIES = {
         "telecom OSS BSS deal 2026",
         "5G network partnership 2026",
         "billing system contract 2026",
-        "telecom merger acquisition 2026"
+        "telecom merger acquisition January 2026"
     ],
     "ott": [
         "OTT streaming deal 2026",
         "streaming platform merger 2026",
-        "Netflix Disney news  2026",
+        "Netflix Disney news January 2026",
         "video streaming acquisition 2026"
     ],
     "sports": [
         "sports media rights 2026",
-        "sports broadcasting deal 2026",
+        "sports broadcasting deal January 2026",
         "sports betting merger 2026",
         "league partnership 2026"
     ],
     "technology": [
         "AI platform deal 2026",
         "cloud computing partnership 2026",
-        "fintech merger 2026",
+        "fintech merger January 2026",
         "digital platform acquisition 2026"
     ]
 }
@@ -641,7 +640,7 @@ st.markdown(f'''
         <strong>🔄 Auto-refresh:</strong> Every 5 minutes
     </p>
     <p style="margin-top: 8px; font-size: 0.75rem; opacity: 0.85;">
-        Powered by AI
+        Powered by Google News RSS + Groq AI • 2026-Only Executive Intelligence
     </p>
 </div>
 ''', unsafe_allow_html=True)
