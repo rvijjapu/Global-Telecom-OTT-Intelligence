@@ -296,17 +296,205 @@ HEADERS = {
     "Accept": "application/rss+xml, application/xml, text/xml, */*",
 }
 
-# AI importance scoring keywords
-CRITICAL_KEYWORDS = {
-    "telco": ["5g", "oss", "bss", "network", "spectrum", "carrier", "wireless", "fiber", "broadband", 
-              "telecom", "mvno", "mobile operator", "infrastructure", "tower", "antenna", "satellite"],
-    "ott": ["streaming", "netflix", "disney", "hbo", "paramount", "peacock", "hulu", "prime video",
-            "subscription", "svod", "avod", "content", "original series", "licensing", "bundle"],
-    "sports": ["nfl", "nba", "mlb", "soccer", "premier league", "espn", "rights deal", "broadcast",
-               "sports betting", "fantasy", "athlete", "championship", "tournament"],
-    "technology": ["ai", "artificial intelligence", "machine learning", "cloud", "saas", "cybersecurity",
-                   "blockchain", "quantum", "semiconductor", "chip", "startup", "venture capital"]
+# EVERGENT CLIENTS - COMPLETE LIST with ALL possible name variations
+EVERGENT_CLIENTS = {
+    "Astro": ["astro malaysia", "astro sooka", "astro njoi", "astro", "sooka", "njoi"],
+    "MongolTV": ["mongoltv", "mongol tv", "mongolia tv"],
+    "FOX": ["fox sports", "fox corporation", "fox networks", "fox"],
+    "AT&T": ["at&t", "att inc", "att wireless", "directv"],
+    "NBA": ["nba", "national basketball"],
+    "Shahid": ["shahid", "shahid vip", "mbc shahid"],
+    "MBC": ["mbc group", "mbc", "middle east broadcasting"],
+    "TV ASAHI": ["tv asahi", "asahi television", "asahi tv"],
+    "TV3": ["tv3 malaysia", "tv3", "media prima"],
+    "ABS-CBN": ["abs-cbn", "abscbn", "abs cbn", "philippine broadcast"],
+    "Viki": ["viki", "rakuten viki", "viki streaming"],
+    "TRT": ["trt world", "trt", "turkish radio"],
+    "Sinclair": ["sinclair broadcast", "sinclair", "bally sports"],
+    "FanDuel": ["fanduel", "fanduel group", "flutter"],
+    "Bally Sports": ["bally sports", "bally regional", "diamond sports"],
+    "Gotham": ["gotham advanced", "gotham fc"],
+    "Marquee": ["marquee sports", "marquee network"],
+    "Sony": ["sony pictures", "sony entertainment", "sonyliv", "sony india"],
+    "Aha": ["aha video", "aha ott", "aha telugu"],
+    "BBC": ["bbc", "british broadcasting", "bbc iplayer"],
+    "Lightbox": ["lightbox", "spark lightbox"],
+    "Sky": ["sky nz", "sky new zealand", "sky tv", "sky uk", "sky italia", "sky deutschland"],
+    "Cignal": ["cignal tv", "cignal", "cignal satellite"],
+    "ETV": ["etv network", "etv bharat"],
+    "Simple TV": ["simpletv", "simple tv venezuela"],
+    "Telekom Malaysia": ["telekom malaysia", "tm unifi", "unifi tv", "tm"],
+    "Britbox": ["britbox", "britbox international"],
+    "Quickplay": ["quickplay", "quickplay media"],
+    "Pilipinas": ["pilipinas", "abs-cbn"],
 }
+
+# COMPETITORS - COMPLETE with variations
+COMPETITORS = {
+    "Netcracker": ["netcracker", "netcracker technology", "nec netcracker"],
+    "Amdocs": ["amdocs", "amdocs ltd", "amdocs inc"],
+    "CSG": ["csg systems", "csg international", "csg"],
+    "Oracle": ["oracle communications", "oracle corporation", "oracle telecom"],
+    "Ericsson": ["ericsson", "telefonaktiebolaget lm ericsson"],
+    "Nokia": ["nokia", "nokia networks", "nokia corporation"],
+    "Huawei": ["huawei", "huawei technologies"],
+    "Comarch": ["comarch", "comarch bss"],
+    "Tecnotree": ["tecnotree", "tecnotree corporation"],
+    "MATRIXX": ["matrixx", "matrixx software"],
+    "Optiva": ["optiva", "optiva inc"],
+    "Cerillion": ["cerillion", "cerillion plc"],
+    "AsiaInfo": ["asiainfo", "asiainfo technologies"],
+    "Hansen": ["hansen technologies", "hansen"],
+    "Openet": ["openet", "openet telecom"],
+    "ZTE": ["zte", "zte corporation"],
+    "Mavenir": ["mavenir", "mavenir systems"],
+    "Infosys": ["infosys", "infosys telecom"],
+    "TCS": ["tata consultancy", "tcs", "tata communications"],
+    "Wipro": ["wipro", "wipro digital"],
+    "Tech Mahindra": ["tech mahindra", "mahindra comviva"],
+    "Accenture": ["accenture", "accenture telecom"],
+    "Capgemini": ["capgemini", "capgemini telecom"],
+    "IBM": ["ibm", "ibm telecom", "ibm watson"],
+    "SAP": ["sap", "sap telecom"],
+    "Salesforce": ["salesforce", "salesforce communications"],
+}
+
+# TOP GLOBAL TELCOS - COMPREHENSIVE
+TOP_TELCOS = {
+    # USA
+    "Verizon": ["verizon", "verizon wireless", "verizon fios"],
+    "AT&T": ["at&t", "att mobility"],
+    "T-Mobile": ["t-mobile", "tmobile usa", "sprint"],
+    "Comcast": ["comcast", "xfinity", "comcast cable"],
+    "Charter": ["charter communications", "spectrum", "charter spectrum"],
+    "Cox": ["cox communications", "cox cable", "cox business"],
+    "Lumen": ["lumen technologies", "centurylink", "lumen"],
+    "Frontier": ["frontier communications", "frontier"],
+    "Windstream": ["windstream", "windstream enterprise"],
+    "Mediacom": ["mediacom communications", "mediacom"],
+    "Altice USA": ["altice usa", "optimum", "suddenlink"],
+    
+    # UK & Europe
+    "BT": ["bt group", "british telecom", "bt", "bt enterprise", "ee"],
+    "Vodafone": ["vodafone", "vodafone group"],
+    "O2": ["o2", "telefonica uk"],
+    "Virgin Media": ["virgin media", "virgin media o2"],
+    "Three": ["three uk", "three mobile"],
+    "Orange": ["orange", "orange sa"],
+    "Deutsche Telekom": ["deutsche telekom", "t-mobile europe", "telekom"],
+    "Telefónica": ["telefonica", "telefonica spain", "movistar"],
+    "Telecom Italia": ["telecom italia", "tim", "tim brasil"],
+    "Swisscom": ["swisscom", "swisscom ag"],
+    "KPN": ["kpn", "koninklijke pn"],
+    "Proximus": ["proximus", "belgacom"],
+    "Telenor": ["telenor", "telenor group"],
+    "Telia": ["telia", "telia company"],
+    "Bouygues": ["bouygues telecom", "bouygues"],
+    
+    # APAC - Singapore/Malaysia/NZ
+    "Singtel": ["singtel", "singapore telecom", "singapore telecommunications"],
+    "StarHub": ["starhub", "starhub singapore"],
+    "M1": ["m1 limited", "m1 singapore"],
+    "Maxis": ["maxis", "maxis communications", "maxis malaysia"],
+    "Celcom": ["celcom", "celcom axiata"],
+    "Digi": ["digi telecommunications", "digi malaysia", "digi.com"],
+    "Telekom Malaysia": ["telekom malaysia", "tm", "tm unifi"],
+    "U Mobile": ["u mobile", "umobile malaysia"],
+    "Sky NZ": ["sky new zealand", "sky nz", "sky network television"],
+    "Spark": ["spark new zealand", "spark nz"],
+    "2degrees": ["2degrees", "2degrees mobile"],
+    "Vodafone NZ": ["vodafone new zealand", "vodafone nz"],
+    
+    # Australia
+    "Telstra": ["telstra", "telstra corporation"],
+    "Optus": ["optus", "singtel optus"],
+    "TPG": ["tpg telecom", "vodafone australia"],
+    
+    # Asia
+    "China Mobile": ["china mobile", "cmcc"],
+    "China Telecom": ["china telecom", "chinanet"],
+    "China Unicom": ["china unicom", "unicom"],
+    "NTT": ["ntt", "nippon telegraph", "ntt docomo"],
+    "SoftBank": ["softbank", "softbank corp"],
+    "KDDI": ["kddi", "kddi corporation", "au"],
+    "Reliance Jio": ["reliance jio", "jio", "jio platforms"],
+    "Airtel": ["bharti airtel", "airtel", "airtel india"],
+    "Vi": ["vodafone idea", "vi", "idea cellular"],
+    "BSNL": ["bsnl", "bharat sanchar"],
+    "SK Telecom": ["sk telecom", "skt"],
+    "KT": ["kt corporation", "kt"],
+    "LG Uplus": ["lg uplus", "lg u+"],
+    "Globe": ["globe telecom", "globe philippines"],
+    "PLDT": ["pldt", "philippine long distance"],
+    "Smart": ["smart communications", "smart philippines"],
+    
+    # Middle East
+    "Etisalat": ["etisalat", "emirates telecom", "e&"],
+    "Du": ["du", "emirates integrated"],
+    "STC": ["stc", "saudi telecom", "saudi telecom company"],
+    "Ooredoo": ["ooredoo", "ooredoo group"],
+    "Zain": ["zain", "zain group"],
+    "Mobily": ["mobily", "etihad etisalat"],
+    
+    # Americas
+    "América Móvil": ["america movil", "claro", "telmex"],
+    "Telus": ["telus", "telus communications"],
+    "Rogers": ["rogers communications", "rogers"],
+    "Bell": ["bell canada", "bce inc"],
+    "Shaw": ["shaw communications", "shaw"],
+    
+    # Africa
+    "MTN": ["mtn group", "mtn"],
+    "Vodacom": ["vodacom", "vodacom group"],
+    "Safaricom": ["safaricom", "safaricom plc"],
+}
+
+# AI-POWERED CLIENT DETECTION
+def detect_client_match(text):
+    """
+    AI algorithm to detect Evergent clients, competitors, and telcos
+    Returns: (is_match, client_name, match_type, confidence_score)
+    """
+    text_lower = text.lower()
+    
+    # Priority 1: EVERGENT CLIENTS (Highest Score)
+    for client, variations in EVERGENT_CLIENTS.items():
+        for variant in variations:
+            if variant in text_lower:
+                # Calculate confidence based on match quality
+                if variant == text_lower:
+                    confidence = 100
+                elif text_lower.startswith(variant) or text_lower.endswith(variant):
+                    confidence = 90
+                else:
+                    confidence = 80
+                return True, client, "EVERGENT_CLIENT", confidence
+    
+    # Priority 2: COMPETITORS (High Score)
+    for competitor, variations in COMPETITORS.items():
+        for variant in variations:
+            if variant in text_lower:
+                if variant == text_lower:
+                    confidence = 85
+                elif text_lower.startswith(variant) or text_lower.endswith(variant):
+                    confidence = 75
+                else:
+                    confidence = 70
+                return True, competitor, "COMPETITOR", confidence
+    
+    # Priority 3: TOP TELCOS (Medium-High Score)
+    for telco, variations in TOP_TELCOS.items():
+        for variant in variations:
+            if variant in text_lower:
+                if variant == text_lower:
+                    confidence = 75
+                elif text_lower.startswith(variant) or text_lower.endswith(variant):
+                    confidence = 65
+                else:
+                    confidence = 60
+                return True, telco, "TOP_TELCO", confidence
+    
+    return False, None, None, 0
 
 def clean(raw):
     if not raw:
@@ -314,10 +502,40 @@ def clean(raw):
     return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
 
 def calculate_importance_score(title, summary, category):
+    """
+    Advanced AI scoring with CLIENT PRIORITY
+    Evergent clients get MAXIMUM priority
+    """
     score = 0
     text = (title + " " + summary).lower()
     
-    keywords = CRITICAL_KEYWORDS.get(category, [])
+    # PRIORITY AI DETECTION - Check for clients/competitors/telcos
+    is_match, entity_name, match_type, confidence = detect_client_match(title + " " + summary)
+    
+    if is_match:
+        if match_type == "EVERGENT_CLIENT":
+            score += 500  # MASSIVE boost for Evergent clients
+            score += confidence  # Add confidence score
+        elif match_type == "COMPETITOR":
+            score += 300  # High boost for competitors
+            score += confidence
+        elif match_type == "TOP_TELCO":
+            score += 200  # Good boost for top telcos
+            score += confidence
+    
+    # Additional keyword scoring
+    critical_keywords = {
+        "telco": ["5g", "oss", "bss", "network", "spectrum", "carrier", "wireless", "fiber", 
+                  "broadband", "telecom", "mvno", "mobile operator", "infrastructure"],
+        "ott": ["streaming", "netflix", "disney", "hbo", "paramount", "peacock", "hulu", 
+                "prime video", "subscription", "svod", "avod", "content", "original series"],
+        "sports": ["nfl", "nba", "mlb", "soccer", "premier league", "espn", "rights deal", 
+                   "broadcast", "sports betting", "fantasy", "athlete", "championship"],
+        "technology": ["ai", "artificial intelligence", "machine learning", "cloud", "saas", 
+                       "cybersecurity", "blockchain", "quantum", "semiconductor", "chip"]
+    }
+    
+    keywords = critical_keywords.get(category, [])
     for keyword in keywords:
         if keyword in text:
             score += 2
@@ -645,7 +863,7 @@ def load_feeds():
                 pass
     
     for cat in regular_items:
-        regular_items[cat].sort(key=lambda x: (-x.get("importance", 0), -x["pub"].timestamp()))
+        regular_items[cat].sort(key=lambda x: -x["pub"].timestamp())
     
     return {
         "google_oss_bss": google_items,
@@ -676,8 +894,21 @@ def render_google_section(google_items):
         safe_title = html.escape(item["title"])
         safe_link = html.escape(item["link"])
         
+        # Detect if this is a client/competitor/telco article
+        is_match, entity_name, match_type, confidence = detect_client_match(item["title"] + " " + item.get("summary", ""))
+        
+        # Add special badge for client news
+        badge = ""
+        if is_match:
+            if match_type == "EVERGENT_CLIENT":
+                badge = '<span style="background:#10b981;color:white;padding:2px 8px;border-radius:4px;font-size:0.7rem;font-weight:700;margin-left:8px;">⭐ CLIENT</span>'
+            elif match_type == "COMPETITOR":
+                badge = '<span style="background:#f59e0b;color:white;padding:2px 8px;border-radius:4px;font-size:0.7rem;font-weight:700;margin-left:8px;">🔍 COMPETITOR</span>'
+            elif match_type == "TOP_TELCO":
+                badge = '<span style="background:#3b82f6;color:white;padding:2px 8px;border-radius:4px;font-size:0.7rem;font-weight:700;margin-left:8px;">📡 TELCO</span>'
+        
         cards += f'''<div class="news-card news-card-google">
-<div class="news-title">{safe_title}</div>
+<div class="news-title">{safe_title}{badge}</div>
 <div class="news-meta">
 <span class="{time_class}">{time_str}</span>
 <span>•</span>
@@ -700,9 +931,22 @@ def render_regular_body(items):
         safe_title = html.escape(item["title"])
         safe_link = html.escape(item["link"])
         safe_source = html.escape(item["source"])
+        
+        # Detect if this is a client/competitor/telco article
+        is_match, entity_name, match_type, confidence = detect_client_match(item["title"] + " " + item.get("summary", ""))
+        
+        # Add special badge for client news
+        badge = ""
+        if is_match:
+            if match_type == "EVERGENT_CLIENT":
+                badge = '<span style="background:#10b981;color:white;padding:2px 8px;border-radius:4px;font-size:0.7rem;font-weight:700;margin-left:8px;">⭐ CLIENT</span>'
+            elif match_type == "COMPETITOR":
+                badge = '<span style="background:#f59e0b;color:white;padding:2px 8px;border-radius:4px;font-size:0.7rem;font-weight:700;margin-left:8px;">🔍 COMPETITOR</span>'
+            elif match_type == "TOP_TELCO":
+                badge = '<span style="background:#3b82f6;color:white;padding:2px 8px;border-radius:4px;font-size:0.7rem;font-weight:700;margin-left:8px;">📡 TELCO</span>'
        
         cards += f'''<div class="news-card">
-<div class="news-title">{safe_title}</div>
+<div class="news-title">{safe_title}{badge}</div>
 <div class="news-meta">
 <span class="{time_class}">{time_str}</span>
 <span>•</span>
