@@ -1,166 +1,157 @@
 import streamlit as st
-import pandas as pd
+import time
 from datetime import datetime
 
 # 1. PAGE CONFIGURATION
 st.set_page_config(page_title="Global Intelligence Stellar Nexus", layout="wide")
 
-# 2. UPDATED LIGHT-THEME & PROFESSIONAL CSS
+# 2. CUSTOM CSS FOR BACKGROUND & LOADING
 st.markdown("""
 <style>
-    /* Professional Light Background */
     .stApp {
-        background-color: #f8fafc;
-        color: #0f172a;
+        background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
+        background-size: cover;
+        color: #1e293b;
     }
     
-    /* NAVY BLUE HEADER: Impactful & Clean */
-    .main-header {
-        background: #0a192f; /* Solid Navy for high visibility */
-        padding: 2rem;
-        border-radius: 12px;
-        text-align: center;
-        margin-bottom: 2rem;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    /* Center the loading text */
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 80vh;
+        color: #ffffff;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-    .main-header h1 {
-        color: #ffffff !important;
-        font-size: 3rem !important;
-        font-weight: 800 !important;
-        margin: 0;
-    }
-
-    /* STRATEGIC BASELINE: DARK FONT ON LIGHT BACKGROUND */
-    .hero-container {
-        background: #ffffff;
-        border-radius: 15px;
-        padding: 2rem;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        margin-bottom: 2.5rem;
-    }
-    .hero-title {
-        color: #0f172a !important;
-        font-size: 1.8rem;
+    
+    .loading-text {
+        font-size: 2.5rem;
         font-weight: 800;
-        margin-bottom: 1.5rem;
-        border-left: 6px solid #1e40af;
-        padding-left: 15px;
-    }
-    .hero-card {
-        background: #f1f5f9;
-        border-radius: 10px;
-        padding: 1.5rem;
-        min-height: 220px;
-        border: 1px solid #e2e8f0;
+        text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+        margin-bottom: 20px;
     }
 
-    /* VERTICAL SECTIONS: CLEAN CARDS */
+    /* Professional Card Styling for Sections */
     .vertical-section {
-        background: #ffffff;
-        padding: 1.8rem;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 20px;
         border-radius: 12px;
-        min-height: 450px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        min-height: 480px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         border: 1px solid #e2e8f0;
+        margin-bottom: 20px;
     }
+
     .vertical-header {
         font-size: 1.2rem;
         font-weight: 800;
         margin-bottom: 15px;
         padding-bottom: 10px;
-        border-bottom: 3px solid #3b82f6;
+        border-bottom: 3px solid;
         text-transform: uppercase;
     }
+
     .news-item {
-        margin-bottom: 18px;
-        padding-bottom: 10px;
+        margin-bottom: 15px;
+        padding-bottom: 8px;
         border-bottom: 1px solid #f1f5f9;
     }
+
     .news-text {
         font-size: 0.95rem;
         color: #334155;
-        line-height: 1.5;
-        margin-bottom: 5px;
+        line-height: 1.4;
     }
+
     .read-more {
         font-size: 0.85rem;
         color: #1e40af;
-        font-weight: 600;
+        font-weight: 700;
         text-decoration: none;
-    }
-    .read-more:hover {
-        text-decoration: underline;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# 3. IMPACTFUL HEADER
-st.markdown("""
-<div class="main-header">
-    <h1>Global Telecom & OTT Stellar Nexus</h1>
-</div>
-""", unsafe_allow_html=True)
-
-# 4. STRATEGIC BASELINE
-st.markdown("""
-<div class="hero-container">
-    <div class="hero-title">🚀 STRATEGIC BASELINE</div>
-    <div style="display: flex; gap: 20px;">
-        <div class="hero-card" style="flex: 1;">
-            <div style="font-weight:800; color:#10b981; margin-bottom:10px;">🟢 STRATEGIC HITS (JAN 2026)</div>
-            <div class="news-text"><b>Netflix-WBD Merger:</b> Netflix board moves to finalize the $82.7B acquisition of Warner Bros. Discovery studios and HBO Max to counter rising competition.</div>
-            <div class="news-text"><b>NEC-CSG Expansion:</b> NEC completes $2.9B acquisition of CSG Systems, scaling Netcracker's footprint in North America.</div>
-            <div class="news-text"><b>Amdocs Market Dominance:</b> Following the Matrixx acquisition, Amdocs secures 23% of the global 5G charging market.</div>
+# 3. LOADING SCREEN (st.empty used to replace content)
+placeholder = st.empty()
+with placeholder.container():
+    st.markdown("""
+        <div class="loading-container">
+            <div class="loading-text">🔥 Igniting AI-powered intelligence...</div>
+            <div style="color: #cbd5e1;">Please wait while we synchronize global nodes.</div>
         </div>
-        <div class="hero-card" style="flex: 1;">
-            <div style="font-weight:800; color:#f97316; margin-bottom:10px;">🟠 TECH PULSE: AGENTIC REALITY</div>
-            <div class="news-text"><b>Agentic BSS:</b> 40% of Tier-1 operators have transitioned to Agentic AI for autonomous revenue management.</div>
-            <div class="news-text"><b>Quantum Commercialization:</b> D-Wave's acquisition of QCI signals the move of quantum-gate systems into enterprise fintech.</div>
-            <div class="news-text"><b>Sovereign AI Infrastructure:</b> Shift toward regionally compliant data centers peaks due to geopolitical cloud fragmentation.</div>
+    """, unsafe_allow_html=True)
+    time.sleep(1.5)  # Simulate fast loading
+
+placeholder.empty()
+
+# 4. DASHBOARD CONTENT
+# Header
+st.markdown("<h1 style='text-align: center; color: white; text-shadow: 2px 2px 5px #000;'>Global Telecom & OTT Stellar Nexus</h1>", unsafe_allow_html=True)
+
+# TOP SECTION: STRATEGIC BASELINE
+st.markdown("""
+<div style="background: rgba(255,255,255,0.9); padding: 25px; border-radius: 15px; margin-bottom: 30px; border-left: 8px solid #1e40af;">
+    <h2 style="color: #0f172a; margin: 0 0 15px 0;">🚀 STRATEGIC BASELINE</h2>
+    <div style="display: flex; gap: 20px;">
+        <div style="flex: 1; background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
+            <div style="font-weight:800; color:#10b981; margin-bottom:8px;">🟢 STRATEGIC HITS (JAN 2026)</div>
+            <div style="font-size:0.95rem; color:#334155;"><b>Netflix-WBD Merger:</b> Netflix confirms definitive agreement to acquire Warner Bros. for $82.7B to unify HBO Max with its global platform.</div>
+            <div style="font-size:0.95rem; color:#334155; margin-top:8px;"><b>Amdocs-Matrixx Deal:</b> Amdocs completes $200M acquisition of Matrixx Software to dominate 5G cloud-native charging.</div>
+        </div>
+        <div style="flex: 1; background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
+            <div style="font-weight:800; color:#f97316; margin-bottom:8px;">🟠 TECH PULSE: AGENTIC REALITY</div>
+            <div style="font-size:0.95rem; color:#334155;"><b>Agentic AI Core:</b> 40% of upcoming agentic projects predicted to fail unless organizations redesign operations for silicon-based workforces.</div>
+            <div style="font-size:0.95rem; color:#334155; margin-top:8px;"><b>Autonomous Networks:</b> Ericsson and Nokia advance self-healing "sensing" networks capable of real-time anomaly detection.</div>
         </div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# 5. VERTICAL INTELLIGENCE WITH HYPERLINKS
-st.markdown("<h2 style='color: #0f172a; margin-bottom: 1.5rem;'>📊 Vertical Intelligence</h2>", unsafe_allow_html=True)
-v_col1, v_col2, v_col3, v_col4 = st.columns(4)
+# INDUSTRY SECTIONS
+col1, col2, col3, col4 = st.columns(4)
 
 sections = [
     ("📡 TELCO OSS/BSS", "#db2777", [
-        {"t": "NEC/Netcracker scales North American operations via $2.9B CSG deal.", "l": "https://www.telecoms.com"},
-        {"t": "Amdocs integrates Matrixx cloud-native charging for 5G edge use cases.", "l": "https://www.lightreading.com"},
-        {"t": "SaaS BSS adoption surges as telcos decommission legacy on-prem stacks.", "l": "https://www.vanillaplus.com"}
+        {"t": "Amdocs snaps up Matrixx for $200M to consolidate charging product market share.", "l": "https://www.lightreading.com"},
+        {"t": "BSS/OSS modernization deemed essential for monetizing 5G Standalone and network slicing.", "l": "https://www.rcrwireless.com"},
+        {"t": "NEC completes acquisition of CSG to scale Netcracker's global BSS footprint.", "l": "https://www.netcracker.com"}
     ]),
     ("📺 OTT & STREAMING", "#7c3aed", [
-        {"t": "Netflix board approves $82.7B WBD merger to secure HBO content library.", "l": "https://www.variety.com"},
-        {"t": "Discovery Global spin-off finalized to partition legacy linear debt.", "l": "https://www.hollywoodreporter.com"},
-        {"t": "Ad-supported revenue overtakes traditional subs for top OTT platforms.", "l": "https://www.digitaltveurope.com"}
+        {"t": "Netflix board rejects Paramount's $77.9B offer, favoring WBD $72B proposal for studios.", "l": "https://www.variety.com"},
+        {"t": "Warner Bros. Discovery separation into Discovery Global expected in Q3 2026.", "l": "https://about.netflix.com"},
+        {"t": "Consolidation unease grows in Indian market over content concentration risk.", "l": "https://www.outlookindia.com"}
     ]),
     ("🏆 SPORTS MEDIA", "#059669", [
-        {"t": "WNBA 11-year rights deal begins, elevating package value to $200M/year.", "l": "https://www.espn.com"},
-        {"t": "NBA domestic rights officially transition to Disney and Amazon.", "l": "https://www.sportspromedia.com"},
-        {"t": "Live generative highlights become standard for fan engagement platforms.", "l": "https://www.sportico.com"}
+        {"t": "WNBA secures landmark 11-year rights deal with Disney, Amazon, and NBCUniversal.", "l": "https://www.wnba.com"},
+        {"t": "NBA Sunday Night Basketball series to debut on NBC and Peacock for 2025-26 season.", "l": "https://www.nbcuniversal.com"},
+        {"t": "Prime Video expands global distribution rights for WNBA League Pass through 2036.", "l": "https://www.amazon.com"}
     ]),
     ("⚡ CORE TECHNOLOGY", "#ea580c", [
-        {"t": "Autonomous AI agent market projected to hit $8.5B by end of 2026.", "l": "https://www.techcrunch.com"},
-        {"t": "Embedded 'Passive' AI begins replacing standalone GenAI productivity tools.", "l": "https://www.wired.com"},
-        {"t": "Industrial robotics installations reach new 5.5M global unit record.", "l": "https://www.venturebeat.com"}
+        {"t": "Amazon deploys 1 millionth robot; DeepFleet AI improves travel efficiency by 10%.", "l": "https://www.deloitte.com"},
+        {"t": "Enterprises shift from cloud-first to strategic hybrid for AI inference economics.", "l": "https://www.gartner.com"},
+        {"t": "Multi-agent systems (MAS) evolve to automate complex cross-platform workflows.", "l": "https://digitalmara.com"}
     ])
 ]
 
-for idx, (label, color, news) in enumerate(sections):
-    with [v_col1, v_col2, v_col3, v_col4][idx]:
-        st.markdown(f'<div class="vertical-section"><div class="vertical-header" style="color: {color}; border-color: {color};">{label}</div>', unsafe_allow_html=True)
-        for item in news:
-            st.markdown(f"""
+# Render industry section cards
+for idx, (label, color, news_list) in enumerate(sections):
+    with [col1, col2, col3, col4][idx]:
+        news_html = ""
+        for item in news_list:
+            news_html += f"""
             <div class="news-item">
                 <div class="news-text">{item['t']}</div>
                 <a href="{item['l']}" target="_blank" class="read-more">Read Full Story →</a>
-            </div>
-            """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+            </div>"""
+        
+        st.markdown(f"""
+        <div class="vertical-section">
+            <div class="vertical-header" style="color: {color}; border-color: {color};">{label}</div>
+            {news_html}
+        </div>
+        """, unsafe_allow_html=True)
 
-# 6. MINIMALIST REFRESH
-st.markdown(f"<div style='text-align: center; color: #94a3b8; padding: 20px;'>Live Sync: {datetime.now().strftime('%H:%M:%S')}</div>", unsafe_allow_html=True)
+# Footer
+st.markdown(f"<div style='text-align: center; color: white; padding: 20px;'>Live Intelligence Sync: {datetime.now().strftime('%H:%M:%S')}</div>", unsafe_allow_html=True)
