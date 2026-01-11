@@ -26,7 +26,7 @@ st.set_page_config(
 GROQ_API_KEY = "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"
 
 # ══════════════════════════════════════════════════════════════════════════════
-# YOUR COMPLETE ENTITY DATABASES (unchanged)
+# EVERGENT CLIENTS - COMPLETE LIST
 # ══════════════════════════════════════════════════════════════════════════════
 EVERGENT_CLIENTS = {
     "Astro": ["astro malaysia", "astro sooka", "astro njoi", "astro", "sooka", "njoi"],
@@ -60,6 +60,7 @@ EVERGENT_CLIENTS = {
     "Pilipinas": ["pilipinas", "abs-cbn"],
 }
 
+# COMPETITORS
 COMPETITORS = {
     "Netcracker": ["netcracker", "netcracker technology", "nec netcracker"],
     "Amdocs": ["amdocs", "amdocs ltd", "amdocs inc"],
@@ -89,6 +90,7 @@ COMPETITORS = {
     "Salesforce": ["salesforce", "salesforce communications"],
 }
 
+# TOP GLOBAL TELCOS
 TOP_TELCOS = {
     "Verizon": ["verizon", "verizon wireless", "verizon fios"],
     "AT&T": ["at&t", "att mobility"],
@@ -118,6 +120,7 @@ TOP_TELCOS = {
     "Rogers": ["rogers communications", "rogers"],
 }
 
+# OTT PLATFORMS
 OTT_PLATFORMS = {
     "Netflix": ["netflix"], "Disney+": ["disney+", "disney plus", "hotstar"],
     "Prime Video": ["prime video", "amazon prime"], "HBO Max": ["hbo max", "max"],
@@ -127,6 +130,7 @@ OTT_PLATFORMS = {
     "ESPN+": ["espn+", "espn plus"], "YouTube TV": ["youtube tv"],
 }
 
+# SPORTS ENTITIES
 SPORTS_ENTITIES = {
     "NBA": ["nba", "national basketball association"],
     "NFL": ["nfl", "national football league"],
@@ -137,7 +141,7 @@ SPORTS_ENTITIES = {
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
-# RSS FEEDS (your original)
+# RSS FEEDS
 # ══════════════════════════════════════════════════════════════════════════════
 RSS_FEEDS = {
     "telco": [
@@ -173,117 +177,39 @@ RSS_FEEDS = {
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
 # ══════════════════════════════════════════════════════════════════════════════
-# YOUR EXACT STYLING + BACKGROUND (merged & optimized)
+# STYLING
 # ══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
 <style>
-    .stApp {
-        background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
-        background-size: cover;
-        color: #1e293b;
-        padding-top: 0.5rem;
-    }
-    .header-container {
-        background: rgba(255,255,255,0.98);
-        padding: 1.5rem 2rem;
-        text-align: center;
-        border-radius: 20px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
-        margin: 0 0 1.5rem 0;
-        border-bottom: 4px solid #3b82f6;
-    }
-    .main-title {
-        font-size: 2.2rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, #1e40af, #3b82f6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin: 0;
-    }
-    .subtitle {
-        font-size: 1rem;
-        color: #64748b;
-        margin-top: 0.4rem;
-    }
-    .col-header {
-        padding: 14px 16px;
-        border-radius: 14px 14px 0 0;
-        color: white;
-        font-weight: 700;
-        font-size: 0.95rem;
-        text-align: center;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-    }
+    .stApp {background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #e8f4fd 100%); color: #1e293b;}
+    .header-container {background: rgba(255,255,255,0.98); padding: 1.5rem 2rem; text-align: center; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); margin: 0 0 1.5rem 0; border-bottom: 4px solid #3b82f6;}
+    .main-title {font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, #1e40af, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0;}
+    .subtitle {font-size: 1rem; color: #64748b; margin-top: 0.4rem;}
+    .col-header {padding: 14px 16px; border-radius: 14px 14px 0 0; color: white; font-weight: 700; font-size: 0.95rem; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; gap: 8px;}
     .col-header-pink {background: linear-gradient(135deg, #ec4899, #db2777);}
     .col-header-purple {background: linear-gradient(135deg, #a78bfa, #8b5cf6);}
     .col-header-green {background: linear-gradient(135deg, #34d399, #10b981);}
     .col-header-orange {background: linear-gradient(135deg, #fb923c, #f97316);}
-    .col-body {
-        background: white;
-        border-radius: 0 0 14px 14px;
-        padding: 12px;
-        min-height: 600px;
-        max-height: 750px;
-        overflow-y: auto;
-        box-shadow: 0 6px 24px rgba(0,0,0,0.08);
-    }
-    .highlight-card {
-        background: linear-gradient(135deg, #fafbfc 0%, #ffffff 100%);
-        border: 1px solid #e2e8f0;
-        border-left: 4px solid #3b82f6;
-        border-radius: 10px;
-        padding: 14px;
-        margin-bottom: 12px;
-        transition: all 0.2s ease;
-    }
-    .highlight-card:hover {
-        background: linear-gradient(135deg, #f1f5f9 0%, #ffffff 100%);
-        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-        transform: translateY(-2px);
-    }
+    .highlight-count {background: rgba(255,255,255,0.25); padding: 2px 10px; border-radius: 12px; font-size: 0.75rem;}
+    .col-body {background: white; border-radius: 0 0 14px 14px; padding: 12px; min-height: 600px; max-height: 750px; overflow-y: auto; box-shadow: 0 6px 24px rgba(0,0,0,0.08);}
+    .highlight-card {background: linear-gradient(135deg, #fafbfc 0%, #ffffff 100%); border: 1px solid #e2e8f0; border-left: 4px solid #3b82f6; border-radius: 10px; padding: 14px; margin-bottom: 12px; transition: all 0.2s ease;}
+    .highlight-card:hover {background: linear-gradient(135deg, #f1f5f9 0%, #ffffff 100%); box-shadow: 0 6px 20px rgba(0,0,0,0.1); transform: translateY(-2px);}
     .highlight-card.pink {border-left-color: #ec4899;}
     .highlight-card.purple {border-left-color: #8b5cf6;}
     .highlight-card.green {border-left-color: #10b981;}
     .highlight-card.orange {border-left-color: #f97316;}
-    .highlight-title {
-        color: #1e293b;
-        font-size: 0.92rem;
-        font-weight: 700;
-        margin-bottom: 8px;
-        line-height: 1.3;
-    }
-    .highlight-description {
-        color: #475569;
-        font-size: 0.85rem;
-        line-height: 1.5;
-        margin-bottom: 8px;
-    }
-    .read-more {
-        color: #2563eb;
-        font-weight: 600;
-        font-size: 0.85rem;
-        text-decoration: none;
-        display: block;
-        margin-top: 8px;
-    }
-    .read-more:hover {color: #1d4ed8;}
-    .footer {
-        text-align: center;
-        color: #94a3b8;
-        font-size: 0.8rem;
-        margin-top: 20px;
-        padding: 15px;
-    }
+    .highlight-title {color: #1e293b; font-size: 0.92rem; font-weight: 700; margin-bottom: 8px; line-height: 1.3;}
+    .highlight-description {color: #475569; font-size: 0.85rem; line-height: 1.5; margin-bottom: 8px;}
+    .client-badge {display: inline-block; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 3px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase;}
+    .footer {text-align: center; color: #94a3b8; font-size: 0.8rem; margin-top: 20px; padding: 15px;}
+    .loading-container {text-align: center; padding: 100px 20px; background: rgba(255,255,255,0.9); border-radius: 20px;}
+    .loading-title {font-size: 1.6rem; font-weight: 700; color: #f97316; margin-bottom: 10px;}
     #MainMenu, footer, header {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# UTILITY FUNCTIONS (optimized)
+# UTILITY FUNCTIONS
 # ══════════════════════════════════════════════════════════════════════════════
 def clean(raw):
     if not raw: return ""
@@ -293,8 +219,7 @@ def extract_summary(entry, max_len=400):
     for field in ['summary', 'description', 'content']:
         if hasattr(entry, field):
             content = getattr(entry, field)
-            if isinstance(content, list) and content:
-                content = content[0].get('value', '')
+            if isinstance(content, list) and content: content = content[0].get('value', '')
             summary = clean(content)
             if summary: return summary[:max_len] + ('...' if len(summary) > max_len else '')
     return ""
@@ -308,135 +233,103 @@ def detect_client(text, section):
         "technology": {**COMPETITORS, **TOP_TELCOS}
     }
     for name, keywords in sources.get(section, {}).items():
-        if any(k in text_lower for k in keywords):
-            return name
+        if any(k in text_lower for k in keywords): return name
     return None
 
 # ══════════════════════════════════════════════════════════════════════════════
-# FEED FETCHING (fast + optimized)
+# FEED FETCHING
 # ══════════════════════════════════════════════════════════════════════════════
 def fetch_feed(source, url):
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=8)
+        resp = requests.get(url, headers=HEADERS, timeout=12)
         if resp.status_code != 200: return []
         feed = feedparser.parse(resp.content)
         items = []
-        for entry in feed.entries[:15]:
+        for entry in feed.entries[:20]:
             title = clean(entry.get("title", ""))
             if len(title) < 20: continue
-            link = entry.get("link", "")
-            if not link: continue
-            summary = extract_summary(entry)
-            items.append({"title": title, "link": link, "source": source, "summary": summary})
+            items.append({"title": title, "source": source, "summary": extract_summary(entry)})
         return items
-    except:
-        return []
+    except: return []
 
-@st.cache_data(ttl=180)
+@st.cache_data(ttl=300)
 def fetch_all_news():
     all_news = {}
     for section, feeds in RSS_FEEDS.items():
         items = []
-        with ThreadPoolExecutor(max_workers=6) as executor:
+        with ThreadPoolExecutor(max_workers=8) as executor:
             for result in executor.map(lambda f: fetch_feed(*f), feeds):
                 items.extend(result)
-        all_news[section] = items[:25]  # Limit for speed
+        all_news[section] = items[:30]
     return all_news
 
 # ══════════════════════════════════════════════════════════════════════════════
-# AI HIGHLIGHTS (12+ with Read More)
+# AI HIGHLIGHTS
 # ══════════════════════════════════════════════════════════════════════════════
-def generate_highlights(news_items):
+def generate_highlights_ai(news_items, section, section_name):
     if not news_items: return []
-    news_text = "\n".join([f"- {n['title']} ({n['source']})" for n in news_items[:30]])
+    news_text = "\n".join([f"- {n['title']}: {n.get('summary','')[:150]}" for n in news_items[:20]])
+   
+    clients = {
+        "telco": list(EVERGENT_CLIENTS.keys()) + list(COMPETITORS.keys())[:10] + list(TOP_TELCOS.keys())[:15],
+        "ott": list(EVERGENT_CLIENTS.keys()) + list(OTT_PLATFORMS.keys()),
+        "sports": ["NBA", "FanDuel", "Bally Sports", "ESPN", "FOX"] + list(SPORTS_ENTITIES.keys()),
+        "technology": list(COMPETITORS.keys())[:15] + list(TOP_TELCOS.keys())[:10]
+    }
+   
     try:
-        r = requests.post(
-            "https://api.groq.com/openai/v1/chat/completions",
+        resp = requests.post("https://api.groq.com/openai/v1/chat/completions",
             headers={"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"},
             json={
                 "model": "llama-3.1-8b-instant",
                 "messages": [
-                    {"role": "system", "content": "Extract 12+ unique client/partner/operator highlights from news. Use real names only. No generic tags."},
-                    {"role": "user", "content": f"""From these headlines, create 12+ client highlights (no duplicates, latest only).
-Each: client name + 1-2 sentence benefit/impact + source link.
-
-News:
-{news_text}
-
-Return JSON only:
-{{"highlights": [{{"client": "Company", "description": "Impact", "source_link": "url"}}]}}
-"""}
+                    {"role": "system", "content": f"You are a {section_name} analyst. Focus on: {', '.join(clients.get(section,[])[:30])}"},
+                    {"role": "user", "content": f"Create 10 client highlights from this news. Return JSON: {{\"highlights\": [{{\"title\": \"5-10 words\", \"description\": \"2-3 sentences\", \"company\": \"name\"}}]}}\n\nNews:\n{news_text}"}
                 ],
-                "max_tokens": 1800,
-                "temperature": 0.35
-            },
-            timeout=30
-        )
-        if r.status_code == 200:
-            content = r.json()["choices"][0]["message"]["content"]
-            match = re.search(r'\{[\s\S]*\}', content)
-            if match:
-                return json.loads(match.group()).get("highlights", [])[:15]
-    except:
-        pass
+                "max_tokens": 2000, "temperature": 0.4
+            }, timeout=45)
+       
+        if resp.status_code == 200:
+            match = re.search(r'\{[\s\S]*\}', resp.json()["choices"][0]["message"]["content"])
+            if match: return json.loads(match.group()).get("highlights", [])[:10]
+    except: pass
+   
     # Fallback
-    return [{"client": n["source"], "description": n["title"][:120] + "...", "source_link": n.get("link", "#")} for n in news_items[:12]]
+    return [{"title": n["title"][:70], "description": n.get("summary","")[:200], "company": detect_client(n["title"], section) or "Industry"} for n in news_items[:10]]
+
+@st.cache_data(ttl=300)
+def get_highlights(section, name, news_hash):
+    return generate_highlights_ai(st.session_state.get(f"news_{section}", []), section, name)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# RENDER FUNCTIONS
+# RENDER
 # ══════════════════════════════════════════════════════════════════════════════
-def render_highlight(h):
-    client = html.escape(h.get("client", "Client"))
-    desc = html.escape(h.get("description", ""))
-    link = html.escape(h.get("source_link", "#"))
-    return f'''
-    <div class="highlight-card">
-        <div class="highlight-title">{client}</div>
-        <div class="highlight-description">{desc}</div>
-        <a href="{link}" target="_blank" class="read-more">Read More →</a>
-    </div>
-    '''
+def render_card(h, color):
+    return f'<div class="highlight-card {color}"><div class="highlight-title">{html.escape(str(h.get("title","")))}</div><div class="highlight-description">{html.escape(str(h.get("description","")))}</div><span class="client-badge">{html.escape(str(h.get("company","Industry")))}</span></div>'
 
-def render_section(icon, name, highlights, color_class):
-    cards = "".join([render_highlight(h) for h in highlights])
-    return f'''
-    <div class="col-header {color_class}">{icon} {name}</div>
-    <div class="col-body">{cards or '<div style="text-align:center;padding:80px;color:#999;">Loading latest highlights...</div>'}</div>
-    '''
+def render_section(icon, name, highlights, hdr_class, color):
+    cards = "".join([render_card(h, color) for h in (highlights or [])])
+    return f'<div class="col-header {hdr_class}"><span>{icon}</span><span>{name}</span><span class="highlight-count">{len(highlights or [])} highlights</span></div><div class="col-body">{cards or "<p style=\"text-align:center;color:#999;padding:40px;\">Loading...</p>"}</div>'
 
 # ══════════════════════════════════════════════════════════════════════════════
-# MAIN DASHBOARD
+# MAIN
 # ══════════════════════════════════════════════════════════════════════════════
 st.markdown('<div class="header-container"><h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1><p class="subtitle">AI-Powered Competitive Intelligence for CEO</p></div>', unsafe_allow_html=True)
 
-placeholder = st.empty()
-placeholder.markdown("""
-<div style="text-align:center; padding:140px 20px; background:rgba(255,255,255,0.92); border-radius:24px; box-shadow:0 10px 30px rgba(0,0,0,0.1);">
-    <h2 style="color:#1e40af; font-size:1.9rem;">Igniting AI-Powered Intelligence...</h2>
-    <p style="color:#64748b;">Fetching real-time telecom, OTT, sports & tech highlights</p>
-</div>
-""", unsafe_allow_html=True)
+# Fetch & Generate
+all_news = fetch_all_news()
+for sec in all_news: st.session_state[f"news_{sec}"] = all_news[sec]
 
-with st.spinner(""):
-    all_news = fetch_all_news()
-    highlights = {}
-    for sec in ["telco", "ott", "sports", "technology"]:
-        highlights[sec] = generate_highlights(all_news.get(sec, []))
+highlights = {}
+for sec, name in [("telco","Telco OSS/BSS"),("ott","OTT & Streaming"),("sports","Sports & Events"),("technology","Technology")]:
+    highlights[sec] = generate_highlights_ai(all_news.get(sec,[]), sec, name)
 
-placeholder.empty()
+# Display
+c1,c2,c3,c4 = st.columns(4)
+with c1: st.markdown(render_section("📡","Telco OSS/BSS",highlights.get("telco",[]),"col-header-pink","pink"), unsafe_allow_html=True)
+with c2: st.markdown(render_section("📺","OTT & Streaming",highlights.get("ott",[]),"col-header-purple","purple"), unsafe_allow_html=True)
+with c3: st.markdown(render_section("🏆","Sports & Events",highlights.get("sports",[]),"col-header-green","green"), unsafe_allow_html=True)
+with c4: st.markdown(render_section("⚡","Technology",highlights.get("technology",[]),"col-header-orange","orange"), unsafe_allow_html=True)
 
-c1, c2, c3, c4 = st.columns(4)
-with c1: st.markdown(render_section("📡", "Telco OSS/BSS", highlights["telco"], "col-header-pink"), unsafe_allow_html=True)
-with c2: st.markdown(render_section("📺", "OTT & Streaming", highlights["ott"], "col-header-purple"), unsafe_allow_html=True)
-with c3: st.markdown(render_section("🏆", "Sports & Events", highlights["sports"], "col-header-green"), unsafe_allow_html=True)
-with c4: st.markdown(render_section("⚡", "Technology", highlights["technology"], "col-header-orange"), unsafe_allow_html=True)
-
-st.markdown('<div class="footer">Last Updated: ' + datetime.now().strftime("%I:%M:%S %p") + ' • Auto-refreshes every 5 min</div>', unsafe_allow_html=True)
-
-# Auto-refresh + anti-sleep keep-alive
-st.markdown("""
-<script>
-setInterval(() => { window.location.reload(); }, 300000);
-setInterval(() => { fetch('/'); }, 60000); // Prevent sleep
-</script>
-""", unsafe_allow_html=True)
+st.markdown(f'<div class="footer"><p>Last Updated: {datetime.now().strftime("%I:%M:%S %p")} • Auto-refreshes every 5 minutes</p></div>', unsafe_allow_html=True)
+st.markdown("<script>setTimeout(function(){window.location.reload();},300000);</script>", unsafe_allow_html=True)
