@@ -2,74 +2,50 @@ import streamlit as st
 import feedparser
 import requests
 from datetime import datetime
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import html, re, hashlib, json, urllib.parse
+import html
+import re
+import hashlib
 from difflib import SequenceMatcher
+import urllib.parse
 
-# ─────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────
 # PAGE CONFIG
-# ─────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Global Telecom & OTT Stellar Nexus",
+    page_title="Global Telecom & OTT Stellar Nexus — LIVE 2026",
     page_icon="🌐",
-    layout="wide",
-    initial_sidebar_state="collapsed"
+    layout="wide"
 )
 
-if "keep_alive" not in st.session_state:
-    st.session_state.keep_alive = datetime.now()
-
-GROQ_API_KEY = "YOUR_GROQ_KEY"
-
-# ─────────────────────────────────────────────
-# SECTION QUERIES (SEARCH SEEDS ONLY)
-# ─────────────────────────────────────────────
-SECTION_QUERIES = {
-    "telco": "telecom OSS BSS 5G billing revenue management 2026",
-    "ott": "OTT streaming platform content subscription 2026",
-    "sports": "sports media rights broadcasting streaming 2026",
-    "technology": "enterprise AI cloud SaaS platform 2026"
-}
-
-SECTION_BACKUP_QUERIES = {
-    "telco": ["telecom billing system", "OSS BSS transformation", "5G monetization"],
-    "ott": ["OTT platform deal", "streaming content partnership"],
-    "sports": ["sports broadcast rights", "league media deal"],
-    "technology": ["enterprise AI platform", "cloud SaaS acquisition"]
-}
-
-# ─────────────────────────────────────────────
-# RELEVANCE CONTROL (CORE FIX)
-# ─────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────
+# KEYWORD DEFINITIONS (STRICT & RELEVANT)
+# ─────────────────────────────────────────────────────────────
 
 TELCO_KEYWORDS = [
-    "oss", "bss", "billing", "charging", "revenue management",
-    "5g", "network slicing", "cloud native telecom",
-    "csp", "telecom transformation"
+    "telecom", "telco", "oss", "bss", "5g", "network", "billing",
+    "charging", "mediation", "subscriber", "operator", "mvno",
+    "roaming", "core network", "cloud native telecom"
 ]
 
 OTT_KEYWORDS = [
-    "ott", "streaming", "video platform", "svod", "avod",
-    "fast channel", "content licensing", "subscriber"
+    "ott", "streaming", "vod", "svod", "avod",
+    "content platform", "media streaming", "video platform",
+    "subscription video", "digital media"
 ]
 
 SPORTS_KEYWORDS = [
-    "sports rights", "media rights", "broadcasting",
-    "sports streaming", "league", "tournament", "esports"
+    "sports broadcast", "media rights", "league", "tournament",
+    "live sports", "sports streaming", "sports network"
 ]
 
 TECH_KEYWORDS = [
-    "enterprise ai", "cloud platform", "saas",
-    "data platform", "enterprise software", "b2b tech"
+    "cloud", "ai", "artificial intelligence", "saas",
+    "platform", "enterprise software", "data platform"
 ]
 
-GLOBAL_EXCLUSIONS = [
-    "oil", "gas", "petroleum", "energy",
-    "insurance", "bank", "loan",
-    "semiconductor", "chip", "fab",
-    "mining", "steel", "cement",
-    "pharma", "biotech", "drug",
-    "automobile", "ev battery"
+EXCLUDED_KEYWORDS = [
+    "oil", "gas", "energy", "insurance", "bank", "finance",
+    "stock", "share price", "semiconductor", "chip", "mining"
 ]
 
 SECTION_KEYWORDS = {
@@ -79,139 +55,177 @@ SECTION_KEYWORDS = {
     "technology": TECH_KEYWORDS
 }
 
-# ─────────────────────────────────────────────
-# EVERGENT SIGNAL BOOST
-# ─────────────────────────────────────────────
-EVERGENT_TERMS = set()
-for group in [EVERGENT_CLIENTS, COMPETITITORS, TOP_TELCOS]:
-    for names in group.values():
-        for n in names:
-            EVERGENT_TERMS.add(n.lower())
+# ─────────────────────────────────────────────────────────────
+# UTILITIES
+# ─────────────────────────────────────────────────────────────
 
-# ─────────────────────────────────────────────
-# UTILS
-# ─────────────────────────────────────────────
-def clean_text(t):
-    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", str(t)))).strip()
+def clean_text(text):
+    if not text:
+        return ""
+    text = html.unescape(re.sub(r"<[^>]+>", "", text))
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()
 
-def get_hash(t):
-    return hashlib.md5(t.lower().encode()).hexdigest()[:12]
+def contains_any(text, keywords):
+    t = text.lower()
+    return any(k in t for k in keywords)
 
-def is_relevant(item, section):
-    text = f"{item['title']} {item['summary']}".lower()
+def excluded(text):
+    t = text.lower()
+    return any(k in t for k in EXCLUDED_KEYWORDS)
 
-    if any(x in text for x in GLOBAL_EXCLUSIONS):
-        return False
+def similarity(a, b):
+    return SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
-    if not any(k in text for k in SECTION_KEYWORDS.get(section, [])):
-        return False
+def unique(items):
+    seen = []
+    out = []
+    for i in items:
+        if not any(similarity(i["title"], s) > 0.65 for s in seen):
+            seen.append(i["title"])
+            out.append(i)
+    return out
 
-    return True
+# ─────────────────────────────────────────────────────────────
+# GOOGLE NEWS RSS FETCH
+# ─────────────────────────────────────────────────────────────
 
-# ─────────────────────────────────────────────
-# GOOGLE NEWS FETCH
-# ─────────────────────────────────────────────
-def fetch_google_news(query):
-    try:
-        q = urllib.parse.quote(query)
-        url = f"https://news.google.com/rss/search?q={q}&hl=en-US&gl=US&ceid=US:en"
-        feed = feedparser.parse(requests.get(url, timeout=12).content)
+def fetch_news(section, limit=12):
+    keywords = SECTION_KEYWORDS[section]
+    query = " ".join(keywords) + " 2026"
 
-        items = []
-        for e in feed.entries:
-            title = clean_text(e.title)
-            link = e.link
-            summary = clean_text(getattr(e, "summary", title))
-
-            if len(title) < 30:
-                continue
-
-            items.append({
-                "title": title,
-                "summary": summary,
-                "link": link,
-                "hash": get_hash(title)
-            })
-
-        return items
-    except:
-        return []
-
-@st.cache_data(ttl=300)
-def fetch_section_news(section):
-    seen, results = set(), []
-
-    queries = [SECTION_QUERIES[section]] + SECTION_BACKUP_QUERIES[section]
-
-    for q in queries:
-        for item in fetch_google_news(q):
-            if item["hash"] in seen:
-                continue
-            if not is_relevant(item, section):
-                continue
-            results.append(item)
-            seen.add(item["hash"])
-
-    return results[:18]
-
-# ─────────────────────────────────────────────
-# AI SUMMARIES (UNCHANGED)
-# ─────────────────────────────────────────────
-def generate_ai_descriptions(news, section):
-    if not news:
-        return []
-
-    text = "\n".join(
-        f"{i+1}. {n['title']} – {n['summary'][:200]}"
-        for i, n in enumerate(news)
+    url = (
+        "https://news.google.com/rss/search?"
+        f"q={urllib.parse.quote(query)}&hl=en-US&gl=US&ceid=US:en"
     )
 
-    try:
-        r = requests.post(
-            "https://api.groq.com/openai/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {GROQ_API_KEY}",
-                "Content-Type": "application/json"
-            },
-            json={
-                "model": "llama-3.1-8b-instant",
-                "messages": [
-                    {"role": "system", "content": f"You are a {section} industry analyst."},
-                    {"role": "user", "content": text}
-                ],
-                "temperature": 0.15,
-                "max_tokens": 3000
-            },
-            timeout=45
-        )
+    feed = feedparser.parse(url)
+    items = []
 
-        data = json.loads(re.search(r"\{.*\}", r.json()["choices"][0]["message"]["content"], re.S).group())
-        return data.get("highlights", [])[:14]
-    except:
-        return [{"title": n["title"], "description": n["summary"], "link": n["link"]} for n in news[:14]]
+    for e in feed.entries:
+        title = clean_text(e.title)
+        link = e.link
+        summary = clean_text(e.get("summary", ""))
 
-# ─────────────────────────────────────────────
-# UI RENDER (UNCHANGED)
-# ─────────────────────────────────────────────
-st.markdown("## 🌐 Global Telecom & OTT Stellar Nexus — LIVE 2026")
+        text_blob = f"{title} {summary}"
 
-sections = [
-    ("telco", "TELCO OSS/BSS", "📡"),
-    ("ott", "OTT & STREAMING", "📺"),
-    ("sports", "SPORTS & EVENTS", "🏆"),
-    ("technology", "TECHNOLOGY", "⚡")
-]
+        if excluded(text_blob):
+            continue
+        if not contains_any(text_blob, keywords):
+            continue
+        if len(title) < 30:
+            continue
+
+        items.append({
+            "title": title,
+            "summary": summary[:280],
+            "link": link
+        })
+
+        if len(items) >= limit * 2:
+            break
+
+    return unique(items)[:limit]
+
+# ─────────────────────────────────────────────────────────────
+# UI COMPONENTS
+# ─────────────────────────────────────────────────────────────
+
+def render_card(item, color):
+    return f"""
+    <div style="
+        background:white;
+        padding:14px;
+        margin-bottom:12px;
+        border-left:4px solid {color};
+        border-radius:10px;
+        box-shadow:0 4px 12px rgba(0,0,0,0.08)
+    ">
+        <div style="font-weight:700;font-size:0.95rem">
+            {html.escape(item['title'])}
+        </div>
+        <div style="font-size:0.85rem;color:#475569;margin:6px 0">
+            {html.escape(item['summary'])}
+        </div>
+        <a href="{item['link']}" target="_blank"
+           style="font-size:0.8rem;font-weight:600;color:#2563eb">
+           Read Full Story →
+        </a>
+    </div>
+    """
+
+def render_section(title, icon, items, color):
+    cards = "".join(render_card(i, color) for i in items) or \
+            "<p style='color:#64748b'>No relevant news found</p>"
+
+    return f"""
+    <div style="
+        background:linear-gradient(135deg,{color},#00000020);
+        color:white;
+        padding:14px;
+        border-radius:14px 14px 0 0;
+        font-weight:800;
+        text-align:center
+    ">
+        {icon} {title}
+    </div>
+    <div style="
+        background:white;
+        padding:12px;
+        min-height:650px;
+        max-height:750px;
+        overflow-y:auto;
+        border-radius:0 0 14px 14px
+    ">
+        {cards}
+    </div>
+    """
+
+# ─────────────────────────────────────────────────────────────
+# HEADER
+# ─────────────────────────────────────────────────────────────
+
+st.markdown("""
+<h2 style="text-align:center">
+🌐 Global Telecom & OTT Stellar Nexus — LIVE 2026
+</h2>
+<p style="text-align:center;color:#64748b">
+Executive-grade competitive intelligence
+</p>
+""", unsafe_allow_html=True)
+
+# ─────────────────────────────────────────────────────────────
+# FETCH & DISPLAY (IMMEDIATE PER SECTION)
+# ─────────────────────────────────────────────────────────────
 
 cols = st.columns(4)
 
-for col, (key, name, icon) in zip(cols, sections):
-    with col:
-        news = fetch_section_news(key)
-        highlights = generate_ai_descriptions(news, name)
-        st.subheader(f"{icon} {name}")
-        for h in highlights:
-            st.markdown(f"**{h['title']}**")
-            st.caption(h["description"])
-            st.markdown(f"[Read →]({h['link']})")
+sections = [
+    ("telco", "TELCO OSS/BSS", "📡", "#ec4899"),
+    ("ott", "OTT & STREAMING", "📺", "#8b5cf6"),
+    ("sports", "SPORTS & EVENTS", "🏆", "#10b981"),
+    ("technology", "TECHNOLOGY", "⚡", "#f97316"),
+]
 
-st.caption(f"Updated: {datetime.now().strftime('%d %b %Y %I:%M %p')}")
+for col, (key, label, icon, color) in zip(cols, sections):
+    with col:
+        with st.spinner(f"Loading {label}…"):
+            data = fetch_news(key)
+        st.markdown(render_section(label, icon, data, color),
+                    unsafe_allow_html=True)
+
+# ─────────────────────────────────────────────────────────────
+# FOOTER
+# ─────────────────────────────────────────────────────────────
+
+st.markdown(f"""
+<p style="text-align:center;color:#64748b;font-size:0.8rem;margin-top:20px">
+Last updated: {datetime.now().strftime('%d %b %Y %I:%M %p')} · Auto-refresh 5 min
+</p>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<script>
+setTimeout(() => location.reload(), 300000);
+</script>
+""", unsafe_allow_html=True)
