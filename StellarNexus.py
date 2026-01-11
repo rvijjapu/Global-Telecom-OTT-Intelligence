@@ -1,15 +1,12 @@
-
 import streamlit as st
 import requests
 from datetime import datetime
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import html
 import re
 import hashlib
 from difflib import SequenceMatcher
 import json
 import urllib.parse
-from bs4 import BeautifulSoup
 
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE CONFIG
@@ -21,19 +18,19 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-if 'keep_alive' not in st.session_state:
-    st.session_state.keep_alive = datetime.now()
-
+# ══════════════════════════════════════════════════════════════════════════════
+# API KEY
+# ══════════════════════════════════════════════════════════════════════════════
 GROQ_API_KEY = "PUT_YOUR_KEY_HERE"
 
 # ══════════════════════════════════════════════════════════════════════════════
-# SECTION URLS (ONLY SOURCE OF TRUTH)
+# SECTION URLS — SINGLE SOURCE OF TRUTH
 # ══════════════════════════════════════════════════════════════════════════════
 SECTION_URLS = {
-    "telco": "https://www.google.com/search?q=recent+telecom+OSS+BSS+key+announcements+2026&udm=50",
-    "ott": "https://www.google.com/search?q=recent+OTT+streaming+key+announcements+2026&udm=50",
-    "sports": "https://www.google.com/search?q=recent+sports+media+rights+events+2026&udm=50",
-    "technology": "https://www.google.com/search?q=recent+technology+AI+cloud+platform+deals+2026&udm=50"
+    "telco": "https://www.google.com/search?q=telecom+OSS+BSS+key+announcements+2026&udm=50",
+    "ott": "https://www.google.com/search?q=OTT+streaming+key+announcements+2026&udm=50",
+    "sports": "https://www.google.com/search?q=sports+media+rights+events+2026&udm=50",
+    "technology": "https://www.google.com/search?q=technology+AI+cloud+platform+deals+2026&udm=50"
 }
 
 YEAR_EXCLUSIONS = ["2025", "2024", "2023", "2022"]
@@ -45,28 +42,26 @@ HEADERS = {
 # ══════════════════════════════════════════════════════════════════════════════
 # UTILITIES
 # ══════════════════════════════════════════════════════════════════════════════
-def clean_text(raw):
-    if not raw:
+def clean_text(text):
+    if not text:
         return ""
-    text = html.unescape(re.sub(r'<[^>]+>', '', str(raw)))
-    text = re.sub(r'\s+', ' ', text)
+    text = html.unescape(text)
+    text = re.sub(r"<[^>]+>", "", text)
+    text = re.sub(r"\s+", " ", text)
     return text.strip()
 
 def get_hash(text):
     return hashlib.md5(text.lower().encode()).hexdigest()[:12]
-
-def title_similarity(a, b):
-    return SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
 def is_2026_only(text):
     t = text.lower()
     for y in YEAR_EXCLUSIONS:
         if y in t:
             return False
-    return "2026" in t or any(x in t for x in ["today", "hours ago", "days ago", "this week"])
+    return "2026" in t or any(k in t for k in ["today", "hours ago", "days ago", "this week"])
 
 # ══════════════════════════════════════════════════════════════════════════════
-# GOOGLE SEARCH URL PARSER (STRICT)
+# STRICT GOOGLE SEARCH HTML PARSER (NO BS4)
 # ══════════════════════════════════════════════════════════════════════════════
 def fetch_from_section_url(section_key, max_results=20):
     url = SECTION_URLS.get(section_key)
@@ -75,23 +70,23 @@ def fetch_from_section_url(section_key, max_results=20):
 
     try:
         r = requests.get(url, headers=HEADERS, timeout=15)
-        soup = BeautifulSoup(r.text, "html.parser")
+        html_text = r.text
 
-        items, seen = [], set()
+        # Extract Google redirect links
+        matches = re.findall(
+            r'<a href="/url\?q=(https?://[^&"]+)[^"]*".*?>(.*?)</a>',
+            html_text,
+            re.DOTALL
+        )
 
-        for a in soup.select("a"):
-            title = clean_text(a.get_text())
-            link = a.get("href", "")
+        items = []
+        seen = set()
 
-            if not title or len(title) < 30:
+        for link, raw_title in matches:
+            title = clean_text(raw_title)
+
+            if len(title) < 30:
                 continue
-
-            if link.startswith("/url?q="):
-                link = link.split("/url?q=")[1].split("&")[0]
-
-            if not link.startswith("http"):
-                continue
-
             if not is_2026_only(title):
                 continue
 
@@ -102,21 +97,23 @@ def fetch_from_section_url(section_key, max_results=20):
             items.append({
                 "title": title,
                 "summary": title,
-                "link": link,
+                "link": urllib.parse.unquote(link),
                 "hash": h
             })
+
             seen.add(h)
 
             if len(items) >= max_results:
                 break
 
         return items
+
     except:
         return []
 
-@st.cache_data(ttl=180, show_spinner=False)
+@st.cache_data(ttl=180)
 def fetch_all_sections():
-    return {k: fetch_from_section_url(k) for k in SECTION_URLS.keys()}
+    return {k: fetch_from_section_url(k) for k in SECTION_URLS}
 
 # ══════════════════════════════════════════════════════════════════════════════
 # AI SUMMARIES
@@ -149,7 +146,6 @@ def generate_ai_descriptions(news_items, section_name):
             timeout=40
         )
 
-        data = r.json()["choices"][0]["message"]["content"]
         return [{
             "title": n["title"][:90],
             "description": n["summary"][:280],
@@ -166,49 +162,46 @@ def generate_ai_descriptions(news_items, section_name):
 # ══════════════════════════════════════════════════════════════════════════════
 # UI RENDER
 # ══════════════════════════════════════════════════════════════════════════════
-def render_card(h, color):
+def render_card(h):
     return f"""
-    <div class="highlight-card {color}">
-        <div class="highlight-title">{html.escape(h['title'])}</div>
-        <div class="highlight-description">{html.escape(h['description'])}</div>
-        <a href="{h['link']}" target="_blank" class="read-more">Read Full Story →</a>
+    <div style="padding:12px;border-left:4px solid #3b82f6;margin-bottom:10px;background:#fff;">
+        <div style="font-weight:700">{html.escape(h['title'])}</div>
+        <div style="font-size:0.85rem;color:#475569;margin:6px 0">
+            {html.escape(h['description'])}
+        </div>
+        <a href="{h['link']}" target="_blank">Read →</a>
     </div>
     """
 
-def render_section(icon, name, highlights, header, color):
-    cards = "".join(render_card(h, color) for h in highlights)
-    return f"""
-    <div class="col-header {header}">{icon} {name}</div>
-    <div class="col-body">{cards}</div>
-    """
+def render_section(name, highlights):
+    return "".join(render_card(h) for h in highlights)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # MAIN
 # ══════════════════════════════════════════════════════════════════════════════
 st.markdown("## 🌐 Global Telecom & OTT Stellar Nexus — LIVE 2026")
 
-with st.spinner("Fetching 2026 intelligence..."):
+with st.spinner("Fetching 2026 intelligence…"):
     all_news = fetch_all_sections()
-
-sections = [
-    ("telco", "TELCO OSS/BSS", "📡", "col-header-pink", "pink"),
-    ("ott", "OTT & STREAMING", "📺", "col-header-purple", "purple"),
-    ("sports", "SPORTS & EVENTS", "🏆", "col-header-green", "green"),
-    ("technology", "TECHNOLOGY", "⚡", "col-header-orange", "orange")
-]
 
 cols = st.columns(4)
 
-for col, (k, name, icon, header, color) in zip(cols, sections):
+sections = [
+    ("telco", "TELCO OSS/BSS"),
+    ("ott", "OTT & STREAMING"),
+    ("sports", "SPORTS & EVENTS"),
+    ("technology", "TECHNOLOGY")
+]
+
+for col, (key, title) in zip(cols, sections):
     with col:
-        highlights = generate_ai_descriptions(all_news.get(k, []), name)
-        st.markdown(render_section(icon, name, highlights, header, color), unsafe_allow_html=True)
+        highlights = generate_ai_descriptions(all_news.get(key, []), title)
+        st.markdown(f"### {title}")
+        st.markdown(render_section(title, highlights), unsafe_allow_html=True)
 
 st.markdown(f"""
-<div class="footer">
-Updated: {datetime.now().strftime("%d %b %Y %I:%M %p")} | Auto refresh 5 min
-</div>
-""", unsafe_allow_html=True)
+Updated: {datetime.now().strftime("%d %b %Y %I:%M %p")} • Auto refresh 5 min
+""")
 
 st.markdown("""
 <script>
