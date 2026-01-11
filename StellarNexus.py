@@ -21,13 +21,45 @@ if 'keep_alive' not in st.session_state:
 GROQ_API_KEY = "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"
 
 # ══════════════════════════════════════════════════════════════════════════════
-# GOOGLE SEARCH PHRASES - ONE PER SECTION (EXACTLY AS YOU SPECIFIED)
+# GOOGLE SEARCH QUERIES - EXACTLY AS YOU SPECIFIED
 # ══════════════════════════════════════════════════════════════════════════════
-SECTION_SEARCH_QUERIES = {
-    "telco": "recent telecom OSS BSS providers news key announcements mergers acquisitions deals profit losses",
-    "ott": "recent OTT providers news key announcements mergers acquisitions deals profit losses streaming",
-    "sports": "recent sports events announcements providers organizers news key announcements mergers acquisitions",
+SECTION_QUERIES = {
+    "telco": "recent telecom OSS BSS key announcements providers organizers news mergers acquisitions deals profit losses",
+    "ott": "recent OTT streaming key announcements providers news mergers acquisitions deals profit losses",
+    "sports": "recent sports events key announcements providers organizers news mergers acquisitions deals",
     "technology": "recent Technology key announcements providers news mergers acquisitions deals profit losses"
+}
+
+# Additional queries for better coverage
+SECTION_MULTI_QUERIES = {
+    "telco": [
+        "telecom OSS BSS merger acquisition deal 2024 2025",
+        "telecom billing revenue management announcement",
+        "5G network operator partnership contract deal",
+        "BSS transformation digital monetization telecom",
+        "telecom operator profit loss earnings announcement"
+    ],
+    "ott": [
+        "OTT streaming merger acquisition deal 2024 2025",
+        "Netflix Disney HBO streaming announcement",
+        "streaming platform subscriber revenue earnings",
+        "OTT content deal partnership announcement",
+        "video streaming profit loss market share"
+    ],
+    "sports": [
+        "sports media rights deal contract 2024 2025",
+        "sports broadcasting streaming partnership",
+        "sports betting merger acquisition deal",
+        "sports league broadcast rights announcement",
+        "esports gaming media deal partnership"
+    ],
+    "technology": [
+        "technology merger acquisition deal 2024 2025",
+        "AI cloud computing partnership announcement",
+        "tech company earnings profit loss report",
+        "5G semiconductor chip deal partnership",
+        "enterprise technology transformation deal"
+    ]
 }
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0"}
@@ -71,15 +103,15 @@ st.markdown("""
 def clean_text(raw):
     if not raw: return ""
     text = html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
-    return re.sub(r'\s*[-–|]\s*[A-Za-z][A-Za-z\s\.]+$', '', text)
+    return re.sub(r'\s*[-–|]\s*[A-Za-z][A-Za-z0-9\s\.,]+$', '', text)
 
-def extract_summary(entry, max_len=350):
+def extract_summary(entry, max_len=400):
     for field in ['summary', 'description', 'content']:
         if hasattr(entry, field):
             content = getattr(entry, field)
             if isinstance(content, list) and content: content = content[0].get('value', '')
             summary = clean_text(content)
-            if summary and len(summary) > 50:
+            if summary and len(summary) > 40:
                 return summary[:max_len].rsplit(' ', 1)[0] + '...' if len(summary) > max_len else summary
     return ""
 
@@ -87,64 +119,55 @@ def get_hash(text): return hashlib.md5(text.lower().strip().encode()).hexdigest(
 def title_similarity(a, b): return SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
 # ══════════════════════════════════════════════════════════════════════════════
-# GOOGLE NEWS FETCHER - USES EXACT SEARCH PHRASE FOR EACH SECTION
+# GOOGLE NEWS RSS FETCHER
 # ══════════════════════════════════════════════════════════════════════════════
-def fetch_google_news(section, query):
-    """Fetch news from Google News RSS using the exact search phrase"""
+def fetch_google_news_rss(query):
     try:
         url = f"https://news.google.com/rss/search?q={urllib.parse.quote(query)}&hl=en-US&gl=US&ceid=US:en"
-        resp = requests.get(url, headers=HEADERS, timeout=15)
+        resp = requests.get(url, headers=HEADERS, timeout=12)
         if resp.status_code != 200: return []
-        
         feed = feedparser.parse(resp.content)
-        items, seen_hashes, seen_titles = [], set(), []
-        
-        for entry in feed.entries[:30]:
-            title = clean_text(entry.get("title", ""))
-            if len(title) < 25: continue
-            link = entry.get("link", "")
-            if not link.startswith("http"): continue
-            
-            title_hash = get_hash(title)
-            if title_hash in seen_hashes or any(title_similarity(title, t) > 0.75 for t in seen_titles): continue
-            
-            summary = extract_summary(entry) or title
-            items.append({"title": title, "link": link, "summary": summary, "hash": title_hash})
-            seen_hashes.add(title_hash)
-            seen_titles.append(title)
-            if len(items) >= 18: break
-        
-        return items
+        return [{"title": clean_text(e.get("title","")), "link": e.get("link",""), "summary": extract_summary(e) or clean_text(e.get("title","")), "hash": get_hash(clean_text(e.get("title","")))} 
+                for e in feed.entries[:20] if len(clean_text(e.get("title",""))) > 25 and e.get("link","").startswith("http")]
     except: return []
 
 @st.cache_data(ttl=180, show_spinner=False)
+def fetch_section_news(section):
+    all_items, seen_hashes, seen_titles = [], set(), []
+    queries = [SECTION_QUERIES.get(section, "")] + SECTION_MULTI_QUERIES.get(section, [])
+    
+    with ThreadPoolExecutor(max_workers=6) as executor:
+        for items in executor.map(fetch_google_news_rss, queries):
+            for item in items:
+                if item["hash"] in seen_hashes or any(title_similarity(item["title"], t) > 0.7 for t in seen_titles): continue
+                all_items.append(item); seen_hashes.add(item["hash"]); seen_titles.append(item["title"])
+    return all_items[:20]
+
+@st.cache_data(ttl=180, show_spinner=False)
 def fetch_all_sections():
-    """Fetch news for all 4 sections using their search phrases"""
     all_news = {}
     with ThreadPoolExecutor(max_workers=4) as executor:
-        futures = {executor.submit(fetch_google_news, sec, qry): sec for sec, qry in SECTION_SEARCH_QUERIES.items()}
-        for future in as_completed(futures, timeout=20):
-            section = futures[future]
-            try: all_news[section] = future.result()
-            except: all_news[section] = []
+        futures = {executor.submit(fetch_section_news, sec): sec for sec in ["telco", "ott", "sports", "technology"]}
+        for future in as_completed(futures, timeout=25):
+            try: all_news[futures[future]] = future.result()
+            except: all_news[futures[future]] = []
     return all_news
 
 # ══════════════════════════════════════════════════════════════════════════════
-# AI ENHANCEMENT - CREATE DESCRIPTIONS
+# AI DESCRIPTION GENERATOR
 # ══════════════════════════════════════════════════════════════════════════════
-def enhance_with_ai(news_items, section_name):
-    """AI creates brief descriptions for the fetched news"""
+def generate_ai_descriptions(news_items, section_name):
     if not news_items: return []
     
-    news_text = "\n".join([f"[{i+1}] {item['title']}\nSummary: {item['summary'][:200]}\nLink: {item['link']}" for i, item in enumerate(news_items[:16])])
+    news_text = "\n".join([f"[{i+1}] Title: {item['title']}\nSummary: {item['summary'][:250]}\nLink: {item['link']}" for i, item in enumerate(news_items[:18])])
     
     try:
         resp = requests.post("https://api.groq.com/openai/v1/chat/completions",
             headers={"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"},
             json={"model": "llama-3.1-8b-instant", "messages": [
-                {"role": "system", "content": f"You are a {section_name} analyst. Create 2-3 sentence descriptions for each news. Keep original titles. Use EXACT original links."},
-                {"role": "user", "content": f"Create 14 highlights. Return JSON:\n{{\"highlights\": [{{\"title\": \"original title\", \"description\": \"2-3 sentences\", \"link\": \"exact url\"}}]}}\n\n{news_text}"}
-            ], "max_tokens": 3500, "temperature": 0.2}, timeout=50)
+                {"role": "system", "content": f"You are a {section_name} analyst. Create 2-3 sentence executive summaries. Use EXACT original links. Focus on mergers, acquisitions, deals, announcements."},
+                {"role": "user", "content": f"Create 14 highlights from this news. Return JSON:\n{{\"highlights\": [{{\"title\": \"title\", \"description\": \"2-3 sentences\", \"link\": \"exact url\"}}]}}\n\n{news_text}"}
+            ], "max_tokens": 4000, "temperature": 0.2}, timeout=55)
         
         if resp.status_code == 200:
             match = re.search(r'\{[\s\S]*\}', resp.json()["choices"][0]["message"]["content"])
@@ -157,7 +180,7 @@ def enhance_with_ai(news_items, section_name):
                 return highlights
     except: pass
     
-    return [{"title": item['title'], "description": item['summary'][:250], "link": item['link']} for item in news_items[:14]]
+    return [{"title": item['title'], "description": item['summary'][:280], "link": item['link']} for item in news_items[:14]]
 
 # ══════════════════════════════════════════════════════════════════════════════
 # RENDER
@@ -176,10 +199,10 @@ def render_section(icon, name, highlights, hdr_class, color):
 # ══════════════════════════════════════════════════════════════════════════════
 st.markdown('<div class="header-container"><h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1><p class="subtitle">AI-Powered Competitive Intelligence for CEO</p></div>', unsafe_allow_html=True)
 
-with st.spinner("⚡ Fetching latest news..."):
+with st.spinner("⚡ Searching Google News..."):
     all_news = fetch_all_sections()
 
-highlights = {sec: enhance_with_ai(all_news.get(sec,[]), name) for sec, name in [("telco","Telco OSS/BSS"),("ott","OTT & Streaming"),("sports","Sports & Events"),("technology","Technology")]}
+highlights = {sec: generate_ai_descriptions(all_news.get(sec,[]), name) for sec, name in [("telco","Telco OSS/BSS"),("ott","OTT & Streaming"),("sports","Sports & Events"),("technology","Technology")]}
 
 c1,c2,c3,c4 = st.columns(4)
 with c1: st.markdown(render_section("📡","Telco OSS/BSS",highlights.get("telco",[]),"col-header-pink","pink"), unsafe_allow_html=True)
