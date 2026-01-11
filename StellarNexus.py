@@ -9,7 +9,6 @@ import hashlib
 from difflib import SequenceMatcher
 import json
 import urllib.parse
-import time
 
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE CONFIG
@@ -20,83 +19,79 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
-   
+
 if 'keep_alive' not in st.session_state:
     st.session_state.keep_alive = datetime.now()
-if 'last_refresh' not in st.session_state:
-    st.session_state.last_refresh = datetime.now()
 
 GROQ_API_KEY = "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"
 
 # ══════════════════════════════════════════════════════════════════════════════
-# OPTIMIZED SEARCH QUERIES - EXACT AS SPECIFIED + ENHANCED FOR 2024-2025 NEWS
+# ENHANCED 2026-FOCUSED SEARCH QUERIES
 # ══════════════════════════════════════════════════════════════════════════════
-SECTION_QUERIES = {
-    "telco": "recent telecom OSS BSS key announcements providers organizers news mergers acquisitions deals profit losses 2026",
-    "ott": "recent OTT providers key announcements providers organizers news mergers acquisitions deals profit losses 2026",
-    "sports": "recent Sports Events organizers key announcements provider organizers news mergers acquisitions deals profit losses 2026",
-    "technology": "recent Technology key announcements provider organizers news mergers acquisitions deals profit losses 2026"
-}
-
-# Enhanced multi-query strategy for comprehensive coverage
 SECTION_MULTI_QUERIES = {
     "telco": [
-        "telecom OSS BSS merger acquisition 2026",
-        "5G network operator partnership deal announcement",
-        "telecom billing revenue management news",
-        "BSS digital transformation monetization",
-        "telecom operator earnings profit loss 2026",
-        "Ericsson Nokia Huawei telecom deal",
-        "telecom infrastructure investment announcement",
-        "wireless carrier merger acquisition news"
+        "recent telecom OSS BSS merger acquisition 2026",
+        "recent billing charging system contract award 2026",
+        "recent revenue management digital BSS deal 2026",
+        "recent 5G network partnership infrastructure 2026",
+        "recent telecom CRM customer management announcement 2026",
+        "recent OSS BSS implementation transformation 2026",
+        "recent private 5G contract deployment 2026",
+        "recent telecom software vendor acquisition deal 2026"
     ],
     "ott": [
-        "OTT streaming merger acquisition 2026",
-        "Netflix Disney HBO Max streaming news",
-        "streaming platform subscriber revenue",
-        "OTT content deal partnership announcement",
-        "video streaming profit loss market",
-        "Amazon Prime Apple TV streaming deal",
-        "streaming wars media acquisition",
-        "SVOD AVOD platform announcement"
+        "recent OTT streaming merger acquisition 2026",
+        "recent video streaming platform subscriber growth 2026",
+        "recent Netflix Disney streaming revenue earnings 2026",
+        "recent digital video service partnership deal 2026",
+        "recent content licensing original investment 2026",
+        "recent ARPU streaming profit loss report 2026",
+        "recent SVOD AVOD platform announcement merger 2026",
+        "recent streaming service acquisition deal 2026"
     ],
     "sports": [
-        "sports media rights deal 2026",
-        "sports broadcasting streaming partnership",
-        "NFL NBA MLB broadcasting deal",
-        "sports league broadcast rights announcement",
-        "esports gaming media deal",
-        "Olympic FIFA World Cup broadcasting",
-        "sports betting merger acquisition",
-        "sports streaming rights contract"
+        "recent sports media rights broadcast deal 2026",
+        "recent league broadcasting contract agreement 2026",
+        "recent sports streaming rights exclusive coverage 2026",
+        "recent sports betting merger sportsbook acquisition 2026",
+        "recent betting platform gambling deal partnership 2026",
+        "recent tournament sponsorship league partnership 2026",
+        "recent NFL NBA MLB broadcasting rights 2026",
+        "recent esports gaming media rights deal 2026"
     ],
     "technology": [
-        "technology merger acquisition 2026",
-        "AI artificial intelligence deal partnership",
-        "tech company earnings profit loss",
-        "cloud computing AWS Azure Google deal",
-        "semiconductor chip deal partnership",
-        "Apple Google Microsoft announcement",
-        "enterprise software acquisition",
-        "tech IPO funding announcement 2026"
+        "recent AI platform partnership contract 2026",
+        "recent cloud telecom SaaS digital platform deal 2026",
+        "recent machine learning deployment technology 2026",
+        "recent eKYC digital identity fintech partnership 2026",
+        "recent 5G technology infrastructure agreement 2026",
+        "recent cloud service national digital rollout 2026",
+        "recent AI technology machine learning contract 2026",
+        "recent enterprise software platform acquisition 2026"
     ]
 }
 
+# EXCLUSION KEYWORDS
+TECH_EXCLUSIONS = ["semiconductor", "chip", "oil", "gas", "petroleum", "mining", "coal"]
+
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.5"
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
-# PREMIUM STYLING - CEO READY
+# PREMIUM STYLING WITH CUSTOM BACKGROUND
 # ══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     
     .stApp {
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+        background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
+        background-size: cover;
+        color: #1e293b;
+        padding-top: 0.5rem;
         font-family: 'Inter', sans-serif;
     }
     
@@ -105,10 +100,9 @@ st.markdown("""
         padding: 1.5rem 2.5rem;
         text-align: center;
         border-radius: 20px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.1);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
         margin: 0 0 1.5rem 0;
         border-bottom: 4px solid transparent;
-        background-clip: padding-box;
         position: relative;
     }
     
@@ -129,7 +123,6 @@ st.markdown("""
         background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #06b6d4 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        background-clip: text;
         margin: 0;
         letter-spacing: -0.5px;
     }
@@ -181,14 +174,6 @@ st.markdown("""
     .col-header-green {background: linear-gradient(135deg, #34d399, #059669);}
     .col-header-orange {background: linear-gradient(135deg, #fb923c, #ea580c);}
     
-    .highlight-count {
-        background: rgba(255,255,255,0.25);
-        padding: 3px 10px;
-        border-radius: 12px;
-        font-size: 0.7rem;
-        font-weight: 600;
-    }
-    
     .col-body {
         background: rgba(255,255,255,0.98);
         border-radius: 0 0 16px 16px;
@@ -207,7 +192,6 @@ st.markdown("""
         padding: 14px 16px;
         margin-bottom: 12px;
         transition: all 0.2s ease;
-        position: relative;
     }
     
     .highlight-card:hover {
@@ -263,11 +247,11 @@ st.markdown("""
     
     .footer {
         text-align: center;
-        color: rgba(255,255,255,0.9);
+        color: rgba(255,255,255,0.95);
         font-size: 0.8rem;
         margin-top: 20px;
         padding: 16px 24px;
-        background: linear-gradient(135deg, rgba(15,23,42,0.9), rgba(30,41,59,0.9));
+        background: linear-gradient(135deg, rgba(15,23,42,0.95), rgba(30,41,59,0.95));
         border-radius: 12px;
         border: 1px solid rgba(255,255,255,0.1);
     }
@@ -275,7 +259,6 @@ st.markdown("""
     .col-body::-webkit-scrollbar {width: 6px;}
     .col-body::-webkit-scrollbar-track {background: #f1f5f9; border-radius: 10px;}
     .col-body::-webkit-scrollbar-thumb {background: linear-gradient(180deg, #94a3b8, #64748b); border-radius: 10px;}
-    .col-body::-webkit-scrollbar-thumb:hover {background: linear-gradient(180deg, #64748b, #475569);}
     
     #MainMenu, footer, header {visibility: hidden;}
     .stDeployButton {display: none;}
@@ -284,17 +267,6 @@ st.markdown("""
         text-align: center;
         padding: 60px 20px;
         color: #64748b;
-    }
-    
-    .news-tag {
-        display: inline-block;
-        background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-        color: #1e40af;
-        padding: 2px 8px;
-        border-radius: 6px;
-        font-size: 0.7rem;
-        font-weight: 600;
-        margin-bottom: 6px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -307,14 +279,12 @@ def clean_text(raw):
     if not raw:
         return ""
     text = html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
-    # Remove source attribution at end
     text = re.sub(r'\s*[-–|]\s*[A-Za-z][A-Za-z0-9\s\.,&\']+$', '', text)
-    # Remove extra whitespace
     text = re.sub(r'\s+', ' ', text)
     return text.strip()
 
 def extract_summary(entry, max_len=500):
-    """Extract the best available summary from feed entry"""
+    """Extract summary from feed entry"""
     for field in ['summary', 'description', 'content']:
         if hasattr(entry, field):
             content = getattr(entry, field)
@@ -322,9 +292,7 @@ def extract_summary(entry, max_len=500):
                 content = content[0].get('value', '')
             summary = clean_text(content)
             if summary and len(summary) > 50:
-                if len(summary) > max_len:
-                    return summary[:max_len].rsplit(' ', 1)[0] + '...'
-                return summary
+                return summary[:max_len].rsplit(' ', 1)[0] + '...' if len(summary) > max_len else summary
     return ""
 
 def get_hash(text):
@@ -332,19 +300,38 @@ def get_hash(text):
     return hashlib.md5(text.lower().strip().encode()).hexdigest()[:12]
 
 def title_similarity(a, b):
-    """Calculate similarity ratio between two titles"""
+    """Calculate similarity between titles"""
     return SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
+def is_2026_news(entry):
+    """Check if news is from 2026"""
+    pub_date = entry.get("published", "")
+    if "2026" in pub_date:
+        return True
+    # Check if recent (within last 30 days from current date)
+    try:
+        from dateutil import parser
+        pub_dt = parser.parse(pub_date)
+        days_old = (datetime.now() - pub_dt).days
+        return days_old <= 30
+    except:
+        return True  # Include if can't parse
+
+def should_exclude_tech(title, summary):
+    """Check if tech news should be excluded"""
+    text = (title + " " + summary).lower()
+    return any(keyword in text for keyword in TECH_EXCLUSIONS)
+
 # ══════════════════════════════════════════════════════════════════════════════
-# GOOGLE NEWS RSS FETCHER - OPTIMIZED
+# GOOGLE NEWS RSS FETCHER
 # ══════════════════════════════════════════════════════════════════════════════
-def fetch_google_news_rss(query, max_results=25):
-    """Fetch news from Google News RSS feed"""
+def fetch_google_news_rss(query, max_results=20):
+    """Fetch news from Google News RSS"""
     try:
         encoded_query = urllib.parse.quote(query)
         url = f"https://news.google.com/rss/search?q={encoded_query}&hl=en-US&gl=US&ceid=US:en"
         
-        resp = requests.get(url, headers=HEADERS, timeout=15)
+        resp = requests.get(url, headers=HEADERS, timeout=12)
         if resp.status_code != 200:
             return []
         
@@ -352,44 +339,42 @@ def fetch_google_news_rss(query, max_results=25):
         results = []
         
         for entry in feed.entries[:max_results]:
+            if not is_2026_news(entry):
+                continue
+                
             title = clean_text(entry.get("title", ""))
             link = entry.get("link", "")
             
-            # Validate entry
             if len(title) < 30 or not link.startswith("http"):
                 continue
             
             summary = extract_summary(entry) or title
-            pub_date = entry.get("published", "")
             
             results.append({
                 "title": title,
                 "link": link,
                 "summary": summary,
-                "published": pub_date,
+                "published": entry.get("published", ""),
                 "hash": get_hash(title)
             })
         
         return results
-    except Exception as e:
+    except:
         return []
 
 @st.cache_data(ttl=180, show_spinner=False)
 def fetch_section_news(section):
-    """Fetch and deduplicate news for a section using multiple queries"""
+    """Fetch and deduplicate news for a section"""
     all_items = []
     seen_hashes = set()
     seen_titles = []
     
-    # Get all queries for this section
-    queries = [SECTION_QUERIES.get(section, "")]
-    queries.extend(SECTION_MULTI_QUERIES.get(section, []))
+    queries = SECTION_MULTI_QUERIES.get(section, [])
     
-    # Fetch in parallel
     with ThreadPoolExecutor(max_workers=8) as executor:
         futures = {executor.submit(fetch_google_news_rss, q): q for q in queries}
         
-        for future in as_completed(futures, timeout=30):
+        for future in as_completed(futures, timeout=25):
             try:
                 items = future.result()
                 for item in items:
@@ -398,8 +383,12 @@ def fetch_section_news(section):
                         continue
                     
                     # Skip similar titles
-                    is_similar = any(title_similarity(item["title"], t) > 0.65 for t in seen_titles)
+                    is_similar = any(title_similarity(item["title"], t) > 0.70 for t in seen_titles)
                     if is_similar:
+                        continue
+                    
+                    # Tech exclusions
+                    if section == "technology" and should_exclude_tech(item["title"], item["summary"]):
                         continue
                     
                     all_items.append(item)
@@ -408,7 +397,7 @@ def fetch_section_news(section):
             except:
                 continue
     
-    return all_items[:25]
+    return all_items[:20]
 
 @st.cache_data(ttl=180, show_spinner=False)
 def fetch_all_sections():
@@ -419,7 +408,7 @@ def fetch_all_sections():
     with ThreadPoolExecutor(max_workers=4) as executor:
         futures = {executor.submit(fetch_section_news, sec): sec for sec in sections}
         
-        for future in as_completed(futures, timeout=45):
+        for future in as_completed(futures, timeout=40):
             section = futures[future]
             try:
                 all_news[section] = future.result()
@@ -429,24 +418,23 @@ def fetch_all_sections():
     return all_news
 
 # ══════════════════════════════════════════════════════════════════════════════
-# AI DESCRIPTION GENERATOR - GROQ OPTIMIZED
+# AI DESCRIPTION GENERATOR
 # ══════════════════════════════════════════════════════════════════════════════
 def generate_ai_descriptions(news_items, section_name):
-    """Generate AI-powered executive summaries using Groq"""
+    """Generate AI summaries using Groq"""
     if not news_items:
         return []
     
-    # Prepare news context
     news_text = "\n\n".join([
         f"[{i+1}] TITLE: {item['title']}\nSUMMARY: {item['summary'][:300]}\nLINK: {item['link']}"
-        for i, item in enumerate(news_items[:20])
+        for i, item in enumerate(news_items[:18])
     ])
     
     section_context = {
-        "Telco OSS/BSS": "telecom industry focusing on OSS/BSS systems, network operators, 5G, billing, revenue management",
-        "OTT & Streaming": "OTT streaming platforms, content providers, media companies, subscriber metrics",
-        "Sports & Events": "sports broadcasting, media rights, leagues, events, esports",
-        "Technology": "technology companies, AI, cloud computing, semiconductors, enterprise software"
+        "Telco OSS/BSS": "telecom OSS/BSS, billing, charging, revenue management, 5G, digital transformation",
+        "OTT & Streaming": "OTT streaming, video platforms, subscriber growth, content deals, ARPU",
+        "Sports & Events": "sports media rights, broadcasting, betting, leagues, esports",
+        "Technology": "AI, cloud, digital platforms, 5G tech, enterprise software, fintech"
     }
     
     context = section_context.get(section_name, section_name)
@@ -463,62 +451,58 @@ def generate_ai_descriptions(news_items, section_name):
                 "messages": [
                     {
                         "role": "system",
-                        "content": f"""You are a senior {section_name} industry analyst creating executive briefings for a CEO.
-Focus on: {context}
+                        "content": f"""You are a {section_name} industry analyst for CEO briefings.
+Focus: {context}
 
-CRITICAL RULES:
-1. Create EXACTLY 14 highlights from the provided news
-2. Each highlight needs: compelling title (max 15 words), executive summary (2-3 sentences, 50-80 words)
-3. Focus on: mergers, acquisitions, deals, partnerships, earnings, market moves, strategic announcements
-4. Use EXACT original links from the news provided - do not modify URLs
-5. Make descriptions CEO-ready: business impact, strategic significance, numbers/metrics when available
+RULES:
+1. Create EXACTLY 14 highlights from provided 2026 news
+2. Each needs: title (max 15 words), summary (2-3 sentences, 50-80 words)
+3. Focus: M&A, deals, partnerships, earnings, strategic moves
+4. Use EXACT URLs from news - do not modify
+5. CEO-ready: business impact, metrics, strategic significance
 6. Return valid JSON only"""
                     },
                     {
                         "role": "user",
                         "content": f"""Create 14 executive highlights from this {section_name} news.
 
-Return ONLY this JSON format:
+Return ONLY:
 {{"highlights": [
-  {{"title": "Compelling headline", "description": "2-3 sentence executive summary with business impact", "link": "exact url from news"}}
+  {{"title": "Compelling headline", "description": "2-3 sentence executive summary", "link": "exact url"}}
 ]}}
 
-NEWS TO ANALYZE:
+NEWS:
 {news_text}"""
                     }
                 ],
                 "max_tokens": 4500,
-                "temperature": 0.15,
-                "top_p": 0.9
+                "temperature": 0.15
             },
-            timeout=60
+            timeout=50
         )
         
         if response.status_code == 200:
             content = response.json()["choices"][0]["message"]["content"]
-            
-            # Extract JSON from response
             json_match = re.search(r'\{[\s\S]*\}', content)
             if json_match:
                 data = json.loads(json_match.group())
                 highlights = data.get("highlights", [])[:14]
                 
-                # Validate and fix links
+                # Validate links
                 valid_links = {item['link'] for item in news_items}
                 for i, h in enumerate(highlights):
                     link = h.get("link", "")
                     if not link.startswith("http") or link not in valid_links:
-                        # Use corresponding news item link
                         if i < len(news_items):
                             h['link'] = news_items[i]['link']
                         elif news_items:
                             h['link'] = news_items[0]['link']
                 
                 return highlights
-    except Exception as e:
+    except:
         pass
     
-    # Fallback: return raw news items formatted
+    # Fallback
     return [
         {
             "title": item['title'][:100],
@@ -532,7 +516,7 @@ NEWS TO ANALYZE:
 # RENDER FUNCTIONS
 # ══════════════════════════════════════════════════════════════════════════════
 def render_card(highlight, color):
-    """Render a single news card"""
+    """Render news card"""
     title = html.escape(str(highlight.get("title", "No Title")))
     description = html.escape(str(highlight.get("description", "")))
     link = highlight.get("link", "#")
@@ -551,23 +535,16 @@ def render_card(highlight, color):
     '''
 
 def render_section(icon, name, highlights, header_class, color):
-    """Render a complete section column"""
-    count = len(highlights) if highlights else 0
-    
+    """Render section column"""
     if highlights:
         cards = "".join([render_card(h, color) for h in highlights])
     else:
-        cards = '''
-        <div class="loading-spinner">
-            <p>⏳ Fetching latest news...</p>
-        </div>
-        '''
+        cards = '<div class="loading-spinner"><p>⏳ Fetching latest news...</p></div>'
     
     return f'''
     <div class="col-header {header_class}">
         <span style="font-size: 1.2rem;">{icon}</span>
         <span>{name}</span>
-        <span class="highlight-count">{count}</span>
     </div>
     <div class="col-body">
         {cards}
@@ -589,11 +566,11 @@ st.markdown(f'''
 </div>
 ''', unsafe_allow_html=True)
 
-# Fetch all news
-with st.spinner("⚡ Fetching latest global news from Google..."):
+# Fetch news
+with st.spinner("⚡ Fetching latest 2026 news..."):
     all_news = fetch_all_sections()
 
-# Generate AI descriptions for each section
+# Generate AI descriptions
 section_configs = [
     ("telco", "Telco OSS/BSS"),
     ("ott", "OTT & Streaming"),
@@ -642,13 +619,13 @@ st.markdown(f'''
         <strong>🕐 Last Updated:</strong> {datetime.now().strftime("%B %d, %Y at %I:%M:%S %p")} | 
         <strong>🔄 Auto-refresh:</strong> Every 5 minutes
     </p>
-    <p style="margin-top: 8px; font-size: 0.75rem; opacity: 0.8;">
-        Powered by Google News RSS + Groq AI • Executive Intelligence Platform
+    <p style="margin-top: 8px; font-size: 0.75rem; opacity: 0.85;">
+        Powered by Google News RSS + Groq AI • 2026 Executive Intelligence
     </p>
 </div>
 ''', unsafe_allow_html=True)
 
-# Auto-refresh script (5 minutes = 300000ms)
+# Auto-refresh
 st.markdown("""
 <script>
     setTimeout(function() {
@@ -657,7 +634,6 @@ st.markdown("""
 </script>
 """, unsafe_allow_html=True)
 
-# Session-based auto-refresh fallback
 if (datetime.now() - st.session_state.keep_alive).seconds > 280:
     st.session_state.keep_alive = datetime.now()
     st.cache_data.clear()
