@@ -31,7 +31,9 @@ if provided_token != EXPECTED_TOKEN:
     st.error("⛔ Unauthorized access – Invalid or missing token")
     st.info(f"Append `?token={EXPECTED_TOKEN}` to the URL or contact admin.")
     st.stop()
-
+    st.write("DEBUG: Expected token (from secrets):", EXPECTED_TOKEN)
+    st.write("DEBUG: Provided token (from URL):", provided_token)
+    st.write("DEBUG: Match?", provided_token == EXPECTED_TOKEN)
 # Rate limiting
 if "last_access" not in st.session_state:
     st.session_state.last_access = 0
