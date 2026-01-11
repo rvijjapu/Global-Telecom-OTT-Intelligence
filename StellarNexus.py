@@ -32,26 +32,26 @@ GROQ_API_KEY = "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"
 # OPTIMIZED SEARCH QUERIES - EXACT AS SPECIFIED + ENHANCED FOR 2024-2025 NEWS
 # ══════════════════════════════════════════════════════════════════════════════
 SECTION_QUERIES = {
-    "telco": "recent telecom OSS BSS key announcements providers organizers news mergers acquisitions deals profit losses 2024 2025",
-    "ott": "recent OTT providers key announcements providers organizers news mergers acquisitions deals profit losses 2024 2025",
-    "sports": "recent Sports Events organizers key announcements provider organizers news mergers acquisitions deals profit losses 2024 2025",
-    "technology": "recent Technology key announcements provider organizers news mergers acquisitions deals profit losses 2024 2025"
+    "telco": "recent telecom OSS BSS key announcements providers organizers news mergers acquisitions deals profit losses 2026",
+    "ott": "recent OTT providers key announcements providers organizers news mergers acquisitions deals profit losses 2026",
+    "sports": "recent Sports Events organizers key announcements provider organizers news mergers acquisitions deals profit losses 2026",
+    "technology": "recent Technology key announcements provider organizers news mergers acquisitions deals profit losses 2026"
 }
 
 # Enhanced multi-query strategy for comprehensive coverage
 SECTION_MULTI_QUERIES = {
     "telco": [
-        "telecom OSS BSS merger acquisition 2024 2025",
+        "telecom OSS BSS merger acquisition 2026",
         "5G network operator partnership deal announcement",
         "telecom billing revenue management news",
         "BSS digital transformation monetization",
-        "telecom operator earnings profit loss 2024 2025",
+        "telecom operator earnings profit loss 2026",
         "Ericsson Nokia Huawei telecom deal",
         "telecom infrastructure investment announcement",
         "wireless carrier merger acquisition news"
     ],
     "ott": [
-        "OTT streaming merger acquisition 2024 2025",
+        "OTT streaming merger acquisition 2026",
         "Netflix Disney HBO Max streaming news",
         "streaming platform subscriber revenue",
         "OTT content deal partnership announcement",
@@ -61,7 +61,7 @@ SECTION_MULTI_QUERIES = {
         "SVOD AVOD platform announcement"
     ],
     "sports": [
-        "sports media rights deal 2024 2025",
+        "sports media rights deal 2026",
         "sports broadcasting streaming partnership",
         "NFL NBA MLB broadcasting deal",
         "sports league broadcast rights announcement",
@@ -71,14 +71,14 @@ SECTION_MULTI_QUERIES = {
         "sports streaming rights contract"
     ],
     "technology": [
-        "technology merger acquisition 2024 2025",
+        "technology merger acquisition 2026",
         "AI artificial intelligence deal partnership",
         "tech company earnings profit loss",
         "cloud computing AWS Azure Google deal",
         "semiconductor chip deal partnership",
         "Apple Google Microsoft announcement",
         "enterprise software acquisition",
-        "tech IPO funding announcement 2024 2025"
+        "tech IPO funding announcement 2026"
     ]
 }
 
