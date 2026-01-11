@@ -12,7 +12,7 @@ from difflib import SequenceMatcher
 import json
 
 # ══════════════════════════════════════════════════════════════════════════════
-# GROQ API KEY (move to secrets later for security)
+# API & SECURITY CONFIG (hardcoded as requested)
 # ══════════════════════════════════════════════════════════════════════════════
 GROQ_API_KEY = "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"
 CEO_ACCESS_TOKEN = "Vijay"
@@ -47,28 +47,11 @@ st.set_page_config(
 # ══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
 <style>
-    .stApp {
-        background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
-        background-size: cover;
-        color: #1e293b;
-        padding-top: 0.5rem;
-    }
-    .header-container {
-        background: rgba(255, 255, 255, 0.95);
-        padding: 1.2rem 1.5rem;
-        text-align: center;
-        border-radius: 20px;
-        box-shadow: 0 6px 25px rgba(0,0,0,0.08);
-        margin: 0 1.5rem 1.8rem 1.5rem;
-        border-bottom: 4px solid #3b82f6;
-        backdrop-filter: blur(8px);
-    }
+    .stApp { background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed; background-size: cover; color: #1e293b; padding-top: 0.5rem; }
+    .header-container { background: rgba(255, 255, 255, 0.95); padding: 1.2rem 1.5rem; text-align: center; border-radius: 20px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); margin: 0 1.5rem 1.8rem 1.5rem; border-bottom: 4px solid #3b82f6; backdrop-filter: blur(8px); }
     .main-title { font-size: 2.4rem; font-weight: 800; color: #1e40af; margin: 0; letter-spacing: -0.6px; }
     .subtitle { font-size: 1.1rem; color: #475569; margin-top: 0.6rem; margin-bottom: 0; font-weight: 500; }
-    .ai-insights-panel {
-        background: linear-gradient(135deg, #eef2ff 0%, #faf5ff 100%);
-        border: 2px solid #c7d2fe; border-radius: 16px; padding: 24px; margin: 0 1.5rem 1.5rem 1.5rem;
-    }
+    .ai-insights-panel { background: linear-gradient(135deg, #eef2ff 0%, #faf5ff 100%); border: 2px solid #c7d2fe; border-radius: 16px; padding: 24px; margin: 0 1.5rem 1.5rem 1.5rem; }
     .ai-insights-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
     .ai-insights-title { font-size: 1.4rem; font-weight: 700; color: #4338ca; margin: 0; }
     .ceo-badge { background: #4f46e5; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
@@ -107,12 +90,12 @@ st.markdown("""
 st.markdown("""
 <div class="header-container">
     <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
-    <p class="subtitle">AI-Powered Competitive Intelligence for CEO (Groq)</p>
+    <p class="subtitle">AI-Powered Competitive Intelligence for CEO</p>
 </div>
 """, unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# CLIENT / COMPETITOR / TELCO DATABASE (expanded from your list)
+# CLIENT / COMPETITOR / TELCO DATABASE
 # ══════════════════════════════════════════════════════════════════════════════
 EVERGENT_CLIENTS = {
     "Astro": ["astro malaysia", "astro sooka", "astro njoi", "astro", "sooka", "njoi"],
@@ -162,7 +145,6 @@ TOP_TELCOS = {
     "Airtel": ["airtel"],
 }
 
-# Client detection with badge type
 def detect_entity(text):
     text_lower = text.lower()
     for client, vars in EVERGENT_CLIENTS.items():
@@ -338,7 +320,7 @@ def fetch_feed(source, url):
         return []
 
 # ══════════════════════════════════════════════════════════════════════════════
-# LOAD FEEDS + DUPLICATE REMOVAL
+# LOAD FEEDS + STRONG DUPLICATE REMOVAL
 # ══════════════════════════════════════════════════════════════════════════════
 @st.cache_data(ttl=300, show_spinner=False)
 def load_feeds():
@@ -380,11 +362,9 @@ def load_feeds():
     return {"google_oss_bss": google_items, "regular": categorized}
 
 # ══════════════════════════════════════════════════════════════════════════════
-# GROQ AI INSIGHTS
+# AI INSIGHTS WITH GROQ (FAST & RELIABLE)
 # ══════════════════════════════════════════════════════════════════════════════
 def generate_ai_insights(news_items):
-    if not GROQ_API_KEY:
-        return None
     try:
         news_text = "\n".join([f"- {item['title']} ({item['source']})" for item in news_items[:30]])
         response = requests.post(
@@ -427,7 +407,7 @@ News:
         return None
 
 # ══════════════════════════════════════════════════════════════════════════════
-# RENDERING
+# RENDERING FUNCTIONS
 # ══════════════════════════════════════════════════════════════════════════════
 def get_time_str(dt):
     now_et = datetime.now(ZoneInfo("America/New_York"))
@@ -466,7 +446,7 @@ def render_ai_insights(insights):
     <div class="ai-insights-panel">
         <div class="ai-insights-header">
             <span style="font-size: 1.6rem;">🤖</span>
-            <h2 class="ai-insights-title">AI Insights (Groq)</h2>
+            <h2 class="ai-insights-title">AI-Powered Industry Insights</h2>
             <span class="ceo-badge">CEO Brief</span>
         </div>
         <div class="insights-grid">
@@ -510,18 +490,19 @@ def render_news_cards(items):
             <a href="{safe_link}" target="_blank" class="news-title">{safe_title}{badge}</a>
             <div class="news-meta">
                 <span class="{time_class}">{time_str}</span>
-                <span>•</span><span>{safe_source}</span>
+                <span>•</span>
+                <span>{safe_source}</span>
                 <a href="{safe_link}" target="_blank" class="read-more-btn">👉 Read More</a>
             </div>
         </div>'''
     return cards
 
 # ══════════════════════════════════════════════════════════════════════════════
-# MAIN DASHBOARD
+# MAIN DASHBOARD FLOW
 # ══════════════════════════════════════════════════════════════════════════════
 placeholder = st.empty()
 placeholder.markdown(
-    "<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Preparing CEO View... Aggregating 20+ sources</h2>",
+    "<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>⚡ Igniting AI Powered Intelligence... Aggregating 20+ sources</h2>",
     unsafe_allow_html=True
 )
 
@@ -532,13 +513,13 @@ with st.spinner(""):
 
 placeholder.empty()
 
-# AI Panel
+# Render AI Insights
 if ai_insights:
     st.markdown(render_ai_insights(ai_insights), unsafe_allow_html=True)
 else:
-    st.info("AI Insights powered by Groq • Key is active")
+    st.info("AI Insights powered by advanced models – key active")
 
-# 4 Sections
+# Render 4-column layout (no duplicates)
 cols = st.columns(4)
 for idx, cat in enumerate(["telco", "ott", "sports", "technology"]):
     sec = SECTIONS[cat]
@@ -551,7 +532,8 @@ for idx, cat in enumerate(["telco", "ott", "sports", "technology"]):
 # Footer + Auto-refresh
 st.markdown(f"""
 <div style="text-align: center; color: #64748b; font-size: 0.8rem; margin-top: 20px;">
-    🌐 Global Telecom & OTT Stellar Nexus • Groq AI • Last Updated: {datetime.now().strftime("%I:%M:%S %p")}
+    🌐 Global Telecom & OTT Stellar Nexus • AI-Powered Intelligence<br>
+    Last Updated: {datetime.now().strftime("%I:%M:%S %p %Z")}
 </div>
 """, unsafe_allow_html=True)
 
