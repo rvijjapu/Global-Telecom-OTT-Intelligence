@@ -650,4 +650,3 @@ for idx, cat in enumerate(["telco", "ott", "sports", "technology"]):
 
 # Auto-refresh
 st.markdown("""<script>setInterval(function(){window.location.reload();}, 300000);</script>""", unsafe_allow_html=True)
-Required requiremen
