@@ -2,102 +2,165 @@ import streamlit as st
 import feedparser
 import requests
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import html
+import re
 import urllib.parse
-from concurrent.futures import ThreadPoolExecutor
 
 # ══════════════════════════════════════════════════════════════════════════════
-# DASHBOARD CONFIGURATION
+# EXECUTIVE DASHBOARD CONFIGURATION (2026 FOCUS)
 # ══════════════════════════════════════════════════════════════════════════════
 st.set_page_config(
     page_title="Global Telecom & OTT Stellar Nexus 2026",
     page_icon="🌐",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
-# 2026-Specific Queries for RSS Feeds
-# Using "when:7d" ensures only fresh 2026 news from the past week is pulled.
+# Strategic Queries for RSS - Updated for January 2026
 SECTION_QUERIES = {
-    "telco": "telecom OSS BSS announcements 2026 when:7d",
-    "ott": "OTT streaming mergers acquisitions 2026 when:7d",
-    "sports": "sports media rights deals 2026 when:7d",
-    "technology": "AI cloud computing telecom technology 2026 when:7d"
+    "telco": "(Amdocs OR Netcracker OR Ericsson OR Nokia) OSS BSS deal 2026",
+    "ott": "(Netflix OR Warner Bros OR WBD OR Disney) merger acquisition 2026",
+    "sports": "(NBA OR NFL OR FIFA OR WNBA) media rights broadcast 2026",
+    "technology": "(Agentic AI OR Cloud Native OR Edge Computing) tech news 2026"
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
-# DATA FETCHING ENGINE (RSS)
+# DATA CORE: REAL-TIME 2026 SIGNALS
 # ══════════════════════════════════════════════════════════════════════════════
 
-def fetch_google_news_rss(label, query):
-    """Fetches and parses Google News RSS for reliable structured data."""
-    encoded_query = urllib.parse.quote(query)
-    # RSS URL structure for keyword search
-    rss_url = f"https://news.google.com/rss/search?q={encoded_query}&hl=en-US&gl=US&ceid=US:en"
-    
+def fetch_rss_news(query, max_results=10):
+    """Fetches up-to-date 2026 signals from Google News RSS."""
     try:
-        # Feedparser is recommended for handling RSS XML reliably
-        feed = feedparser.parse(rss_url)
+        encoded_query = urllib.parse.quote(query)
+        url = f"https://news.google.com/rss/search?q={encoded_query}&hl=en-US&gl=US&ceid=US:en"
+        feed = feedparser.parse(url)
         results = []
-        
-        for entry in feed.entries[:10]:
+        for entry in feed.entries[:max_results]:
             results.append({
-                "title": entry.title,
+                "title": html.unescape(entry.title),
                 "link": entry.link,
                 "date": entry.published,
-                "source": entry.source.get('title', 'Global News')
+                "source": entry.source.get('title', 'Global Intel')
             })
-        return label, results
-    except Exception:
-        return label, []
+        return results
+    except:
+        return []
 
 # ══════════════════════════════════════════════════════════════════════════════
-# DASHBOARD UI & RENDERING
+# PREMIUM UI STYLING
 # ══════════════════════════════════════════════════════════════════════════════
-
 st.markdown("""
 <style>
     .stApp { background-color: #0f172a; color: #f1f5f9; }
-    .header { text-align: center; padding: 2rem; background: linear-gradient(90deg, #1e40af, #3b82f6); border-radius: 12px; margin-bottom: 2rem; }
-    .card { background-color: #1e293b; border-left: 5px solid #3b82f6; border-radius: 8px; padding: 1.2rem; margin-bottom: 1.2rem; }
-    .title-link { color: #f8fafc; font-weight: 700; text-decoration: none; font-size: 1rem; }
-    .meta { color: #94a3b8; font-size: 0.75rem; margin-top: 8px; }
-    .section-title { text-align: center; font-weight: 800; text-transform: uppercase; padding: 10px; border-radius: 6px; margin-bottom: 20px; color: white; }
-    .telco-h { background: #db2777; } .ott-h { background: #7c3aed; } 
-    .sports-h { background: #059669; } .tech-h { background: #ea580c; }
+    .header-box { 
+        background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%); 
+        padding: 2rem; border-radius: 15px; text-align: center; margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+    .main-title { font-size: 2.8rem; font-weight: 800; color: white; margin: 0; }
+    .subtitle { color: #bfdbfe; font-size: 1.1rem; margin-top: 10px; }
+    .news-card { 
+        background: #1e293b; border-left: 5px solid #3b82f6; 
+        border-radius: 8px; padding: 1rem; margin-bottom: 1rem; 
+        transition: transform 0.2s; 
+    }
+    .news-card:hover { transform: scale(1.02); border-left-color: #60a5fa; }
+    .card-title { font-size: 0.95rem; font-weight: 700; color: #f8fafc; text-decoration: none; }
+    .card-meta { font-size: 0.75rem; color: #94a3b8; margin-top: 8px; }
+    .prediction-box { 
+        background: rgba(30, 41, 59, 0.7); border: 1px dashed #3b82f6; 
+        border-radius: 10px; padding: 1rem; margin-top: 1rem;
+    }
+    .badge { 
+        background: #3b82f6; color: white; padding: 2px 8px; 
+        border-radius: 10px; font-size: 0.65rem; font-weight: 800;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="header"><h1>🌐 Global Telecom & OTT Stellar Nexus</h1><p>2026 Live Executive Briefing</p></div>', unsafe_allow_html=True)
+# ══════════════════════════════════════════════════════════════════════════════
+# DASHBOARD LAYOUT
+# ══════════════════════════════════════════════════════════════════════════════
 
-# Use ThreadPoolExecutor for concurrent section loading
-with st.spinner("⚡ Fetching 2026 Intelligence..."):
-    with ThreadPoolExecutor(max_workers=4) as executor:
-        futures = [executor.submit(fetch_google_news_rss, label, q) for label, q in SECTION_QUERIES.items()]
-        results_map = {f.result()[0]: f.result()[1] for f in futures}
+st.markdown("""
+<div class="header-box">
+    <h1 class="main-title">Global Telecom & OTT Stellar Nexus</h1>
+    <p class="subtitle">Executive Competitive Intelligence — January 2026 Report</p>
+</div>
+""", unsafe_allow_html=True)
 
-# Render columns
 cols = st.columns(4)
+
+# Section Definitions
 sections = [
-    ("telco", "📡 Telco & OSS/BSS", "telco-h"),
-    ("ott", "📺 OTT & Streaming", "ott-h"),
-    ("sports", "🏆 Sports Rights", "sports-h"),
-    ("technology", "⚡ Technology", "tech-h")
+    ("telco", "📡 TELCO OSS/BSS", "#db2777"),
+    ("ott", "📺 OTT & STREAMING", "#7c3aed"),
+    ("sports", "🏆 SPORTS MEDIA", "#059669"),
+    ("technology", "⚡ TECH & AI", "#ea580c")
 ]
 
-for i, (key, label, color_class) in enumerate(sections):
-    with cols[i]:
-        st.markdown(f'<div class="section-title {color_class}">{label}</div>', unsafe_allow_html=True)
-        items = results_map.get(key, [])
-        
-        if not items:
-            st.info("No fresh 2026 alerts found. Checking global nodes...")
-        
-        for item in items:
+with st.spinner("Synchronizing with 2026 Strategic Nodes..."):
+    for i, (key, label, color) in enumerate(sections):
+        with cols[i]:
+            st.markdown(f"<h3 style='color:{color}; text-align:center;'>{label}</h3>", unsafe_allow_html=True)
+            
+            # Fetch News
+            items = fetch_rss_news(SECTION_QUERIES[key])
+            
+            # Prediction Logic (Hardcoded based on Jan 2026 status)
+            if key == "telco":
+                pred = "<b>Amdocs-Matrixx Synergy</b>: Post-merger integration will accelerate 'Value Plane' 5G charging by Q3 2026."
+            elif key == "ott":
+                pred = "<b>Netflix Goliath</b>: Acquisition of WBD (Warner Bros. Studio/HBO) to close in H2 2026, pending anti-trust carve-outs."
+            elif key == "sports":
+                pred = "<b>NBA Rights</b>: Disney/Amazon global distribution expansion kicks off for the 2026-27 season."
+            else:
+                pred = "<b>Agentic Workforce</b>: 40% of tier-1 enterprises will deploy autonomous AI 'coworkers' by year-end."
+
+            # Render Cards
+            for item in items[:6]:
+                st.markdown(f"""
+                <div class="news-card">
+                    <a href="{item['link']}" target="_blank" class="card-title">{item['title']}</a>
+                    <div class="card-meta">
+                        <span class="badge">LIVE</span> {item['source']} • {item['date']}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+            
             st.markdown(f"""
-            <div class="card">
-                <a href="{item['link']}" target="_blank" class="title-link">{item['title']}</a>
-                <div class="meta">{item['source']} • {item['date']}</div>
+            <div class="prediction-box">
+                <span style="color:{color}; font-weight:800; font-size:0.75rem;">STRATEGIC PREDICTION</span>
+                <p style="font-size:0.8rem; margin-top:5px; color:#cbd5e1;">{pred}</p>
             </div>
             """, unsafe_allow_html=True)
 
-# Auto-refresh script (every 10 minutes)
+# ══════════════════════════════════════════════════════════════════════════════
+# GLOBAL SUMMARY TABLE (EVERGENT STRATEGIC WATCH)
+# ══════════════════════════════════════════════════════════════════════════════
+st.divider()
+st.subheader("Industry Value Chain & Competitive Landscape (Jan 2026)")
+
+col_a, col_b = st.columns(2)
+
+with col_a:
+    st.markdown("#### Strategic Hits (Jan 2026)")
+    st.info("""
+    * **Jio Platforms IPO**: Reliance Industries gearing up for a landmark Jio IPO in first half of 2026.
+    * **Amdocs-Matrixx Merger**: Amdocs consolidates charging market by acquiring Matrixx Software for $200M.
+    * **Netflix-WBD Acquisition**: Netflix confirms definitive agreement to acquire Warner Bros. (HBO/Studios) for ~$83B.
+    """)
+
+with col_b:
+    st.markdown("#### Tech Pulse: Agentic Reality")
+    st.warning("""
+    * **Network Autonomy**: AI-driven network agents moving from ambition to real production at scale.
+    * **WNBA Surge**: Landmark 11-year rights deal with Disney/Amazon/NBC begins with the 2026 season.
+    * **Compute Shift**: AI infrastructure pivoting from 'Cloud-First' to 'Strategic Hybrid' for inference optimization.
+    """)
+
+# Footer & Auto-Refresh
+st.markdown("---")
+st.markdown(f"<p style='text-align:center; color:#64748b;'>Last Update: {datetime.now().strftime('%H:%M:%S')} | Confidential CEO Intelligence Dashboard</p>", unsafe_allow_html=True)
 st.markdown("<script>setTimeout(function(){ window.location.reload(); }, 600000);</script>", unsafe_allow_html=True)
