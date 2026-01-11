@@ -20,16 +20,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
-
-st.markdown("""
-<style>
-    .stApp {
-        background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
-        background-size: cover;
-        color: #1e293b;
-        padding-top: 0.5rem;
-    }
-    
+   
 if 'keep_alive' not in st.session_state:
     st.session_state.keep_alive = datetime.now()
 if 'last_refresh' not in st.session_state:
