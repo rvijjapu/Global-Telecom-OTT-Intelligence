@@ -26,11 +26,14 @@ if not OPENAI_API_KEY:
     st.warning("OPENAI_API_KEY is empty in secrets → AI Insights will be disabled. Add a valid key to enable.")
 
 # Security gate
+# Safer, more reliable way to read token (fixes truncation bug)
 provided_token = ""
 if "token" in st.query_params:
-    token_list = st.query_params["token"]
-    if token_list:
-        provided_token = token_list[0].strip()
+    tokens = st.query_params["token"]
+    if tokens and isinstance(tokens, list) and len(tokens) > 0:
+        provided_token = tokens[0].strip()  # strip removes any hidden whitespace
+    elif isinstance(tokens, str):
+        provided_token = tokens.strip()
 if provided_token != EXPECTED_TOKEN:
     st.error("⛔ Unauthorized access – Invalid or missing token")
     st.info(f"Append `?token={EXPECTED_TOKEN}` to the URL or contact admin.")
