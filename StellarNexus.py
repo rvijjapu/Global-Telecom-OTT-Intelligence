@@ -13,20 +13,23 @@ import json
 from openai import OpenAI
 
 # ══════════════════════════════════════════════════════════════════════════════
-# CONFIGURATION - Read keys from secrets.toml or Cloud secrets (no hard-coding!)
+# READ ALL SECRETS SAFELY (this is the ONLY place keys should ever live)
 # ══════════════════════════════════════════════════════════════════════════════
 try:
     EXPECTED_TOKEN = st.secrets["CEO_ACCESS_TOKEN"]
-    OPENAI_API_KEY = st.secrets.get("OPENAI_API_KEY")
+    OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 except KeyError as e:
-    st.error(f"Missing required secret: {str(e)} — Add to secrets.toml or Cloud secrets.")
+    st.error(f"Missing secret key: {str(e)}\n\nPlease go to Streamlit Cloud → Settings → Secrets and add:\nCEO_ACCESS_TOKEN and OPENAI_API_KEY")
     st.stop()
+
+if not OPENAI_API_KEY:
+    st.warning("OPENAI_API_KEY is empty in secrets → AI Insights will be disabled. Add a valid key to enable.")
 
 # Security gate
 provided_token = st.query_params.get("token", [""])[0]
 if provided_token != EXPECTED_TOKEN:
     st.error("⛔ Unauthorized access – Invalid or missing token")
-    st.info("Append `?token=your_token` to the URL or contact admin.")
+    st.info(f"Append `?token={EXPECTED_TOKEN}` to the URL or contact admin.")
     st.stop()
 
 # Rate limiting
@@ -46,7 +49,7 @@ st.set_page_config(
 )
 
 # ══════════════════════════════════════════════════════════════════════════════
-# STYLING (unchanged)
+# FULL STYLING (your original – unchanged)
 # ══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
 <style>
@@ -81,7 +84,6 @@ st.markdown("""
         font-weight: 500;
     }
    
-    /* AI Insights Panel */
     .ai-insights-panel {
         background: linear-gradient(135deg, #eef2ff 0%, #faf5ff 100%);
         border: 2px solid #c7d2fe;
@@ -180,7 +182,6 @@ st.markdown("""
         flex-shrink: 0;
     }
    
-    /* Column styles */
     .col-header {
         padding: 12px 16px;
         border-radius: 14px 14px 0 0;
@@ -302,9 +303,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ══════════════════════════════════════════════════════════════════════════════
-# RSS FEEDS CONFIGURATION
-# ══════════════════════════════════════════════════════════════════════════════
+# ── RSS FEEDS & CONFIG (unchanged)
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed"),
     ("Light Reading", "https://www.lightreading.com/rss/simple"),
@@ -331,34 +330,38 @@ RSS_FEEDS = [
     ("ZDNet", "https://www.zdnet.com/news/rss.xml"),
     ("Engadget", "https://www.engadget.com/rss.xml"),
 ]
+
 GOOGLE_OSS_BSS_URL = "https://news.google.com/rss/search?q=(OSS+BSS+OR+%22operations+support+systems%22+OR+%22business+support+systems%22)+telecom+after:2025-12-01&hl=en-US&gl=US&ceid=US:en"
+
 SECTIONS = {
     "telco": {"icon": "📡", "name": "Telco & OSS/BSS", "style": "col-header col-header-pink"},
     "ott": {"icon": "📺", "name": "OTT & Streaming", "style": "col-header col-header-purple"},
     "sports": {"icon": "🏆", "name": "Sports & Events", "style": "col-header col-header-green"},
     "technology": {"icon": "⚡", "name": "Technology", "style": "col-header col-header-orange"},
 }
+
 SOURCE_CATEGORY_MAP = {
-    "Telecoms.com": "telco", "Light Reading": "telco", "RCR Wireless": "telco",
-    "Mobile World Live": "telco", "ET Telecom": "telco", "The Fast Mode": "telco", "TelecomTV": "telco",
-    "Variety": "ott", "Hollywood Reporter": "ott", "Deadline": "ott",
-    "Digital TV Europe": "ott", "Advanced Television": "ott",
-    "ESPN": "sports", "BBC Sport": "sports", "Front Office Sports": "sports",
-    "Sportico": "sports", "SportsPro": "sports",
-    "TechCrunch": "technology", "The Verge": "technology", "Wired": "technology",
-    "Ars Technica": "technology", "VentureBeat": "technology", "ZDNet": "technology", "Engadget": "technology",
+    "Telecoms.com":"telco", "Light Reading":"telco", "RCR Wireless":"telco",
+    "Mobile World Live":"telco", "ET Telecom":"telco", "The Fast Mode":"telco", "TelecomTV":"telco",
+    "Variety":"ott", "Hollywood Reporter":"ott", "Deadline":"ott",
+    "Digital TV Europe":"ott", "Advanced Television":"ott",
+    "ESPN":"sports", "BBC Sport":"sports", "Front Office Sports":"sports",
+    "Sportico":"sports", "SportsPro":"sports",
+    "TechCrunch":"technology", "The Verge":"technology", "Wired":"technology",
+    "Ars Technica":"technology", "VentureBeat":"technology", "ZDNet":"technology", "Engadget":"technology",
 }
+
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
     "Accept": "application/rss+xml, application/xml, text/xml, */*",
 }
-# ══════════════════════════════════════════════════════════════════════════════
-# UTILITY FUNCTIONS
-# ══════════════════════════════════════════════════════════════════════════════
+
+# ── UTILITY FUNCTIONS (unchanged)
 def clean(raw):
     if not raw:
         return ""
     return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
+
 def extract_summary(entry, max_len=280):
     summary = ""
     for field in ['summary', 'description', 'content']:
@@ -372,8 +375,10 @@ def extract_summary(entry, max_len=280):
     if len(summary) > max_len:
         summary = summary[:max_len].rsplit(' ', 1)[0] + '...'
     return summary
+
 def get_article_hash(title, link):
     return hashlib.md5(f"{title}{link}".encode()).hexdigest()
+
 def get_priority_score(title, summary):
     text = (title + " " + (summary or "")).lower()
     score = 0
@@ -383,11 +388,11 @@ def get_priority_score(title, summary):
         if word in text:
             score += 100
     return score
+
 def simple_title_similarity(a, b):
     return SequenceMatcher(None, a.lower(), b.lower()).ratio()
-# ══════════════════════════════════════════════════════════════════════════════
-# FEED FETCHING FUNCTIONS
-# ══════════════════════════════════════════════════════════════════════════════
+
+# ── FEED FETCHING (unchanged)
 def fetch_google_oss_bss():
     items = []
     try:
@@ -425,6 +430,7 @@ def fetch_google_oss_bss():
         return items
     except Exception as e:
         return []
+
 def fetch_feed(source, url):
     items = []
     try:
@@ -464,11 +470,11 @@ def fetch_feed(source, url):
         return items
     except:
         return []
+
 # ══════════════════════════════════════════════════════════════════════════════
-# AI INSIGHTS GENERATION
+# AI INSIGHTS GENERATION (with improved error handling)
 # ══════════════════════════════════════════════════════════════════════════════
 def generate_ai_insights(news_items):
-    """Generate AI insights using OpenAI GPT-4o-mini"""
     if not OPENAI_API_KEY:
         return None
     try:
@@ -480,26 +486,22 @@ def generate_ai_insights(news_items):
                 {
                     "role": "system",
                     "content": """You are a telecom industry analyst providing executive insights for a CEO dashboard.
-Focus on:
-- OSS/BSS deals and contracts
-- Major telecom partnerships and acquisitions
-- Streaming/OTT market movements
-- Technology trends in telecom
+Focus on OSS/BSS, telecom deals, streaming/OTT news, and major partnerships.
 Provide concise, business-focused insights."""
                 },
                 {
                     "role": "user",
                     "content": f"""Analyze these telecom and OTT news headlines and provide:
-1. KEY ANNOUNCEMENTS (exactly 5): Most important business announcements with brief 1-line descriptions
-2. MARKET TRENDS (exactly 3): Key emerging industry trends
-3. CLIENT HIGHLIGHTS (exactly 3): Notable business/partner news
-News Headlines:
+1. KEY ANNOUNCEMENTS (max 5): Most important business announcements with 1-line descriptions
+2. MARKET TRENDS (max 3): Emerging industry trends
+3. CLIENT HIGHLIGHTS (max 3): Notable client/partner news
+News:
 {news_text}
-Return valid JSON only:
-{{"key_announcements": [{{"title": "Short Title", "description": "Brief one-line description"}}], "market_trends": ["Trend description"], "client_highlights": ["Highlight description"]}}"""
+Return JSON format only:
+{{"key_announcements": [{{"title": "...", "description": "..."}}], "market_trends": ["..."], "client_highlights": ["..."]}}"""
                 }
             ],
-            max_tokens=1000,
+            max_tokens=800,
             temperature=0.3
         )
         content = response.choices[0].message.content
@@ -508,8 +510,15 @@ Return valid JSON only:
             return json.loads(json_match.group())
         return None
     except Exception as e:
-        st.error(f"AI Error: {str(e)[:100]}")
+        error_msg = str(e)
+        if "401" in error_msg or "incorrect api key" in error_msg.lower():
+            st.error("401 Error: Invalid or revoked OpenAI API key. Please create a new one at https://platform.openai.com/api-keys and update your secrets.")
+        elif "429" in error_msg:
+            st.warning("Rate limit reached. AI insights temporarily unavailable – try again in a few minutes.")
+        else:
+            st.error(f"AI Error: {error_msg[:100]}... Check your OPENAI_API_KEY in secrets.")
         return None
+
 # ══════════════════════════════════════════════════════════════════════════════
 # LOAD ALL FEEDS
 # ══════════════════════════════════════════════════════════════════════════════
@@ -547,25 +556,22 @@ def load_feeds():
     for cat in categorized:
         categorized[cat].sort(key=lambda x: (-x.get("score", 0), -x["pub"].timestamp()))
     return {"google_oss_bss": google_items, "regular": categorized}
+
 # ══════════════════════════════════════════════════════════════════════════════
-# RENDERING FUNCTIONS
+# RENDERING FUNCTIONS (unchanged)
 # ══════════════════════════════════════════════════════════════════════════════
 def get_time_str(dt):
     now_et = datetime.now(ZoneInfo("America/New_York"))
     diff = (now_et - dt).total_seconds()
     hrs = int(diff / 3600)
-    if hrs < 1:
-        return "Just now", "time-hot"
-    if hrs < 6:
-        return f"{hrs}h ago", "time-hot"
-    if hrs < 24:
-        return f"{hrs}h ago", "time-warm"
+    if hrs < 1: return "Just now", "time-hot"
+    if hrs < 6: return f"{hrs}h ago", "time-hot"
+    if hrs < 24: return f"{hrs}h ago", "time-warm"
     return f"{hrs // 24}d ago", "time-normal"
+
 def render_ai_insights(insights):
-    """Render AI Insights Panel matching the React preview exactly"""
     if not insights:
         return ""
-    # Key Announcements
     announcements_html = ""
     for item in insights.get("key_announcements", [])[:5]:
         if isinstance(item, dict):
@@ -575,14 +581,12 @@ def render_ai_insights(insights):
                 <div class="announcement-title">{title}</div>
                 <div class="announcement-desc">{desc}</div>
             </div>'''
-    # Market Trends
     trends_html = ""
     for trend in insights.get("market_trends", [])[:3]:
         trends_html += f'''<div class="trend-item">
             <span class="trend-dot">●</span>
             <span>{html.escape(str(trend))}</span>
         </div>'''
-    # Client Highlights
     highlights_html = ""
     for highlight in insights.get("client_highlights", [])[:3]:
         highlights_html += f'''<div class="highlight-item">
@@ -599,35 +603,32 @@ def render_ai_insights(insights):
         <div class="insights-grid">
             <div class="insight-card">
                 <div class="insight-card-title">📢 Key Announcements</div>
-                {announcements_html if announcements_html else '<div class="empty-message">Loading...</div>'}
+                {announcements_html if announcements_html else '<div class="empty-message">No announcements</div>'}
             </div>
             <div class="insight-card">
                 <div class="insight-card-title">📈 Market Trends</div>
-                {trends_html if trends_html else '<div class="empty-message">Loading...</div>'}
+                {trends_html if trends_html else '<div class="empty-message">No trends</div>'}
             </div>
             <div class="insight-card">
                 <div class="insight-card-title">⭐ Client Highlights</div>
-                {highlights_html if highlights_html else '<div class="empty-message">Loading...</div>'}
+                {highlights_html if highlights_html else '<div class="empty-message">No highlights</div>'}
             </div>
         </div>
     </div>
     '''
+
 def render_google_section(google_items):
-    """Render Google OSS/BSS Intelligence section"""
     if not google_items:
         return ""
-   
     html_content = '''<div class="google-section">
     <div class="google-header">
         🔍 Google OSS/BSS Intelligence
         <span class="ai-badge">AI Search Results</span>
     </div>'''
-   
     for item in google_items[:5]:
         time_str, time_class = get_time_str(item["pub"])
         safe_title = html.escape(item["title"])
         safe_link = html.escape(item["link"])
-       
         html_content += f'''<div class="news-card">
             <a href="{safe_link}" target="_blank" rel="noopener noreferrer" class="news-title">{safe_title}</a>
             <div class="news-meta">
@@ -637,20 +638,17 @@ def render_google_section(google_items):
                 <a href="{safe_link}" target="_blank" rel="noopener noreferrer" class="read-more-btn">👉 Read More</a>
             </div>
         </div>'''
-   
     return html_content + '</div><div class="separator"></div>'
+
 def render_news_cards(items):
-    """Render news cards for a category"""
     if not items:
         return '<div class="empty-message">📭 No recent news available</div>'
-   
     cards = ""
     for item in items[:15]:
         time_str, time_class = get_time_str(item["pub"])
         safe_title = html.escape(item["title"])
         safe_link = html.escape(item["link"])
         safe_source = html.escape(item["source"])
-       
         cards += f'''<div class="news-card">
             <a href="{safe_link}" target="_blank" rel="noopener noreferrer" class="news-title">{safe_title}</a>
             <div class="news-meta">
@@ -661,10 +659,10 @@ def render_news_cards(items):
             </div>
         </div>'''
     return cards
+
 # ══════════════════════════════════════════════════════════════════════════════
-# MAIN APPLICATION
+# MAIN APPLICATION FLOW
 # ══════════════════════════════════════════════════════════════════════════════
-# Loading placeholder
 placeholder = st.empty()
 placeholder.markdown(
     "<h2 style='text-align:center;color:#1e40af;margin-top:120px;'>"
@@ -672,54 +670,44 @@ placeholder.markdown(
     "</h2>",
     unsafe_allow_html=True
 )
-# Load data
-with st.spinner(""):
+
+with st.spinner("Loading latest feeds..."):
     data = load_feeds()
-   
-    # Combine news for AI analysis
     all_news = (
         data["google_oss_bss"] +
         data["regular"]["telco"][:15] +
         data["regular"]["ott"][:10] +
         data["regular"]["technology"][:5]
     )
-   
-    # Generate AI insights
     ai_insights = generate_ai_insights(all_news)
+
 placeholder.empty()
-# ══════════════════════════════════════════════════════════════════════════════
-# RENDER AI INSIGHTS PANEL
-# ══════════════════════════════════════════════════════════════════════════════
+
+# Render AI Insights
 if ai_insights:
     st.markdown(render_ai_insights(ai_insights), unsafe_allow_html=True)
 else:
-    st.warning("⚠️ AI Insights unavailable. Check OpenAI API key in secrets.")
-# ══════════════════════════════════════════════════════════════════════════════
-# RENDER 4-COLUMN NEWS LAYOUT
-# ══════════════════════════════════════════════════════════════════════════════
+    st.info("AI Insights powered by OpenAI • Add valid OPENAI_API_KEY in Streamlit secrets to enable")
+
+# Render 4-column layout
 cols = st.columns(4)
 for idx, cat in enumerate(["telco", "ott", "sports", "technology"]):
     sec = SECTIONS[cat]
-   
-    # Google section only for telco column
     google_section = render_google_section(data["google_oss_bss"]) if cat == "telco" else ""
-   
-    # Regular news cards
     news_cards = render_news_cards(data["regular"].get(cat, []))
    
     with cols[idx]:
         st.markdown(f'<div class="{sec["style"]}">{sec["icon"]} {sec["name"]}</div>', unsafe_allow_html=True)
         st.markdown(f'<div class="col-body">{google_section}{news_cards}</div>', unsafe_allow_html=True)
-# ══════════════════════════════════════════════════════════════════════════════
-# FOOTER & AUTO-REFRESH
-# ══════════════════════════════════════════════════════════════════════════════
+
+# Footer & auto-refresh
 st.markdown(f"""
 <div style="text-align: center; color: #64748b; font-size: 0.8rem; margin-top: 20px;">
     🌐 Global Telecom & OTT Stellar Nexus • AI-Powered Intelligence<br>
-    Last Updated: {datetime.now().strftime("%I:%M:%S %p")}
+    Last Updated: {datetime.now().strftime("%I:%M:%S %p %Z")}
 </div>
 """, unsafe_allow_html=True)
-# Auto-refresh every 5 minutes
+
 st.markdown("""
 <script>
 setInterval(function(){
