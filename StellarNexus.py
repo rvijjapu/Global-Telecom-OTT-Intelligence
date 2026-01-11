@@ -6,13 +6,12 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import html
 import time
 import re
-from zoneinfo import ZoneInfo
 import hashlib
 from difflib import SequenceMatcher
 import json
 
 # ══════════════════════════════════════════════════════════════════════════════
-# PAGE CONFIG - FIRST LINE
+# PAGE CONFIG - MUST BE FIRST
 # ══════════════════════════════════════════════════════════════════════════════
 st.set_page_config(
     page_title="Global Telecom & OTT Stellar Nexus",
@@ -174,20 +173,130 @@ RSS_FEEDS = {
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
 # ══════════════════════════════════════════════════════════════════════════════
+# YOUR EXACT STYLING + BACKGROUND (merged & optimized)
+# ══════════════════════════════════════════════════════════════════════════════
+st.markdown("""
+<style>
+    .stApp {
+        background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
+        background-size: cover;
+        color: #1e293b;
+        padding-top: 0.5rem;
+    }
+    .header-container {
+        background: rgba(255,255,255,0.98);
+        padding: 1.5rem 2rem;
+        text-align: center;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+        margin: 0 0 1.5rem 0;
+        border-bottom: 4px solid #3b82f6;
+    }
+    .main-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #1e40af, #3b82f6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0;
+    }
+    .subtitle {
+        font-size: 1rem;
+        color: #64748b;
+        margin-top: 0.4rem;
+    }
+    .col-header {
+        padding: 14px 16px;
+        border-radius: 14px 14px 0 0;
+        color: white;
+        font-weight: 700;
+        font-size: 0.95rem;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    .col-header-pink {background: linear-gradient(135deg, #ec4899, #db2777);}
+    .col-header-purple {background: linear-gradient(135deg, #a78bfa, #8b5cf6);}
+    .col-header-green {background: linear-gradient(135deg, #34d399, #10b981);}
+    .col-header-orange {background: linear-gradient(135deg, #fb923c, #f97316);}
+    .col-body {
+        background: white;
+        border-radius: 0 0 14px 14px;
+        padding: 12px;
+        min-height: 600px;
+        max-height: 750px;
+        overflow-y: auto;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+    }
+    .highlight-card {
+        background: linear-gradient(135deg, #fafbfc 0%, #ffffff 100%);
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid #3b82f6;
+        border-radius: 10px;
+        padding: 14px;
+        margin-bottom: 12px;
+        transition: all 0.2s ease;
+    }
+    .highlight-card:hover {
+        background: linear-gradient(135deg, #f1f5f9 0%, #ffffff 100%);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    .highlight-card.pink {border-left-color: #ec4899;}
+    .highlight-card.purple {border-left-color: #8b5cf6;}
+    .highlight-card.green {border-left-color: #10b981;}
+    .highlight-card.orange {border-left-color: #f97316;}
+    .highlight-title {
+        color: #1e293b;
+        font-size: 0.92rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        line-height: 1.3;
+    }
+    .highlight-description {
+        color: #475569;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        margin-bottom: 8px;
+    }
+    .read-more {
+        color: #2563eb;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-decoration: none;
+        display: block;
+        margin-top: 8px;
+    }
+    .read-more:hover {color: #1d4ed8;}
+    .footer {
+        text-align: center;
+        color: #94a3b8;
+        font-size: 0.8rem;
+        margin-top: 20px;
+        padding: 15px;
+    }
+    #MainMenu, footer, header {visibility: hidden;}
+</style>
+""", unsafe_allow_html=True)
+
+# ══════════════════════════════════════════════════════════════════════════════
 # UTILITY FUNCTIONS (optimized)
 # ══════════════════════════════════════════════════════════════════════════════
 def clean(raw):
     if not raw: return ""
     return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
 
-def extract_summary(entry):
+def extract_summary(entry, max_len=400):
     for field in ['summary', 'description', 'content']:
         if hasattr(entry, field):
             content = getattr(entry, field)
             if isinstance(content, list) and content:
                 content = content[0].get('value', '')
             summary = clean(content)
-            if summary: return summary[:400] + ('...' if len(summary) > 400 else '')
+            if summary: return summary[:max_len] + ('...' if len(summary) > max_len else '')
     return ""
 
 def detect_client(text, section):
@@ -203,13 +312,16 @@ def detect_client(text, section):
             return name
     return None
 
+# ══════════════════════════════════════════════════════════════════════════════
+# FEED FETCHING (fast + optimized)
+# ══════════════════════════════════════════════════════════════════════════════
 def fetch_feed(source, url):
     try:
         resp = requests.get(url, headers=HEADERS, timeout=8)
         if resp.status_code != 200: return []
         feed = feedparser.parse(resp.content)
         items = []
-        for entry in feed.entries[:15]:  # Reduced for speed
+        for entry in feed.entries[:15]:
             title = clean(entry.get("title", ""))
             if len(title) < 20: continue
             link = entry.get("link", "")
@@ -220,26 +332,20 @@ def fetch_feed(source, url):
     except:
         return []
 
-@st.cache_data(ttl=180)  # Faster cache refresh
-def load_all_news():
+@st.cache_data(ttl=180)
+def fetch_all_news():
     all_news = {}
     for section, feeds in RSS_FEEDS.items():
         items = []
-        with ThreadPoolExecutor(max_workers=6) as executor:  # Reduced workers for speed
+        with ThreadPoolExecutor(max_workers=6) as executor:
             for result in executor.map(lambda f: fetch_feed(*f), feeds):
                 items.extend(result)
-        # Light duplicate removal
-        seen = set()
-        unique = []
-        for item in items:
-            h = hashlib.md5(item["title"].encode()).hexdigest()
-            if h not in seen:
-                seen.add(h)
-                unique.append(item)
-        all_news[section] = unique[:25]  # Limit per section
+        all_news[section] = items[:25]  # Limit for speed
     return all_news
 
-# AI Highlights - Fast, 12+ with Read More
+# ══════════════════════════════════════════════════════════════════════════════
+# AI HIGHLIGHTS (12+ with Read More)
+# ══════════════════════════════════════════════════════════════════════════════
 def generate_highlights(news_items):
     if not news_items: return []
     news_text = "\n".join([f"- {n['title']} ({n['source']})" for n in news_items[:30]])
@@ -248,9 +354,9 @@ def generate_highlights(news_items):
             "https://api.groq.com/openai/v1/chat/completions",
             headers={"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"},
             json={
-                "model": "llama-3.1-8b-instant",  # Fast model
+                "model": "llama-3.1-8b-instant",
                 "messages": [
-                    {"role": "system", "content": "Extract 12+ unique client/partner/operator highlights from news. Use real names only. Format as JSON."},
+                    {"role": "system", "content": "Extract 12+ unique client/partner/operator highlights from news. Use real names only. No generic tags."},
                     {"role": "user", "content": f"""From these headlines, create 12+ client highlights (no duplicates, latest only).
 Each: client name + 1-2 sentence benefit/impact + source link.
 
@@ -276,7 +382,9 @@ Return JSON only:
     # Fallback
     return [{"client": n["source"], "description": n["title"][:120] + "...", "source_link": n.get("link", "#")} for n in news_items[:12]]
 
-# Render functions
+# ══════════════════════════════════════════════════════════════════════════════
+# RENDER FUNCTIONS
+# ══════════════════════════════════════════════════════════════════════════════
 def render_highlight(h):
     client = html.escape(h.get("client", "Client"))
     desc = html.escape(h.get("description", ""))
@@ -284,7 +392,7 @@ def render_highlight(h):
     return f'''
     <div class="highlight-card">
         <div class="highlight-title">{client}</div>
-        <div class="highlight-desc">{desc}</div>
+        <div class="highlight-description">{desc}</div>
         <a href="{link}" target="_blank" class="read-more">Read More →</a>
     </div>
     '''
@@ -293,10 +401,12 @@ def render_section(icon, name, highlights, color_class):
     cards = "".join([render_highlight(h) for h in highlights])
     return f'''
     <div class="col-header {color_class}">{icon} {name}</div>
-    <div class="col-body">{cards or '<div style="text-align:center;padding:80px;color:#999;">Loading highlights...</div>'}</div>
+    <div class="col-body">{cards or '<div style="text-align:center;padding:80px;color:#999;">Loading latest highlights...</div>'}</div>
     '''
 
+# ══════════════════════════════════════════════════════════════════════════════
 # MAIN DASHBOARD
+# ══════════════════════════════════════════════════════════════════════════════
 st.markdown('<div class="header-container"><h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1><p class="subtitle">AI-Powered Competitive Intelligence for CEO</p></div>', unsafe_allow_html=True)
 
 placeholder = st.empty()
@@ -308,7 +418,7 @@ placeholder.markdown("""
 """, unsafe_allow_html=True)
 
 with st.spinner(""):
-    all_news = load_all_news()
+    all_news = fetch_all_news()
     highlights = {}
     for sec in ["telco", "ott", "sports", "technology"]:
         highlights[sec] = generate_highlights(all_news.get(sec, []))
@@ -323,10 +433,10 @@ with c4: st.markdown(render_section("⚡", "Technology", highlights["technology"
 
 st.markdown('<div class="footer">Last Updated: ' + datetime.now().strftime("%I:%M:%S %p") + ' • Auto-refreshes every 5 min</div>', unsafe_allow_html=True)
 
-# Auto-refresh + anti-sleep
+# Auto-refresh + anti-sleep keep-alive
 st.markdown("""
 <script>
 setInterval(() => { window.location.reload(); }, 300000);
-setInterval(() => { fetch('/'); }, 60000); // Keep-alive ping
+setInterval(() => { fetch('/'); }, 60000); // Prevent sleep
 </script>
 """, unsafe_allow_html=True)
