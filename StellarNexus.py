@@ -2,77 +2,85 @@ import streamlit as st
 import feedparser
 import time
 from datetime import datetime
-import html
-import re
+import urllib.parse
 
-# 1. PAGE CONFIGURATION & PERMANENT AI ALGORITHM
-st.set_page_config(page_title="Stellar Nexus CEO Dashboard", layout="wide")
+# 1. CORE SEARCH NODES (Direct 2026 Search Strings)
+# These nodes find LIVE news; nothing is stored in the code.
+SECTION_QUERIES = {
+    "telco": "OSS BSS 5G billing monetization after:2026-01-01",
+    "ott": "OTT streaming platform merger acquisition after:2026-01-01",
+    "sports": "sports media rights broadcast deal after:2026-01-01",
+    "technology": "agentic AI autonomous enterprise software after:2026-01-01"
+}
 
-# CORE KEYWORDS & CLIENT WATCHLIST (CEO VISION)
-CLIENTS = ["AT&T", "Verizon", "T-Mobile", "Sony", "NBA", "WNBA", "BBC", "Sky", "Jio", "Shahid"]
-COMPETITORS = ["Netcracker", "Amdocs", "CSG", "Oracle", "Ericsson", "Nokia", "Huawei"]
-STRATEGIC_TERMS = ["merger", "acquisition", "deal", "billion", "agentic", "monetization", "rights"]
+# 2. DYNAMIC FETCHING ALGORITHM
+def fetch_live_signals(query, limit=5):
+    """
+    Scans the Google News RSS node for 2026 strategic events.
+    """
+    encoded_query = urllib.parse.quote(query)
+    rss_url = f"https://news.google.com/rss/search?q={encoded_query}&hl=en-US&gl=US&ceid=US:en"
+    
+    try:
+        feed = feedparser.parse(rss_url)
+        results = []
+        for entry in feed.entries[:limit]:
+            results.append({
+                "title": entry.get("title", ""),
+                "link": entry.get("link", ""),
+                "source": entry.get("source", {}).get("title", "Global Intel"),
+                "score": 100 if any(word in entry.title.lower() for word in ['merger', 'acquisition', 'billion', 'deal']) else 0
+            })
+        return results
+    except Exception:
+        return []
 
-# 2. PREMIUM CSS: DARK BLUE BRANDING
-st.markdown("""
-<style>
-    .stApp { background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed; background-size: cover; }
-    .dark-blue-text { color: #0a192f !important; font-weight: 800 !important; }
-    .hero-container { background: rgba(255, 255, 255, 0.96); border-radius: 15px; padding: 2rem; border-left: 10px solid #0a192f; margin-bottom: 2.5rem; }
-    .section-card { background: rgba(255, 255, 255, 0.98); padding: 20px; border-radius: 12px; min-height: 500px; border: 1px solid #e2e8f0; }
-    .section-header { font-size: 1.2rem; font-weight: 800; border-bottom: 3px solid; text-transform: uppercase; margin-bottom: 15px; }
-</style>
-""", unsafe_allow_html=True)
+# 3. DASHBOARD UI & AUTO-REFRESH (Every 5 Minutes)
+st.set_page_config(page_title="Stellar Nexus CEO Hub", layout="wide")
 
-# 3. DYNAMIC REFRESH FRAGMENT (NEVER-SLEEP ENGINE)
 @st.fragment(run_every=300)
-def render_live_intelligence():
-    # A. Fetch Dynamic 2026 Data Nodes
-    # Note: In production, use the RSS list provided in the prompt for each query
-    feeds = {
-        "telco": "https://news.google.com/rss/search?q=OSS+BSS+monetization+after:2026-01-01",
-        "ott": "https://news.google.com/rss/search?q=OTT+streaming+merger+after:2026-01-01",
-        "sports": "https://news.google.com/rss/search?q=sports+media+rights+after:2026-01-01",
-        "technology": "https://news.google.com/rss/search?q=agentic+AI+enterprise+after:2026-01-01"
-    }
-    
-    # B. AI Processing Logic: Priority Ranking
-    hits, pulse = [], []
-    processed_data = {}
-    for key, url in feeds.items():
-        items = feedparser.parse(url).entries[:6]
-        processed_data[key] = items
-        for entry in items:
-            title = entry.title.lower()
-            if any(c.lower() in title for c in CLIENTS + COMPETITORS):
-                hits.append(entry.title)
-            if any(t in title for t in STRATEGIC_TERMS):
-                pulse.append(entry.title)
+def render_live_dashboard():
+    # Fetch Data Dynamically
+    news_data = {k: fetch_live_signals(v) for k, v in SECTION_QUERIES.items()}
 
-    # C. Main Dashboard Rendering
-    st.markdown("<h1 class='dark-blue-text' style='text-align: center; font-size: 3.2rem;'>Global Telecom & OTT Stellar Nexus</h1>", unsafe_allow_html=True)
-    
-    # D. Strategic Highlights (Top Boxes)
+    # Header Styling
+    st.markdown("<h1 style='color:#0a192f; text-align:center;'>Global Telecom & OTT Stellar Nexus</h1>", unsafe_allow_html=True)
+
+    # DYNAMIC HIGHLIGHTS (Calculated from fetched results)
     col_h, col_p = st.columns(2)
+    
     with col_h:
-        st.markdown(f"""<div class="hero-box" style="background:#f1f5f9; padding:1.5rem; border-radius:10px;">
-            <h3 style="color:#10b981;">🟢 STRATEGIC HITS</h3>
-            <p style="font-size:0.95rem;">• <b>Netflix-WBD Merger:</b> WBD board rejects Paramount hostile bid, reaffirming commitment to $82.7B Netflix deal.<br>
-            • <b>Amdocs-Matrixx Acquisition:</b> Amdocs finalizes $200M deal to secure 23% of global charging revenue.</p>
-        </div>""", unsafe_allow_html=True)
+        st.markdown("""<div style='background:#f1f5f9; padding:20px; border-radius:12px; border-left:8px solid #10b981;'>
+            <h3 style='color:#10b981;'>🟢 STRATEGIC HITS</h3>""", unsafe_allow_html=True)
+        # Find highest scored items dynamically
+        all_hits = sorted([it for sub in news_data.values() for it in sub], key=lambda x: x['score'], reverse=True)
+        for hit in all_hits[:3]:
+            st.write(f"• **{hit['title']}**")
+        st.markdown("</div>", unsafe_allow_html=True)
+
     with col_p:
-        st.markdown(f"""<div class="hero-box" style="background:#f1f5f9; padding:1.5rem; border-radius:10px;">
-            <h3 style="color:#f97316;">🟠 PULSE</h3>
-            <p style="font-size:0.95rem;">• <b>Agentic BSS Core:</b> Autonomous agents move to end-to-end workflow orchestration, worth $8.5B by EOY.<br>
-            • <b>Sports Rights:</b> WNBA enters landmark 11-year deal; revenue sharing disputes remain a key season risk.</p>
-        </div>""", unsafe_allow_html=True)
+        st.markdown("""<div style='background:#f1f5f9; padding:20px; border-radius:12px; border-left:8px solid #f97316;'>
+            <h3 style='color:#f97316;'>🟠 PULSE</h3>""", unsafe_allow_html=True)
+        # Show latest entries across all categories
+        for key in news_data:
+            if news_data[key]:
+                st.write(f"• **{news_data[key][0]['title']}**")
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    # E. Industry Vertical Columns
+    # INDUSTRY VERTICALS
+    st.write("---")
     cols = st.columns(4)
-    labels = [("📡 TELCO", "#db2777", "telco"), ("📺 OTT", "#7c3aed", "ott"), ("🏆 SPORTS", "#059669", "sports"), ("⚡ AI TECH", "#ea580c", "technology")]
-    for idx, (label, color, key) in enumerate(labels):
+    verticals = [("📡 TELCO OSS/BSS", "telco"), ("📺 OTT", "ott"), ("🏆 SPORTS", "sports"), ("⚡ AI TECH", "technology")]
+    
+    for idx, (label, key) in enumerate(verticals):
         with cols[idx]:
-            content = "".join([f'<div style="margin-bottom:10px;">• {e.title}<br><a href="{e.link}" style="font-size:0.8rem;">Full Story →</a></div>' for e in processed_data[key]])
-            st.markdown(f'<div class="section-card"><div class="section-header" style="color:{color}; border-color:{color};">{label}</div>{content}</div>', unsafe_allow_html=True)
+            st.subheader(label)
+            for item in news_data[key]:
+                st.markdown(f"**{item['source']}**: {item['title']}")
+                st.markdown(f"[Source Article]({item['link']})")
+                st.write("---")
 
-render_live_intelligence()
+    st.caption(f"Last Intelligence Sync: {datetime.now().strftime('%H:%M:%S')} | 🚀 Engine Active")
+
+# 4. START ENGINE
+render_live_dashboard()
