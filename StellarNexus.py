@@ -8,6 +8,7 @@ import re
 import hashlib
 import json
 import urllib.parse
+from urllib.parse import urlparse, parse_qs
 import time
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -309,72 +310,63 @@ def get_hash(text):
 
 def is_2026_only(text):
     text_lower = text.lower()
-    if any(year in text_lower for year in ["2024", "2025", "2023", "2022"]):
+    if any(year in text_lower for year in ["2024", "2023", "2022"]):
         return False
-    if "2026" in text_lower:
-        return True
-    return any(ind in text_lower for ind in ["hours ago", "today", "yesterday"])
+    return "2025" not in text_lower and ("2026" in text_lower or any(ind in text_lower for ind in ["hours ago", "today", "yesterday", "this week"]))
 
 def calculate_relevance_score(title, summary):
     """AI-powered relevance scoring for Evergent"""
     text = (title + " " + summary).lower()
     score = 0
     
-    # High priority: Evergent clients
-    for client in ALL_CLIENTS:
-        if client in text:
-            score += 15
-            break
+    # High priority: Evergent clients - add points for each match to cover more
+    client_matches = sum(1 for client in ALL_CLIENTS if client in text)
+    score += client_matches * 15
     
     # Medium priority: Competitors
-    for competitor in ALL_COMPETITORS:
-        if competitor in text:
-            score += 10
-            break
+    comp_matches = sum(1 for competitor in ALL_COMPETITORS if competitor in text)
+    score += comp_matches * 10
     
     # Important telcos
-    for telco in ALL_TELCOS:
-        if telco in text:
-            score += 8
-            break
+    telco_matches = sum(1 for telco in ALL_TELCOS if telco in text)
+    score += telco_matches * 8
     
     # Strategic keywords
-    for keyword in STRATEGIC_KEYWORDS:
-        if keyword in text:
-            score += 3
+    keyword_matches = sum(1 for keyword in STRATEGIC_KEYWORDS if keyword in text)
+    score += keyword_matches * 3
     
     return score
 
 def extract_entities(title, summary):
     """Extract Evergent-relevant entities"""
     text = (title + " " + summary).lower()
-    found = {"clients": [], "competitors": [], "telcos": []}
+    found = {"clients": set(), "competitors": set(), "telcos": set()}
     
     for name, terms in EVERGENT_CLIENTS.items():
         if any(term in text for term in terms):
-            found["clients"].append(name)
+            found["clients"].add(name)
     
     for name, terms in COMPETITORS.items():
         if any(term in text for term in terms):
-            found["competitors"].append(name)
+            found["competitors"].add(name)
     
     for name, terms in TOP_TELCOS.items():
         if any(term in text for term in terms):
-            found["telcos"].append(name)
+            found["telcos"].add(name)
     
-    return found
+    return {k: list(v) for k, v in found.items()}
 
 # ══════════════════════════════════════════════════════════════════════════════
 # NEWS FETCHER WITH AI SCORING
 # ══════════════════════════════════════════════════════════════════════════════
-def fetch_intelligent_news(query, max_results=25):
+def fetch_intelligent_news(query, max_results=50):
     """Fetch and score news using AI algorithm"""
     try:
-        query_2026 = f"{query} 2026"
-        encoded = urllib.parse.quote(query_2026)
+        filter_params = " after:2026-01-01 when:30d -2025"
+        encoded = urllib.parse.quote(query + filter_params)
         url = f"https://news.google.com/rss/search?q={encoded}&hl=en-US&gl=US&ceid=US:en"
         
-        resp = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
+        resp = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=15)
         if resp.status_code != 200:
             return []
         
@@ -386,6 +378,11 @@ def fetch_intelligent_news(query, max_results=25):
             link = entry.get("link", "")
             summary = clean_text(entry.get("summary", "")) or title
             
+            # Extract original URL
+            parsed = urlparse(link)
+            query_params = parse_qs(parsed.query)
+            real_link = query_params.get('url', [link])[0]
+            
             if not is_2026_only(title + summary) or len(title) < 25:
                 continue
             
@@ -393,7 +390,7 @@ def fetch_intelligent_news(query, max_results=25):
             score = calculate_relevance_score(title, summary)
             entities = extract_entities(title, summary)
             
-            # Determine news type
+            # Determine news type - prioritize client if multiple
             news_type = "standard"
             if entities["clients"]:
                 news_type = "client"
@@ -402,7 +399,7 @@ def fetch_intelligent_news(query, max_results=25):
             
             results.append({
                 "title": title,
-                "link": link,
+                "link": real_link,
                 "summary": summary,
                 "score": score,
                 "type": news_type,
@@ -414,32 +411,34 @@ def fetch_intelligent_news(query, max_results=25):
         results.sort(key=lambda x: x["score"], reverse=True)
         return results
         
-    except:
+    except Exception as e:
+        st.warning(f"News fetch error: {str(e)}")
         return []
 
 @st.cache_data(ttl=180, show_spinner=False)
 def fetch_all_intelligence():
     """Fetch news across all sectors with AI prioritization"""
+    all_clients_or = ' OR '.join(EVERGENT_CLIENTS.keys())
     queries = {
         "telco": [
-            "telecom OSS BSS deal partnership 2026",
-            "5G network operator contract 2026",
-            f"{' OR '.join(list(EVERGENT_CLIENTS.keys())[:5])} telecom deal 2026"
+            "telecom OSS BSS deal partnership merger acquisition",
+            "5G network operator contract billing monetization",
+            f"{all_clients_or} telecom deal partnership"
         ],
         "ott": [
-            "streaming platform merger acquisition 2026",
-            "OTT video service deal 2026",
-            f"{' OR '.join(list(EVERGENT_CLIENTS.keys())[:5])} streaming 2026"
+            "streaming platform merger acquisition OTT video service",
+            "content rights deal streaming partnership",
+            f"{all_clients_or} streaming OTT deal"
         ],
         "sports": [
-            "sports media rights broadcasting 2026",
-            "sports betting platform deal 2026",
-            "NBA NFL broadcasting partnership 2026"
+            "sports media rights broadcasting deal",
+            "sports betting platform partnership NBA NFL",
+            f"{all_clients_or} sports media rights"
         ],
         "technology": [
-            "cloud computing AI platform deal 2026",
-            "enterprise SaaS acquisition 2026",
-            "fintech platform merger 2026"
+            "cloud computing AI platform deal enterprise SaaS",
+            "AI tech acquisition merger fintech platform",
+            f"{all_clients_or} technology AI deal"
         ]
     }
     
@@ -451,7 +450,7 @@ def fetch_all_intelligence():
         with ThreadPoolExecutor(max_workers=4) as executor:
             futures = {executor.submit(fetch_intelligent_news, q): q for q in query_list}
             
-            for future in as_completed(futures, timeout=25):
+            for future in as_completed(futures):
                 try:
                     items = future.result()
                     for item in items:
@@ -461,9 +460,9 @@ def fetch_all_intelligence():
                 except:
                     continue
         
-        # Sort by score and take top 12
+        # Sort by score and take top 15
         section_news.sort(key=lambda x: x["score"], reverse=True)
-        all_news[section] = section_news[:12]
+        all_news[section] = section_news[:15]
     
     return all_news
 
@@ -475,15 +474,15 @@ def generate_ceo_insights(all_news):
     # Extract high-priority news
     priority_news = []
     for section_news in all_news.values():
-        priority_news.extend([n for n in section_news if n["score"] >= 15][:3])
+        priority_news.extend([n for n in section_news if n["score"] >= 15][:4])
     
     if not priority_news:
-        return "No high-priority Evergent-related news in the last 24 hours. Monitoring continues."
+        return "No high-priority Evergent-related news in the last 24 hours. Monitoring continues across all clients and competitors."
     
-    # Prepare context for AI
+    # Prepare context for AI - include multiple clients
     news_context = "\n".join([
-        f"• {item['title'][:100]} (Relevance: {item['score']}, Entities: {item['entities']})"
-        for item in priority_news[:8]
+        f"• {item['title'][:100]} (Relevance: {item['score']}, Clients: {', '.join(item['entities']['clients'])}, Competitors: {', '.join(item['entities']['competitors'])})"
+        for item in priority_news[:10]
     ])
     
     try:
@@ -495,25 +494,25 @@ def generate_ceo_insights(all_news):
                 "messages": [
                     {
                         "role": "system",
-                        "content": "You are an executive intelligence analyst for Evergent. Create a 3-4 sentence CEO summary highlighting key industry moves, client news, and competitive threats. Focus on business impact and strategic implications."
+                        "content": "You are an executive intelligence analyst for Evergent. Create a 4-5 sentence CEO summary highlighting key industry moves across multiple clients, competitors, and strategic implications. Ensure coverage of various clients without focusing on single one. Focus on business impact."
                     },
                     {
                         "role": "user",
-                        "content": f"Analyze these top industry developments and create a CEO executive summary:\n\n{news_context}"
+                        "content": f"Analyze these top industry developments covering multiple clients and create a CEO executive summary:\n\n{news_context}"
                     }
                 ],
-                "max_tokens": 300,
-                "temperature": 0.3
+                "max_tokens": 350,
+                "temperature": 0.4
             },
             timeout=30
         )
         
         if response.status_code == 200:
             return response.json()["choices"][0]["message"]["content"].strip()
-    except:
-        pass
-    
-    return f"🎯 {len(priority_news)} high-priority developments detected involving Evergent clients and competitors. Key focus areas: {', '.join(set([e for n in priority_news for e in n['entities']['clients'][:2]]))}."
+        else:
+            return "API response error. Fallback summary: Multiple client activities detected across telecom and OTT sectors."
+    except Exception as e:
+        return f"Insight generation error: {str(e)}. Monitoring {len(priority_news)} developments involving various clients like {', '.join(set([e for n in priority_news for e in n['entities']['clients'][:3]]))}."
 
 # ══════════════════════════════════════════════════════════════════════════════
 # RENDER FUNCTIONS
@@ -528,9 +527,11 @@ def render_news_card(item):
     
     badge_html = ""
     if item["type"] == "client":
-        badge_html = '<span class="priority-badge">🟢 CLIENT</span>'
+        clients_str = ', '.join(item['entities']['clients'][:3])
+        badge_html = f'<span class="priority-badge" style="background: linear-gradient(135deg, #10b981, #059669);">🟢 CLIENT: {clients_str}</span>'
     elif item["type"] == "competitor":
-        badge_html = '<span class="priority-badge" style="background: linear-gradient(135deg, #f59e0b, #d97706);">🟡 COMPETITOR</span>'
+        comps_str = ', '.join(item['entities']['competitors'][:3])
+        badge_html = f'<span class="priority-badge" style="background: linear-gradient(135deg, #f59e0b, #d97706);">🟡 COMPETITOR: {comps_str}</span>'
     
     return f'''
     <div class="{card_class}">
@@ -547,7 +548,7 @@ def render_section(icon, name, news_items, header_class):
     if news_items:
         cards = "".join([render_news_card(item) for item in news_items])
     else:
-        cards = '<div style="text-align:center;color:#94a3b8;padding:40px;">No priority news</div>'
+        cards = '<div style="text-align:center;color:#94a3b8;padding:40px;">No priority news detected. Expanding search...</div>'
     
     body = f'<div class="col-body">{cards}</div>'
     return header + body
@@ -562,7 +563,7 @@ with placeholder.container():
     st.markdown("""
         <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:70vh;text-align:center;">
             <h1 style="color:#0a192f;font-size:2.5rem;font-weight:800;">⚡ Activating Intelligence Layer...</h1>
-            <p style="color:#64748b;font-size:1.1rem;">Scanning global news for Evergent priorities</p>
+            <p style="color:#64748b;font-size:1.1rem;">Scanning global news for Evergent priorities across all clients</p>
         </div>
     """, unsafe_allow_html=True)
     time.sleep(1.3)
@@ -581,7 +582,7 @@ st.markdown(f'''
 ''', unsafe_allow_html=True)
 
 # Fetch Intelligence
-with st.spinner(""):
+with st.spinner("Gathering global intelligence..."):
     all_news = fetch_all_intelligence()
     ceo_summary = generate_ceo_insights(all_news)
 
@@ -594,25 +595,25 @@ st.markdown(f'''
 ''', unsafe_allow_html=True)
 
 # Strategic Highlights
-client_news = [n for section in all_news.values() for n in section if n["type"] == "client"][:4]
-competitor_news = [n for section in all_news.values() for n in section if n["type"] == "competitor"][:4]
+client_news = [n for section in all_news.values() for n in section if n["type"] == "client"][:5]
+competitor_news = [n for section in all_news.values() for n in section if n["type"] == "competitor"][:5]
 
 col_h1, col_h2 = st.columns(2)
 
 with col_h1:
-    client_html = "<br>".join([f"• <b>{n['entities']['clients'][0]}</b>: {n['title'][:80]}..." for n in client_news]) if client_news else "• Monitoring client ecosystem..."
+    client_html = "<br>".join([f"• <b>{', '.join(n['entities']['clients'])}</b>: {n['title'][:80]}..." for n in client_news]) if client_news else "• Monitoring all client ecosystems..."
     st.markdown(f'''
     <div class="hero-container">
         <div class="hero-title">🟢 CLIENT INTELLIGENCE</div>
         <div class="hero-box">
-            <div class="hero-box-title" style="color: #10b981;">Evergent Client Activity</div>
+            <div class="hero-box-title" style="color: #10b981;">Evergent Client Activity Across Portfolio</div>
             <div class="hero-content">{client_html}</div>
         </div>
     </div>
     ''', unsafe_allow_html=True)
 
 with col_h2:
-    comp_html = "<br>".join([f"• <b>{n['entities']['competitors'][0]}</b>: {n['title'][:80]}..." for n in competitor_news]) if competitor_news else "• Monitoring competitive landscape..."
+    comp_html = "<br>".join([f"• <b>{', '.join(n['entities']['competitors'])}</b>: {n['title'][:80]}..." for n in competitor_news]) if competitor_news else "• Monitoring competitive landscape..."
     st.markdown(f'''
     <div class="hero-container">
         <div class="hero-title">🟡 COMPETITIVE INTELLIGENCE</div>
