@@ -1,86 +1,100 @@
 import streamlit as st
 import feedparser
-import time
+import pandas as pd
 from datetime import datetime
-import urllib.parse
+import time
+import re
 
-# 1. CORE SEARCH NODES (Direct 2026 Search Strings)
-# These nodes find LIVE news; nothing is stored in the code.
-SECTION_QUERIES = {
-    "telco": "OSS BSS 5G billing monetization after:2026-01-01",
-    "ott": "OTT streaming platform merger acquisition after:2026-01-01",
-    "sports": "sports media rights broadcast deal after:2026-01-01",
-    "technology": "agentic AI autonomous enterprise software after:2026-01-01"
-}
+# ==========================================
+# 1. CORE DATA & KEYWORDS (CEO VISION)
+# ==========================================
+# (Your provided EVERGENT_CLIENTS and COMPETITORS lists go here)
+# For brevity, we use a flattened list for matching
+ALL_CLIENTS = [item for sublist in EVERGENT_CLIENTS.values() for item in sublist]
+ALL_COMPETITORS = [item for sublist in COMPETITORS.values() for item in sublist]
 
+# Strategic Keywords for "Hits" vs "Pulse"
+STRATEGIC_HITS_KEYWORDS = ["merger", "acquisition", "deal", "billion", "million", "partnership", "contract"]
+PULSE_KEYWORDS = ["ai", "agent", "5g", "streaming", "launch", "trend", "innovation"]
+
+# ==========================================
 # 2. DYNAMIC FETCHING ALGORITHM
-def fetch_live_signals(query, limit=5):
-    """
-    Scans the Google News RSS node for 2026 strategic events.
-    """
-    encoded_query = urllib.parse.quote(query)
-    rss_url = f"https://news.google.com/rss/search?q={encoded_query}&hl=en-US&gl=US&ceid=US:en"
+# ==========================================
+def fetch_news_intelligence():
+    # Example feeds - can be expanded to any RSS URL
+    feeds = [
+        "https://news.google.com/rss/search?q=telecom+OSS+BSS+merger+2026",
+        "https://news.google.com/rss/search?q=OTT+streaming+deal+2026",
+        "https://news.google.com/rss/search?q=sports+media+rights+2026"
+    ]
     
-    try:
-        feed = feedparser.parse(rss_url)
-        results = []
-        for entry in feed.entries[:limit]:
-            results.append({
-                "title": entry.get("title", ""),
-                "link": entry.get("link", ""),
-                "source": entry.get("source", {}).get("title", "Global Intel"),
-                "score": 100 if any(word in entry.title.lower() for word in ['merger', 'acquisition', 'billion', 'deal']) else 0
+    all_articles = []
+    for url in feeds:
+        feed = feedparser.parse(url)
+        for entry in feed.entries:
+            title = entry.title.lower()
+            
+            # Identify if it mentions a Client or Competitor
+            involved_client = next((c for c in ALL_CLIENTS if c in title), None)
+            involved_competitor = next((comp for comp in ALL_COMPETITORS if comp in title), None)
+            
+            # Scoring for relevance
+            score = 0
+            if involved_client: score += 50
+            if involved_competitor: score += 30
+            if any(k in title for k in STRATEGIC_HITS_KEYWORDS): score += 20
+            
+            all_articles.append({
+                "title": entry.title,
+                "link": entry.link,
+                "published": entry.published,
+                "score": score,
+                "type": "Hit" if any(k in title for k in STRATEGIC_HITS_KEYWORDS) else "Pulse"
             })
-        return results
-    except Exception:
-        return []
+            
+    # Return top 20 most impactful articles
+    return pd.DataFrame(all_articles).sort_values(by="score", ascending=False).head(20)
 
-# 3. DASHBOARD UI & AUTO-REFRESH (Every 5 Minutes)
-st.set_page_config(page_title="Stellar Nexus CEO Hub", layout="wide")
+# ==========================================
+# 3. STREAMLIT UI & AUTO-REFRESH
+# ==========================================
+st.set_page_config(page_title="Global Intelligence Stellar Nexus", layout="wide")
 
-@st.fragment(run_every=300)
-def render_live_dashboard():
-    # Fetch Data Dynamically
-    news_data = {k: fetch_live_signals(v) for k, v in SECTION_QUERIES.items()}
+# Custom CSS for Dark Blue Executive Branding
+st.markdown("""
+<style>
+    .stApp { background-color: #0a192f; color: white; }
+    .card { background-color: #112240; padding: 20px; border-radius: 10px; border-left: 5px solid #64ffda; margin-bottom: 15px; }
+    .hit-title { color: #64ffda; font-weight: bold; font-size: 1.1rem; }
+</style>
+""", unsafe_allow_html=True)
 
-    # Header Styling
-    st.markdown("<h1 style='color:#0a192f; text-align:center;'>Global Telecom & OTT Stellar Nexus</h1>", unsafe_allow_html=True)
+st.title("📡 Global Telecom & OTT Stellar Nexus")
+st.subheader("CEO Strategic Intelligence Dashboard")
 
-    # DYNAMIC HIGHLIGHTS (Calculated from fetched results)
-    col_h, col_p = st.columns(2)
-    
-    with col_h:
-        st.markdown("""<div style='background:#f1f5f9; padding:20px; border-radius:12px; border-left:8px solid #10b981;'>
-            <h3 style='color:#10b981;'>🟢 STRATEGIC HITS</h3>""", unsafe_allow_html=True)
-        # Find highest scored items dynamically
-        all_hits = sorted([it for sub in news_data.values() for it in sub], key=lambda x: x['score'], reverse=True)
-        for hit in all_hits[:3]:
-            st.write(f"• **{hit['title']}**")
-        st.markdown("</div>", unsafe_allow_html=True)
+# Auto-refresh every 10 minutes
+if "last_fetch" not in st.session_state or (time.time() - st.session_state.last_fetch > 600):
+    st.session_state.news_df = fetch_news_intelligence()
+    st.session_state.last_fetch = time.time()
 
-    with col_p:
-        st.markdown("""<div style='background:#f1f5f9; padding:20px; border-radius:12px; border-left:8px solid #f97316;'>
-            <h3 style='color:#f97316;'>🟠 PULSE</h3>""", unsafe_allow_html=True)
-        # Show latest entries across all categories
-        for key in news_data:
-            if news_data[key]:
-                st.write(f"• **{news_data[key][0]['title']}**")
-        st.markdown("</div>", unsafe_allow_html=True)
+df = st.session_state.news_df
 
-    # INDUSTRY VERTICALS
-    st.write("---")
-    cols = st.columns(4)
-    verticals = [("📡 TELCO OSS/BSS", "telco"), ("📺 OTT", "ott"), ("🏆 SPORTS", "sports"), ("⚡ AI TECH", "technology")]
-    
-    for idx, (label, key) in enumerate(verticals):
-        with cols[idx]:
-            st.subheader(label)
-            for item in news_data[key]:
-                st.markdown(f"**{item['source']}**: {item['title']}")
-                st.markdown(f"[Source Article]({item['link']})")
-                st.write("---")
+# RENDER SECTIONS
+col1, col2 = st.columns(2)
 
-    st.caption(f"Last Intelligence Sync: {datetime.now().strftime('%H:%M:%S')} | 🚀 Engine Active")
+with col1:
+    st.markdown("### 🟢 STRATEGIC HITS (M&A & High-Value Deals)")
+    hits = df[df['type'] == 'Hit']
+    for _, row in hits.iterrows():
+        st.markdown(f"""<div class="card"><div class="hit-title">{row['title']}</div>
+                    <a href="{row['link']}" target="_blank">Read Full Analysis</a></div>""", unsafe_allow_html=True)
 
-# 4. START ENGINE
-render_live_dashboard()
+with col2:
+    st.markdown("### 🟠 MARKET PULSE (Trends & Innovations)")
+    pulse = df[df['type'] == 'Pulse']
+    for _, row in pulse.iterrows():
+        st.markdown(f"""<div class="card"><div>{row['title']}</div>
+                    <small>{row['published']}</small><br>
+                    <a href="{row['link']}" target="_blank">View Insight</a></div>""", unsafe_allow_html=True)
+
+st.caption(f"Last Intelligence Sync: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
