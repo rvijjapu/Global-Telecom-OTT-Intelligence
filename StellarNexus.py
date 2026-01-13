@@ -9,7 +9,7 @@ import time
 import streamlit.components.v1 as components
 
 # ──────────────────────────────────────────────────────────────────────────────
-# KEEP-ALIVE - Defined FIRST to prevent NameError
+# KEEP-ALIVE - MUST BE FIRST (prevents NameError)
 # ──────────────────────────────────────────────────────────────────────────────
 @st.fragment(run_every=600)
 def keep_alive():
@@ -26,7 +26,7 @@ st.set_page_config(
 )
 
 # ──────────────────────────────────────────────────────────────────────────────
-# CLEAN & PROFESSIONAL STYLING - All sections match Highlights look
+# CLEAN & BEAUTIFUL STYLING - All sections match Highlights style
 # ──────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
@@ -43,7 +43,7 @@ st.markdown("""
         padding: 2rem 3rem;
         text-align: center;
         border-radius: 20px;
-        box-shadow: 0 12px 45px rgba(0,0,0,0.15);
+        box-shadow: 0 12px 50px rgba(0,0,0,0.14);
         margin-bottom: 2.5rem;
         border-bottom: 6px solid #1e40af;
     }
@@ -192,7 +192,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# RSS FEEDS & STRICT KEYWORDS (no cross-contamination)
+# RSS FEEDS & STRICT KEYWORDS (no cross-leakage)
 # ──────────────────────────────────────────────────────────────────────────────
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
@@ -218,12 +218,40 @@ SECTIONS = {
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
-TELCO_KEYWORDS = ["oss", "bss", "billing", "charging", "monetization", "convergent billing", "revenue management", "order management", "5g monetization", "telecom deal", "oss bss contract", "digital transformation", "system migration"]
-OTT_KEYWORDS = ["ott", "streaming", "svod", "avod", "subscriber growth", "arpu", "content deal", "streaming merger", "platform expansion"]
-SPORTS_KEYWORDS = ["sports media rights", "broadcasting rights", "league partnership", "media rights deal", "sponsorship deal"]
-TECH_KEYWORDS = ["artificial intelligence", "generative ai", "enterprise ai", "ai platform", "cloud platform", "saas platform", "technology acquisition"]
+TELCO_KEYWORDS = [
+    "oss", "bss", "billing", "charging", "convergent billing", "revenue management",
+    "order management", "product catalog", "service fulfillment", "5g monetization",
+    "real-time charging", "saas telecom platform", "telecom deal", "telco partnership",
+    "oss bss contract", "telecom modernization", "digital transformation", "system migration",
+    "platform consolidation", "vendor replacement"
+]
 
-JUNK_EXCLUDES = ["coupon", "discount", "sale", "promo", "baby", "birth", "gossip", "celebrity", "injury", "score", "oil", "gas", "semiconductor", "crypto", "legislation", "spam", "phishing", "packaging", "satellite"]
+OTT_KEYWORDS = [
+    "ott platform", "streaming service", "svod", "avod", "fast channels", "hybrid ott",
+    "subscriber growth", "arpu", "churn reduction", "content monetization", "bundling",
+    "content licensing", "sports streaming", "original content", "ott acquisition",
+    "streaming merger", "content deal", "distribution partnership", "platform expansion"
+]
+
+SPORTS_KEYWORDS = [
+    "sports media rights", "broadcasting rights", "sports streaming", "league partnership",
+    "media rights deal", "sponsorship deal", "betting partnership", "fan engagement",
+    "digital ticketing", "pay-per-view"
+]
+
+TECH_KEYWORDS = [
+    "artificial intelligence", "generative ai", "enterprise ai", "ai platform",
+    "cloud platform", "saas platform", "technology acquisition", "strategic partnership",
+    "platform expansion", "enterprise contract", "cloud migration", "mlops", "ai governance"
+]
+
+JUNK_EXCLUDES = [
+    "coupon", "discount", "sale", "promo", "voucher", "giveaway", "contest", "black friday",
+    "cyber monday", "flash sale", "baby", "birth", "newborn", "pregnant", "wedding", "divorce",
+    "gossip", "celebrity", "player injury", "match score", "fantasy", "betting odds",
+    "oil", "gas", "petroleum", "insurance", "semiconductor", "chip", "mining", "power plant",
+    "crypto", "nft", "legislation", "spam", "phishing", "packaging", "satellite", "geopolitics"
+]
 
 # ──────────────────────────────────────────────────────────────────────────────
 # FILTERING FUNCTIONS
@@ -357,7 +385,7 @@ def render_section(icon, name, style_class, items):
     components.html(full_html, height=860, scrolling=True)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# MAIN APPLICATION - FINAL VERSION
+# MAIN APPLICATION - FINAL, ERROR-FREE VERSION
 # ──────────────────────────────────────────────────────────────────────────────
 placeholder = st.empty()
 with placeholder.container():
@@ -378,7 +406,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# HIGHLIGHTS (reference style)
+# HIGHLIGHTS - Rocket style
 st.markdown("""
 <div class="hero-container">
     <div class="hero-title">🚀 HIGHLIGHTS</div>
