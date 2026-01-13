@@ -9,7 +9,7 @@ import time
 import streamlit.components.v1 as components
 
 # ──────────────────────────────────────────────────────────────────────────────
-# KEEP-ALIVE - Defined at top
+# KEEP-ALIVE - Defined at top (no NameError)
 # ──────────────────────────────────────────────────────────────────────────────
 @st.fragment(run_every=600)
 def keep_alive():
@@ -26,7 +26,7 @@ st.set_page_config(
 )
 
 # ──────────────────────────────────────────────────────────────────────────────
-# ULTRA-CLEAN & BEAUTIFUL STYLING (all sections match Hits/Pulse look)
+# ULTRA-CLEAN & BEAUTIFUL CEO-READY STYLING
 # ──────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
@@ -64,7 +64,7 @@ st.markdown("""
     }
     
     .hero-container {
-        background: rgba(255, 255, 255, 0.98);
+        background: rgba(255,255,255,0.98);
         border-radius: 20px;
         padding: 2.2rem;
         margin-bottom: 3rem;
@@ -204,7 +204,45 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# RSS FEEDS & STRICT KEYWORDS
+# STRICT SECTION-SPECIFIC KEYWORDS (no cross-leakage)
+# ──────────────────────────────────────────────────────────────────────────────
+TELCO_KEYWORDS = [
+    "oss", "bss", "billing", "charging", "convergent billing", "revenue management",
+    "order management", "product catalog", "service fulfillment", "5g monetization",
+    "real-time charging", "saas telecom platform", "telecom deal", "telco partnership",
+    "oss bss contract", "telecom modernization", "digital transformation", "system migration",
+    "platform consolidation", "vendor replacement"
+]
+
+OTT_KEYWORDS = [
+    "ott platform", "streaming service", "svod", "avod", "fast channels", "hybrid ott",
+    "subscriber growth", "arpu", "churn reduction", "content monetization", "bundling",
+    "content licensing", "sports streaming", "original content", "ott acquisition",
+    "streaming merger", "content deal", "distribution partnership", "platform expansion"
+]
+
+SPORTS_KEYWORDS = [
+    "sports media rights", "broadcasting rights", "sports streaming", "league partnership",
+    "media rights deal", "sponsorship deal", "betting partnership", "fan engagement",
+    "digital ticketing", "pay-per-view"
+]
+
+TECH_KEYWORDS = [
+    "artificial intelligence", "generative ai", "enterprise ai", "ai platform",
+    "cloud platform", "saas platform", "technology acquisition", "strategic partnership",
+    "platform expansion", "enterprise contract", "cloud migration", "mlops", "ai governance"
+]
+
+JUNK_EXCLUDES = [
+    "coupon", "discount", "sale", "promo", "voucher", "giveaway", "contest", "black friday",
+    "cyber monday", "flash sale", "baby", "birth", "newborn", "pregnant", "wedding", "divorce",
+    "gossip", "celebrity", "player injury", "match score", "fantasy", "betting odds",
+    "oil", "gas", "petroleum", "insurance", "semiconductor", "chip", "mining", "power plant",
+    "crypto", "nft", "legislation", "spam", "phishing", "packaging", "satellite", "geopolitics"
+]
+
+# ──────────────────────────────────────────────────────────────────────────────
+# RSS FEEDS
 # ──────────────────────────────────────────────────────────────────────────────
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
@@ -230,15 +268,8 @@ SECTIONS = {
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
-TELCO_KEYWORDS = ["oss", "bss", "billing", "charging", "monetization", "convergent billing", "revenue management", "order management", "5g monetization", "telecom deal", "oss bss contract", "digital transformation", "system migration"]
-OTT_KEYWORDS = ["ott", "streaming", "svod", "avod", "subscriber growth", "arpu", "content deal", "streaming merger", "platform expansion"]
-SPORTS_KEYWORDS = ["sports media rights", "broadcasting rights", "league partnership", "media rights deal", "sponsorship deal"]
-TECH_KEYWORDS = ["artificial intelligence", "generative ai", "enterprise ai", "ai platform", "cloud platform", "saas platform", "technology acquisition"]
-
-JUNK_EXCLUDES = ["coupon", "discount", "sale", "promo", "baby", "birth", "gossip", "celebrity", "injury", "score", "oil", "gas", "semiconductor", "crypto"]
-
 # ──────────────────────────────────────────────────────────────────────────────
-# FILTERING FUNCTIONS
+# STRICT FILTERING FUNCTIONS
 # ──────────────────────────────────────────────────────────────────────────────
 def clean(raw):
     if not raw: return ""
@@ -287,7 +318,7 @@ def fetch_feed(source, url, category):
             
             if not pub or pub < cutoff: continue
             
-            is_priority = any(kw in (title + summary).lower() for kw in ["netcracker", "amdocs", "matrixx", "merger", "acquisition"])
+            is_priority = any(kw in (title + summary).lower() for kw in ["netcracker", "amdocs", "matrixx", "merger", "acquisition", "billing", "charging"])
             
             items.append({
                 "title": title,
@@ -329,7 +360,7 @@ def get_time_str(dt):
     return f"🔵 {hrs//24}d", "time-normal"
 
 # ──────────────────────────────────────────────────────────────────────────────
-# RENDER SECTION - Now matches Hits/Pulse style perfectly
+# RENDER SECTION - Now matches Hits/Pulse look perfectly
 # ──────────────────────────────────────────────────────────────────────────────
 def render_section(icon, name, style_class, items):
     header = f'<div class="{style_class}">{icon} {name}</div>'
@@ -369,7 +400,7 @@ def render_section(icon, name, style_class, items):
     components.html(full_html, height=860, scrolling=True)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# MAIN APPLICATION
+# MAIN APPLICATION - CEO READY
 # ──────────────────────────────────────────────────────────────────────────────
 placeholder = st.empty()
 with placeholder.container():
@@ -390,7 +421,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# HIGHLIGHTS - Rocket style (reference look)
+# HIGHLIGHTS - Rocket style
 st.markdown("""
 <div class="hero-container">
     <div class="hero-title">🚀 HIGHLIGHTS</div>
