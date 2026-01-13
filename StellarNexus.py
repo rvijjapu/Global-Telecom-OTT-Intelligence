@@ -7,11 +7,16 @@ import html
 import time
 import streamlit.components.v1 as components
 
-# KEEP-ALIVE - FIRST THING IN FILE
+# ──────────────────────────────────────────────────────────────────────────────
+# KEEP-ALIVE (defined first - no NameError)
+# ──────────────────────────────────────────────────────────────────────────────
 @st.fragment(run_every=600)
 def keep_alive():
     st.markdown("", unsafe_allow_html=True)
 
+# ──────────────────────────────────────────────────────────────────────────────
+# PAGE CONFIG
+# ──────────────────────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Global Telecom & OTT Stellar Nexus",
     page_icon="🌐",
@@ -19,7 +24,9 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# SAFE BASE STYLING (no complex HTML)
+# ──────────────────────────────────────────────────────────────────────────────
+# CLEAN & BEAUTIFUL STYLING (all sections match Highlights look)
+# ──────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -132,7 +139,57 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# RSS & KEYWORDS (strict)
+# ──────────────────────────────────────────────────────────────────────────────
+# STRICT KEYWORDS & EXCLUDES (exactly as you provided)
+# ──────────────────────────────────────────────────────────────────────────────
+TELCO_KEYWORDS = [
+    "oss", "bss", "telecom oss", "telecom bss", "digital bss", "cloud-native oss",
+    "telecom it stack", "telco transformation", "billing system", "charging system",
+    "convergent billing", "mediation", "revenue management", "policy control",
+    "order management", "product catalog", "service fulfillment", "network orchestration",
+    "telecom deal", "telco partnership", "oss bss contract", "telecom modernization",
+    "digital transformation", "system migration", "platform consolidation",
+    "vendor replacement", "5g monetization", "network slicing", "open ran oss",
+    "api-based bss", "ai-driven assurance", "real-time charging", "saas telecom platform"
+]
+
+OTT_KEYWORDS = [
+    "ott platform", "streaming service", "video streaming", "subscription video",
+    "svod", "avod", "fast channels", "hybrid ott", "subscriber growth", "arpu",
+    "churn reduction", "content monetization", "pricing strategy", "bundling",
+    "super app", "content licensing", "sports streaming", "live streaming",
+    "original content", "regional content", "multi-language ott", "content aggregation",
+    "ott acquisition", "streaming merger", "content deal", "distribution partnership",
+    "platform expansion", "market entry"
+]
+
+SPORTS_KEYWORDS = [
+    "sports media rights", "broadcasting rights", "sports streaming", "live sports",
+    "sports ott", "league partnership", "media rights deal", "sponsorship deal",
+    "betting partnership", "fan engagement", "digital ticketing", "pay-per-view",
+    "football league", "cricket board", "basketball league", "formula racing",
+    "olympics preparation", "world cup media", "sports analytics", "fan data platform",
+    "ai sports insights", "smart stadium", "ar/vr sports"
+]
+
+TECH_KEYWORDS = [
+    "artificial intelligence", "generative ai", "enterprise ai", "ai platform",
+    "ai monetization", "ai deployment", "cloud platform", "saas platform",
+    "digital platform", "enterprise software", "api platform", "data platform",
+    "technology acquisition", "ai startup acquisition", "strategic partnership",
+    "platform expansion", "product launch", "enterprise contract", "cloud migration",
+    "data warehouse", "mlops", "ai governance", "responsible ai", "edge computing"
+]
+
+JUNK_EXCLUDES = [
+    "oil", "gas", "petroleum", "insurance", "banking core", "semiconductor",
+    "chip manufacturing", "mining", "power plant", "cinema release", "box office",
+    "movie review", "celebrity gossip", "film awards", "music album launch",
+    "player injury", "match score", "fantasy tips", "sports betting odds",
+    "player transfers gossip", "chip fabrication", "gpu manufacturing",
+    "mining hardware", "crypto mining", "nft art"
+]
+
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
     ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
@@ -155,15 +212,11 @@ SECTIONS = {
     "technology": {"icon": "⚡", "name": "AI TECHWATCH", "style": "orange-header"},
 }
 
-TELCO_KEYWORDS = ["oss", "bss", "billing", "charging", "monetization", "convergent billing", "revenue management", "order management", "5g monetization", "telecom deal", "oss bss contract"]
-OTT_KEYWORDS = ["ott", "streaming", "svod", "avod", "subscriber growth", "arpu", "content deal", "streaming merger"]
-SPORTS_KEYWORDS = ["sports media rights", "broadcasting rights", "league partnership", "media rights deal"]
-TECH_KEYWORDS = ["artificial intelligence", "generative ai", "enterprise ai", "ai platform", "cloud platform", "saas platform", "technology acquisition"]
-
-JUNK_EXCLUDES = ["coupon","sale","promo","baby","gossip","celebrity","injury","score","oil","gas","semiconductor","crypto","legislation","spam","phishing","packaging","satellite"]
-
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
+# ──────────────────────────────────────────────────────────────────────────────
+# FILTERING
+# ──────────────────────────────────────────────────────────────────────────────
 def clean(raw):
     if not raw: return ""
     return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
@@ -255,7 +308,6 @@ def get_time_str(dt):
 # ──────────────────────────────────────────────────────────────────────────────
 # MAIN DASHBOARD - ALL SAFE via components.html
 # ──────────────────────────────────────────────────────────────────────────────
-# Loading
 placeholder = st.empty()
 with placeholder.container():
     st.markdown("""
@@ -270,7 +322,7 @@ placeholder.empty()
 
 # Header
 components.html("""
-<div class="header">
+<div class="header-box">
     <div class="main-title">🌐 Global Telecom & OTT Stellar Nexus</div>
     <div class="subtitle">AI-Powered Real-time Critical Intelligence • January 2026</div>
 </div>
@@ -278,9 +330,9 @@ components.html("""
 
 # Highlights
 components.html("""
-<div class="hero-container">
+<div class="section-box">
     <div class="section-title">🚀 HIGHLIGHTS</div>
-    <div class="hit-pulse-grid">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div class="strategic-box">
             <div class="strategic-title"><span style="font-size:2rem;">🌟</span> STRATEGIC HITS</div>
             <div class="highlight-item"><b>Amdocs-Matrixx Deal:</b> Amdocs completes $200M acquisition of charging leader Matrixx Software to dominate Tier-1 5G billing market.</div>
@@ -297,7 +349,7 @@ components.html("""
 </div>
 """, height=420, scrolling=False)
 
-# News Sections
+# Load news
 with st.spinner("Loading only critical, relevant intelligence..."):
     data = load_feeds()
 
@@ -344,10 +396,10 @@ for idx, cat in enumerate(["telco", "ott", "sports", "technology"]):
 
 # Footer
 components.html(f"""
-<div class="footer">
+<div class="footer-box">
     <p><strong>🕐 Live:</strong> {datetime.now().strftime('%H:%M:%S')} IST | <strong>🔄 Auto-refresh:</strong> Every 5 minutes</p>
     <p style="margin-top:1.2rem; opacity:0.92;">
-        Strictly filtered for OSS/BSS • OTT • Sports Rights • Enterprise AI • No junk • CEO Dashboard
+        Strictly filtered using your exact keywords • OSS/BSS • OTT • Sports Rights • Enterprise AI • No junk • CEO Dashboard
     </p>
 </div>
 """, height=140, scrolling=False)
