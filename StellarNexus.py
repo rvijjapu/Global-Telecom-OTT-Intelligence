@@ -9,88 +9,162 @@ import time
 import streamlit.components.v1 as components
 
 # ──────────────────────────────────────────────────────────────────────────────
-# PAGE CONFIG & BASIC SETUP
+# PAGE CONFIGURATION
 # ──────────────────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="🌐 Telecom & OTT Intelligence Nexus",
-    page_icon="⚡",
+    page_title="Global Telecom & OTT Stellar Nexus",
+    page_icon="🌐",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
 # ──────────────────────────────────────────────────────────────────────────────
-# GLOBAL PROFESSIONAL STYLING
+# GLOBAL PROFESSIONAL STYLING - Fixed containment & beautiful look
 # ──────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    .stApp { background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed; background-size: cover; font-family: 'Segoe UI', sans-serif; }
-    .header { background: rgba(10, 25, 47, 0.92); color: white; padding: 2rem; text-align: center; border-radius: 0 0 24px 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); margin-bottom: 2rem; }
-    .title { font-size: 3.2rem; font-weight: 800; margin: 0; letter-spacing: -1px; }
-    .subtitle { font-size: 1.3rem; opacity: 0.9; margin-top: 0.6rem; }
-    .section { background: rgba(255,255,255,0.96); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.15); margin-bottom: 2.5rem; border: 1px solid #e2e8f0; }
-    .section-header { padding: 1.2rem 1.5rem; font-size: 1.35rem; font-weight: 700; color: white; display: flex; align-items: center; gap: 12px; }
-    .pink { background: linear-gradient(135deg, #c026d3, #9f1239); }
-    .purple { background: linear-gradient(135deg, #7c3aed, #5b21b6); }
-    .green { background: linear-gradient(135deg, #059669, #047857); }
-    .orange { background: linear-gradient(135deg, #ea580c, #c2410c); }
-    .content { padding: 1.2rem; max-height: 580px; overflow-y: auto; }
-    .card { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1.1rem; margin-bottom: 1rem; transition: all 0.25s ease; }
-    .card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); background: #f1f5f9; }
-    .priority { background: linear-gradient(135deg, #fefce8, #fef3c7); border: 2px solid #fbbf24; }
-    .title-link { color: #1e40af; font-weight: 600; font-size: 1.05rem; text-decoration: none; display: block; margin-bottom: 0.5rem; line-height: 1.35; }
-    .title-link:hover { color: #1d4ed8; text-decoration: underline; }
-    .meta { font-size: 0.82rem; color: #64748b; display: flex; gap: 10px; flex-wrap: wrap; }
-    .hot { color: #dc2626; font-weight: 700; }
-    .warm { color: #ea580c; font-weight: 700; }
-    .normal { color: #64748b; }
-    .status { background: rgba(16, 185, 129, 0.15); color: #065f46; padding: 0.8rem 1.2rem; border-radius: 12px; margin: 1rem 0; font-weight: 500; }
+    
+    .stApp {
+        background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
+        background-size: cover;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+    
+    .header-container {
+        background: rgba(10, 25, 47, 0.94);
+        color: white;
+        padding: 2rem 2.5rem;
+        text-align: center;
+        border-radius: 0 0 24px 24px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+        margin-bottom: 2.5rem;
+    }
+    
+    .main-title {
+        font-size: 3.1rem;
+        font-weight: 800;
+        margin: 0;
+        letter-spacing: -1px;
+    }
+    
+    .subtitle {
+        font-size: 1.3rem;
+        opacity: 0.9;
+        margin-top: 0.7rem;
+    }
+    
+    .hero-container {
+        background: rgba(255,255,255,0.97);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2.5rem;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+        border: 1px solid #e2e8f0;
+    }
+    
+    .hero-title {
+        color: #0a192f;
+        font-size: 1.9rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        border-left: 6px solid #1e40af;
+        padding-left: 16px;
+    }
+    
+    .col-header {
+        padding: 14px 16px;
+        border-radius: 14px 14px 0 0;
+        color: white;
+        font-weight: 700;
+        font-size: 1.1rem;
+        text-align: center;
+        box-shadow: 0 5px 16px rgba(0,0,0,0.18);
+    }
+    
+    .col-header-pink    { background: linear-gradient(135deg, #ec4899, #db2777); }
+    .col-header-purple  { background: linear-gradient(135deg, #a78bfa, #7c3aed); }
+    .col-header-green   { background: linear-gradient(135deg, #10b981, #059669); }
+    .col-header-orange  { background: linear-gradient(135deg, #fb923c, #ea580c); }
+    
+    .section-box {
+        background: white;
+        border-radius: 0 0 14px 14px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .news-container {
+        padding: 16px;
+        min-height: 420px;
+        max-height: 680px;
+        overflow-y: auto;
+    }
+    
+    .news-card {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 14px;
+        transition: all 0.3s ease;
+    }
+    
+    .news-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        background: #f1f5f9;
+    }
+    
+    .news-card-priority {
+        background: linear-gradient(135deg, #fefce8, #fef3c7);
+        border: 2px solid #fbbf24;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 14px;
+    }
+    
+    .news-title {
+        color: #1e40af;
+        font-size: 1.02rem;
+        font-weight: 600;
+        line-height: 1.38;
+        text-decoration: none;
+        display: block;
+        margin-bottom: 0.6rem;
+    }
+    
+    .news-title:hover {
+        color: #1d4ed8;
+        text-decoration: underline;
+    }
+    
+    .news-meta {
+        font-size: 0.84rem;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .time-hot    { color: #dc2626; font-weight: 700; }
+    .time-warm   { color: #ea580c; font-weight: 700; }
+    .time-normal { color: #64748b; }
+    
+    .news-container::-webkit-scrollbar { width: 7px; }
+    .news-container::-webkit-scrollbar-track { background: #f3f4f6; border-radius: 12px; }
+    .news-container::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 12px; }
+    
+    #MainMenu, footer, header { visibility: hidden !important; }
+    .stDeployButton { display: none !important; }
 </style>
 """, unsafe_allow_html=True)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# EVERGENT CLIENTS + COMPETITORS + KEYWORDS (very comprehensive)
-# ──────────────────────────────────────────────────────────────────────────────
-EVERGENT_CLIENTS = {
-    "Astro": ["astro", "astro malaysia", "sooka", "njoi"],
-    "FOX": ["fox", "fox sports", "fox corporation"],
-    "AT&T": ["at&t", "att", "directv"],
-    "NBA": ["nba", "national basketball"],
-    "Shahid": ["shahid", "shahid vip"],
-    "Sony": ["sony", "sonyliv", "sony pictures"],
-    "BBC": ["bbc", "bbc iplayer"],
-    "Sky": ["sky", "sky uk", "sky nz"],
-    "FanDuel": ["fanduel"],
-    "Bally Sports": ["bally sports"],
-    "Telekom Malaysia": ["telekom malaysia", "tm unifi"],
-    # ... add more as needed
-}
-
-COMPETITORS = {
-    "Netcracker": ["netcracker", "nec netcracker"],
-    "Amdocs": ["amdocs"],
-    "Matrixx": ["matrixx"],
-    "CSG": ["csg"],
-    "Oracle": ["oracle communications"],
-    "Ericsson": ["ericsson"],
-    "Nokia": ["nokia"],
-}
-
-CRITICAL_KEYWORDS = [
-    "merger", "acquisition", "deal", "partnership", "contract", "billion", "million",
-    "oss", "bss", "billing", "charging", "monetization", "5g", "convergent", "revenue",
-    "subscriber", "rights", "broadcast", "streaming", "platform", "launch", "expansion"
-]
-
-JUNK_KEYWORDS = [
-    "coupon", "code", "discount", "sale", "offer", "promo", "voucher", "deal of the day",
-    "black friday", "cyber monday", "flash sale", "limited time", "save", "% off",
-    "giveaway", "contest", "win", "free trial", "sign up", "subscribe now", "shop now",
-    "buy now", "best price", "clearance", "bogo"
-]
-
-# ──────────────────────────────────────────────────────────────────────────────
-# RSS FEEDS - Focused on quality sources
+# RSS SOURCES & CONFIG
 # ──────────────────────────────────────────────────────────────────────────────
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
@@ -108,181 +182,226 @@ RSS_FEEDS = [
 ]
 
 SECTIONS = {
-    "telco": {"icon": "📡", "name": "TELCO OSS/BSS", "color": "pink"},
-    "ott": {"icon": "📺", "name": "OTT & STREAMING", "color": "purple"},
-    "sports": {"icon": "🏆", "name": "SPORTS MEDIA", "color": "green"},
-    "technology": {"icon": "⚡", "name": "AI & TECH", "color": "orange"},
+    "telco": {"icon": "📡", "name": "TELCO OSS/BSS", "style": "col-header-pink"},
+    "ott": {"icon": "📺", "name": "OTT & STREAMING", "style": "col-header-purple"},
+    "sports": {"icon": "🏆", "name": "SPORTS MEDIA", "style": "col-header-green"},
+    "technology": {"icon": "⚡", "name": "AI & TECH", "style": "col-header-orange"},
 }
+
+HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+
+# Aggressive junk filter
+JUNK_PATTERNS = [
+    r'coupon', r'code', r'discount.*code', r'sale', r'offer', r'promo', r'voucher',
+    r'black\s*friday', r'cyber\s*monday', r'flash\s*sale', r'limited\s*time',
+    r'giveaway', r'contest', r'win\s*(free|now)', r'free\s*trial', r'sign\s*up',
+    r'shop\s*now', r'buy\s*now', r'best\s*price', r'%.*off'
+]
 
 # ──────────────────────────────────────────────────────────────────────────────
 # UTILITY FUNCTIONS
 # ──────────────────────────────────────────────────────────────────────────────
-def clean(text):
-    if not text:
-        return ""
-    return html.unescape(re.sub(r'<[^>]+>', '', str(text))).strip()
+def clean(raw):
+    if not raw: return ""
+    return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
 
 def is_junk(title, summary=""):
     text = (title + " " + summary).lower()
-    return any(term in text for term in JUNK_KEYWORDS)
+    return any(re.search(pat, text) for pat in JUNK_PATTERNS)
 
-def has_priority_content(title, summary=""):
-    text = (title + " " + summary).lower()
-    return any(kw in text for kw in CRITICAL_KEYWORDS)
-
-def fetch_feed(source_name, url, category):
+def fetch_feed(source, url, category):
     items = []
     try:
-        resp = requests.get(url, timeout=10)
-        if resp.status_code != 200:
-            return items
-
+        resp = requests.get(url, headers=HEADERS, timeout=10)
+        if resp.status_code != 200: return items
+        
         feed = feedparser.parse(resp.content)
         cutoff = datetime.now() - timedelta(days=7)
-
-        for entry in feed.entries[:15]:
+        
+        for entry in feed.entries[:12]:
             title = clean(entry.get("title", ""))
-            if len(title) < 30:
-                continue
-
+            if len(title) < 30: continue
+            
             summary = clean(entry.get("summary", title))
-
-            if is_junk(title, summary):
-                continue
-
-            if not has_priority_content(title, summary):
-                continue
-
-            pub_date = None
-            for key in ("published_parsed", "updated_parsed"):
-                val = getattr(entry, key, None)
+            
+            if is_junk(title, summary): continue
+            
+            link = entry.get("link", "#")
+            
+            pub = None
+            for k in ("published_parsed", "updated_parsed"):
+                val = getattr(entry, k, None)
                 if val:
                     try:
-                        pub_date = datetime(*val[:6])
+                        pub = datetime(*val[:6])
                         break
-                    except:
-                        pass
-
-            if not pub_date or pub_date < cutoff:
-                continue
-
+                    except: pass
+            
+            if not pub or pub < cutoff: continue
+            
+            # Priority flag for visual highlight
+            priority_keywords = ["amdocs", "netcracker", "matrixx", "evergent", "oss", "bss",
+                               "merger", "acquisition", "charging", "billing", "monetization"]
+            is_priority = any(kw in (title + summary).lower() for kw in priority_keywords)
+            
             items.append({
                 "title": title,
-                "link": entry.get("link", "#"),
-                "pub": pub_date,
-                "source": source_name,
+                "link": link,
+                "pub": pub,
+                "source": source,
                 "category": category,
-                "priority": True  # All passed articles are priority
+                "priority": is_priority
             })
-    except:
-        pass
-
+    except: pass
+    
     return items
 
-@st.cache_data(ttl=600)
-def load_all():
+@st.cache_data(ttl=600, show_spinner=False)
+def load_feeds():
     categorized = {k: [] for k in SECTIONS}
-
+    
     with ThreadPoolExecutor(max_workers=12) as executor:
-        futures = [
-            executor.submit(fetch_feed, name, url, cat)
-            for name, url, cat in RSS_FEEDS
-        ]
-
+        futures = [executor.submit(fetch_feed, src, url, cat) 
+                   for src, url, cat in RSS_FEEDS]
+        
         for future in as_completed(futures):
             try:
-                articles = future.result()
-                if articles:
-                    categorized[articles[0]["category"]].extend(articles)
-            except:
-                continue
-
-    # Sort: newest first
+                categorized[future.result()[0]["category"]].extend(future.result())
+            except: pass
+    
     for cat in categorized:
         categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
         categorized[cat] = categorized[cat][:12]
-
+    
     return categorized
 
-def get_time_badge(dt):
-    hours = int((datetime.now() - dt).total_seconds() / 3600)
-    if hours < 2: return "🟢 Now", "hot"
-    if hours < 12: return f"🟠 {hours}h", "warm"
-    return f"🔵 {hours//24}d", "normal"
+def get_time_str(dt):
+    hrs = int((datetime.now() - dt).total_seconds() / 3600)
+    if hrs < 2: return "🟢 Now", "time-hot"
+    if hrs < 12: return f"🟠 {hrs}h", "time-warm"
+    return f"🔵 {hrs//24}d", "time-normal"
 
 # ──────────────────────────────────────────────────────────────────────────────
-# RENDER SECTION - Beautiful & Contained
+# RENDER SECTION - Perfect containment
 # ──────────────────────────────────────────────────────────────────────────────
-def render_section(category, articles):
-    cfg = SECTIONS[category]
-    header = f"""
-    <div class="section-header {cfg['color']}">
-        {cfg['icon']} {cfg['name']}
-    </div>
-    """
-
-    if not articles:
-        content = '<div style="padding:120px 20px;text-align:center;color:#94a3b8;font-size:1.1rem;">No critical news in last 7 days</div>'
+def render_section(icon, name, style_class, items):
+    header = f'<div class="{style_class}">{icon} {name}</div>'
+    
+    content = ""
+    if not items:
+        content = '<div style="padding:140px 20px; text-align:center; color:#94a3b8; font-size:1.15rem;">No critical news in last 7 days</div>'
     else:
-        content = ""
-        for art in articles:
-            time_str, cls = get_time_badge(art["pub"])
-            title = html.escape(art["title"])
-            link = html.escape(art["link"])
-            source = html.escape(art["source"])
-
-            content += f"""
-            <div class="card">
-                <a href="{link}" target="_blank" class="title-link">{title}</a>
-                <div class="meta">
-                    <span class="{cls}">{time_str}</span>
+        for item in items:
+            time_str, time_class = get_time_str(item["pub"])
+            title = html.escape(item["title"])
+            link = html.escape(item["link"])
+            source = html.escape(item["source"])
+            
+            card_class = "news-card-priority" if item["priority"] else "news-card"
+            
+            content += f'''
+            <div class="{card_class}">
+                <a href="{link}" target="_blank" class="news-title">{title}</a>
+                <div class="news-meta">
+                    <span class="{time_class}">{time_str}</span>
                     <span>•</span>
                     <span>{source}</span>
                 </div>
             </div>
-            """
-
-    full = f"""
-    <div class="section">
+            '''
+    
+    full_html = f'''
+    <div class="section-box">
         {header}
         <div class="news-container">{content}</div>
     </div>
-    """
-
-    components.html(full, height=660, scrolling=True)
+    '''
+    
+    components.html(full_html, height=700, scrolling=True)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# MAIN DASHBOARD
+# MAIN APPLICATION FLOW
 # ──────────────────────────────────────────────────────────────────────────────
+placeholder = st.empty()
+with placeholder.container():
+    st.markdown("""
+        <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:70vh; text-align:center;">
+            <h1 style="color:#0a192f; font-size:3rem; font-weight:800;">⚡ Stellar Nexus Intelligence</h1>
+            <p style="color:#64748b; font-size:1.3rem; margin-top:1.2rem;">Loading critical global telecom & OTT signals...</p>
+        </div>
+    """, unsafe_allow_html=True)
+    time.sleep(1.6)
+
+placeholder.empty()
+
 st.markdown("""
-<div class="header">
-    <div class="title">Global Telecom & OTT Intelligence Nexus</div>
-    <div class="subtitle">Real-time Critical News • Clients • Competitors • OSS/BSS • Deals • January 2026</div>
+<div class="header-container">
+    <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
+    <p class="subtitle">AI-Powered Real-time Critical Intelligence • No Promos • January 2026</p>
 </div>
 """, unsafe_allow_html=True)
 
-with st.spinner("Loading high-impact intelligence (no promos, no junk)..."):
-    data = load_all()
-
-total_articles = sum(len(v) for v in data.values())
-
-st.markdown(f"""
-<div class="status">
-    Loaded {total_articles} high-priority articles • Last 7 days • Zero promotions/coupons
+# Strategic Highlights (your original content)
+st.markdown("""
+<div class="hero-container">
+    <div class="hero-title">🚀 KEY HIGHLIGHTS</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+        <div class="hero-box">
+            <div class="hero-box-title" style="color: #10b981;">🟢 STRATEGIC HITS</div>
+            <div class="hero-content">
+                <b>Amdocs-Matrixx Deal:</b> $200M acquisition completed — strengthens Tier-1 5G charging leadership<br><br>
+                <b>Disney-Hulu Integration:</b> Standalone Hulu app phase-out begins for unified Disney+ hub<br><br>
+                <b>NEC-CSG Acquisition:</b> NEC finalizes CSG deal, expanding Netcracker North America footprint
+            </div>
+        </div>
+        <div class="hero-box">
+            <div class="hero-box-title" style="color: #f97316;">🟠 MARKET PULSE</div>
+            <div class="hero-content">
+                <b>Agentic BSS Core:</b> Autonomous AI agents projected to manage ~40% of BSS operations by EOY<br><br>
+                <b>Satellite Broadband Rise:</b> Direct-to-consumer services emerging as fiber alternative<br><br>
+                <b>Physical AI Milestone:</b> Amazon reaches 1-millionth robot with DeepFleet integration
+            </div>
+        </div>
+    </div>
 </div>
 """, unsafe_allow_html=True)
+
+# Load & Display
+with st.spinner("Scanning high-impact sources (zero promotions)..."):
+    data = load_feeds()
 
 cols = st.columns(4)
 
 for idx, cat in enumerate(["telco", "ott", "sports", "technology"]):
+    sec = SECTIONS[cat]
+    items = data.get(cat, [])[:12]
+    
     with cols[idx]:
-        render_section(cat, data.get(cat, []))
+        render_section(
+            sec["icon"],
+            sec["name"],
+            sec["style"],
+            items
+        )
 
-st.markdown("""
-<div style="text-align:center; color:#94a3b8; font-size:0.9rem; margin:3rem 0 2rem;">
-    Powered by Real-time RSS Intelligence • Focused on EVERGENT ecosystem
+# Footer
+st.markdown(f'''
+<div style="text-align:center; color:rgba(255,255,255,0.9); font-size:0.9rem; margin:3rem 0 2rem; 
+            padding:20px; background:linear-gradient(135deg,rgba(10,25,47,0.96),rgba(30,41,59,0.96)); 
+            border-radius:16px;">
+    <p><strong>🕐 Live:</strong> {datetime.now().strftime('%H:%M:%S')} IST • <strong>🔄 Auto-refresh:</strong> every 5 min</p>
+    <p style="margin-top:10px; opacity:0.85;">
+        Focused on critical telecom/OTT news • No coupons, sales or promos • Powered by Real-time Intelligence
+    </p>
 </div>
-""", unsafe_allow_html=True)
+''', unsafe_allow_html=True)
 
-# Auto-refresh every 5 minutes
+# Auto-refresh
 st.markdown('<script>setTimeout(() => location.reload(), 300000);</script>', unsafe_allow_html=True)
+
+# Keep-alive
+@st.fragment(run_every=600)
+def keep_alive():
+    st.markdown("", unsafe_allow_html=True)
+
+keep_alive()
