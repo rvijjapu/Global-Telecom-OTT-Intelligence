@@ -330,30 +330,38 @@ def get_time_str(dt):
     return f"{hrs//24}d", "time-normal"
 
 def render_body(items):
+    """Render news cards - using components to avoid raw HTML display"""
     if not items:
-        return '<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">No recent news</div></div>'
+        return """<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">No recent news</div></div>"""
     
-    cards = ""
+    cards = []
     for item in items:
         time_str, time_class = get_time_str(item["pub"])
-        safe_title = html.escape(item["title"])
-        safe_link = html.escape(item["link"])
-        safe_source = html.escape(item["source"])
+        title = html.escape(item["title"])
+        link = html.escape(item["link"])
+        source = html.escape(item["source"])
         
         card_class = "news-card-priority" if item["priority"] else "news-card"
         
-        cards += f'''
-        <div class="{card_class}">
-            <a href="{safe_link}" target="_blank" class="news-title">{safe_title}</a>
-            <div class="news-meta">
-                <span class="{time_class}">{time_str}</span>
-                <span>•</span>
-                <span>{safe_source}</span>
-            </div>
-        </div>
-        '''
+        # Build card HTML without f-strings to avoid display issues
+        card_parts = [
+            '<div class="' + card_class + '">',
+            '<a href="' + link + '" target="_blank" class="news-title">' + title + '</a>',
+            '<div class="news-meta">',
+            '<span class="' + time_class + '">' + time_str + '</span>',
+            '<span>•</span>',
+            '<span>' + source + '</span>',
+            '</div>',
+            '</div>'
+        ]
+        
+        cards.append(''.join(card_parts))
     
-    return f'<div class="col-body">{cards}</div>'
+    body_parts = ['<div class="col-body">']
+    body_parts.extend(cards)
+    body_parts.append('</div>')
+    
+    return ''.join(body_parts)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # MAIN APPLICATION
@@ -415,20 +423,35 @@ cat_list = ["telco", "ott", "sports", "technology"]
 
 for idx, cat in enumerate(cat_list):
     sec = SECTIONS[cat]
-    items = data.get(cat, [])[:10]  # Top 10 per section
+    items = data.get(cat, [])[:10]
     
     with cols[idx]:
-        header_html = f'<div class="{sec["style"]}">{sec["icon"]} {sec["name"]}</div>'
-        st.markdown(header_html, unsafe_allow_html=True)
+        # Render header
+        header_parts = [
+            '<div class="',
+            sec["style"],
+            '">',
+            sec["icon"],
+            ' ',
+            sec["name"],
+            '</div>'
+        ]
+        st.markdown(''.join(header_parts), unsafe_allow_html=True)
+        
+        # Render body
         st.markdown(render_body(items), unsafe_allow_html=True)
 
 # Footer
-st.markdown(f"""
-<div style="text-align:center;color:rgba(255,255,255,0.95);font-size:0.8rem;margin-top:20px;padding:16px;background:linear-gradient(135deg,rgba(10,25,47,0.95),rgba(30,41,59,0.95));border-radius:10px;">
-    <p><strong>🕐 Live Sync:</strong> {datetime.now().strftime('%H:%M:%S')} | <strong>🔄 Auto-refresh:</strong> Every 5 minutes</p>
-    <p style="margin-top:6px;font-size:0.7rem;opacity:0.85;">Powered by Real-time RSS Intelligence</p>
-</div>
-""", unsafe_allow_html=True)
+footer_parts = [
+    '<div style="text-align:center;color:rgba(255,255,255,0.95);font-size:0.8rem;margin-top:20px;padding:16px;background:linear-gradient(135deg,rgba(10,25,47,0.95),rgba(30,41,59,0.95));border-radius:10px;">',
+    '<p><strong>🕐 Live Sync:</strong> ',
+    datetime.now().strftime('%H:%M:%S'),
+    ' | <strong>🔄 Auto-refresh:</strong> Every 5 minutes</p>',
+    '<p style="margin-top:6px;font-size:0.7rem;opacity:0.85;">Powered by Real-time RSS Intelligence</p>',
+    '</div>'
+]
+
+st.markdown(''.join(footer_parts), unsafe_allow_html=True)
 
 # Auto-refresh
 st.markdown('<script>setTimeout(function() {window.location.reload();}, 300000);</script>', unsafe_allow_html=True)
