@@ -8,9 +8,16 @@ import re
 import time
 import streamlit.components.v1 as components
 
-# ──────────────────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+# KEEP-ALIVE - MOVED TO TOP so it's defined before call
+# ══════════════════════════════════════════════════════════════════════════════
+@st.fragment(run_every=600)
+def keep_alive():
+    st.markdown("", unsafe_allow_html=True)
+
+# ══════════════════════════════════════════════════════════════════════════════
 # PAGE CONFIG
-# ──────────────────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
 st.set_page_config(
     page_title="Global Telecom & OTT Stellar Nexus",
     page_icon="🌐",
@@ -18,9 +25,9 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ──────────────────────────────────────────────────────────────────────────────
-# ULTRA-BEAUTIFUL CEO-LEVEL STYLING (light + dark accents)
-# ──────────────────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+# PREMIUM LIGHT THEME STYLING (beautiful & stable)
+# ══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -29,99 +36,72 @@ st.markdown("""
         background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
         background-size: cover;
         font-family: 'Inter', sans-serif;
+        padding-top: 1rem;
     }
     
-    .main-header {
-        background: linear-gradient(135deg, rgba(10,25,47,0.92), rgba(30,41,59,0.92));
-        color: white;
-        padding: 2.2rem 3rem;
-        border-radius: 0 0 32px 32px;
-        box-shadow: 0 12px 48px rgba(0,0,0,0.4);
+    .header-container {
+        background: rgba(255, 255, 255, 0.97);
+        padding: 2rem 2.5rem;
         text-align: center;
-        margin-bottom: 2.5rem;
+        border-radius: 20px;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        margin: 0 0 2.5rem 0;
+        border-bottom: 6px solid #1e40af;
     }
     
     .main-title {
-        font-size: 3.4rem;
-        font-weight: 900;
+        font-size: 3rem;
+        font-weight: 800;
+        color: #0a192f;
         margin: 0;
-        letter-spacing: -1.2px;
-        text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        letter-spacing: -0.8px;
     }
     
-    .main-subtitle {
-        font-size: 1.45rem;
-        opacity: 0.92;
+    .subtitle {
+        font-size: 1.35rem;
+        color: #475569;
         margin-top: 0.8rem;
         font-weight: 500;
     }
     
-    .highlights-container {
-        background: rgba(255,255,255,0.96);
-        border-radius: 20px;
-        padding: 2rem;
-        box-shadow: 0 14px 50px rgba(0,0,0,0.14);
+    .hero-container {
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 18px;
+        padding: 2.2rem;
+        margin-bottom: 2.5rem;
+        box-shadow: 0 14px 48px rgba(0,0,0,0.12);
         border: 1px solid #e2e8f0;
-        margin-bottom: 3rem;
-        display: flex;
-        flex-direction: column;
-        gap: 1.8rem;
     }
     
-    .highlights-title {
-        font-size: 2.1rem;
-        font-weight: 800;
+    .hero-title {
         color: #0a192f;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 12px;
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 1.6rem;
+        border-left: 8px solid #1e40af;
+        padding-left: 18px;
     }
     
-    .hit-pulse-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
-    }
-    
-    .hit-box, .pulse-box {
+    .hero-box {
         background: #f8fafc;
-        border-radius: 16px;
+        border-radius: 14px;
         padding: 1.8rem;
         border: 1px solid #e2e8f0;
-        box-shadow: 0 6px 24px rgba(0,0,0,0.06);
+        min-height: 240px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.05);
     }
     
-    .hit-title {
-        color: #10b981;
-        font-size: 1.35rem;
+    .hero-box-title {
         font-weight: 800;
-        margin-bottom: 1.2rem;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    
-    .pulse-title {
-        color: #f97316;
-        font-size: 1.35rem;
-        font-weight: 800;
-        margin-bottom: 1.2rem;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    
-    .highlight-item {
-        margin-bottom: 1.4rem;
-        font-size: 1.02rem;
-        line-height: 1.65;
-        color: #1e293b;
-    }
-    
-    .highlight-item b {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
         color: #0a192f;
-        font-weight: 700;
+    }
+    
+    .hero-content {
+        color: #1e293b;
+        font-size: 1rem;
+        line-height: 1.75;
     }
     
     .col-header {
@@ -134,10 +114,10 @@ st.markdown("""
         box-shadow: 0 6px 20px rgba(0,0,0,0.18);
     }
     
-    .col-header-pink { background: linear-gradient(135deg, #ec4899, #db2777); }
-    .col-header-purple { background: linear-gradient(135deg, #a78bfa, #7c3aed); }
-    .col-header-green { background: linear-gradient(135deg, #10b981, #059669); }
-    .col-header-orange { background: linear-gradient(135deg, #fb923c, #ea580c); }
+    .col-header-pink {background: linear-gradient(135deg, #ec4899, #db2777);}
+    .col-header-purple {background: linear-gradient(135deg, #a78bfa, #7c3aed);}
+    .col-header-green {background: linear-gradient(135deg, #10b981, #059669);}
+    .col-header-orange {background: linear-gradient(135deg, #fb923c, #ea580c);}
     
     .section-box {
         background: white;
@@ -171,7 +151,7 @@ st.markdown("""
     }
     
     .news-card-priority {
-        background: linear-gradient(135deg, #fffbeb, #fef3c7);
+        background: linear-gradient(135deg, #fefce8, #fef3c7);
         border: 2px solid #fbbf24;
     }
     
@@ -196,13 +176,13 @@ st.markdown("""
         flex-wrap: wrap;
     }
     
-    .time-hot { color: #dc2626; font-weight: 700; }
-    .time-warm { color: #ea580c; font-weight: 700; }
-    .time-normal { color: #64748b; }
+    .time-hot {color: #dc2626; font-weight: 700;}
+    .time-warm {color: #ea580c; font-weight: 700;}
+    .time-normal {color: #64748b;}
     
-    .news-container::-webkit-scrollbar { width: 8px; }
-    .news-container::-webkit-scrollbar-track { background: #f3f4f6; border-radius: 14px; }
-    .news-container::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 14px; }
+    .news-container::-webkit-scrollbar {width: 8px;}
+    .news-container::-webkit-scrollbar-track {background: #f3f4f6; border-radius: 14px;}
+    .news-container::-webkit-scrollbar-thumb {background: #9ca3af; border-radius: 14px;}
     
     .footer-bar {
         text-align: center;
@@ -215,13 +195,13 @@ st.markdown("""
         box-shadow: 0 8px 32px rgba(0,0,0,0.3);
     }
     
-    #MainMenu, footer, header { visibility: hidden !important; }
-    .stDeployButton { display: none !important; }
+    #MainMenu, footer, header {visibility: hidden !important;}
+    .stDeployButton {display: none !important;}
 </style>
 """, unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# RSS FEEDS & SECTION KEYWORDS (strict per-section)
+# RSS FEEDS & CONFIG
 # ══════════════════════════════════════════════════════════════════════════════
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
@@ -245,40 +225,14 @@ SECTIONS = {
     "technology": {"icon": "⚡", "name": "AI TECHWATCH", "style": "col-header-orange"},
 }
 
-# Strict per-section keywords (no cross-over)
-TELCO_KEYWORDS = ["oss", "bss", "billing", "charging", "monetization", "convergent billing", "5g monetization", "revenue management", "order management", "product catalog", "service fulfillment", "telecom deal", "telco partnership", "oss bss contract", "digital transformation", "system migration"]
-OTT_KEYWORDS = ["ott", "streaming", "svod", "avod", "fast channels", "subscriber growth", "arpu", "content licensing", "sports streaming", "original content", "ott acquisition", "streaming merger", "content deal"]
-SPORTS_KEYWORDS = ["sports media rights", "broadcasting rights", "sports streaming", "league partnership", "media rights deal", "sponsorship deal", "fan engagement"]
-TECH_KEYWORDS = ["artificial intelligence", "generative ai", "enterprise ai", "ai platform", "cloud platform", "saas platform", "technology acquisition", "strategic partnership"]
-
-JUNK_EXCLUDES = [
-    "coupon", "discount", "sale", "promo", "voucher", "giveaway", "contest", "black friday", "cyber monday",
-    "baby", "birth", "newborn", "pregnant", "wedding", "divorce", "gossip", "celebrity", "player injury",
-    "match score", "fantasy", "betting odds", "oil", "gas", "petroleum", "insurance", "semiconductor", "crypto", "nft"
-]
-
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
-# ──────────────────────────────────────────────────────────────────────────────
-# CORE UTILITY FUNCTIONS
-# ──────────────────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+# UTILITY FUNCTIONS
+# ══════════════════════════════════════════════════════════════════════════════
 def clean(raw):
     if not raw: return ""
     return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
-
-def is_junk(title, summary=""):
-    text = (title + " " + summary).lower()
-    return any(ex in text for ex in JUNK_EXCLUDES)
-
-def is_section_relevant(title, summary, section):
-    text = (title + " " + summary).lower()
-    keywords = {
-        "telco": TELCO_KEYWORDS,
-        "ott": OTT_KEYWORDS,
-        "sports": SPORTS_KEYWORDS,
-        "technology": TECH_KEYWORDS
-    }[section]
-    return any(kw in text for kw in keywords)
 
 def fetch_feed(source, url, category):
     items = []
@@ -295,8 +249,7 @@ def fetch_feed(source, url, category):
             
             summary = clean(entry.get("summary", title))
             
-            if is_junk(title, summary): continue
-            if not is_section_relevant(title, summary, category): continue
+            link = entry.get("link", "#")
             
             pub = None
             for k in ("published_parsed", "updated_parsed"):
@@ -309,11 +262,11 @@ def fetch_feed(source, url, category):
             
             if not pub or pub < cutoff: continue
             
-            is_priority = any(kw in (title + summary).lower() for kw in ["netcracker", "amdocs", "matrixx", "merger", "acquisition"])
+            is_priority = any(kw in (title + summary).lower() for kw in ["amdocs", "netcracker", "matrixx", "merger", "acquisition"])
             
             items.append({
                 "title": title,
-                "link": entry.get("link", "#"),
+                "link": link,
                 "pub": pub,
                 "source": source,
                 "category": category,
@@ -340,7 +293,7 @@ def load_feeds():
     
     for cat in categorized:
         categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
-        categorized[cat] = categorized[cat][:10]
+        categorized[cat] = categorized[cat][:12]
     
     return categorized
 
@@ -350,9 +303,9 @@ def get_time_str(dt):
     if hrs < 12: return f"🟠 {hrs}h", "time-warm"
     return f"🔵 {hrs//24}d", "time-normal"
 
-# ──────────────────────────────────────────────────────────────────────────────
-# RENDER SECTION - Beautiful & Contained
-# ──────────────────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+# RENDER SECTION - Stable HTML rendering
+# ══════════════════════════════════════════════════════════════════════════════
 def render_section(icon, name, style_class, items):
     header = f'<div class="{style_class}">{icon} {name}</div>'
     
@@ -382,88 +335,87 @@ def render_section(icon, name, style_class, items):
     full_html = f'''
     <div class="section-box">
         {header}
-        <div class="news-container">{content}</div>
+        <div class="news-container">
+            {content}
+        </div>
     </div>
     '''
     
+    # Use components.html for reliable rendering
     components.html(full_html, height=760, scrolling=True)
 
-# ──────────────────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
 # MAIN APPLICATION - CEO-READY LAYOUT
-# ──────────────────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+placeholder = st.empty()
+with placeholder.container():
+    st.markdown("""
+        <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:70vh; text-align:center;">
+            <h1 style="color:#0a192f; font-size:3.2rem; font-weight:800;">⚡ Stellar Nexus Intelligence</h1>
+            <p style="color:#64748b; font-size:1.4rem; margin-top:1.2rem;">Loading critical telecom & OTT signals...</p>
+        </div>
+    """, unsafe_allow_html=True)
+    time.sleep(1.5)
+
+placeholder.empty()
+
 st.markdown("""
-<div class="main-header">
-    <div class="main-title">Global Telecom & OTT Stellar Nexus</div>
-    <div class="main-subtitle">AI-Powered Real-time Critical Intelligence • January 2026</div>
+<div class="header-container">
+    <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
+    <p class="subtitle">AI-Powered Real-time Critical Intelligence • January 2026</p>
 </div>
 """, unsafe_allow_html=True)
 
-# ──────────────────────────────────────────────────────
-# HIGHLIGHTS - Rocket style (exactly like sample)
-# ──────────────────────────────────────────────────────
+# Strategic Highlights (your original content)
 st.markdown("""
-<div class="highlights-container">
-    <div class="highlights-title">
-        🚀 HIGHLIGHTS
-    </div>
-    <div class="hit-pulse-grid">
-        <div class="hit-box">
-            <div class="hit-title">
-                <span style="font-size:1.5rem;">🌟</span> STRATEGIC HITS
-            </div>
-            <div class="highlight-item">
-                <b>Amdocs-Matrixx Deal:</b> Amdocs completes $200M acquisition of charging leader Matrixx Software to dominate Tier-1 5G billing market.
-            </div>
-            <div class="highlight-item">
-                <b>Disney-Hulu Merger:</b> Disney officially begins phasing out standalone Hulu app for unified Disney+ hub.
-            </div>
-            <div class="highlight-item">
-                <b>NEC Expansion:</b> Japan's NEC finalizes CSG acquisition, scaling Netcracker's North American SaaS footprint.
+<div class="hero-container">
+    <div class="hero-title">🚀 HIGHLIGHTS</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+        <div class="hero-box">
+            <div class="hero-box-title" style="color: #10b981;">🟢 STRATEGIC HITS</div>
+            <div class="hero-content">
+                <b>Amdocs-Matrixx Deal:</b> Amdocs completes its $200M acquisition of charging leader Matrixx Software to dominate the Tier-1 5G billing market.<br><br>
+                <b>Disney-Hulu Merger:</b> Disney officially begins phasing out the standalone Hulu app to integrate all content into a unified Disney+ hub.<br><br>
+                <b>NEC Expansion:</b> Japan's NEC finalizes the acquisition of CSG, significantly scaling Netcracker's North American SaaS footprint.
             </div>
         </div>
-        
-        <div class="pulse-box">
-            <div class="pulse-title">
-                <span style="font-size:1.5rem;">🔥</span> PULSE
-            </div>
-            <div class="highlight-item">
-                <b>Agentic AI Core:</b> By EOY 2026, autonomous AI agents expected to handle ~40% of standard BSS operations.
-            </div>
-            <div class="highlight-item">
-                <b>Satellite Breakout:</b> Direct-to-consumer satellite broadband moves from niche to mainstream fiber competitor.
-            </div>
-            <div class="highlight-item">
-                <b>Physical AI:</b> Amazon deploys 1-millionth robot with DeepFleet AI for 10% warehouse efficiency gain.
+        <div class="hero-box">
+            <div class="hero-box-title" style="color: #f97316;">🟠 PULSE</div>
+            <div class="hero-content">
+                <b>Agentic AI Core:</b> By EOY 2026, autonomous AI agents are expected to handle roughly 40% of standard BSS operational tasks.<br><br>
+                <b>Satellite Breakout:</b> Direct-to-consumer satellite broadband moves from niche to mainstream as a primary fiber competitor.<br><br>
+                <b>Physical AI:</b> Amazon deploys its 1-millionth robot, integrated with DeepFleet AI for a 10% gain in warehouse efficiency.
             </div>
         </div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# ──────────────────────────────────────────────────────
-# REAL-TIME NEWS SECTIONS
-# ──────────────────────────────────────────────────────
-with st.spinner("Loading only high-impact critical intelligence..."):
+# Load & Render News
+with st.spinner("Scanning high-impact sources..."):
     data = load_feeds()
 
 cols = st.columns(4)
 
 for idx, cat in enumerate(["telco", "ott", "sports", "technology"]):
+    sec = SECTIONS[cat]
+    items = data.get(cat, [])[:12]
+    
     with cols[idx]:
         render_section(
-            SECTIONS[cat]["icon"],
-            SECTIONS[cat]["name"],
-            SECTIONS[cat]["style"],
-            data.get(cat, [])
+            sec["icon"],
+            sec["name"],
+            sec["style"],
+            items
         )
 
 # Footer
 st.markdown(f"""
 <div class="footer-bar">
-    <p><strong>🕐 Live Update:</strong> {datetime.now().strftime('%H:%M:%S')} IST 
+    <p><strong>🕐 Live:</strong> {datetime.now().strftime('%H:%M:%S')} IST 
        | <strong>🔄 Auto-refresh:</strong> Every 5 minutes</p>
     <p style="margin-top:0.8rem; opacity:0.9;">
-        Strictly filtered for business-critical news • Powered by Real-time Intelligence Engine
+        Strictly filtered for business-critical news • Powered by Real-time Intelligence
     </p>
 </div>
 """, unsafe_allow_html=True)
@@ -471,4 +423,5 @@ st.markdown(f"""
 # Auto-refresh
 st.markdown('<script>setTimeout(() => location.reload(), 300000);</script>', unsafe_allow_html=True)
 
+# Call keep_alive at the end (now safe)
 keep_alive()
