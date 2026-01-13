@@ -19,15 +19,11 @@ st.set_page_config(
 )
 
 # ──────────────────────────────────────────────────────────────────────────────
-# GLOBAL STYLING - Fixed layout & containment
+# GLOBAL CSS - Strict containment & clean layout
 # ──────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-    * { 
-        box-sizing: border-box; 
-        margin: 0; 
-        padding: 0; 
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     
     .stApp {
         background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
@@ -35,10 +31,7 @@ st.markdown("""
         font-family: 'Inter', sans-serif;
     }
     
-    .block-container {
-        padding-top: 1rem !important;
-        padding-bottom: 2rem !important;
-    }
+    .block-container { padding-top: 1rem !important; padding-bottom: 2rem !important; }
     
     .header-container {
         background: rgba(255, 255, 255, 0.97);
@@ -50,38 +43,8 @@ st.markdown("""
         border-bottom: 5px solid #1e40af;
     }
     
-    .main-title {
-        font-size: 2.8rem;
-        font-weight: 800;
-        color: #0a192f;
-        margin: 0;
-        letter-spacing: -0.6px;
-    }
-    
-    .subtitle {
-        font-size: 1.15rem;
-        color: #475569;
-        margin-top: 0.6rem;
-        font-weight: 500;
-    }
-    
-    .hero-container {
-        background: rgba(255, 255, 255, 0.98);
-        border-radius: 16px;
-        padding: 2rem;
-        margin-bottom: 2.2rem;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.12);
-        border: 1px solid #e2e8f0;
-    }
-    
-    .hero-title {
-        color: #0a192f;
-        font-size: 1.95rem;
-        font-weight: 800;
-        margin-bottom: 1.5rem;
-        border-left: 6px solid #1e40af;
-        padding-left: 15px;
-    }
+    .main-title { font-size: 2.8rem; font-weight: 800; color: #0a192f; margin: 0; }
+    .subtitle { font-size: 1.15rem; color: #475569; margin-top: 0.6rem; }
     
     .col-header {
         padding: 14px 16px;
@@ -147,10 +110,7 @@ st.markdown("""
         margin-bottom: 8px;
     }
     
-    .news-title:hover {
-        color: #1d4ed8;
-        text-decoration: underline;
-    }
+    .news-title:hover { color: #1d4ed8; text-decoration: underline; }
     
     .news-meta {
         font-size: 0.78rem;
@@ -165,29 +125,17 @@ st.markdown("""
     .time-warm   { color: #ea580c; font-weight: 600; }
     .time-normal { color: #64748b; }
     
-    .news-container::-webkit-scrollbar {
-        width: 6px;
-    }
-    .news-container::-webkit-scrollbar-track {
-        background: #f3f4f6;
-        border-radius: 10px;
-    }
-    .news-container::-webkit-scrollbar-thumb {
-        background: #9ca3af;
-        border-radius: 10px;
-    }
+    .news-container::-webkit-scrollbar { width: 6px; }
+    .news-container::-webkit-scrollbar-track { background: #f3f4f6; border-radius: 10px; }
+    .news-container::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 10px; }
     
     #MainMenu, footer, header { visibility: hidden !important; }
     .stDeployButton { display: none !important; }
-    
-    [data-testid="column"] > div {
-        padding: 0 10px !important;
-    }
 </style>
 """, unsafe_allow_html=True)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# RSS FEEDS & CONFIGURATION (your original list)
+# RSS SOURCES & BUSINESS FILTERS
 # ──────────────────────────────────────────────────────────────────────────────
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
@@ -215,36 +163,112 @@ SECTIONS = {
     "technology": {"icon": "⚡", "name": "AI TECHWATCH", "style": "col-header-orange"},
 }
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-    "Accept": "application/rss+xml, application/xml, text/xml, */*",
-}
-
-# Your filters, keywords, clients, competitors... (keep your original ones)
-
-# ──────────────────────────────────────────────────────────────────────────────
-# UTILITY FUNCTIONS (your original ones - only showing signature)
-# ──────────────────────────────────────────────────────────────────────────────
-# clean(), is_content_appropriate(), calculate_relevance_score(), fetch_feed(),
-# load_feeds(), get_time_str()  → keep your existing implementations
+# Junk/promotional filter keywords (very aggressive)
+PROMO_JUNK = [
+    "coupon", "code", "discount", "sale", "offer", "promo", "voucher", "deal of the day",
+    "black friday", "cyber monday", "flash sale", "limited time", "save", "off", "% off",
+    "giveaway", "contest", "win", "free trial", "sign up", "subscribe now", "shop now",
+    "buy now", "best price", "lowest price", "clearance", "bogo", "bundle"
+]
 
 # ──────────────────────────────────────────────────────────────────────────────
-# IMPROVED SECTION RENDERING - Strict containment
+# UTILITY FUNCTIONS
+# ──────────────────────────────────────────────────────────────────────────────
+def clean(raw):
+    if not raw: return ""
+    return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
+
+def is_junk(title, summary):
+    text = (title + " " + summary).lower()
+    return any(term in text for term in PROMO_JUNK)
+
+def calculate_relevance_score(title, summary):
+    text = (title + " " + summary).lower()
+    score = 0
+    critical = ["merger", "acquisition", "deal", "oss", "bss", "billing", "charging", "5g", "monetization"]
+    for kw in critical:
+        if kw in text: score += 10
+    return score
+
+def fetch_feed(source, url, category):
+    items = []
+    try:
+        resp = requests.get(url, timeout=10)
+        if resp.status_code != 200: return items
+        
+        feed = feedparser.parse(resp.content)
+        cutoff = datetime.now() - timedelta(days=5)
+        
+        for entry in feed.entries[:12]:
+            title = clean(entry.title)
+            if len(title) < 25: continue
+            
+            summary = clean(entry.get("summary", title))
+            
+            if is_junk(title, summary): continue  # ← Aggressive promo filter
+            
+            pub = None
+            for key in ("published_parsed", "updated_parsed"):
+                val = getattr(entry, key, None)
+                if val:
+                    try:
+                        pub = datetime(*val[:6])
+                        break
+                    except: pass
+            
+            if not pub or pub < cutoff: continue
+            
+            relevance = calculate_relevance_score(title, summary)
+            priority = relevance >= 20 or any(kw in (title + summary).lower() for kw in ["amdocs", "netcracker", "matrixx", "oss", "bss"])
+            
+            items.append({
+                "title": title,
+                "link": entry.get("link", "#"),
+                "pub": pub,
+                "source": source,
+                "priority": priority,
+                "relevance": relevance
+            })
+    except:
+        pass
+    return items
+
+@st.cache_data(ttl=300)
+def load_feeds():
+    categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
+    
+    with ThreadPoolExecutor(max_workers=12) as executor:
+        futures = [executor.submit(fetch_feed, src, url, cat) 
+                   for src, url, cat in RSS_FEEDS]
+        
+        for future in as_completed(futures):
+            try:
+                for item in future.result():
+                    categorized[item["category"]].append(item)
+            except: pass
+    
+    for cat in categorized:
+        categorized[cat].sort(key=lambda x: (-x["relevance"], x["pub"]))
+        categorized[cat] = categorized[cat][:10]
+    
+    return categorized
+
+def get_time_str(dt):
+    hrs = int((datetime.now() - dt).total_seconds() / 3600)
+    if hrs < 1: return "Now", "time-hot"
+    if hrs < 6: return f"{hrs}h ago", "time-hot"
+    if hrs < 24: return f"{hrs}h ago", "time-warm"
+    return f"{hrs//24}d ago", "time-normal"
+
+# ──────────────────────────────────────────────────────────────────────────────
+# RENDERING - Strict containment
 # ──────────────────────────────────────────────────────────────────────────────
 def render_section(icon, name, style_class, items):
-    header = f'''
-    <div class="{style_class}">
-        {icon} {name}
-    </div>
-    '''
+    header = f'<div class="{style_class}">{icon} {name}</div>'
     
     news_html = ""
     if not items:
-        news_html = '''
-        <div style="text-align:center; color:#94a3b8; padding:100px 20px; font-size:1.1rem;">
-            No recent relevant news
-        </div>
-        '''
+        news_html = '<div style="padding:100px 20px; text-align:center; color:#94a3b8;">No recent relevant news</div>'
     else:
         for item in items:
             time_str, time_class = get_time_str(item["pub"])
@@ -252,7 +276,7 @@ def render_section(icon, name, style_class, items):
             link = html.escape(item["link"])
             source = html.escape(item["source"])
             
-            card_class = "news-card-priority" if item.get("priority", False) else "news-card"
+            card_class = "news-card-priority" if item["priority"] else "news-card"
             
             news_html += f'''
             <div class="{card_class}">
@@ -274,14 +298,11 @@ def render_section(icon, name, style_class, items):
     </div>
     '''
     
-    # Use generous height + scrolling
-    components.html(full_html, height=620, scrolling=True)
+    components.html(full_html, height=640, scrolling=True)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# MAIN APPLICATION FLOW
+# MAIN APPLICATION
 # ──────────────────────────────────────────────────────────────────────────────
-
-# Loading screen (optional - your version)
 placeholder = st.empty()
 with placeholder.container():
     st.markdown("""
@@ -294,7 +315,6 @@ with placeholder.container():
 
 placeholder.empty()
 
-# Header & Strategic Highlights (your original content)
 st.markdown("""
 <div class="header-container">
     <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
@@ -302,13 +322,34 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ... your hero/highlights section ...
+# Strategic Highlights (your original content)
+st.markdown("""
+<div class="hero-container">
+    <div class="hero-title">🚀 KEY HIGHLIGHTS</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div class="hero-box">
+            <div class="hero-box-title" style="color: #10b981;">🟢 STRATEGIC HITS</div>
+            <div class="hero-content">
+                <b>Amdocs-Matrixx:</b> $200M acquisition completed — strengthens charging leadership<br><br>
+                <b>Disney-Hulu:</b> Standalone Hulu app phase-out begins<br><br>
+                <b>NEC-CSG:</b> NEC finalizes CSG acquisition, boosting Netcracker NA
+            </div>
+        </div>
+        <div class="hero-box">
+            <div class="hero-box-title" style="color: #f97316;">🟠 MARKET PULSE</div>
+            <div class="hero-content">
+                <b>Agentic BSS:</b> ~40% of BSS tasks autonomous by EOY<br><br>
+                <b>Satellite Broadband:</b> Gaining vs fiber<br><br>
+                <b>Physical AI:</b> Amazon 1M robot milestone
+            </div>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-# Load data
-with st.spinner("Loading latest industry signals..."):
+with st.spinner("Loading clean industry signals..."):
     data = load_feeds()
 
-# Render columns with fixed layout
 cols = st.columns(4)
 
 for idx, cat in enumerate(["telco", "ott", "sports", "technology"]):
@@ -323,17 +364,15 @@ for idx, cat in enumerate(["telco", "ott", "sports", "technology"]):
             items
         )
 
-# Footer
 st.markdown(f'''
 <div style="text-align:center; color:rgba(255,255,255,0.92); font-size:0.85rem; margin:2.5rem 0 1.5rem; 
             padding:18px; background:linear-gradient(135deg,rgba(10,25,47,0.96),rgba(30,41,59,0.96)); 
             border-radius:12px;">
-    <p><strong>🕐 Live Update:</strong> {datetime.now().strftime('%H:%M:%S')} IST</p>
+    <p><strong>🕐 Live:</strong> {datetime.now().strftime('%H:%M:%S')} IST</p>
     <p style="margin-top:8px; font-size:0.75rem; opacity:0.88;">
-        Powered by Real-time RSS Intelligence Engine
+        Powered by Real-time RSS Intelligence • Junk & promo filtered
     </p>
 </div>
 ''', unsafe_allow_html=True)
 
-# Auto-refresh
-st.markdown('<script>setTimeout(() => {window.location.reload()}, 300000);</script>', unsafe_allow_html=True)
+st.markdown('<script>setTimeout(() => location.reload(), 300000);</script>', unsafe_allow_html=True)
