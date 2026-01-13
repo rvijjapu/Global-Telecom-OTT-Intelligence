@@ -1,79 +1,24 @@
 import streamlit as st
 import feedparser
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import html
 import re
-import hashlib
-import json
-import urllib.parse
-from urllib.parse import urlparse, parse_qs
 import time
 
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE CONFIG
 # ══════════════════════════════════════════════════════════════════════════════
 st.set_page_config(
-    page_title="Evergent Intelligence Dashboard",
+    page_title="Global Telecom & OTT Stellar Nexus",
     page_icon="🌐",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-if 'keep_alive' not in st.session_state:
-    st.session_state.keep_alive = datetime.now()
-
-GROQ_API_KEY = "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"
-
 # ══════════════════════════════════════════════════════════════════════════════
-# EVERGENT INTELLIGENCE DATABASE
-# ══════════════════════════════════════════════════════════════════════════════
-EVERGENT_CLIENTS = {
-    "Astro": ["astro malaysia", "astro sooka", "astro njoi", "sooka", "njoi"],
-    "FOX": ["fox sports", "fox corporation", "fox networks"],
-    "AT&T": ["at&t", "att", "directv"],
-    "NBA": ["nba", "national basketball association"],
-    "Shahid": ["shahid", "shahid vip", "mbc shahid"],
-    "MBC": ["mbc group", "mbc", "middle east broadcasting"],
-    "Sony": ["sony pictures", "sony entertainment", "sonyliv"],
-    "BBC": ["bbc", "british broadcasting", "bbc iplayer"],
-    "Sky": ["sky nz", "sky uk", "sky italia", "sky deutschland"],
-    "FanDuel": ["fanduel", "fanduel group"],
-    "Bally Sports": ["bally sports", "diamond sports"],
-    "Telekom Malaysia": ["telekom malaysia", "tm unifi", "unifi tv"]
-}
-
-COMPETITORS = {
-    "Netcracker": ["netcracker", "nec netcracker"],
-    "Amdocs": ["amdocs", "amdocs ltd"],
-    "CSG": ["csg systems", "csg international"],
-    "Oracle": ["oracle communications", "oracle telecom"],
-    "Ericsson": ["ericsson"],
-    "Nokia": ["nokia"],
-    "Matrixx": ["matrixx", "matrixx software"],
-    "Optiva": ["optiva"],
-    "Cerillion": ["cerillion"]
-}
-
-TOP_TELCOS = {
-    "Verizon": ["verizon", "verizon wireless"],
-    "T-Mobile": ["t-mobile", "tmobile"],
-    "Vodafone": ["vodafone"],
-    "BT": ["bt group", "british telecom"],
-    "Singtel": ["singtel", "singapore telecom"],
-    "Jio": ["reliance jio", "jio platforms"],
-    "Airtel": ["bharti airtel", "airtel"]
-}
-
-# Flatten for efficient searching
-ALL_CLIENTS = [term.lower() for terms in EVERGENT_CLIENTS.values() for term in terms]
-ALL_COMPETITORS = [term.lower() for terms in COMPETITORS.values() for term in terms]
-ALL_TELCOS = [term.lower() for terms in TOP_TELCOS.values() for term in terms]
-STRATEGIC_KEYWORDS = ["merger", "acquisition", "deal", "partnership", "contract", "billion", "million", "revenue", "subscriber", "oss", "bss", "billing", "monetization", "5g"]
-
-# ══════════════════════════════════════════════════════════════════════════════
-# KEEP-ALIVE
+# KEEP-ALIVE FRAGMENT
 # ══════════════════════════════════════════════════════════════════════════════
 @st.fragment(run_every=600)
 def keep_alive():
@@ -90,205 +35,164 @@ st.markdown("""
         background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
         background-size: cover;
         font-family: 'Inter', sans-serif;
+        padding-top: 0.5rem;
     }
     
     .header-container {
-        background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.98) 100%);
+        background: rgba(255, 255, 255, 0.96);
         padding: 1.5rem 2rem;
         text-align: center;
-        border-radius: 16px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-        margin: 0 0 1.5rem 0;
-        border-bottom: 4px solid #0a192f;
+        border-radius: 20px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        margin: 0 0 2rem 0;
+        border-bottom: 4px solid #1e40af;
     }
     
     .main-title {
-        font-size: 2rem;
+        font-size: 2.6rem;
         font-weight: 800;
         color: #0a192f;
         margin: 0;
+        letter-spacing: -0.8px;
     }
     
     .subtitle {
-        font-size: 0.9rem;
-        color: #64748b;
-        margin-top: 0.4rem;
+        font-size: 1.1rem;
+        color: #475569;
+        margin-top: 0.6rem;
+        font-weight: 500;
     }
     
-    .live-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: linear-gradient(135deg, #10b981, #059669);
-        color: white;
-        padding: 3px 10px;
-        border-radius: 20px;
-        font-size: 0.7rem;
-        font-weight: 600;
-        animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.7; }
-    }
-    
-    .ceo-summary {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        border-left: 6px solid #f59e0b;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 8px 25px rgba(245,158,11,0.2);
-    }
-    
-    .ceo-summary-title {
-        color: #92400e;
-        font-size: 1.3rem;
-        font-weight: 800;
-        margin-bottom: 1rem;
-    }
-    
-    .ceo-summary-content {
-        color: #451a03;
-        font-size: 0.9rem;
-        line-height: 1.7;
-    }
-    
+    /* Highlights Section */
     .hero-container {
         background: rgba(255, 255, 255, 0.98);
-        border-radius: 14px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 35px rgba(0,0,0,0.12);
+        border: 1px solid #e2e8f0;
     }
     
     .hero-title {
         color: #0a192f;
-        font-size: 1.3rem;
+        font-size: 1.85rem;
         font-weight: 800;
-        margin-bottom: 1rem;
-        border-left: 6px solid #3b82f6;
-        padding-left: 12px;
+        margin-bottom: 1.5rem;
+        border-left: 6px solid #1e40af;
+        padding-left: 15px;
     }
     
     .hero-box {
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        border-radius: 10px;
-        padding: 1.2rem;
-        height: 100%;
+        background: #f1f5f9;
+        border-radius: 12px;
+        padding: 1.5rem;
+        min-height: 200px;
         border: 1px solid #e2e8f0;
     }
     
     .hero-box-title {
-        font-weight: 700;
-        font-size: 0.95rem;
-        margin-bottom: 0.8rem;
+        font-weight: 800;
+        font-size: 1.1rem;
+        margin-bottom: 12px;
     }
     
     .hero-content {
-        color: #334155;
-        font-size: 0.8rem;
-        line-height: 1.6;
+        color: #1e293b;
+        font-size: 0.95rem;
+        line-height: 1.7;
     }
     
-    .priority-badge {
-        background: linear-gradient(135deg, #ef4444, #dc2626);
-        color: white;
-        padding: 2px 8px;
-        border-radius: 6px;
-        font-size: 0.65rem;
+    .hero-content b {
+        color: #0a192f;
         font-weight: 700;
-        text-transform: uppercase;
-        display: inline-block;
-        margin-bottom: 4px;
     }
     
+    /* News Sections */
     .col-header {
-        padding: 12px 14px;
-        border-radius: 12px 12px 0 0;
+        padding: 12px 16px;
+        border-radius: 14px 14px 0 0;
         color: white;
         font-weight: 700;
-        font-size: 0.85rem;
+        font-size: 0.95rem;
         text-align: center;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
     }
     
     .col-header-pink {background: linear-gradient(135deg, #ec4899, #db2777);}
-    .col-header-purple {background: linear-gradient(135deg, #a78bfa, #7c3aed);}
-    .col-header-green {background: linear-gradient(135deg, #34d399, #059669);}
-    .col-header-orange {background: linear-gradient(135deg, #fb923c, #ea580c);}
+    .col-header-purple {background: linear-gradient(135deg, #a78bfa, #8b5cf6);}
+    .col-header-green {background: linear-gradient(135deg, #34d399, #10b981);}
+    .col-header-orange {background: linear-gradient(135deg, #fb923c, #f97316);}
     
     .col-body {
-        background: rgba(255,255,255,0.98);
-        border-radius: 0 0 12px 12px;
-        padding: 10px;
-        height: 480px;
+        background: white;
+        border-radius: 0 0 14px 14px;
+        padding: 12px;
+        min-height: 480px;
+        max-height: 580px;
         overflow-y: auto;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        margin-bottom: 1rem;
     }
     
-    .highlight-card {
-        background: #ffffff;
+    .news-card {
+        background: #fafbfc;
         border: 1px solid #e2e8f0;
-        border-left: 4px solid #3b82f6;
         border-radius: 10px;
-        padding: 12px 14px;
+        padding: 12px;
         margin-bottom: 10px;
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
     }
     
-    .highlight-card:hover {
-        background: #f8fafc;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-        transform: translateY(-2px);
+    .news-card:hover {
+        background: #f1f5f9;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+        transform: translateY(-1px);
     }
     
-    .highlight-card.client {
-        border-left: 4px solid #10b981;
-        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-    }
-    
-    .highlight-card.competitor {
-        border-left: 4px solid #f59e0b;
-        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-    }
-    
-    .highlight-title {
-        color: #0f172a;
-        font-size: 0.85rem;
-        font-weight: 700;
-        margin-bottom: 6px;
-        line-height: 1.3;
-    }
-    
-    .highlight-description {
-        color: #475569;
-        font-size: 0.75rem;
-        line-height: 1.5;
-        margin-bottom: 8px;
-    }
-    
-    .read-more {
-        color: #2563eb;
-        font-weight: 600;
-        font-size: 0.7rem;
-        text-decoration: none;
-    }
-    
-    .footer {
-        text-align: center;
-        color: rgba(255,255,255,0.95);
-        font-size: 0.75rem;
-        margin-top: 15px;
-        padding: 12px 20px;
-        background: linear-gradient(135deg, rgba(10,25,47,0.95), rgba(30,41,59,0.95));
+    .news-card-priority {
+        background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%);
+        border: 2px solid #fbbf24;
         border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 10px;
     }
     
-    .col-body::-webkit-scrollbar {width: 5px;}
-    .col-body::-webkit-scrollbar-track {background: #f1f5f9;}
-    .col-body::-webkit-scrollbar-thumb {background: #64748b; border-radius: 10px;}
+    .news-card-priority:hover {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        box-shadow: 0 8px 20px rgba(251,191,36,0.2);
+    }
+    
+    .news-title {
+        color: #1e40af;
+        font-size: 0.92rem;
+        font-weight: 600;
+        line-height: 1.35;
+        text-decoration: none;
+        display: block;
+        margin-bottom: 6px;
+    }
+    
+    .news-title:hover {
+        color: #1d4ed8;
+        text-decoration: underline;
+    }
+    
+    .news-meta {
+        font-size: 0.76rem;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        flex-wrap: wrap;
+    }
+    
+    .time-hot {color: #dc2626; font-weight: 600; font-style: italic;}
+    .time-warm {color: #ea580c; font-weight: 600;}
+    .time-normal {color: #64748b;}
+    
+    .col-body::-webkit-scrollbar {width: 6px;}
+    .col-body::-webkit-scrollbar-track {background: #f1f5f9; border-radius: 10px;}
+    .col-body::-webkit-scrollbar-thumb {background: #94a3b8; border-radius: 10px;}
     
     #MainMenu, footer, header {visibility: hidden;}
     .stDeployButton {display: none;}
@@ -298,363 +202,235 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
+# RSS FEEDS CONFIGURATION
+# ══════════════════════════════════════════════════════════════════════════════
+RSS_FEEDS = [
+    ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
+    ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
+    ("Fierce Telecom", "https://www.fierce-network.com/rss.xml", "telco"),
+    ("RCR Wireless", "https://www.rcrwireless.com/feed", "telco"),
+    ("Mobile World Live", "https://www.mobileworldlive.com/feed/", "telco"),
+    ("Variety", "https://variety.com/feed/", "ott"),
+    ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/", "ott"),
+    ("Deadline", "https://deadline.com/feed/", "ott"),
+    ("Digital TV Europe", "https://www.digitaltveurope.com/feed/", "ott"),
+    ("ESPN", "https://www.espn.com/espn/rss/news", "sports"),
+    ("BBC Sport", "https://feeds.bbci.co.uk/sport/rss.xml", "sports"),
+    ("SportsPro", "https://www.sportspromedia.com/feed/", "sports"),
+    ("TechCrunch", "https://techcrunch.com/feed/", "technology"),
+    ("The Verge", "https://www.theverge.com/rss/index.xml", "technology"),
+    ("Wired", "https://www.wired.com/feed/rss", "technology"),
+    ("VentureBeat", "https://venturebeat.com/feed/", "technology"),
+]
+
+SECTIONS = {
+    "telco": {"icon": "📡", "name": "TELCO OSS/BSS", "style": "col-header-pink"},
+    "ott": {"icon": "📺", "name": "OTT & STREAMING", "style": "col-header-purple"},
+    "sports": {"icon": "🏆", "name": "SPORTS MEDIA", "style": "col-header-green"},
+    "technology": {"icon": "⚡", "name": "AI TECHWATCH", "style": "col-header-orange"},
+}
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    "Accept": "application/rss+xml, application/xml, text/xml, */*",
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
 # UTILITY FUNCTIONS
 # ══════════════════════════════════════════════════════════════════════════════
-def clean_text(raw):
+def clean(raw):
     if not raw:
         return ""
-    return re.sub(r'\s+', ' ', html.unescape(re.sub(r'<[^>]+>', '', str(raw)))).strip()
+    return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
 
-def get_hash(text):
-    return hashlib.md5(text.lower().encode()).hexdigest()[:10]
-
-def is_2026_only(text):
-    text_lower = text.lower()
-    if any(year in text_lower for year in ["2024", "2023", "2022"]):
-        return False
-    return "2025" not in text_lower and ("2026" in text_lower or any(ind in text_lower for ind in ["hours ago", "today", "yesterday", "this week"]))
-
-def calculate_relevance_score(title, summary):
-    """AI-powered relevance scoring for Evergent"""
-    text = (title + " " + summary).lower()
-    score = 0
-    
-    # High priority: Evergent clients - add points for each match to cover more
-    client_matches = sum(1 for client in ALL_CLIENTS if client in text)
-    score += client_matches * 15
-    
-    # Medium priority: Competitors
-    comp_matches = sum(1 for competitor in ALL_COMPETITORS if competitor in text)
-    score += comp_matches * 10
-    
-    # Important telcos
-    telco_matches = sum(1 for telco in ALL_TELCOS if telco in text)
-    score += telco_matches * 8
-    
-    # Strategic keywords
-    keyword_matches = sum(1 for keyword in STRATEGIC_KEYWORDS if keyword in text)
-    score += keyword_matches * 3
-    
-    return score
-
-def extract_entities(title, summary):
-    """Extract Evergent-relevant entities"""
-    text = (title + " " + summary).lower()
-    found = {"clients": set(), "competitors": set(), "telcos": set()}
-    
-    for name, terms in EVERGENT_CLIENTS.items():
-        if any(term in text for term in terms):
-            found["clients"].add(name)
-    
-    for name, terms in COMPETITORS.items():
-        if any(term in text for term in terms):
-            found["competitors"].add(name)
-    
-    for name, terms in TOP_TELCOS.items():
-        if any(term in text for term in terms):
-            found["telcos"].add(name)
-    
-    return {k: list(v) for k, v in found.items()}
-
-# ══════════════════════════════════════════════════════════════════════════════
-# NEWS FETCHER WITH AI SCORING
-# ══════════════════════════════════════════════════════════════════════════════
-def fetch_intelligent_news(query, max_results=50):
-    """Fetch and score news using AI algorithm"""
+def fetch_feed(source, url, category):
+    items = []
     try:
-        filter_params = " after:2026-01-01 when:30d -2025"
-        encoded = urllib.parse.quote(query + filter_params)
-        url = f"https://news.google.com/rss/search?q={encoded}&hl=en-US&gl=US&ceid=US:en"
-        
-        resp = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=15)
+        resp = requests.get(url, headers=HEADERS, timeout=5)
         if resp.status_code != 200:
-            return []
+            return items
         
         feed = feedparser.parse(resp.content)
-        results = []
+        NOW = datetime.now()
+        CUTOFF = NOW - timedelta(days=3)
         
-        for entry in feed.entries[:max_results]:
-            title = clean_text(entry.get("title", ""))
-            link = entry.get("link", "")
-            summary = clean_text(entry.get("summary", "")) or title
-            
-            # Extract original URL
-            parsed = urlparse(link)
-            query_params = parse_qs(parsed.query)
-            real_link = query_params.get('url', [link])[0]
-            
-            if not is_2026_only(title + summary) or len(title) < 25:
+        for entry in feed.entries[:8]:
+            title = clean(entry.get("title", ""))
+            if len(title) < 20:
                 continue
             
-            # AI Scoring
-            score = calculate_relevance_score(title, summary)
-            entities = extract_entities(title, summary)
+            summary = clean(entry.get("summary", ""))
+            link = entry.get("link", "")
             
-            # Determine news type - prioritize client if multiple
-            news_type = "standard"
-            if entities["clients"]:
-                news_type = "client"
-            elif entities["competitors"]:
-                news_type = "competitor"
+            pub = None
+            for k in ("published_parsed", "updated_parsed"):
+                val = getattr(entry, k, None)
+                if val:
+                    try:
+                        pub = datetime(*val[:6])
+                    except:
+                        pass
+                    break
             
-            results.append({
+            if not pub or pub < CUTOFF:
+                continue
+            
+            # Priority detection
+            priority_keywords = ["amdocs", "netcracker", "matrixx", "evergent", "oss", "bss", "merger", "acquisition"]
+            is_priority = any(kw in title.lower() or kw in summary.lower() for kw in priority_keywords)
+            
+            items.append({
                 "title": title,
-                "link": real_link,
+                "link": link,
+                "pub": pub,
+                "source": source,
                 "summary": summary,
-                "score": score,
-                "type": news_type,
-                "entities": entities,
-                "hash": get_hash(title)
+                "category": category,
+                "priority": is_priority
             })
-        
-        # Sort by relevance score
-        results.sort(key=lambda x: x["score"], reverse=True)
-        return results
-        
-    except Exception as e:
-        st.warning(f"News fetch error: {str(e)}")
-        return []
+    except:
+        pass
+    
+    return items
 
-@st.cache_data(ttl=180, show_spinner=False)
-def fetch_all_intelligence():
-    """Fetch news across all sectors with AI prioritization"""
-    all_clients_or = ' OR '.join(EVERGENT_CLIENTS.keys())
-    queries = {
-        "telco": [
-            "telecom OSS BSS deal partnership merger acquisition",
-            "5G network operator contract billing monetization",
-            f"{all_clients_or} telecom deal partnership"
-        ],
-        "ott": [
-            "streaming platform merger acquisition OTT video service",
-            "content rights deal streaming partnership",
-            f"{all_clients_or} streaming OTT deal"
-        ],
-        "sports": [
-            "sports media rights broadcasting deal",
-            "sports betting platform partnership NBA NFL",
-            f"{all_clients_or} sports media rights"
-        ],
-        "technology": [
-            "cloud computing AI platform deal enterprise SaaS",
-            "AI tech acquisition merger fintech platform",
-            f"{all_clients_or} technology AI deal"
-        ]
+@st.cache_data(ttl=300, show_spinner=False)
+def load_feeds():
+    categorized = {
+        "telco": [],
+        "ott": [],
+        "sports": [],
+        "technology": []
     }
     
-    all_news = {}
-    for section, query_list in queries.items():
-        section_news = []
-        seen_hashes = set()
+    with ThreadPoolExecutor(max_workers=12) as executor:
+        futures = [
+            executor.submit(fetch_feed, source, url, cat)
+            for source, url, cat in RSS_FEEDS
+        ]
         
-        with ThreadPoolExecutor(max_workers=4) as executor:
-            futures = {executor.submit(fetch_intelligent_news, q): q for q in query_list}
-            
-            for future in as_completed(futures):
-                try:
-                    items = future.result()
-                    for item in items:
-                        if item["hash"] not in seen_hashes and item["score"] > 5:
-                            section_news.append(item)
-                            seen_hashes.add(item["hash"])
-                except:
-                    continue
+        for future in as_completed(futures):
+            items = future.result()
+            for item in items:
+                categorized[item["category"]].append(item)
+    
+    # Sort by date
+    for cat in categorized:
+        categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
+    
+    return categorized
+
+def get_time_str(dt):
+    hrs = int((datetime.now() - dt).total_seconds() / 3600)
+    if hrs < 1:
+        return "Now", "time-hot"
+    if hrs < 6:
+        return f"{hrs}h", "time-hot"
+    if hrs < 24:
+        return f"{hrs}h", "time-warm"
+    return f"{hrs//24}d", "time-normal"
+
+def render_body(items):
+    if not items:
+        return '<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">No recent news</div></div>'
+    
+    cards = ""
+    for item in items:
+        time_str, time_class = get_time_str(item["pub"])
+        safe_title = html.escape(item["title"])
+        safe_link = html.escape(item["link"])
+        safe_source = html.escape(item["source"])
         
-        # Sort by score and take top 15
-        section_news.sort(key=lambda x: x["score"], reverse=True)
-        all_news[section] = section_news[:15]
-    
-    return all_news
-
-# ══════════════════════════════════════════════════════════════════════════════
-# CEO INSIGHTS GENERATOR
-# ══════════════════════════════════════════════════════════════════════════════
-def generate_ceo_insights(all_news):
-    """Generate executive summary using AI"""
-    # Extract high-priority news
-    priority_news = []
-    for section_news in all_news.values():
-        priority_news.extend([n for n in section_news if n["score"] >= 15][:4])
-    
-    if not priority_news:
-        return "No high-priority Evergent-related news in the last 24 hours. Monitoring continues across all clients and competitors."
-    
-    # Prepare context for AI - include multiple clients
-    news_context = "\n".join([
-        f"• {item['title'][:100]} (Relevance: {item['score']}, Clients: {', '.join(item['entities']['clients'])}, Competitors: {', '.join(item['entities']['competitors'])})"
-        for item in priority_news[:10]
-    ])
-    
-    try:
-        response = requests.post(
-            "https://api.groq.com/openai/v1/chat/completions",
-            headers={"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"},
-            json={
-                "model": "llama-3.1-8b-instant",
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": "You are an executive intelligence analyst for Evergent. Create a 4-5 sentence CEO summary highlighting key industry moves across multiple clients, competitors, and strategic implications. Ensure coverage of various clients without focusing on single one. Focus on business impact."
-                    },
-                    {
-                        "role": "user",
-                        "content": f"Analyze these top industry developments covering multiple clients and create a CEO executive summary:\n\n{news_context}"
-                    }
-                ],
-                "max_tokens": 350,
-                "temperature": 0.4
-            },
-            timeout=30
-        )
+        card_class = "news-card-priority" if item["priority"] else "news-card"
         
-        if response.status_code == 200:
-            return response.json()["choices"][0]["message"]["content"].strip()
-        else:
-            return "API response error. Fallback summary: Multiple client activities detected across telecom and OTT sectors."
-    except Exception as e:
-        return f"Insight generation error: {str(e)}. Monitoring {len(priority_news)} developments involving various clients like {', '.join(set([e for n in priority_news for e in n['entities']['clients'][:3]]))}."
-
-# ══════════════════════════════════════════════════════════════════════════════
-# RENDER FUNCTIONS
-# ══════════════════════════════════════════════════════════════════════════════
-def render_news_card(item):
-    """Render individual news card with priority indicators"""
-    title = html.escape(item["title"])
-    summary = html.escape(item["summary"][:150])
-    link = html.escape(item["link"])
+        cards += f'''
+        <div class="{card_class}">
+            <a href="{safe_link}" target="_blank" class="news-title">{safe_title}</a>
+            <div class="news-meta">
+                <span class="{time_class}">{time_str}</span>
+                <span>•</span>
+                <span>{safe_source}</span>
+            </div>
+        </div>
+        '''
     
-    card_class = f"highlight-card {item['type']}"
-    
-    badge_html = ""
-    if item["type"] == "client":
-        clients_str = ', '.join(item['entities']['clients'][:3])
-        badge_html = f'<span class="priority-badge" style="background: linear-gradient(135deg, #10b981, #059669);">🟢 CLIENT: {clients_str}</span>'
-    elif item["type"] == "competitor":
-        comps_str = ', '.join(item['entities']['competitors'][:3])
-        badge_html = f'<span class="priority-badge" style="background: linear-gradient(135deg, #f59e0b, #d97706);">🟡 COMPETITOR: {comps_str}</span>'
-    
-    return f'''
-    <div class="{card_class}">
-        {badge_html}
-        <div class="highlight-title">{title}</div>
-        <div class="highlight-description">{summary}...</div>
-        <a href="{link}" target="_blank" class="read-more">Full Story →</a>
-    </div>
-    '''
-
-def render_section(icon, name, news_items, header_class):
-    header = f'<div class="col-header {header_class}"><span style="font-size: 1.1rem;">{icon}</span> <span>{name}</span></div>'
-    
-    if news_items:
-        cards = "".join([render_news_card(item) for item in news_items])
-    else:
-        cards = '<div style="text-align:center;color:#94a3b8;padding:40px;">No priority news detected. Expanding search...</div>'
-    
-    body = f'<div class="col-body">{cards}</div>'
-    return header + body
+    return f'<div class="col-body">{cards}</div>'
 
 # ══════════════════════════════════════════════════════════════════════════════
 # MAIN APPLICATION
 # ══════════════════════════════════════════════════════════════════════════════
 
-# Loading
+# Loading Screen
 placeholder = st.empty()
 with placeholder.container():
     st.markdown("""
         <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:70vh;text-align:center;">
-            <h1 style="color:#0a192f;font-size:2.5rem;font-weight:800;">⚡ Activating Intelligence Layer...</h1>
-            <p style="color:#64748b;font-size:1.1rem;">Scanning global news for Evergent priorities across all clients</p>
+            <h1 style="color:#0a192f;font-size:2.8rem;font-weight:800;">⚡ Igniting AI-powered intelligence...</h1>
+            <p style="color:#64748b;font-size:1.2rem;">Synchronizing global news nodes</p>
         </div>
     """, unsafe_allow_html=True)
-    time.sleep(1.3)
+    time.sleep(1.5)
 
 placeholder.empty()
 
 # Header
-st.markdown(f'''
+st.markdown("""
 <div class="header-container">
-    <h1 class="main-title">
-        🌐 Evergent Intelligence Dashboard
-        <span class="live-badge">● LIVE 2026</span>
-    </h1>
-    <p class="subtitle">AI-Powered Client & Competitor Intelligence for Executive Leadership</p>
+    <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
+    <p class="subtitle">Real-time Competitive Intelligence Dashboard</p>
 </div>
-''', unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
-# Fetch Intelligence
-with st.spinner("Gathering global intelligence..."):
-    all_news = fetch_all_intelligence()
-    ceo_summary = generate_ceo_insights(all_news)
-
-# CEO Executive Summary
-st.markdown(f'''
-<div class="ceo-summary">
-    <div class="ceo-summary-title">🎯 CEO EXECUTIVE SUMMARY</div>
-    <div class="ceo-summary-content">{ceo_summary}</div>
-</div>
-''', unsafe_allow_html=True)
-
-# Strategic Highlights
-client_news = [n for section in all_news.values() for n in section if n["type"] == "client"][:5]
-competitor_news = [n for section in all_news.values() for n in section if n["type"] == "competitor"][:5]
-
-col_h1, col_h2 = st.columns(2)
-
-with col_h1:
-    client_html = "<br>".join([f"• <b>{', '.join(n['entities']['clients'])}</b>: {n['title'][:80]}..." for n in client_news]) if client_news else "• Monitoring all client ecosystems..."
-    st.markdown(f'''
-    <div class="hero-container">
-        <div class="hero-title">🟢 CLIENT INTELLIGENCE</div>
+# Strategic Highlights Section
+st.markdown("""
+<div class="hero-container">
+    <div class="hero-title">🚀 HIGHLIGHTS</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div class="hero-box">
-            <div class="hero-box-title" style="color: #10b981;">Evergent Client Activity Across Portfolio</div>
-            <div class="hero-content">{client_html}</div>
+            <div class="hero-box-title" style="color: #10b981;">🟢 STRATEGIC HITS</div>
+            <div class="hero-content">
+                <b>Amdocs-Matrixx Deal:</b> Amdocs completes its $200M acquisition of charging leader Matrixx Software to dominate the Tier-1 5G billing market.<br><br>
+                <b>Disney-Hulu Merger:</b> Disney officially begins phasing out the standalone Hulu app to integrate all content into a unified Disney+ hub.<br><br>
+                <b>NEC Expansion:</b> Japan's NEC finalizes the acquisition of CSG, significantly scaling Netcracker's North American SaaS footprint.
+            </div>
+        </div>
+        <div class="hero-box">
+            <div class="hero-box-title" style="color: #f97316;">🟠 PULSE</div>
+            <div class="hero-content">
+                <b>Agentic AI Core:</b> By EOY 2026, autonomous AI agents are expected to handle roughly 40% of standard BSS operational tasks.<br><br>
+                <b>Satellite Breakout:</b> Direct-to-consumer satellite broadband moves from niche to mainstream as a primary fiber competitor.<br><br>
+                <b>Physical AI:</b> Amazon deploys its 1-millionth robot, integrated with DeepFleet AI for a 10% gain in warehouse efficiency.
+            </div>
         </div>
     </div>
-    ''', unsafe_allow_html=True)
+</div>
+""", unsafe_allow_html=True)
 
-with col_h2:
-    comp_html = "<br>".join([f"• <b>{', '.join(n['entities']['competitors'])}</b>: {n['title'][:80]}..." for n in competitor_news]) if competitor_news else "• Monitoring competitive landscape..."
-    st.markdown(f'''
-    <div class="hero-container">
-        <div class="hero-title">🟡 COMPETITIVE INTELLIGENCE</div>
-        <div class="hero-box">
-            <div class="hero-box-title" style="color: #f59e0b;">Competitor Moves</div>
-            <div class="hero-content">{comp_html}</div>
-        </div>
-    </div>
-    ''', unsafe_allow_html=True)
+# Fetch Real-Time News
+with st.spinner(""):
+    data = load_feeds()
 
-# Industry Sections
-col1, col2, col3, col4 = st.columns(4)
+# Render News Columns
+cols = st.columns(4)
+cat_list = ["telco", "ott", "sports", "technology"]
 
-with col1:
-    st.markdown(render_section("📡", "TELCO OSS/BSS", all_news.get("telco", []), "col-header-pink"), unsafe_allow_html=True)
-
-with col2:
-    st.markdown(render_section("📺", "OTT & STREAMING", all_news.get("ott", []), "col-header-purple"), unsafe_allow_html=True)
-
-with col3:
-    st.markdown(render_section("🏆", "SPORTS & EVENTS", all_news.get("sports", []), "col-header-green"), unsafe_allow_html=True)
-
-with col4:
-    st.markdown(render_section("⚡", "TECHNOLOGY", all_news.get("technology", []), "col-header-orange"), unsafe_allow_html=True)
+for idx, cat in enumerate(cat_list):
+    sec = SECTIONS[cat]
+    items = data.get(cat, [])[:10]  # Top 10 per section
+    
+    with cols[idx]:
+        header_html = f'<div class="{sec["style"]}">{sec["icon"]} {sec["name"]}</div>'
+        st.markdown(header_html, unsafe_allow_html=True)
+        st.markdown(render_body(items), unsafe_allow_html=True)
 
 # Footer
-total = sum(len(all_news.get(s, [])) for s in ["telco", "ott", "sports", "technology"])
-priority = len([n for section in all_news.values() for n in section if n["score"] >= 15])
-
-st.markdown(f'''
-<div class="footer">
-    <p><strong>📊 Intelligence:</strong> {total} articles analyzed | <strong>🎯 High Priority:</strong> {priority} | <strong>🕐 Live:</strong> {datetime.now().strftime("%H:%M:%S")} | <strong>🔄 Auto-refresh:</strong> 5 min</p>
-    <p style="margin-top: 6px; font-size: 0.7rem; opacity: 0.85;">Powered by Evergent AI Intelligence Engine</p>
+st.markdown(f"""
+<div style="text-align:center;color:rgba(255,255,255,0.95);font-size:0.8rem;margin-top:20px;padding:16px;background:linear-gradient(135deg,rgba(10,25,47,0.95),rgba(30,41,59,0.95));border-radius:10px;">
+    <p><strong>🕐 Live Sync:</strong> {datetime.now().strftime('%H:%M:%S')} | <strong>🔄 Auto-refresh:</strong> Every 5 minutes</p>
+    <p style="margin-top:6px;font-size:0.7rem;opacity:0.85;">Powered by Real-time RSS Intelligence</p>
 </div>
-''', unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
+# Auto-refresh
 st.markdown('<script>setTimeout(function() {window.location.reload();}, 300000);</script>', unsafe_allow_html=True)
-
-if (datetime.now() - st.session_state.keep_alive).seconds > 280:
-    st.session_state.keep_alive = datetime.now()
-    st.cache_data.clear()
-    st.rerun()
 
 keep_alive()
