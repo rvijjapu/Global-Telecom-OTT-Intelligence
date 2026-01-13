@@ -9,7 +9,7 @@ import time
 import streamlit.components.v1 as components
 
 # ──────────────────────────────────────────────────────────────────────────────
-# KEEP-ALIVE (top for safety)
+# KEEP-ALIVE - MUST BE AT TOP
 # ──────────────────────────────────────────────────────────────────────────────
 @st.fragment(run_every=600)
 def keep_alive():
@@ -26,7 +26,7 @@ st.set_page_config(
 )
 
 # ──────────────────────────────────────────────────────────────────────────────
-# CEO-LEVEL BEAUTIFUL LIGHT THEME (perfect sizes & wow factor)
+# CEO-READY BEAUTIFUL LIGHT THEME
 # ──────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
@@ -130,12 +130,12 @@ st.markdown("""
     
     .col-header {
         padding: 18px;
-        border-radius: 16px 16px 0 0;
+        border-radius: 18px 18px 0 0;
         color: white;
         font-weight: 800;
         font-size: 1.35rem;
         text-align: center;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        box-shadow: 0 8px 26px rgba(0,0,0,0.2);
     }
     
     .col-header-pink {background: linear-gradient(135deg, #ec4899, #db2777);}
@@ -145,26 +145,26 @@ st.markdown("""
     
     .section-box {
         background: white;
-        border-radius: 0 0 16px 16px;
-        box-shadow: 0 16px 60px rgba(0,0,0,0.12);
+        border-radius: 0 0 18px 18px;
+        box-shadow: 0 16px 60px rgba(0,0,0,0.14);
         overflow: hidden;
-        margin-bottom: 3rem;
+        margin-bottom: 3.2rem;
         border: 1px solid #e5e7eb;
     }
     
     .news-container {
-        padding: 1.8rem;
-        min-height: 580px;
-        max-height: 880px;
+        padding: 2rem;
+        min-height: 600px;
+        max-height: 900px;
         overflow-y: auto;
     }
     
     .news-card {
         background: #f9fafb;
         border: 1px solid #e5e7eb;
-        border-radius: 14px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
+        border-radius: 16px;
+        padding: 1.6rem;
+        margin-bottom: 1.6rem;
         transition: all 0.4s ease;
     }
     
@@ -221,7 +221,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# RSS FEEDS (quality sources)
+# RSS FEEDS & STRICT KEYWORDS
 # ──────────────────────────────────────────────────────────────────────────────
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
@@ -247,8 +247,15 @@ SECTIONS = {
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
+TELCO_KEYWORDS = ["oss", "bss", "billing", "charging", "monetization", "convergent billing", "revenue management", "order management", "5g monetization", "telecom deal", "telco partnership", "oss bss contract"]
+OTT_KEYWORDS = ["ott", "streaming", "svod", "avod", "subscriber growth", "arpu", "content deal", "streaming merger"]
+SPORTS_KEYWORDS = ["sports media rights", "broadcasting rights", "league partnership", "media rights deal"]
+TECH_KEYWORDS = ["artificial intelligence", "generative ai", "enterprise ai", "ai platform", "cloud platform", "saas platform", "technology acquisition"]
+
+JUNK_EXCLUDES = ["coupon", "discount", "sale", "promo", "baby", "birth", "gossip", "celebrity", "injury", "score", "oil", "gas", "semiconductor", "crypto"]
+
 # ──────────────────────────────────────────────────────────────────────────────
-# ULTRA-STRICT FILTERING (section-specific only)
+# FILTERING FUNCTIONS
 # ──────────────────────────────────────────────────────────────────────────────
 def clean(raw):
     if not raw: return ""
@@ -256,18 +263,16 @@ def clean(raw):
 
 def is_junk(title, summary=""):
     text = (title + " " + summary).lower()
-    junk = ["coupon", "discount", "sale", "promo", "baby", "birth", "gossip", "celebrity", "injury", "score", "oil", "gas", "semiconductor", "crypto"]
-    return any(ex in text for ex in junk)
+    return any(ex in text for ex in JUNK_EXCLUDES)
 
 def is_relevant(title, summary, section):
     text = (title + " " + summary).lower()
     keywords = {
-        "telco": ["oss", "bss", "billing", "charging", "monetization", "convergent billing", "revenue management", "order management", "5g monetization", "telecom deal", "telco partnership"],
-        "ott": ["ott", "streaming", "svod", "avod", "subscriber growth", "arpu", "content deal", "streaming merger", "platform expansion"],
-        "sports": ["sports media rights", "broadcasting rights", "league partnership", "media rights deal", "sponsorship deal"],
-        "technology": ["artificial intelligence", "generative ai", "enterprise ai", "ai platform", "cloud platform", "saas platform", "technology acquisition"]
+        "telco": TELCO_KEYWORDS,
+        "ott": OTT_KEYWORDS,
+        "sports": SPORTS_KEYWORDS,
+        "technology": TECH_KEYWORDS
     }[section]
-    
     return any(kw in text for kw in keywords)
 
 def fetch_feed(source, url, category):
@@ -348,7 +353,7 @@ def render_section(icon, name, style_class, items):
     
     content = ""
     if not items:
-        content = '<div style="padding:160px 20px; text-align:center; color:#94a3b8; font-size:1.3rem;">No critical news in last 7 days</div>'
+        content = '<div style="padding:180px 20px; text-align:center; color:#94a3b8; font-size:1.35rem;">No critical news in last 7 days</div>'
     else:
         for item in items:
             time_str, time_class = get_time_str(item["pub"])
@@ -372,30 +377,30 @@ def render_section(icon, name, style_class, items):
     full_html = f'''
     <div class="section-box">
         {header}
-        <div class="news-container">
-            {content}
-        </div>
+        <div class="news-container">{content}</div>
     </div>
     '''
     
-    components.html(full_html, height=860, scrolling=True)
+    components.html(full_html, height=900, scrolling=True)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# MAIN DASHBOARD - CEO-READY
+# MAIN DASHBOARD - CEO READY
 # ──────────────────────────────────────────────────────────────────────────────
 st.markdown("""
-<div class="header-container">
-    <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
-    <p class="subtitle">Real-time Critical Intelligence Dashboard • January 2026</p>
+<div class="main-header">
+    <div class="main-title">🌐 Global Telecom & OTT Stellar Nexus</div>
+    <div class="main-subtitle">Real-time Critical Intelligence • January 2026</div>
 </div>
 """, unsafe_allow_html=True)
 
 # ──────────────────────────────────────────────────────
-# HIGHLIGHTS - Rocket + Perfect Layout
+# HIGHLIGHTS - Rocket style
 # ──────────────────────────────────────────────────────
 st.markdown("""
-<div class="hero-container">
-    <div class="hero-title">🚀 HIGHLIGHTS</div>
+<div class="highlights-container">
+    <div class="highlights-title">
+        🚀 HIGHLIGHTS
+    </div>
     <div class="hit-pulse-grid">
         <div class="strategic-box">
             <div class="strategic-title">
