@@ -8,19 +8,19 @@ import re
 import time
 import streamlit.components.v1 as components
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
 # PAGE CONFIG
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Global Telecom & OTT Intelligence Nexus",
-    page_icon="🌐",
+    page_icon="⚡",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
 # PROFESSIONAL LIGHT THEME STYLING (beautiful wow UI)
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -116,7 +116,7 @@ st.markdown("""
         border-radius: 0 0 14px 14px;
         box-shadow: 0 8px 32px rgba(0,0,0,0.12);
         overflow: hidden;
-        margin-bottom: 2.2rem;
+        margin-bottom: 2rem;
         border: 1px solid #e5e7eb;
     }
     
@@ -182,194 +182,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# STRICT CLIENT / COMPETITOR / TELCO LISTS (FULL)
+# RSS FEEDS CONFIGURATION
 # ══════════════════════════════════════════════════════════════════════════════
-EVERGENT_CLIENTS = {
-    "Astro": ["astro malaysia", "astro sooka", "astro njoi", "astro", "sooka", "njoi"],
-    "MongolTV": ["mongoltv", "mongol tv", "mongolia tv"],
-    "FOX": ["fox sports", "fox corporation", "fox networks", "fox"],
-    "AT&T": ["at&t", "att inc", "att wireless", "directv"],
-    "NBA": ["nba", "national basketball"],
-    "Shahid": ["shahid", "shahid vip", "mbc shahid"],
-    "MBC": ["mbc group", "mbc", "middle east broadcasting"],
-    "TV ASAHI": ["tv asahi", "asahi television", "asahi tv"],
-    "TV3": ["tv3 malaysia", "tv3", "media prima"],
-    "ABS-CBN": ["abs-cbn", "abscbn", "abs cbn", "philippine broadcast"],
-    "Viki": ["viki", "rakuten viki", "viki streaming"],
-    "TRT": ["trt world", "trt", "turkish radio"],
-    "Sinclair": ["sinclair broadcast", "sinclair", "bally sports"],
-    "FanDuel": ["fanduel", "fanduel group", "flutter"],
-    "Bally Sports": ["bally sports", "bally regional", "diamond sports"],
-    "Gotham": ["gotham advanced", "gotham fc"],
-    "Marquee": ["marquee sports", "marquee network"],
-    "Sony": ["sony pictures", "sony entertainment", "sonyliv", "sony india"],
-    "Aha": ["aha video", "aha ott", "aha telugu"],
-    "BBC": ["bbc", "british broadcasting", "bbc iplayer"],
-    "Lightbox": ["lightbox", "spark lightbox"],
-    "Sky": ["sky nz", "sky new zealand", "sky tv", "sky uk", "sky italia", "sky deutschland"],
-    "Cignal": ["cignal tv", "cignal", "cignal satellite"],
-    "ETV": ["etv network", "etv bharat"],
-    "Simple TV": ["simpletv", "simple tv venezuela"],
-    "Telekom Malaysia": ["telekom malaysia", "tm", "tm unifi", "unifi tv"],
-    "Britbox": ["britbox", "britbox international"],
-    "Quickplay": ["quickplay", "quickplay media"],
-    "Pilipinas": ["pilipinas", "abs-cbn"],
-}
-
-COMPETITORS = {
-    "Netcracker": ["netcracker", "netcracker technology", "nec netcracker"],
-    "Amdocs": ["amdocs", "amdocs ltd", "amdocs inc"],
-    "CSG": ["csg systems", "csg international", "csg"],
-    "Oracle": ["oracle communications", "oracle corporation", "oracle telecom"],
-    "Ericsson": ["ericsson", "telefonaktiebolaget lm ericsson"],
-    "Nokia": ["nokia", "nokia networks", "nokia corporation"],
-    "Huawei": ["huawei", "huawei technologies"],
-    "Comarch": ["comarch", "comarch bss"],
-    "Tecnotree": ["tecnotree", "tecnotree corporation"],
-    "MATRIXX": ["matrixx", "matrixx software"],
-    "Optiva": ["optiva", "optiva inc"],
-    "Cerillion": ["cerillion", "cerillion plc"],
-    "AsiaInfo": ["asiainfo", "asiainfo technologies"],
-    "Hansen": ["hansen technologies", "hansen"],
-    "Openet": ["openet", "openet telecom"],
-    "ZTE": ["zte", "zte corporation"],
-    "Mavenir": ["mavenir", "mavenir systems"],
-    "Infosys": ["infosys", "infosys telecom"],
-    "TCS": ["tata consultancy", "tcs", "tata communications"],
-    "Wipro": ["wipro", "wipro digital"],
-    "Tech Mahindra": ["tech mahindra", "mahindra comviva"],
-    "Accenture": ["accenture", "accenture telecom"],
-    "Capgemini": ["capgemini", "capgemini telecom"],
-    "IBM": ["ibm", "ibm telecom", "ibm watson"],
-    "SAP": ["sap", "sap telecom"],
-    "Salesforce": ["salesforce", "salesforce communications"],
-}
-
-TOP_TELCOS = {
-    "Verizon": ["verizon", "verizon wireless", "verizon fios"],
-    "AT&T": ["at&t", "att mobility"],
-    "T-Mobile": ["t-mobile", "tmobile usa", "sprint"],
-    "Comcast": ["comcast", "xfinity", "comcast cable"],
-    "Charter": ["charter communications", "spectrum", "charter spectrum"],
-    "Cox": ["cox communications", "cox cable", "cox business"],
-    "Lumen": ["lumen technologies", "centurylink", "lumen"],
-    "Frontier": ["frontier communications", "frontier"],
-    "Windstream": ["windstream", "windstream enterprise"],
-    "Mediacom": ["mediacom communications", "mediacom"],
-    "Altice USA": ["altice usa", "optimum", "suddenlink"],
-    "BT": ["bt group", "british telecom", "bt", "bt enterprise", "ee"],
-    "Vodafone": ["vodafone", "vodafone group"],
-    "O2": ["o2", "telefonica uk"],
-    "Virgin Media": ["virgin media", "virgin media o2"],
-    "Three": ["three uk", "three mobile"],
-    "Orange": ["orange", "orange sa"],
-    "Deutsche Telekom": ["deutsche telekom", "t-mobile europe", "telekom"],
-    "Telefónica": ["telefonica", "telefonica spain", "movistar"],
-    "Telecom Italia": ["telecom italia", "tim", "tim brasil"],
-    "Swisscom": ["swisscom", "swisscom ag"],
-    "KPN": ["kpn", "koninklijke pn"],
-    "Proximus": ["proximus", "belgacom"],
-    "Telenor": ["telenor", "telenor group"],
-    "Telia": ["telia", "telia company"],
-    "Bouygues": ["bouygues telecom", "bouygues"],
-    "Singtel": ["singtel", "singapore telecom", "singapore telecommunications"],
-    "StarHub": ["starhub", "starhub singapore"],
-    "M1": ["m1 limited", "m1 singapore"],
-    "Maxis": ["maxis", "maxis communications", "maxis malaysia"],
-    "Celcom": ["celcom", "celcom axiata"],
-    "Digi": ["digi telecommunications", "digi malaysia", "digi.com"],
-    "Telekom Malaysia": ["telekom malaysia", "tm", "tm unifi"],
-    "U Mobile": ["u mobile", "umobile malaysia"],
-    "Sky NZ": ["sky new zealand", "sky nz", "sky network television"],
-    "Spark": ["spark new zealand", "spark nz"],
-    "2degrees": ["2degrees", "2degrees mobile"],
-    "Vodafone NZ": ["vodafone new zealand", "vodafone nz"],
-    "Telstra": ["telstra", "telstra corporation"],
-    "Optus": ["optus", "singtel optus"],
-    "TPG": ["tpg telecom", "vodafone australia"],
-    "China Mobile": ["china mobile", "cmcc"],
-    "China Telecom": ["china telecom", "chinanet"],
-    "China Unicom": ["china unicom", "unicom"],
-    "NTT": ["ntt", "nippon telegraph", "ntt docomo"],
-    "SoftBank": ["softbank", "softbank corp"],
-    "KDDI": ["kddi", "kddi corporation", "au"],
-    "Reliance Jio": ["reliance jio", "jio", "jio platforms"],
-    "Airtel": ["bharti airtel", "airtel", "airtel india"],
-    "Vi": ["vodafone idea", "vi", "idea cellular"],
-    "BSNL": ["bsnl", "bharat sanchar"],
-    "SK Telecom": ["sk telecom", "skt"],
-    "KT": ["kt corporation", "kt"],
-    "LG Uplus": ["lg uplus", "lg u+"],
-    "Globe": ["globe telecom", "globe philippines"],
-    "PLDT": ["pldt", "philippine long distance"],
-    "Smart": ["smart communications", "smart philippines"],
-    "Etisalat": ["etisalat", "emirates telecom", "e&"],
-    "Du": ["du", "emirates integrated"],
-    "STC": ["stc", "saudi telecom", "saudi telecom company"],
-    "Ooredoo": ["ooredoo", "ooredoo group"],
-    "Zain": ["zain", "zain group"],
-    "Mobily": ["mobily", "etihad etisalat"],
-    "América Móvil": ["america movil", "claro", "telmex"],
-    "Telus": ["telus", "telus communications"],
-    "Rogers": ["rogers communications", "rogers"],
-    "Bell": ["bell canada", "bce inc"],
-    "Shaw": ["shaw communications", "shaw"],
-    "MTN": ["mtn group", "mtn"],
-    "Vodacom": ["vodacom", "vodacom group"],
-    "Safaricom": ["safaricom", "safaricom plc"],
-}
-
-# ──────────────────────────────────────────────────────────────────────────────
-# STRICT KEYWORDS + EXCLUDES (very tight filtering)
-# ──────────────────────────────────────────────────────────────────────────────
-TELCO_KEYWORDS = [
-    "oss", "bss", "billing system", "charging system", "convergent billing", "mediation",
-    "revenue management", "policy control", "order management", "product catalog",
-    "service fulfillment", "network orchestration", "5g monetization", "network slicing",
-    "open ran oss", "api-based bss", "ai-driven assurance", "real-time charging",
-    "saas telecom platform", "telecom deal", "telco partnership", "oss bss contract",
-    "telecom modernization", "digital transformation", "system migration", "platform consolidation",
-    "vendor replacement"
-]
-
-OTT_KEYWORDS = [
-    "ott platform", "streaming service", "video streaming", "subscription video", "svod",
-    "avod", "fast channels", "hybrid ott", "subscriber growth", "arpu", "churn reduction",
-    "content monetization", "pricing strategy", "bundling", "super app", "content licensing",
-    "sports streaming", "live streaming", "original content", "regional content",
-    "multi-language ott", "content aggregation", "ott acquisition", "streaming merger",
-    "content deal", "distribution partnership", "platform expansion", "market entry"
-]
-
-SPORTS_KEYWORDS = [
-    "sports media rights", "broadcasting rights", "sports streaming", "live sports",
-    "sports ott", "league partnership", "media rights deal", "sponsorship deal",
-    "betting partnership", "fan engagement", "digital ticketing", "pay-per-view",
-    "sports analytics", "fan data platform", "ai sports insights", "smart stadium",
-    "ar/vr sports"
-]
-
-TECH_KEYWORDS = [
-    "artificial intelligence", "generative ai", "enterprise ai", "ai platform",
-    "ai monetization", "ai deployment", "cloud platform", "saas platform",
-    "digital platform", "enterprise software", "api platform", "data platform",
-    "technology acquisition", "ai startup acquisition", "strategic partnership",
-    "platform expansion", "product launch", "enterprise contract", "cloud migration",
-    "data warehouse", "mlops", "ai governance", "responsible ai", "edge computing"
-]
-
-JUNK_EXCLUDES = [
-    "baby", "birth", "newborn", "pregnant", "wedding", "divorce", "gossip", "celebrity",
-    "coupon", "discount", "sale", "promo", "voucher", "giveaway", "contest", "win free",
-    "black friday", "cyber monday", "flash sale", "limited time offer", "player injury",
-    "match score", "fantasy tips", "sports betting odds", "player transfers", "box office",
-    "movie review", "film awards", "music album", "oil", "gas", "petroleum", "insurance",
-    "banking core", "semiconductor", "chip", "mining", "power plant", "crypto", "nft"
-]
-
-# ──────────────────────────────────────────────────────────────────────────────
-# RSS FEEDS (quality sources only)
-# ──────────────────────────────────────────────────────────────────────────────
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
     ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
@@ -379,84 +193,54 @@ RSS_FEEDS = [
     ("Variety", "https://variety.com/feed/", "ott"),
     ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/", "ott"),
     ("Deadline", "https://deadline.com/feed/", "ott"),
+    ("Digital TV Europe", "https://www.digitaltveurope.com/feed/", "ott"),
+    ("ESPN", "https://www.espn.com/espn/rss/news", "sports"),
+    ("BBC Sport", "https://feeds.bbci.co.uk/sport/rss.xml", "sports"),
     ("SportsPro", "https://www.sportspromedia.com/feed/", "sports"),
     ("TechCrunch", "https://techcrunch.com/feed/", "technology"),
     ("The Verge", "https://www.theverge.com/rss/index.xml", "technology"),
     ("Wired", "https://www.wired.com/feed/rss", "technology"),
+    ("VentureBeat", "https://venturebeat.com/feed/", "technology"),
 ]
 
 SECTIONS = {
     "telco": {"icon": "📡", "name": "TELCO OSS/BSS", "style": "col-header-pink"},
     "ott": {"icon": "📺", "name": "OTT & STREAMING", "style": "col-header-purple"},
     "sports": {"icon": "🏆", "name": "SPORTS MEDIA", "style": "col-header-green"},
-    "technology": {"icon": "⚡", "name": "AI & TECH", "style": "col-header-orange"},
+    "technology": {"icon": "⚡", "name": "AI TECHWATCH", "style": "col-header-orange"},
 }
 
-HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    "Accept": "application/rss+xml, application/xml, text/xml, */*",
+}
 
-# ──────────────────────────────────────────────────────────────────────────────
-# UTILITY FUNCTIONS - Ultra-strict filtering
-# ──────────────────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+# UTILITY FUNCTIONS
+# ══════════════════════════════════════════════════════════════════════════════
 def clean(raw):
-    if not raw: return ""
+    if not raw:
+        return ""
     return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
-
-def is_junk(title, summary=""):
-    text = (title + " " + summary).lower()
-    return any(ex in text for ex in JUNK_EXCLUDES)
-
-def has_client_or_comp_or_telco(title, summary):
-    text = (title + " " + summary).lower()
-    
-    # EVERGENT CLIENTS
-    for variations in EVERGENT_CLIENTS.values():
-        if any(v in text for v in variations):
-            return True
-    
-    # COMPETITORS (extra strict for Netcracker)
-    for variations in COMPETITORS.values():
-        if any(v in text for v in variations):
-            return True
-    
-    # TOP TELCOS
-    for variations in TOP_TELCOS.values():
-        if any(v in text for v in variations):
-            return True
-    
-    return False
-
-def is_section_relevant(title, summary, section):
-    text = (title + " " + summary).lower()
-    keywords = {
-        "telco": TELCO_KEYWORDS,
-        "ott": OTT_KEYWORDS,
-        "sports": SPORTS_KEYWORDS,
-        "technology": TECH_KEYWORDS
-    }.get(section, [])
-    
-    return any(kw in text for kw in keywords)
 
 def fetch_feed(source, url, category):
     items = []
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=10)
-        if resp.status_code != 200: return items
+        resp = requests.get(url, headers=HEADERS, timeout=5)
+        if resp.status_code != 200:
+            return items
         
         feed = feedparser.parse(resp.content)
-        cutoff = datetime.now() - timedelta(days=7)
+        NOW = datetime.now()
+        CUTOFF = NOW - timedelta(days=3)
         
-        for entry in feed.entries[:15]:
+        for entry in feed.entries[:8]:
             title = clean(entry.get("title", ""))
-            if len(title) < 40: continue
-            
-            summary = clean(entry.get("summary", title))
-            
-            # Ultra-strict: MUST have client/competitor/telco OR section keyword
-            if not (has_client_or_comp_or_telco(title, summary) or is_section_relevant(title, summary, category)):
+            if len(title) < 20:
                 continue
             
-            # Double-check junk
-            if is_junk(title, summary): continue
+            summary = clean(entry.get("summary", ""))
+            link = entry.get("link", "")
             
             pub = None
             for k in ("published_parsed", "updated_parsed"):
@@ -464,139 +248,191 @@ def fetch_feed(source, url, category):
                 if val:
                     try:
                         pub = datetime(*val[:6])
-                        break
-                    except: pass
+                    except:
+                        pass
+                    break
             
-            if not pub or pub < cutoff: continue
+            if not pub or pub < CUTOFF:
+                continue
             
-            is_priority = any(kw in (title + summary).lower() for kw in ["amdocs", "netcracker", "matrixx", "merger", "acquisition"])
+            # Priority detection
+            priority_keywords = ["amdocs", "netcracker", "matrixx", "evergent", "oss", "bss", "merger", "acquisition"]
+            is_priority = any(kw in title.lower() or kw in summary.lower() for kw in priority_keywords)
             
             items.append({
                 "title": title,
-                "link": entry.get("link", "#"),
+                "link": link,
                 "pub": pub,
                 "source": source,
+                "summary": summary,
                 "category": category,
                 "priority": is_priority
             })
-    except: pass
+    except:
+        pass
     
     return items
 
-@st.cache_data(ttl=600)
+@st.cache_data(ttl=300, show_spinner=False)
 def load_feeds():
-    categorized = {k: [] for k in SECTIONS}
+    categorized = {
+        "telco": [],
+        "ott": [],
+        "sports": [],
+        "technology": []
+    }
     
     with ThreadPoolExecutor(max_workers=12) as executor:
-        futures = [executor.submit(fetch_feed, src, url, cat) for src, url, cat in RSS_FEEDS]
+        futures = [
+            executor.submit(fetch_feed, source, url, cat)
+            for source, url, cat in RSS_FEEDS
+        ]
         
         for future in as_completed(futures):
-            try:
-                articles = future.result()
-                if articles:
-                    cat = articles[0]["category"]
-                    categorized[cat].extend(articles)
-            except: pass
+            items = future.result()
+            for item in items:
+                categorized[item["category"]].append(item)
     
+    # Sort by date
     for cat in categorized:
         categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
-        categorized[cat] = categorized[cat][:12]
     
     return categorized
 
 def get_time_str(dt):
     hrs = int((datetime.now() - dt).total_seconds() / 3600)
-    if hrs < 3: return "🟢 Now", "time-hot"
-    if hrs < 12: return f"🟠 {hrs}h", "time-warm"
-    return f"🔵 {hrs//24}d", "time-normal"
+    if hrs < 1:
+        return "Now", "time-hot"
+    if hrs < 6:
+        return f"{hrs}h", "time-hot"
+    if hrs < 24:
+        return f"{hrs}h", "time-warm"
+    return f"{hrs//24}d", "time-normal"
 
-# ──────────────────────────────────────────────────────────────────────────────
-# RENDER SECTION - Perfect containment & beautiful cards
-# ──────────────────────────────────────────────────────────────────────────────
-def render_section(icon, name, style_class, items):
-    header = f'<div class="{style_class}">{icon} {name}</div>'
-    
-    content = ""
+def render_body(items):
+    """Render news cards - using components to avoid raw HTML display"""
     if not items:
-        content = '<div style="padding:140px 20px; text-align:center; color:#94a3b8; font-size:1.2rem;">No client/competitor critical news in last 7 days</div>'
-    else:
-        for item in items:
-            time_str, time_class = get_time_str(item["pub"])
-            title = html.escape(item["title"])
-            link = html.escape(item["link"])
-            source = html.escape(item["source"])
-            
-            card_class = "news-card-priority" if item["priority"] else "news-card"
-            
-            content += f'''
-            <div class="{card_class}">
-                <a href="{link}" target="_blank" class="news-title">{title}</a>
-                <div class="news-meta">
-                    <span class="{time_class}">{time_str}</span>
-                    <span>•</span>
-                    <span>{source}</span>
-                </div>
-            </div>
-            '''
+        return """<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">No recent news</div></div>"""
     
-    full_html = f'''
-    <div class="section-box">
-        {header}
-        <div class="news-container">
-            {content}
-        </div>
-    </div>
-    '''
+    cards = []
+    for item in items:
+        time_str, time_class = get_time_str(item["pub"])
+        title = html.escape(item["title"])
+        link = html.escape(item["link"])
+        source = html.escape(item["source"])
+        
+        card_class = "news-card-priority" if item["priority"] else "news-card"
+        
+        # Build card HTML without f-strings to avoid display issues
+        card_parts = [
+            '<div class="' + card_class + '">',
+            '<a href="' + link + '" target="_blank" class="news-title">' + title + '</a>',
+            '<div class="news-meta">',
+            '<span class="' + time_class + '">' + time_str + '</span>',
+            '<span>•</span>',
+            '<span>' + source + '</span>',
+            '</div>',
+            '</div>'
+        ]
+        
+        cards.append(''.join(card_parts))
     
-    components.html(full_html, height=740, scrolling=True)
+    body_parts = ['<div class="col-body">']
+    body_parts.extend(cards)
+    body_parts.append('</div>')
+    
+    return ''.join(body_parts)
 
-# ──────────────────────────────────────────────────────────────────────────────
-# MAIN APPLICATION FLOW
-# ──────────────────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+# MAIN APPLICATION
+# ══════════════════════════════════════════════════════════════════════════════
+
+# Loading Screen
 placeholder = st.empty()
 with placeholder.container():
     st.markdown("""
-        <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:70vh; text-align:center;">
-            <h1 style="color:#0a192f; font-size:3.2rem; font-weight:800;">⚡ Stellar Nexus Intelligence</h1>
-            <p style="color:#64748b; font-size:1.4rem; margin-top:1.2rem;">Loading ONLY client, competitor & critical business news...</p>
+        <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:70vh;text-align:center;">
+            <h1 style="color:#0a192f;font-size:2.8rem;font-weight:800;">⚡ Igniting AI-powered intelligence...</h1>
+            <p style="color:#64748b;font-size:1.2rem;">Synchronizing global news nodes</p>
         </div>
     """, unsafe_allow_html=True)
     time.sleep(1.5)
 
 placeholder.empty()
 
+# Header
 st.markdown("""
-<div class="header">
-    <div class="title">Global Telecom & OTT Intelligence Nexus</div>
-    <div class="subtitle">Real-time Critical Business Intelligence • Clients • Competitors • OSS/BSS • January 2026</div>
+<div class="header-container">
+    <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
+    <p class="subtitle">AI Powered Real-time Competitive Intelligence Dashboard</p>
 </div>
 """, unsafe_allow_html=True)
 
-with st.spinner("Scanning high-priority sources (strict client focus)..."):
+# Strategic Highlights Section
+st.markdown("""
+<div class="hero-container">
+    <div class="hero-title">🚀 HIGHLIGHTS</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div class="hero-box">
+            <div class="hero-box-title" style="color: #10b981;">🟢 STRATEGIC HITS</div>
+            <div class="hero-content">
+                <b>Amdocs-Matrixx Deal:</b> Amdocs completes its $200M acquisition of charging leader Matrixx Software to dominate the Tier-1 5G billing market.<br><br>
+                <b>Disney-Hulu Merger:</b> Disney officially begins phasing out the standalone Hulu app to integrate all content into a unified Disney+ hub.<br><br>
+                <b>NEC Expansion:</b> Japan's NEC finalizes the acquisition of CSG, significantly scaling Netcracker's North American SaaS footprint.
+            </div>
+        </div>
+        <div class="hero-box">
+            <div class="hero-box-title" style="color: #f97316;">🟠 PULSE</div>
+            <div class="hero-content">
+                <b>Agentic AI Core:</b> By EOY 2026, autonomous AI agents are expected to handle roughly 40% of standard BSS operational tasks.<br><br>
+                <b>Satellite Breakout:</b> Direct-to-consumer satellite broadband moves from niche to mainstream as a primary fiber competitor.<br><br>
+                <b>Physical AI:</b> Amazon deploys its 1-millionth robot, integrated with DeepFleet AI for a 10% gain in warehouse efficiency.
+            </div>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# Fetch Real-Time News
+with st.spinner(""):
     data = load_feeds()
 
-total = sum(len(v) for v in data.values())
-st.markdown(f"""
-<div class="status-bar">
-    Loaded {total} high-impact articles • Last 7 days • ONLY EVERGENT clients, competitors & critical keywords
-</div>
-""", unsafe_allow_html=True)
-
+# Render News Columns
 cols = st.columns(4)
+cat_list = ["telco", "ott", "sports", "technology"]
 
-for idx, cat in enumerate(["telco", "ott", "sports", "technology"]):
+for idx, cat in enumerate(cat_list):
+    sec = SECTIONS[cat]
+    items = data.get(cat, [])[:10]
+    
     with cols[idx]:
-        render_section(
-            SECTIONS[cat]["icon"],
-            SECTIONS[cat]["name"],
-            SECTIONS[cat]["style"],
-            data.get(cat, [])
-        )
+        # Render header
+        header_parts = [
+            '<div class="',
+            sec["style"],
+            '">',
+            sec["icon"],
+            ' ',
+            sec["name"],
+            '</div>'
+        ]
+        st.markdown(''.join(header_parts), unsafe_allow_html=True)
+        
+        # Render body
+        st.markdown(render_body(items), unsafe_allow_html=True)
 
-st.markdown("""
-<div style="text-align:center; color:#94a3b8; font-size:0.95rem; margin:3.5rem 0 2rem;">
-    Strictly filtered: ONLY EVERGENT clients, competitors, OSS/BSS, deals & monetization news • No promotions, no gossip • Auto-refreshes every 5 min
-</div>
-""", unsafe_allow_html=True)
+# Footer
+footer_parts = [
+    '<div style="text-align:center;color:rgba(255,255,255,0.95);font-size:0.8rem;margin-top:20px;padding:16px;background:linear-gradient(135deg,rgba(10,25,47,0.95),rgba(30,41,59,0.95));border-radius:10px;">',
+    '<p><strong>🕐 Live:</strong> ' + datetime.now().strftime('%H:%M:%S'),
+    ' | <strong>🔄 Auto-refresh:</strong> Every 5 minutes</p>',
+    '<p style="margin-top:6px;font-size:0.7rem;opacity:0.85;">Powered by Real-time RSS Intelligence</p>',
+    '</div>'
+]
 
-st.markdown('<script>setTimeout(() => location.reload(), 300000);</script>', unsafe_allow_html=True)
+st.markdown(''.join(footer_parts), unsafe_allow_html=True)
+
+# Auto-refresh
+st.markdown('<script>setTimeout(function() {window.location.reload();}, 300000);</script>', unsafe_allow_html=True)
+
+keep_alive()
