@@ -236,12 +236,148 @@ HEADERS = {
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
+# CONTENT FILTER - EXCLUDE INAPPROPRIATE NEWS
+# ══════════════════════════════════════════════════════════════════════════════
+EXCLUDED_KEYWORDS = [
+    # Violence & Crime
+    "sex", "sexual", "assault", "abuse", "murder", "kill", "death", "rape", "violence",
+    "shooting", "stabbing", "terror", "terrorist", "suicide", "harassment", "victim",
+    
+    # Adult Content
+    "porn", "pornography", "nude", "naked", "explicit", "xxx", "adult content",
+    
+    # Drugs & Substance
+    "drug bust", "cocaine", "heroin", "meth", "overdose", "trafficking",
+    
+    # Controversial/Sensitive
+    "scandal", "controversy", "accused", "convicted", "arrest", "investigation",
+    "lawsuit", "sued", "fraud", "scam", "embezzlement", "corruption",
+    
+    # Disasters (unless business-relevant)
+    "crash", "accident", "disaster", "tragedy", "fatal", "dies", "dead", "died"
+]
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CONTENT FILTER - EXCLUDE INAPPROPRIATE & IRRELEVANT NEWS
+# ══════════════════════════════════════════════════════════════════════════════
+EXCLUDED_KEYWORDS = [
+    # Violence & Crime
+    "sex", "sexual", "assault", "abuse", "murder", "kill", "death", "rape", "violence",
+    "shooting", "stabbing", "terror", "terrorist", "suicide", "harassment", "victim",
+    
+    # Adult Content
+    "porn", "pornography", "nude", "naked", "explicit", "xxx", "adult content",
+    
+    # Drugs & Substance
+    "drug bust", "cocaine", "heroin", "meth", "overdose", "trafficking",
+    
+    # Controversial/Sensitive
+    "scandal", "controversy", "accused", "convicted", "arrest", "investigation",
+    "lawsuit", "sued", "fraud", "scam", "embezzlement", "corruption",
+    
+    # Disasters (unless business-relevant)
+    "crash", "accident", "disaster", "tragedy", "fatal", "dies", "dead", "died",
+    
+    # Promotional/Trivial Content
+    "promo code", "coupon", "discount code", "voucher", "sale", "black friday",
+    "cyber monday", "deal of the day", "limited time", "flash sale", "giveaway",
+    "contest", "sweepstakes", "free trial", "sign up now", "click here",
+    
+    # Celebrity/Entertainment Gossip
+    "celebrity", "gossip", "rumor", "dating", "relationship", "breakup",
+    "wedding", "divorce", "baby", "pregnant", "engagement",
+    
+    # Trivial Content
+    "quiz", "poll", "survey", "listicle", "top 10", "best of", "worst of",
+    "you won't believe", "shocking", "viral", "trending", "meme"
+]
+
+# EVERGENT INTELLIGENCE - Clients & Competitors
+EVERGENT_CLIENTS = [
+    # Key Clients
+    "astro", "sooka", "njoi", "fox sports", "fox corporation", "at&t", "directv",
+    "nba", "wnba", "shahid", "mbc", "tv asahi", "tv3", "abs-cbn", "viki",
+    "trt", "sinclair", "fanduel", "bally sports", "sony pictures", "sonyliv",
+    "aha", "bbc", "sky", "cignal", "telekom malaysia", "tm unifi", "britbox"
+]
+
+COMPETITORS = [
+    "netcracker", "amdocs", "csg systems", "oracle communications", "ericsson",
+    "nokia", "huawei", "matrixx", "optiva", "cerillion", "tecnotree", "comarch"
+]
+
+TOP_TELCOS = [
+    "verizon", "at&t", "t-mobile", "vodafone", "bt group", "singtel",
+    "reliance jio", "airtel", "china mobile", "softbank", "deutsche telekom"
+]
+
+# CRITICAL KEYWORDS - What makes news important
+CRITICAL_KEYWORDS = [
+    "merger", "acquisition", "deal", "partnership", "contract", "agreement",
+    "billion", "million", "revenue", "earnings", "profit", "loss",
+    "oss", "bss", "billing", "charging", "monetization", "5g", "network",
+    "streaming", "platform", "subscriber", "rights", "broadcasting",
+    "launch", "expansion", "shutdown", "bankruptcy", "ipo", "investment"
+]
+
+# ══════════════════════════════════════════════════════════════════════════════
 # UTILITY FUNCTIONS
 # ══════════════════════════════════════════════════════════════════════════════
 def clean(raw):
     if not raw:
         return ""
     return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
+
+def is_content_appropriate(title, summary):
+    """Filter out inappropriate and promotional content"""
+    text = (title + " " + summary).lower()
+    
+    # Reject if contains excluded keywords
+    for keyword in EXCLUDED_KEYWORDS:
+        if keyword in text:
+            return False
+    
+    return True
+
+def calculate_relevance_score(title, summary):
+    """Score news based on business relevance to Evergent"""
+    text = (title + " " + summary).lower()
+    score = 0
+    
+    # High priority: Evergent clients (15 points)
+    for client in EVERGENT_CLIENTS:
+        if client in text:
+            score += 15
+            break
+    
+    # Medium priority: Competitors (10 points)
+    for competitor in COMPETITORS:
+        if competitor in text:
+            score += 10
+            break
+    
+    # Important: Major telcos (8 points)
+    for telco in TOP_TELCOS:
+        if telco in text:
+            score += 8
+            break
+    
+    # Critical business keywords (3 points each, max 15)
+    keyword_matches = sum(1 for kw in CRITICAL_KEYWORDS if kw in text)
+    score += min(keyword_matches * 3, 15)
+    
+    return score
+
+def is_content_appropriate(title, summary):
+    """Filter out inappropriate content for CEO dashboard"""
+    text = (title + " " + summary).lower()
+    
+    # Check if any excluded keyword is present
+    for keyword in EXCLUDED_KEYWORDS:
+        if keyword in text:
+            return False
+    
+    return True
 
 def fetch_feed(source, url, category):
     items = []
@@ -260,6 +396,11 @@ def fetch_feed(source, url, category):
                 continue
             
             summary = clean(entry.get("summary", ""))
+            
+            # CRITICAL: Filter inappropriate content
+            if not is_content_appropriate(title, summary):
+                continue
+            
             link = entry.get("link", "")
             
             pub = None
@@ -313,9 +454,11 @@ def load_feeds():
             for item in items:
                 categorized[item["category"]].append(item)
     
-    # Sort by date
+    # Sort by relevance score first, then by date
     for cat in categorized:
-        categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
+        categorized[cat].sort(key=lambda x: (x["relevance"], x["pub"]), reverse=True)
+        # Keep only top 10 most relevant per category
+        categorized[cat] = categorized[cat][:10]
     
     return categorized
 
@@ -384,7 +527,7 @@ placeholder.empty()
 st.markdown("""
 <div class="header-container">
     <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
-    <p class="subtitle">AI Powered Real-time Competitive Intelligence Dashboard</p>
+    <p class="subtitle">Real-time Competitive Intelligence Dashboard</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -444,7 +587,9 @@ for idx, cat in enumerate(cat_list):
 # Footer
 footer_parts = [
     '<div style="text-align:center;color:rgba(255,255,255,0.95);font-size:0.8rem;margin-top:20px;padding:16px;background:linear-gradient(135deg,rgba(10,25,47,0.95),rgba(30,41,59,0.95));border-radius:10px;">',
-       ' | <strong>🔄 Auto-refresh:</strong> Every 5 minutes</p>',
+    '<p><strong>🕐 Live Sync:</strong> ',
+    datetime.now().strftime('%H:%M:%S'),
+    ' | <strong>🔄 Auto-refresh:</strong> Every 5 minutes</p>',
     '<p style="margin-top:6px;font-size:0.7rem;opacity:0.85;">Powered by Real-time RSS Intelligence</p>',
     '</div>'
 ]
