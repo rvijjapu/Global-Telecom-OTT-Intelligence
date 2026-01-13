@@ -7,7 +7,7 @@ import html
 import time
 import streamlit.components.v1 as components
 
-# KEEP-ALIVE - MUST BE FIRST
+# KEEP-ALIVE - FIRST THING IN FILE
 @st.fragment(run_every=600)
 def keep_alive():
     st.markdown("", unsafe_allow_html=True)
@@ -19,7 +19,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# BASE SAFE STYLING
+# SAFE BASE STYLING (no complex HTML)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -30,40 +30,34 @@ st.markdown("""
         font-family: 'Inter', sans-serif;
     }
 
-    body { margin: 0; padding: 0; }
-
-    .header, .section-box, .footer {
+    .header-box, .section-box, .footer-box {
+        background: rgba(255,255,255,0.97);
         border-radius: 18px;
+        padding: 2rem;
         box-shadow: 0 12px 50px rgba(0,0,0,0.14);
         margin-bottom: 2.5rem;
-    }
-
-    .header {
-        background: rgba(255,255,255,0.97);
-        padding: 2.2rem 3rem;
-        text-align: center;
-        border-bottom: 6px solid #1e40af;
+        border: 1px solid #e2e8f0;
     }
 
     .main-title {
         font-size: 3.4rem;
         font-weight: 900;
         color: #0a192f;
+        text-align: center;
         margin: 0;
-        letter-spacing: -1px;
     }
 
     .subtitle {
         font-size: 1.4rem;
         color: #475569;
+        text-align: center;
         margin-top: 0.8rem;
-        font-weight: 500;
     }
 
     .section-title {
-        color: #0a192f;
         font-size: 1.9rem;
         font-weight: 800;
+        color: #0a192f;
         margin-bottom: 1.5rem;
         border-left: 7px solid #1e40af;
         padding-left: 16px;
@@ -95,7 +89,7 @@ st.markdown("""
 
     .news-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.12);
     }
 
     .priority-card {
@@ -107,7 +101,6 @@ st.markdown("""
         color: #1e40af;
         font-size: 1.08rem;
         font-weight: 600;
-        line-height: 1.45;
         text-decoration: none;
         display: block;
         margin-bottom: 0.8rem;
@@ -127,9 +120,10 @@ st.markdown("""
     .time-warm { color: #ea580c; font-weight: 700; }
     .time-normal { color: #64748b; }
 
-    .footer {
+    .footer-box {
         color: rgba(255,255,255,0.92);
         font-size: 0.95rem;
+        text-align: center;
         padding: 2rem;
         background: linear-gradient(135deg, rgba(10,25,47,0.96), rgba(30,41,59,0.96));
         border-radius: 20px;
@@ -138,7 +132,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# RSS FEEDS & KEYWORDS (strict filtering)
+# RSS & KEYWORDS (strict)
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
     ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
@@ -259,9 +253,9 @@ def get_time_str(dt):
     return f"🔵 {hrs//24}d", "time-normal"
 
 # ──────────────────────────────────────────────────────────────────────────────
-# MAIN DASHBOARD - ALL VIA components.html ONLY
+# MAIN DASHBOARD - ALL SAFE via components.html
 # ──────────────────────────────────────────────────────────────────────────────
-# Loading screen (simple markdown - safe)
+# Loading
 placeholder = st.empty()
 with placeholder.container():
     st.markdown("""
@@ -303,7 +297,7 @@ components.html("""
 </div>
 """, height=420, scrolling=False)
 
-# Load news
+# News Sections
 with st.spinner("Loading only critical, relevant intelligence..."):
     data = load_feeds()
 
@@ -314,7 +308,6 @@ for idx, cat in enumerate(["telco", "ott", "sports", "technology"]):
         sec = SECTIONS[cat]
         items = data.get(cat, [])[:10]
         
-        # Build safe HTML string
         header = f'<div class="col-header {sec["style"]}">{sec["icon"]} {sec["name"]}</div>'
         
         content = ""
@@ -347,7 +340,6 @@ for idx, cat in enumerate(["telco", "ott", "sports", "technology"]):
         </div>
         '''
         
-        # Render safely
         components.html(full_section, height=860, scrolling=True)
 
 # Footer
