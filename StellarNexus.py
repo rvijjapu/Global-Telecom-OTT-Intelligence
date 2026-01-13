@@ -384,7 +384,7 @@ placeholder.empty()
 st.markdown("""
 <div class="header-container">
     <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
-    <p class="subtitle">Real-time Competitive Intelligence Dashboard</p>
+    <p class="subtitle">AI Powered Real-time Competitive Intelligence Dashboard</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -444,9 +444,7 @@ for idx, cat in enumerate(cat_list):
 # Footer
 footer_parts = [
     '<div style="text-align:center;color:rgba(255,255,255,0.95);font-size:0.8rem;margin-top:20px;padding:16px;background:linear-gradient(135deg,rgba(10,25,47,0.95),rgba(30,41,59,0.95));border-radius:10px;">',
-    '<p><strong>🕐 Live Sync:</strong> ',
-    datetime.now().strftime('%H:%M:%S'),
-    ' | <strong>🔄 Auto-refresh:</strong> Every 5 minutes</p>',
+       ' | <strong>🔄 Auto-refresh:</strong> Every 5 minutes</p>',
     '<p style="margin-top:6px;font-size:0.7rem;opacity:0.85;">Powered by Real-time RSS Intelligence</p>',
     '</div>'
 ]
