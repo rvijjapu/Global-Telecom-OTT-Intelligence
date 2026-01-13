@@ -6,10 +6,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import html
 import re
 import time
+import streamlit.components.v1 as components
 
-# ══════════════════════════════════════════════════════════════════════════════
-# PAGE CONFIG
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
+# PAGE CONFIGURATION
+# ──────────────────────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Global Telecom & OTT Stellar Nexus",
     page_icon="🌐",
@@ -17,16 +18,9 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ══════════════════════════════════════════════════════════════════════════════
-# KEEP-ALIVE FRAGMENT
-# ══════════════════════════════════════════════════════════════════════════════
-@st.fragment(run_every=600)
-def keep_alive():
-    st.markdown("", unsafe_allow_html=True)
-
-# ══════════════════════════════════════════════════════════════════════════════
-# PREMIUM STYLING
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
+# GLOBAL CSS (moved to top for reliability)
+# ──────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -194,14 +188,12 @@ st.markdown("""
     
     #MainMenu, footer, header {visibility: hidden;}
     .stDeployButton {display: none;}
-    
-    [data-testid="column"] {padding: 0 8px !important;}
 </style>
 """, unsafe_allow_html=True)
 
-# ══════════════════════════════════════════════════════════════════════════════
-# RSS FEEDS CONFIGURATION
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
+# RSS FEEDS & CONFIG
+# ──────────────────────────────────────────────────────────────────────────────
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
     ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
@@ -233,9 +225,7 @@ HEADERS = {
     "Accept": "application/rss+xml, application/xml, text/xml, */*",
 }
 
-# ══════════════════════════════════════════════════════════════════════════════
-# CONTENT FILTERS & BUSINESS KEYWORDS
-# ══════════════════════════════════════════════════════════════════════════════
+# Content filters & keywords
 EXCLUDED_KEYWORDS = [
     "sex", "sexual", "assault", "abuse", "murder", "kill", "death", "rape", "violence",
     "porn", "pornography", "nude", "naked", "explicit", "xxx", "adult content",
@@ -269,9 +259,9 @@ CRITICAL_KEYWORDS = [
     "launch", "expansion", "shutdown", "bankruptcy", "ipo", "investment"
 ]
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
 # UTILITY FUNCTIONS
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
 def clean(raw):
     if not raw:
         return ""
@@ -285,24 +275,20 @@ def calculate_relevance_score(title, summary):
     text = (title + " " + summary).lower()
     score = 0
     
-    # Critical keywords
     for kw in CRITICAL_KEYWORDS:
         if kw in text:
             score += 8
     
-    # Clients - strong priority
     for client in EVERGENT_CLIENTS:
         if client in text:
             score += 15
             break
     
-    # Competitors
     for comp in COMPETITORS:
         if comp in text:
             score += 12
             break
     
-    # Major telcos
     for telco in TOP_TELCOS:
         if telco in text:
             score += 6
@@ -313,15 +299,15 @@ def calculate_relevance_score(title, summary):
 def fetch_feed(source, url, category):
     items = []
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=8)
+        resp = requests.get(url, headers=HEADERS, timeout=10)
         if resp.status_code != 200:
             return items
         
         feed = feedparser.parse(resp.content)
         NOW = datetime.now()
-        CUTOFF = NOW - timedelta(days=4)
+        CUTOFF = NOW - timedelta(days=5)
         
-        for entry in feed.entries[:10]:
+        for entry in feed.entries[:12]:
             title = clean(entry.get("title", ""))
             if len(title) < 25:
                 continue
@@ -346,10 +332,8 @@ def fetch_feed(source, url, category):
             if not pub or pub < CUTOFF:
                 continue
             
-            # Calculate relevance score
             relevance = calculate_relevance_score(title, summary)
             
-            # Priority flag for visual highlight
             priority_keywords = ["amdocs", "netcracker", "matrixx", "evergent", "oss", "bss", 
                                "merger", "acquisition", "charging", "billing", "monetization"]
             is_priority = any(kw in (title + summary).lower() for kw in priority_keywords) \
@@ -363,7 +347,7 @@ def fetch_feed(source, url, category):
                 "summary": summary,
                 "category": category,
                 "priority": is_priority,
-                "relevance": relevance  # ← THIS WAS THE MISSING PIECE
+                "relevance": relevance
             })
     except:
         pass
@@ -372,89 +356,89 @@ def fetch_feed(source, url, category):
 
 @st.cache_data(ttl=300, show_spinner=False)
 def load_feeds():
-    categorized = {
-        "telco": [],
-        "ott": [],
-        "sports": [],
-        "technology": []
-    }
+    categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
     
     with ThreadPoolExecutor(max_workers=12) as executor:
-        futures = [
-            executor.submit(fetch_feed, source, url, cat)
-            for source, url, cat in RSS_FEEDS
-        ]
+        futures = [executor.submit(fetch_feed, src, url, cat) 
+                   for src, url, cat in RSS_FEEDS]
         
         for future in as_completed(futures):
             try:
-                new_items = future.result()
-                for item in new_items:
+                for item in future.result():
                     categorized[item["category"]].append(item)
             except:
                 continue
     
-    # Sort: highest relevance first, then most recent
     for cat in categorized:
-        categorized[cat].sort(
-            key=lambda x: (-x["relevance"], x["pub"]),  # descending relevance + descending date
-            reverse=False
-        )
-        # Keep best 10 per category
+        categorized[cat].sort(key=lambda x: (-x["relevance"], x["pub"]))
         categorized[cat] = categorized[cat][:10]
     
     return categorized
 
 def get_time_str(dt):
     hrs = int((datetime.now() - dt).total_seconds() / 3600)
-    if hrs < 1:
-        return "Now", "time-hot"
-    if hrs < 6:
-        return f"{hrs}h ago", "time-hot"
-    if hrs < 24:
-        return f"{hrs}h ago", "time-warm"
+    if hrs < 1: return "Now", "time-hot"
+    if hrs < 6: return f"{hrs}h ago", "time-hot"
+    if hrs < 24: return f"{hrs}h ago", "time-warm"
     return f"{hrs//24}d ago", "time-normal"
 
-def render_body(items):
+# ──────────────────────────────────────────────────────────────────────────────
+# RENDERING WITH COMPONENTS.HTML (most reliable method)
+# ──────────────────────────────────────────────────────────────────────────────
+def render_section(icon, name, style_class, items):
+    header = f'''
+    <div class="{style_class}">
+        {icon} {name}
+    </div>
+    '''
+    
+    body_content = ""
     if not items:
-        return """<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">No recent relevant news</div></div>"""
-    
-    cards = []
-    for item in items:
-        time_str, time_class = get_time_str(item["pub"])
-        title = html.escape(item["title"])
-        link = html.escape(item["link"])
-        source = html.escape(item["source"])
-        
-        card_class = "news-card-priority" if item["priority"] else "news-card"
-        
-        card = f'''
-        <div class="{card_class}">
-            <a href="{link}" target="_blank" class="news-title">{title}</a>
-            <div class="news-meta">
-                <span class="{time_class}">{time_str}</span>
-                <span>•</span>
-                <span>{source}</span>
+        body_content = '<div style="text-align:center;color:#94a3b8;padding:40px;">No recent relevant news</div>'
+    else:
+        for item in items:
+            time_str, time_class = get_time_str(item["pub"])
+            title = html.escape(item["title"])
+            link = html.escape(item["link"])
+            source = html.escape(item["source"])
+            
+            card_class = "news-card-priority" if item["priority"] else "news-card"
+            
+            body_content += f'''
+            <div class="{card_class}">
+                <a href="{link}" target="_blank" class="news-title">{title}</a>
+                <div class="news-meta">
+                    <span class="{time_class}">{time_str}</span>
+                    <span>•</span>
+                    <span>{source}</span>
+                </div>
             </div>
-        </div>
-        '''
-        cards.append(card)
+            '''
     
-    return f'<div class="col-body">{"".join(cards)}</div>'
+    full_html = f'''
+    {header}
+    <div class="col-body">
+        {body_content}
+    </div>
+    '''
+    
+    # Use components.html - this is the most reliable way in 2025/2026 Streamlit
+    components.html(full_html, height=550, scrolling=True)
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
 # MAIN APPLICATION
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
 
-# Loading Screen
+# Loading screen
 placeholder = st.empty()
 with placeholder.container():
     st.markdown("""
         <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:70vh;text-align:center;">
-            <h1 style="color:#0a192f;font-size:2.8rem;font-weight:800;">⚡ Igniting AI-powered intelligence...</h1>
-            <p style="color:#64748b;font-size:1.2rem;">Synchronizing global telecom & OTT news nodes</p>
+            <h1 style="color:#0a192f;font-size:2.8rem;font-weight:800;">⚡ Igniting intelligence layer...</h1>
+            <p style="color:#64748b;font-size:1.2rem;">Collecting latest telecom, OTT & sports signals</p>
         </div>
     """, unsafe_allow_html=True)
-    time.sleep(1.5)
+    time.sleep(1.4)
 
 placeholder.empty()
 
@@ -462,11 +446,11 @@ placeholder.empty()
 st.markdown("""
 <div class="header-container">
     <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
-    <p class="subtitle">Real-time Competitive Intelligence Dashboard • January 2026</p>
+    <p class="subtitle">Real-time Competitive Intelligence • January 2026</p>
 </div>
 """, unsafe_allow_html=True)
 
-# Strategic Highlights Section
+# Strategic Highlights
 st.markdown("""
 <div class="hero-container">
     <div class="hero-title">🚀 KEY HIGHLIGHTS</div>
@@ -474,53 +458,55 @@ st.markdown("""
         <div class="hero-box">
             <div class="hero-box-title" style="color: #10b981;">🟢 STRATEGIC HITS</div>
             <div class="hero-content">
-                <b>Amdocs-Matrixx Deal:</b> Amdocs completes its $200M acquisition of charging leader Matrixx Software to dominate Tier-1 5G billing market.<br><br>
-                <b>Disney-Hulu Integration:</b> Disney begins phasing out standalone Hulu app for unified Disney+ hub.<br><br>
-                <b>NEC-CSG Acquisition:</b> Japan's NEC finalizes CSG acquisition, significantly expanding Netcracker's North American presence.
+                <b>Amdocs-Matrixx:</b> $200M acquisition completed — strengthens charging leadership<br><br>
+                <b>Disney-Hulu:</b> Standalone Hulu app phase-out begins for unified Disney+ experience<br><br>
+                <b>NEC-CSG:</b> NEC finalizes CSG acquisition, boosting Netcracker's NA footprint
             </div>
         </div>
         <div class="hero-box">
             <div class="hero-box-title" style="color: #f97316;">🟠 MARKET PULSE</div>
             <div class="hero-content">
-                <b>Agentic AI in BSS:</b> Autonomous AI agents projected to handle ~40% of standard BSS operations by EOY 2026.<br><br>
-                <b>Satellite Broadband Rise:</b> Direct-to-consumer satellite services emerging as serious fiber alternative.<br><br>
-                <b>Physical AI Milestone:</b> Amazon reaches 1-millionth robot deployment with DeepFleet AI integration.
+                <b>Agentic BSS:</b> Autonomous AI agents expected to manage ~40% of BSS tasks by EOY<br><br>
+                <b>Satellite Broadband:</b> Direct-to-consumer services gaining ground vs fiber<br><br>
+                <b>Physical AI:</b> Amazon hits 1-million-robot milestone with DeepFleet integration
             </div>
         </div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# Fetch & Display News
-with st.spinner("Loading latest industry intelligence..."):
+# Load & render news
+with st.spinner("Loading industry intelligence..."):
     data = load_feeds()
 
-# Render News Columns
 cols = st.columns(4)
-cat_list = ["telco", "ott", "sports", "technology"]
-
-for idx, cat in enumerate(cat_list):
+for idx, cat in enumerate(["telco", "ott", "sports", "technology"]):
     sec = SECTIONS[cat]
     items = data.get(cat, [])[:10]
     
     with cols[idx]:
-        st.markdown(f'''
-        <div class="{sec["style"]}">
-            {sec["icon"]} {sec["name"]}
-        </div>
-        ''', unsafe_allow_html=True)
-        
-        st.markdown(render_body(items), unsafe_allow_html=True)
+        render_section(
+            sec["icon"],
+            sec["name"],
+            sec["style"],
+            items
+        )
 
 # Footer
 st.markdown(f'''
-<div style="text-align:center;color:rgba(255,255,255,0.95);font-size:0.8rem;margin-top:20px;padding:16px;background:linear-gradient(135deg,rgba(10,25,47,0.95),rgba(30,41,59,0.95));border-radius:10px;">
-    <p><strong>🕐 Live Sync:</strong> {datetime.now().strftime('%H:%M:%S')} IST • January 13, 2026</p>
-    <p style="margin-top:6px;font-size:0.7rem;opacity:0.85;">Powered by Real-time RSS Intelligence Engine</p>
+<div style="text-align:center; color:rgba(255,255,255,0.95); font-size:0.8rem; margin-top:20px; padding:16px; 
+            background:linear-gradient(135deg,rgba(10,25,47,0.95),rgba(30,41,59,0.95)); border-radius:10px;">
+    <p><strong>🕐 Live:</strong> {datetime.now().strftime('%H:%M:%S')} • <strong>🔄 Refresh:</strong> every 5 min</p>
+    <p style="margin-top:6px; font-size:0.7rem; opacity:0.85;">Powered by Real-time RSS Intelligence</p>
 </div>
 ''', unsafe_allow_html=True)
 
 # Auto-refresh
-st.markdown('<script>setTimeout(function() {window.location.reload();}, 300000);</script>', unsafe_allow_html=True)
+st.markdown('<script>setTimeout(() => {window.location.reload()}, 300000);</script>', unsafe_allow_html=True)
+
+# Keep-alive fragment
+@st.fragment(run_every=600)
+def keep_alive():
+    st.markdown("", unsafe_allow_html=True)
 
 keep_alive()
