@@ -26,7 +26,7 @@ st.set_page_config(
 )
 
 # ──────────────────────────────────────────────────────────────────────────────
-# PREMIUM NEAT UI STYLING - Clean, modern, polished for all sections
+# PREMIUM STYLING - Light theme, beautiful, wow UI
 # ──────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
@@ -41,16 +41,16 @@ st.markdown("""
     
     .header-container {
         background: rgba(255, 255, 255, 0.96);
-        padding: 1.8rem 2.5rem;
+        padding: 1.5rem 2rem;
         text-align: center;
-        border-radius: 22px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-        margin: 0 0 2.5rem 0;
-        border-bottom: 5px solid #1e40af;
+        border-radius: 20px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        margin: 0 0 2rem 0;
+        border-bottom: 4px solid #1e40af;
     }
     
     .main-title {
-        font-size: 3rem;
+        font-size: 2.6rem;
         font-weight: 800;
         color: #0a192f;
         margin: 0;
@@ -58,48 +58,49 @@ st.markdown("""
     }
     
     .subtitle {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         color: #475569;
-        margin-top: 0.7rem;
+        margin-top: 0.6rem;
         font-weight: 500;
     }
     
+    /* Highlights Section */
     .hero-container {
         background: rgba(255, 255, 255, 0.98);
-        border-radius: 18px;
-        padding: 2.2rem;
-        margin-bottom: 2.5rem;
-        box-shadow: 0 12px 45px rgba(0,0,0,0.12);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 35px rgba(0,0,0,0.12);
         border: 1px solid #e2e8f0;
     }
     
     .hero-title {
         color: #0a192f;
-        font-size: 2rem;
+        font-size: 1.85rem;
         font-weight: 800;
-        margin-bottom: 1.6rem;
-        border-left: 7px solid #1e40af;
-        padding-left: 16px;
+        margin-bottom: 1.5rem;
+        border-left: 6px solid #1e40af;
+        padding-left: 15px;
     }
     
     .hero-box {
         background: #f1f5f9;
-        border-radius: 14px;
-        padding: 1.6rem;
-        min-height: 220px;
+        border-radius: 12px;
+        padding: 1.5rem;
+        min-height: 200px;
         border: 1px solid #e2e8f0;
     }
     
     .hero-box-title {
         font-weight: 800;
-        font-size: 1.2rem;
-        margin-bottom: 1rem;
+        font-size: 1.1rem;
+        margin-bottom: 12px;
     }
     
     .hero-content {
         color: #1e293b;
-        font-size: 0.98rem;
-        line-height: 1.75;
+        font-size: 0.95rem;
+        line-height: 1.7;
     }
     
     .hero-content b {
@@ -107,14 +108,15 @@ st.markdown("""
         font-weight: 700;
     }
     
+    /* News Sections */
     .col-header {
-        padding: 14px 18px;
-        border-radius: 16px 16px 0 0;
+        padding: 12px 16px;
+        border-radius: 14px 14px 0 0;
         color: white;
         font-weight: 700;
-        font-size: 1.1rem;
+        font-size: 0.95rem;
         text-align: center;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
     }
     
     .col-header-pink {background: linear-gradient(135deg, #ec4899, #db2777);}
@@ -124,51 +126,51 @@ st.markdown("""
     
     .col-body {
         background: white;
-        border-radius: 0 0 16px 16px;
-        padding: 14px;
-        min-height: 500px;
-        max-height: 620px;
+        border-radius: 0 0 14px 14px;
+        padding: 12px;
+        min-height: 480px;
+        max-height: 580px;
         overflow-y: auto;
-        box-shadow: 0 7px 25px rgba(0,0,0,0.1);
-        margin-bottom: 1.5rem;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        margin-bottom: 1rem;
     }
     
     .news-card {
         background: #fafbfc;
         border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 14px;
-        margin-bottom: 12px;
-        transition: all 0.35s ease;
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 10px;
+        transition: all 0.3s ease;
     }
     
     .news-card:hover {
         background: #f1f5f9;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+        transform: translateY(-1px);
     }
     
     .news-card-priority {
         background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%);
         border: 2px solid #fbbf24;
-        border-radius: 12px;
-        padding: 14px;
-        margin-bottom: 12px;
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 10px;
     }
     
     .news-card-priority:hover {
         background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        box-shadow: 0 10px 25px rgba(251,191,36,0.25);
+        box-shadow: 0 8px 20px rgba(251,191,36,0.2);
     }
     
     .news-title {
         color: #1e40af;
-        font-size: 0.96rem;
+        font-size: 0.92rem;
         font-weight: 600;
-        line-height: 1.4;
+        line-height: 1.35;
         text-decoration: none;
         display: block;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
     }
     
     .news-title:hover {
@@ -177,11 +179,11 @@ st.markdown("""
     }
     
     .news-meta {
-        font-size: 0.8rem;
+        font-size: 0.76rem;
         color: #64748b;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 7px;
         flex-wrap: wrap;
     }
     
@@ -189,215 +191,16 @@ st.markdown("""
     .time-warm {color: #ea580c; font-weight: 600;}
     .time-normal {color: #64748b;}
     
-    .col-body::-webkit-scrollbar {width: 7px;}
-    .col-body::-webkit-scrollbar-track {background: #f1f5f9; border-radius: 12px;}
-    .col-body::-webkit-scrollbar-thumb {background: #94a3b8; border-radius: 12px;}
-    
-    .footer-bar {
-        text-align: center;
-        color: rgba(255,255,255,0.95);
-        font-size: 0.9rem;
-        margin-top: 2.5rem;
-        padding: 1.8rem;
-        background: linear-gradient(135deg,rgba(10,25,47,0.96),rgba(30,41,59,0.96));
-        border-radius: 16px;
-    }
+    .col-body::-webkit-scrollbar {width: 6px;}
+    .col-body::-webkit-scrollbar-track {background: #f1f5f9; border-radius: 10px;}
+    .col-body::-webkit-scrollbar-thumb {background: #94a3b8; border-radius: 10px;}
     
     #MainMenu, footer, header {visibility: hidden;}
     .stDeployButton {display: none;}
     
-    [data-testid="column"] {padding: 0 10px !important;}
+    [data-testid="column"] {padding: 0 8px !important;}
 </style>
 """, unsafe_allow_html=True)
-
-# ──────────────────────────────────────────────────────────────────────────────
-# EVERGENT CLIENTS, COMPETITORS, TOP TELCOS (FULL LISTS)
-# ──────────────────────────────────────────────────────────────────────────────
-EVERGENT_CLIENTS = {
-    "Astro": ["astro malaysia", "astro sooka", "astro njoi", "astro", "sooka", "njoi"],
-    "MongolTV": ["mongoltv", "mongol tv", "mongolia tv"],
-    "FOX": ["fox sports", "fox corporation", "fox networks", "fox"],
-    "AT&T": ["at&t", "att inc", "att wireless", "directv"],
-    "NBA": ["nba", "national basketball"],
-    "Shahid": ["shahid", "shahid vip", "mbc shahid"],
-    "MBC": ["mbc group", "mbc", "middle east broadcasting"],
-    "TV ASAHI": ["tv asahi", "asahi television", "asahi tv"],
-    "TV3": ["tv3 malaysia", "tv3", "media prima"],
-    "ABS-CBN": ["abs-cbn", "abscbn", "abs cbn", "philippine broadcast"],
-    "Viki": ["viki", "rakuten viki", "viki streaming"],
-    "TRT": ["trt world", "trt", "turkish radio"],
-    "Sinclair": ["sinclair broadcast", "sinclair", "bally sports"],
-    "FanDuel": ["fanduel", "fanduel group", "flutter"],
-    "Bally Sports": ["bally sports", "bally regional", "diamond sports"],
-    "Gotham": ["gotham advanced", "gotham fc"],
-    "Marquee": ["marquee sports", "marquee network"],
-    "Sony": ["sony pictures", "sony entertainment", "sonyliv", "sony india"],
-    "Aha": ["aha video", "aha ott", "aha telugu"],
-    "BBC": ["bbc", "british broadcasting", "bbc iplayer"],
-    "Lightbox": ["lightbox", "spark lightbox"],
-    "Sky": ["sky nz", "sky new zealand", "sky tv", "sky uk", "sky italia", "sky deutschland"],
-    "Cignal": ["cignal tv", "cignal", "cignal satellite"],
-    "ETV": ["etv network", "etv bharat"],
-    "Simple TV": ["simpletv", "simple tv venezuela"],
-    "Telekom Malaysia": ["telekom malaysia", "tm unifi", "unifi tv", "tm"],
-    "Britbox": ["britbox", "britbox international"],
-    "Quickplay": ["quickplay", "quickplay media"],
-    "Pilipinas": ["pilipinas", "abs-cbn"],
-}
-
-COMPETITORS = {
-    "Netcracker": ["netcracker", "netcracker technology", "nec netcracker"],
-    "Amdocs": ["amdocs", "amdocs ltd", "amdocs inc"],
-    "CSG": ["csg systems", "csg international", "csg"],
-    "Oracle": ["oracle communications", "oracle corporation", "oracle telecom"],
-    "Ericsson": ["ericsson", "telefonaktiebolaget lm ericsson"],
-    "Nokia": ["nokia", "nokia networks", "nokia corporation"],
-    "Huawei": ["huawei", "huawei technologies"],
-    "Comarch": ["comarch", "comarch bss"],
-    "Tecnotree": ["tecnotree", "tecnotree corporation"],
-    "MATRIXX": ["matrixx", "matrixx software"],
-    "Optiva": ["optiva", "optiva inc"],
-    "Cerillion": ["cerillion", "cerillion plc"],
-    "AsiaInfo": ["asiainfo", "asiainfo technologies"],
-    "Hansen": ["hansen technologies", "hansen"],
-    "Openet": ["openet", "openet telecom"],
-    "ZTE": ["zte", "zte corporation"],
-    "Mavenir": ["mavenir", "mavenir systems"],
-    "Infosys": ["infosys", "infosys telecom"],
-    "TCS": ["tata consultancy", "tcs", "tata communications"],
-    "Wipro": ["wipro", "wipro digital"],
-    "Tech Mahindra": ["tech mahindra", "mahindra comviva"],
-    "Accenture": ["accenture", "accenture telecom"],
-    "Capgemini": ["capgemini", "capgemini telecom"],
-    "IBM": ["ibm", "ibm telecom", "ibm watson"],
-    "SAP": ["sap", "sap telecom"],
-    "Salesforce": ["salesforce", "salesforce communications"],
-}
-
-TOP_TELCOS = {
-    "Verizon": ["verizon", "verizon wireless", "verizon fios"],
-    "AT&T": ["at&t", "att mobility"],
-    "T-Mobile": ["t-mobile", "tmobile usa", "sprint"],
-    "Comcast": ["comcast", "xfinity", "comcast cable"],
-    "Charter": ["charter communications", "spectrum", "charter spectrum"],
-    "Cox": ["cox communications", "cox cable", "cox business"],
-    "Lumen": ["lumen technologies", "centurylink", "lumen"],
-    "Frontier": ["frontier communications", "frontier"],
-    "Windstream": ["windstream", "windstream enterprise"],
-    "Mediacom": ["mediacom communications", "mediacom"],
-    "Altice USA": ["altice usa", "optimum", "suddenlink"],
-    "BT": ["bt group", "british telecom", "bt", "bt enterprise", "ee"],
-    "Vodafone": ["vodafone", "vodafone group"],
-    "O2": ["o2", "telefonica uk"],
-    "Virgin Media": ["virgin media", "virgin media o2"],
-    "Three": ["three uk", "three mobile"],
-    "Orange": ["orange", "orange sa"],
-    "Deutsche Telekom": ["deutsche telekom", "t-mobile europe", "telekom"],
-    "Telefónica": ["telefonica", "telefonica spain", "movistar"],
-    "Telecom Italia": ["telecom italia", "tim", "tim brasil"],
-    "Swisscom": ["swisscom", "swisscom ag"],
-    "KPN": ["kpn", "koninklijke pn"],
-    "Proximus": ["proximus", "belgacom"],
-    "Telenor": ["telenor", "telenor group"],
-    "Telia": ["telia", "telia company"],
-    "Bouygues": ["bouygues telecom", "bouygues"],
-    "Singtel": ["singtel", "singapore telecom", "singapore telecommunications"],
-    "StarHub": ["starhub", "starhub singapore"],
-    "M1": ["m1 limited", "m1 singapore"],
-    "Maxis": ["maxis", "maxis communications", "maxis malaysia"],
-    "Celcom": ["celcom", "celcom axiata"],
-    "Digi": ["digi telecommunications", "digi malaysia", "digi.com"],
-    "Telekom Malaysia": ["telekom malaysia", "tm", "tm unifi"],
-    "U Mobile": ["u mobile", "umobile malaysia"],
-    "Sky NZ": ["sky new zealand", "sky nz", "sky network television"],
-    "Spark": ["spark new zealand", "spark nz"],
-    "2degrees": ["2degrees", "2degrees mobile"],
-    "Vodafone NZ": ["vodafone new zealand", "vodafone nz"],
-    "Telstra": ["telstra", "telstra corporation"],
-    "Optus": ["optus", "singtel optus"],
-    "TPG": ["tpg telecom", "vodafone australia"],
-    "China Mobile": ["china mobile", "cmcc"],
-    "China Telecom": ["china telecom", "chinanet"],
-    "China Unicom": ["china unicom", "unicom"],
-    "NTT": ["ntt", "nippon telegraph", "ntt docomo"],
-    "SoftBank": ["softbank", "softbank corp"],
-    "KDDI": ["kddi", "kddi corporation", "au"],
-    "Reliance Jio": ["reliance jio", "jio", "jio platforms"],
-    "Airtel": ["bharti airtel", "airtel", "airtel india"],
-    "Vi": ["vodafone idea", "vi", "idea cellular"],
-    "BSNL": ["bsnl", "bharat sanchar"],
-    "SK Telecom": ["sk telecom", "skt"],
-    "KT": ["kt corporation", "kt"],
-    "LG Uplus": ["lg uplus", "lg u+"],
-    "Globe": ["globe telecom", "globe philippines"],
-    "PLDT": ["pldt", "philippine long distance"],
-    "Smart": ["smart communications", "smart philippines"],
-    "Etisalat": ["etisalat", "emirates telecom", "e&"],
-    "Du": ["du", "emirates integrated"],
-    "STC": ["stc", "saudi telecom", "saudi telecom company"],
-    "Ooredoo": ["ooredoo", "ooredoo group"],
-    "Zain": ["zain", "zain group"],
-    "Mobily": ["mobily", "etihad etisalat"],
-    "América Móvil": ["america movil", "claro", "telmex"],
-    "Telus": ["telus", "telus communications"],
-    "Rogers": ["rogers communications", "rogers"],
-    "Bell": ["bell canada", "bce inc"],
-    "Shaw": ["shaw communications", "shaw"],
-    "MTN": ["mtn group", "mtn"],
-    "Vodacom": ["vodacom", "vodacom group"],
-    "Safaricom": ["safaricom", "safaricom plc"],
-}
-
-# ──────────────────────────────────────────────────────────────────────────────
-# STRICT SECTION KEYWORDS (no mixing)
-# ──────────────────────────────────────────────────────────────────────────────
-TELCO_KEYWORDS = [
-    "oss", "bss", "telecom oss", "telecom bss", "digital bss", "cloud-native oss",
-    "telecom it stack", "telco transformation", "billing system", "charging system",
-    "convergent billing", "mediation", "revenue management", "policy control",
-    "order management", "product catalog", "service fulfillment", "network orchestration",
-    "telecom deal", "telco partnership", "oss bss contract", "telecom modernization",
-    "digital transformation", "system migration", "platform consolidation",
-    "vendor replacement", "5g monetization", "network slicing", "open ran oss",
-    "api-based bss", "ai-driven assurance", "real-time charging", "saas telecom platform"
-]
-
-OTT_KEYWORDS = [
-    "ott platform", "streaming service", "video streaming", "subscription video",
-    "svod", "avod", "fast channels", "hybrid ott", "subscriber growth", "arpu",
-    "churn reduction", "content monetization", "pricing strategy", "bundling",
-    "super app", "content licensing", "sports streaming", "live streaming",
-    "original content", "regional content", "multi-language ott", "content aggregation",
-    "ott acquisition", "streaming merger", "content deal", "distribution partnership",
-    "platform expansion", "market entry"
-]
-
-SPORTS_KEYWORDS = [
-    "sports media rights", "broadcasting rights", "sports streaming", "live sports",
-    "sports ott", "league partnership", "media rights deal", "sponsorship deal",
-    "betting partnership", "fan engagement", "digital ticketing", "pay-per-view",
-    "football league", "cricket board", "basketball league", "formula racing",
-    "olympics preparation", "world cup media", "sports analytics", "fan data platform",
-    "ai sports insights", "smart stadium", "ar/vr sports"
-]
-
-TECH_KEYWORDS = [
-    "artificial intelligence", "generative ai", "enterprise ai", "ai platform",
-    "ai monetization", "ai deployment", "cloud platform", "saas platform",
-    "digital platform", "enterprise software", "api platform", "data platform",
-    "technology acquisition", "ai startup acquisition", "strategic partnership",
-    "platform expansion", "product launch", "enterprise contract", "cloud migration",
-    "data warehouse", "mlops", "ai governance", "responsible ai", "edge computing"
-]
-
-JUNK_EXCLUDES = [
-    "oil", "gas", "petroleum", "insurance", "banking core", "semiconductor",
-    "chip manufacturing", "mining", "power plant", "cinema release", "box office",
-    "movie review", "celebrity gossip", "film awards", "music album launch",
-    "player injury", "match score", "fantasy tips", "sports betting odds",
-    "player transfers gossip", "semiconductor", "chip fabrication", "gpu manufacturing",
-    "mining hardware", "crypto mining", "nft art"
-]
 
 # ──────────────────────────────────────────────────────────────────────────────
 # RSS FEEDS CONFIGURATION
@@ -434,7 +237,7 @@ HEADERS = {
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
-# UTILITY FUNCTIONS - Strict filtering
+# UTILITY FUNCTIONS
 # ──────────────────────────────────────────────────────────────────────────────
 def clean(raw):
     if not raw:
@@ -527,8 +330,10 @@ def get_time_str(dt):
         return f"{hrs}h", "time-warm"
     return f"{hrs//24}d", "time-normal"
 
+# ──────────────────────────────────────────────────────────────────────────────
+# RENDER BODY - Stable rendering with components
+# ──────────────────────────────────────────────────────────────────────────────
 def render_body(items):
-    """Render news cards - using components to avoid raw HTML display"""
     if not items:
         return """<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">No recent news</div></div>"""
     
@@ -635,8 +440,9 @@ for idx, cat in enumerate(cat_list):
         ]
         st.markdown(''.join(header_parts), unsafe_allow_html=True)
         
-        # Render body
-        st.markdown(render_body(items), unsafe_allow_html=True)
+        # Render body with components for stable display
+        body_html = render_body(items)
+        components.html(body_html, height=600, scrolling=True)
 
 # Footer
 footer_parts = [
@@ -647,7 +453,7 @@ footer_parts = [
     '</div>'
 ]
 
-st.markdown(''.join(footer_parts), unsafe_allow_html=True)
+components.html(''.join(footer_parts), height=120, scrolling=False)
 
 # Auto-refresh
 st.markdown('<script>setTimeout(function() {window.location.reload();}, 300000);</script>', unsafe_allow_html=True)
