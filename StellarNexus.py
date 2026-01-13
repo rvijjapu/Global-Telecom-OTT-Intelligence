@@ -8,26 +8,19 @@ import re
 import time
 import streamlit.components.v1 as components
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
 # PAGE CONFIG
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Global Telecom & OTT Intelligence Nexus",
+    page_title="Global Telecom & OTT Stellar Nexus",
     page_icon="🌐",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# ══════════════════════════════════════════════════════════════════════════════
-# KEEP-ALIVE
-# ══════════════════════════════════════════════════════════════════════════════
-@st.fragment(run_every=600)
-def keep_alive():
-    st.markdown("", unsafe_allow_html=True)
-
-# ══════════════════════════════════════════════════════════════════════════════
-# BEAUTIFUL LIGHT THEME WOW UI STYLING
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
+# ULTRA-BEAUTIFUL CEO-LEVEL STYLING (light + dark accents)
+# ──────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -36,130 +29,157 @@ st.markdown("""
         background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
         background-size: cover;
         font-family: 'Inter', sans-serif;
-        padding-top: 1rem;
     }
     
-    .header-container {
-        background: rgba(255, 255, 255, 0.97);
-        padding: 2rem 2.5rem;
+    .main-header {
+        background: linear-gradient(135deg, rgba(10,25,47,0.92), rgba(30,41,59,0.92));
+        color: white;
+        padding: 2.2rem 3rem;
+        border-radius: 0 0 32px 32px;
+        box-shadow: 0 12px 48px rgba(0,0,0,0.4);
         text-align: center;
-        border-radius: 20px;
-        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
-        margin: 0 0 2.5rem 0;
-        border-bottom: 6px solid #1e40af;
+        margin-bottom: 2.5rem;
     }
     
     .main-title {
-        font-size: 3.1rem;
-        font-weight: 800;
-        color: #0a192f;
+        font-size: 3.4rem;
+        font-weight: 900;
         margin: 0;
-        letter-spacing: -0.8px;
+        letter-spacing: -1.2px;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.4);
     }
     
-    .subtitle {
-        font-size: 1.35rem;
-        color: #475569;
+    .main-subtitle {
+        font-size: 1.45rem;
+        opacity: 0.92;
         margin-top: 0.8rem;
         font-weight: 500;
     }
     
-    .hero-container {
-        background: rgba(255, 255, 255, 0.98);
-        border-radius: 18px;
-        padding: 2.2rem;
-        margin-bottom: 2.5rem;
-        box-shadow: 0 14px 48px rgba(0,0,0,0.12);
+    .highlights-container {
+        background: rgba(255,255,255,0.96);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 14px 50px rgba(0,0,0,0.14);
         border: 1px solid #e2e8f0;
+        margin-bottom: 3rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.8rem;
     }
     
-    .hero-title {
-        color: #0a192f;
-        font-size: 2rem;
+    .highlights-title {
+        font-size: 2.1rem;
         font-weight: 800;
-        margin-bottom: 1.6rem;
-        border-left: 8px solid #1e40af;
-        padding-left: 18px;
+        color: #0a192f;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
     }
     
-    .hero-box {
+    .hit-pulse-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+    
+    .hit-box, .pulse-box {
         background: #f8fafc;
-        border-radius: 14px;
+        border-radius: 16px;
         padding: 1.8rem;
         border: 1px solid #e2e8f0;
-        min-height: 240px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        box-shadow: 0 6px 24px rgba(0,0,0,0.06);
     }
     
-    .hero-box-title {
+    .hit-title {
+        color: #10b981;
+        font-size: 1.35rem;
         font-weight: 800;
-        font-size: 1.25rem;
-        margin-bottom: 1rem;
-        color: #0a192f;
+        margin-bottom: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
     
-    .hero-content {
+    .pulse-title {
+        color: #f97316;
+        font-size: 1.35rem;
+        font-weight: 800;
+        margin-bottom: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .highlight-item {
+        margin-bottom: 1.4rem;
+        font-size: 1.02rem;
+        line-height: 1.65;
         color: #1e293b;
-        font-size: 1rem;
-        line-height: 1.75;
+    }
+    
+    .highlight-item b {
+        color: #0a192f;
+        font-weight: 700;
     }
     
     .col-header {
         padding: 16px;
-        border-radius: 14px 14px 0 0;
+        border-radius: 16px 16px 0 0;
         color: white;
         font-weight: 700;
-        font-size: 1.15rem;
+        font-size: 1.2rem;
         text-align: center;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.18);
     }
     
-    .col-header-pink {background: linear-gradient(135deg, #ec4899, #db2777);}
-    .col-header-purple {background: linear-gradient(135deg, #a78bfa, #7c3aed);}
-    .col-header-green {background: linear-gradient(135deg, #10b981, #059669);}
-    .col-header-orange {background: linear-gradient(135deg, #fb923c, #ea580c);}
+    .col-header-pink { background: linear-gradient(135deg, #ec4899, #db2777); }
+    .col-header-purple { background: linear-gradient(135deg, #a78bfa, #7c3aed); }
+    .col-header-green { background: linear-gradient(135deg, #10b981, #059669); }
+    .col-header-orange { background: linear-gradient(135deg, #fb923c, #ea580c); }
     
     .section-box {
         background: white;
-        border-radius: 0 0 14px 14px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+        border-radius: 0 0 16px 16px;
+        box-shadow: 0 12px 48px rgba(0,0,0,0.12);
         overflow: hidden;
-        margin-bottom: 2.5rem;
+        margin-bottom: 2.8rem;
         border: 1px solid #e5e7eb;
     }
     
     .news-container {
-        padding: 1.5rem;
-        min-height: 480px;
-        max-height: 760px;
+        padding: 1.6rem;
+        min-height: 520px;
+        max-height: 820px;
         overflow-y: auto;
     }
     
     .news-card {
         background: #f9fafb;
         border: 1px solid #e5e7eb;
-        border-radius: 12px;
+        border-radius: 14px;
         padding: 1.4rem;
-        margin-bottom: 1.3rem;
-        transition: all 0.3s ease;
+        margin-bottom: 1.4rem;
+        transition: all 0.35s ease;
     }
     
     .news-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 14px 36px rgba(0,0,0,0.1);
+        transform: translateY(-6px);
+        box-shadow: 0 16px 40px rgba(0,0,0,0.12);
         background: #f1f5f9;
     }
     
     .news-card-priority {
-        background: linear-gradient(135deg, #fefce8, #fef3c7);
+        background: linear-gradient(135deg, #fffbeb, #fef3c7);
         border: 2px solid #fbbf24;
     }
     
     .news-title {
         color: #1e40af;
-        font-size: 1.08rem;
+        font-size: 1.12rem;
         font-weight: 600;
-        line-height: 1.42;
+        line-height: 1.45;
         text-decoration: none;
         display: block;
         margin-bottom: 0.8rem;
@@ -168,7 +188,7 @@ st.markdown("""
     .news-title:hover { color: #1d4ed8; text-decoration: underline; }
     
     .news-meta {
-        font-size: 0.88rem;
+        font-size: 0.9rem;
         color: #64748b;
         display: flex;
         align-items: center;
@@ -176,72 +196,32 @@ st.markdown("""
         flex-wrap: wrap;
     }
     
-    .time-hot {color: #dc2626; font-weight: 700;}
-    .time-warm {color: #ea580c; font-weight: 700;}
-    .time-normal {color: #64748b;}
+    .time-hot { color: #dc2626; font-weight: 700; }
+    .time-warm { color: #ea580c; font-weight: 700; }
+    .time-normal { color: #64748b; }
     
-    .news-container::-webkit-scrollbar {width: 8px;}
-    .news-container::-webkit-scrollbar-track {background: #f3f4f6; border-radius: 12px;}
-    .news-container::-webkit-scrollbar-thumb {background: #9ca3af; border-radius: 12px;}
+    .news-container::-webkit-scrollbar { width: 8px; }
+    .news-container::-webkit-scrollbar-track { background: #f3f4f6; border-radius: 14px; }
+    .news-container::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 14px; }
     
-    #MainMenu, footer, header {visibility: hidden !important;}
-    .stDeployButton {display: none !important;}
+    .footer-bar {
+        text-align: center;
+        color: rgba(255,255,255,0.9);
+        font-size: 0.95rem;
+        margin: 3rem 0 2rem;
+        padding: 1.8rem;
+        background: linear-gradient(135deg, rgba(10,25,47,0.94), rgba(30,41,59,0.94));
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    
+    #MainMenu, footer, header { visibility: hidden !important; }
+    .stDeployButton { display: none !important; }
 </style>
 """, unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# STRICT SECTION KEYWORDS (no mixing - each section only its own keywords)
-# ══════════════════════════════════════════════════════════════════════════════
-TELCO_KEYWORDS = [
-    "oss", "bss", "telecom oss", "telecom bss", "digital bss", "cloud-native oss", 
-    "telecom it stack", "telco transformation", "billing system", "charging system",
-    "convergent billing", "mediation", "revenue management", "policy control",
-    "order management", "product catalog", "service fulfillment", "network orchestration",
-    "telecom deal", "telco partnership", "oss bss contract", "telecom modernization",
-    "digital transformation", "system migration", "platform consolidation",
-    "vendor replacement", "5g monetization", "network slicing", "open ran oss",
-    "api-based bss", "ai-driven assurance", "real-time charging", "saas telecom platform"
-]
-
-OTT_KEYWORDS = [
-    "ott platform", "streaming service", "video streaming", "subscription video",
-    "svod", "avod", "fast channels", "hybrid ott", "subscriber growth", "arpu",
-    "churn reduction", "content monetization", "pricing strategy", "bundling",
-    "super app", "content licensing", "sports streaming", "live streaming",
-    "original content", "regional content", "multi-language ott", "content aggregation",
-    "ott acquisition", "streaming merger", "content deal", "distribution partnership",
-    "platform expansion", "market entry"
-]
-
-SPORTS_KEYWORDS = [
-    "sports media rights", "broadcasting rights", "sports streaming", "live sports",
-    "sports ott", "league partnership", "media rights deal", "sponsorship deal",
-    "betting partnership", "fan engagement", "digital ticketing", "pay-per-view",
-    "sports analytics", "fan data platform", "ai sports insights", "smart stadium",
-    "ar/vr sports"
-]
-
-TECH_KEYWORDS = [
-    "artificial intelligence", "generative ai", "enterprise ai", "ai platform",
-    "ai monetization", "ai deployment", "cloud platform", "saas platform",
-    "digital platform", "enterprise software", "api platform", "data platform",
-    "technology acquisition", "ai startup acquisition", "strategic partnership",
-    "platform expansion", "product launch", "enterprise contract", "cloud migration",
-    "data warehouse", "mlops", "ai governance", "responsible ai", "edge computing"
-]
-
-JUNK_EXCLUDES = [
-    "coupon", "discount", "sale", "promo", "voucher", "giveaway", "contest", "win free",
-    "black friday", "cyber monday", "flash sale", "limited time offer",
-    "baby", "birth", "newborn", "pregnant", "wedding", "divorce", "gossip", "celebrity",
-    "player injury", "match score", "fantasy tips", "sports betting odds", "player transfers",
-    "box office", "movie review", "film awards", "music album", "oil", "gas", "petroleum",
-    "insurance", "banking core", "semiconductor", "chip", "mining", "power plant",
-    "crypto", "nft"
-]
-
-# ══════════════════════════════════════════════════════════════════════════════
-# RSS FEEDS
+# RSS FEEDS & SECTION KEYWORDS (strict per-section)
 # ══════════════════════════════════════════════════════════════════════════════
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
@@ -262,14 +242,26 @@ SECTIONS = {
     "telco": {"icon": "📡", "name": "TELCO OSS/BSS", "style": "col-header-pink"},
     "ott": {"icon": "📺", "name": "OTT & STREAMING", "style": "col-header-purple"},
     "sports": {"icon": "🏆", "name": "SPORTS MEDIA", "style": "col-header-green"},
-    "technology": {"icon": "⚡", "name": "AI & TECH", "style": "col-header-orange"},
+    "technology": {"icon": "⚡", "name": "AI TECHWATCH", "style": "col-header-orange"},
 }
+
+# Strict per-section keywords (no cross-over)
+TELCO_KEYWORDS = ["oss", "bss", "billing", "charging", "monetization", "convergent billing", "5g monetization", "revenue management", "order management", "product catalog", "service fulfillment", "telecom deal", "telco partnership", "oss bss contract", "digital transformation", "system migration"]
+OTT_KEYWORDS = ["ott", "streaming", "svod", "avod", "fast channels", "subscriber growth", "arpu", "content licensing", "sports streaming", "original content", "ott acquisition", "streaming merger", "content deal"]
+SPORTS_KEYWORDS = ["sports media rights", "broadcasting rights", "sports streaming", "league partnership", "media rights deal", "sponsorship deal", "fan engagement"]
+TECH_KEYWORDS = ["artificial intelligence", "generative ai", "enterprise ai", "ai platform", "cloud platform", "saas platform", "technology acquisition", "strategic partnership"]
+
+JUNK_EXCLUDES = [
+    "coupon", "discount", "sale", "promo", "voucher", "giveaway", "contest", "black friday", "cyber monday",
+    "baby", "birth", "newborn", "pregnant", "wedding", "divorce", "gossip", "celebrity", "player injury",
+    "match score", "fantasy", "betting odds", "oil", "gas", "petroleum", "insurance", "semiconductor", "crypto", "nft"
+]
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
-# ══════════════════════════════════════════════════════════════════════════════
-# ULTRA-STRICT FILTERING FUNCTIONS
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
+# CORE UTILITY FUNCTIONS
+# ──────────────────────────────────────────────────────────────────────────────
 def clean(raw):
     if not raw: return ""
     return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
@@ -278,21 +270,15 @@ def is_junk(title, summary=""):
     text = (title + " " + summary).lower()
     return any(ex in text for ex in JUNK_EXCLUDES)
 
-def is_relevant(title, summary, section):
+def is_section_relevant(title, summary, section):
     text = (title + " " + summary).lower()
-    
     keywords = {
         "telco": TELCO_KEYWORDS,
         "ott": OTT_KEYWORDS,
         "sports": SPORTS_KEYWORDS,
         "technology": TECH_KEYWORDS
-    }.get(section, [])
-    
-    # Must have at least one section keyword
-    if not any(kw in text for kw in keywords):
-        return False
-    
-    return True
+    }[section]
+    return any(kw in text for kw in keywords)
 
 def fetch_feed(source, url, category):
     items = []
@@ -303,17 +289,14 @@ def fetch_feed(source, url, category):
         feed = feedparser.parse(resp.content)
         cutoff = datetime.now() - timedelta(days=7)
         
-        for entry in feed.entries[:15]:
+        for entry in feed.entries[:12]:
             title = clean(entry.get("title", ""))
             if len(title) < 40: continue
             
             summary = clean(entry.get("summary", title))
             
-            # 1. Junk filter
             if is_junk(title, summary): continue
-            
-            # 2. Section-specific keyword REQUIRED
-            if not is_relevant(title, summary, category): continue
+            if not is_section_relevant(title, summary, category): continue
             
             pub = None
             for k in ("published_parsed", "updated_parsed"):
@@ -326,9 +309,7 @@ def fetch_feed(source, url, category):
             
             if not pub or pub < cutoff: continue
             
-            # Priority for top clients/competitors
-            priority_keywords = ["netcracker", "amdocs", "matrixx", "merger", "acquisition", "billing", "charging", "5g monetization"]
-            is_priority = any(kw in (title + summary).lower() for kw in priority_keywords)
+            is_priority = any(kw in (title + summary).lower() for kw in ["netcracker", "amdocs", "matrixx", "merger", "acquisition"])
             
             items.append({
                 "title": title,
@@ -359,7 +340,7 @@ def load_feeds():
     
     for cat in categorized:
         categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
-        categorized[cat] = categorized[cat][:12]
+        categorized[cat] = categorized[cat][:10]
     
     return categorized
 
@@ -369,15 +350,15 @@ def get_time_str(dt):
     if hrs < 12: return f"🟠 {hrs}h", "time-warm"
     return f"🔵 {hrs//24}d", "time-normal"
 
-# ══════════════════════════════════════════════════════════════════════════════
-# RENDER SECTION - Beautiful containment
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
+# RENDER SECTION - Beautiful & Contained
+# ──────────────────────────────────────────────────────────────────────────────
 def render_section(icon, name, style_class, items):
     header = f'<div class="{style_class}">{icon} {name}</div>'
     
     content = ""
     if not items:
-        content = '<div style="padding:140px 20px; text-align:center; color:#94a3b8; font-size:1.2rem;">No high-impact news in last 7 days</div>'
+        content = '<div style="padding:140px 20px; text-align:center; color:#94a3b8; font-size:1.2rem;">No critical news in last 7 days</div>'
     else:
         for item in items:
             time_str, time_class = get_time_str(item["pub"])
@@ -401,45 +382,69 @@ def render_section(icon, name, style_class, items):
     full_html = f'''
     <div class="section-box">
         {header}
-        <div class="news-container">
-            {content}
-        </div>
+        <div class="news-container">{content}</div>
     </div>
     '''
     
     components.html(full_html, height=760, scrolling=True)
 
-# ══════════════════════════════════════════════════════════════════════════════
-# MAIN APPLICATION
-# ══════════════════════════════════════════════════════════════════════════════
-placeholder = st.empty()
-with placeholder.container():
-    st.markdown("""
-        <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:70vh; text-align:center;">
-            <h1 style="color:#0a192f; font-size:3.2rem; font-weight:800;">⚡ Stellar Nexus Intelligence</h1>
-            <p style="color:#64748b; font-size:1.4rem; margin-top:1.2rem;">Loading ONLY section-specific critical business news...</p>
-        </div>
-    """, unsafe_allow_html=True)
-    time.sleep(1.5)
-
-placeholder.empty()
-
+# ──────────────────────────────────────────────────────────────────────────────
+# MAIN APPLICATION - CEO-READY LAYOUT
+# ──────────────────────────────────────────────────────────────────────────────
 st.markdown("""
-<div class="header-container">
-    <h1 class="main-title">🌐 Global Telecom & OTT Intelligence Nexus</h1>
-    <p class="subtitle">Real-time Critical Intelligence • Strictly Section-Specific • No Junk • January 2026</p>
+<div class="main-header">
+    <div class="main-title">Global Telecom & OTT Stellar Nexus</div>
+    <div class="main-subtitle">AI-Powered Real-time Critical Intelligence • January 2026</div>
 </div>
 """, unsafe_allow_html=True)
 
-with st.spinner("Scanning high-priority sources (strict section filtering)..."):
+# ──────────────────────────────────────────────────────
+# HIGHLIGHTS - Rocket style (exactly like sample)
+# ──────────────────────────────────────────────────────
+st.markdown("""
+<div class="highlights-container">
+    <div class="highlights-title">
+        🚀 HIGHLIGHTS
+    </div>
+    <div class="hit-pulse-grid">
+        <div class="hit-box">
+            <div class="hit-title">
+                <span style="font-size:1.5rem;">🌟</span> STRATEGIC HITS
+            </div>
+            <div class="highlight-item">
+                <b>Amdocs-Matrixx Deal:</b> Amdocs completes $200M acquisition of charging leader Matrixx Software to dominate Tier-1 5G billing market.
+            </div>
+            <div class="highlight-item">
+                <b>Disney-Hulu Merger:</b> Disney officially begins phasing out standalone Hulu app for unified Disney+ hub.
+            </div>
+            <div class="highlight-item">
+                <b>NEC Expansion:</b> Japan's NEC finalizes CSG acquisition, scaling Netcracker's North American SaaS footprint.
+            </div>
+        </div>
+        
+        <div class="pulse-box">
+            <div class="pulse-title">
+                <span style="font-size:1.5rem;">🔥</span> PULSE
+            </div>
+            <div class="highlight-item">
+                <b>Agentic AI Core:</b> By EOY 2026, autonomous AI agents expected to handle ~40% of standard BSS operations.
+            </div>
+            <div class="highlight-item">
+                <b>Satellite Breakout:</b> Direct-to-consumer satellite broadband moves from niche to mainstream fiber competitor.
+            </div>
+            <div class="highlight-item">
+                <b>Physical AI:</b> Amazon deploys 1-millionth robot with DeepFleet AI for 10% warehouse efficiency gain.
+            </div>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# ──────────────────────────────────────────────────────
+# REAL-TIME NEWS SECTIONS
+# ──────────────────────────────────────────────────────
+with st.spinner("Loading only high-impact critical intelligence..."):
     data = load_feeds()
-
-total = sum(len(v) for v in data.values())
-st.markdown(f"""
-<div class="status-bar">
-    Loaded {total} high-impact articles • Last 7 days • Only relevant to section keywords
-</div>
-""", unsafe_allow_html=True)
 
 cols = st.columns(4)
 
@@ -452,12 +457,18 @@ for idx, cat in enumerate(["telco", "ott", "sports", "technology"]):
             data.get(cat, [])
         )
 
-st.markdown("""
-<div style="text-align:center; color:#94a3b8; font-size:0.95rem; margin:3.5rem 0 2rem;">
-    Strictly filtered per section: TELCO OSS/BSS • OTT Streaming • Sports Media Rights • AI/Tech Enterprise • No promotions • Auto-refreshes every 5 min
+# Footer
+st.markdown(f"""
+<div class="footer-bar">
+    <p><strong>🕐 Live Update:</strong> {datetime.now().strftime('%H:%M:%S')} IST 
+       | <strong>🔄 Auto-refresh:</strong> Every 5 minutes</p>
+    <p style="margin-top:0.8rem; opacity:0.9;">
+        Strictly filtered for business-critical news • Powered by Real-time Intelligence Engine
+    </p>
 </div>
 """, unsafe_allow_html=True)
 
+# Auto-refresh
 st.markdown('<script>setTimeout(() => location.reload(), 300000);</script>', unsafe_allow_html=True)
 
 keep_alive()
