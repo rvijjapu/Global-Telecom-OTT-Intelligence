@@ -7,71 +7,194 @@ import html
 import re
 import hashlib
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
 # PAGE CONFIG
-# ─────────────────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
 st.set_page_config(
-    page_title="Global Telecom & OTT Stellar Nexus – AI Powered Real-time Competitive Intelligence",
+    page_title="Global Telecom & OTT Stellar Nexus AI Powered Real-time Competitive Intelligence Dashboard",
     page_icon="🌐",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# Health check endpoint
-if st.query_params.get("ping") == "1":
+# Health check
+query_params = st.query_params
+if query_params.get("ping") == "1":
     st.write("alive")
     st.stop()
 
-# ─────────────────────────────────────────────────────────────────────────────
-# CONTENT FILTER
-# ─────────────────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+# AI CONTENT FILTER
+# ══════════════════════════════════════════════════════════════════════════════
 BLACKLIST_WORDS = [
     "sexual", "porn", "xxx", "adult", "explicit", "nude", "nsfw",
     "murder", "killing", "shooter", "terrorist", "massacre", "rape", "assault",
     "scandal", "affair", "divorce", "lawsuit", "fraud", "corruption",
     "celebrity breakup", "dating rumors", "feud", "controversy",
     "casino", "gambling", "tobacco", "drug", "overdose",
-    "ponzi", "scam", "pyramid scheme", "crypto crash", "gossip", "rumor",
-    "score", "injury", "fantasy", "betting"
+    "ponzi", "scam", "pyramid scheme", "crypto crash", "gossip", "rumor", "score", "injury"
 ]
 
 def is_content_appropriate(title, summary=""):
     content = f"{title} {summary}".lower()
     return not any(word in content for word in BLACKLIST_WORDS)
 
-# ─────────────────────────────────────────────────────────────────────────────
-# EVERGENT DATA LAYERS – REPLACE WITH YOUR FULL DICTS
-# ─────────────────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+# EVERGENT INTELLIGENCE
+# ══════════════════════════════════════════════════════════════════════════════
 EVERGENT_CLIENTS = {
-    "Astro": ["astro", "sooka", "njoi"],
-    "Shahid": ["shahid", "mbc shahid"],
-    "AT&T": ["at&t", "att", "directv"],
+    "Astro": ["astro malaysia", "astro sooka", "astro njoi", "astro", "sooka", "njoi"],
+    "MongolTV": ["mongoltv", "mongol tv", "mongolia tv"],
+    "FOX": ["fox sports", "fox corporation", "fox networks", "fox"],
+    "AT&T": ["at&t", "att inc", "att wireless", "directv"],
     "NBA": ["nba", "national basketball"],
-    "Sony": ["sony", "sonyliv"],
-    "Sky": ["sky nz", "sky new zealand", "sky tv"],
-    "BBC": ["bbc", "bbc iplayer"],
-    "ABS-CBN": ["abs-cbn", "abscbn"],
-    "FOX": ["fox sports", "fox networks"],
-    # Add the rest from your list
+    "Shahid": ["shahid", "shahid vip", "mbc shahid"],
+    "MBC": ["mbc group", "mbc", "middle east broadcasting"],
+    "TV ASAHI": ["tv asahi", "asahi television", "asahi tv"],
+    "TV3": ["tv3 malaysia", "tv3", "media prima"],
+    "ABS-CBN": ["abs-cbn", "abscbn", "abs cbn", "philippine broadcast"],
+    "Viki": ["viki", "rakuten viki", "viki streaming"],
+    "TRT": ["trt world", "trt", "turkish radio"],
+    "Sinclair": ["sinclair broadcast", "sinclair", "bally sports"],
+    "FanDuel": ["fanduel", "fanduel group", "flutter"],
+    "Bally Sports": ["bally sports", "bally regional", "diamond sports"],
+    "Gotham": ["gotham advanced", "gotham fc"],
+    "Marquee": ["marquee sports", "marquee network"],
+    "Sony": ["sony pictures", "sony entertainment", "sonyliv", "sony india"],
+    "Aha": ["aha video", "aha ott", "aha telugu"],
+    "BBC": ["bbc", "british broadcasting", "bbc iplayer"],
+    "Lightbox": ["lightbox", "spark lightbox"],
+    "Sky": ["sky nz", "sky new zealand", "sky tv", "sky uk", "sky italia", "sky deutschland"],
+    "Cignal": ["cignal tv", "cignal", "cignal satellite"],
+    "ETV": ["etv network", "etv bharat"],
+    "Simple TV": ["simpletv", "simple tv venezuela"],
+    "Telekom Malaysia": ["telekom malaysia", "tm unifi", "unifi tv", "tm"],
+    "Britbox": ["britbox", "britbox international"],
+    "Quickplay": ["quickplay", "quickplay media"],
+    "Pilipinas": ["pilipinas", "abs-cbn"],
 }
 
+# COMPETITORS - COMPLETE with variations
 COMPETITORS = {
     "Netcracker": ["netcracker", "netcracker technology", "nec netcracker"],
     "Amdocs": ["amdocs", "amdocs ltd", "amdocs inc"],
     "CSG": ["csg systems", "csg international", "csg"],
-    # Add the rest from your list
+    "Oracle": ["oracle communications", "oracle corporation", "oracle telecom"],
+    "Ericsson": ["ericsson", "telefonaktiebolaget lm ericsson"],
+    "Nokia": ["nokia", "nokia networks", "nokia corporation"],
+    "Huawei": ["huawei", "huawei technologies"],
+    "Comarch": ["comarch", "comarch bss"],
+    "Tecnotree": ["tecnotree", "tecnotree corporation"],
+    "MATRIXX": ["matrixx", "matrixx software"],
+    "Optiva": ["optiva", "optiva inc"],
+    "Cerillion": ["cerillion", "cerillion plc"],
+    "AsiaInfo": ["asiainfo", "asiainfo technologies"],
+    "Hansen": ["hansen technologies", "hansen"],
+    "Openet": ["openet", "openet telecom"],
+    "ZTE": ["zte", "zte corporation"],
+    "Mavenir": ["mavenir", "mavenir systems"],
+    "Infosys": ["infosys", "infosys telecom"],
+    "TCS": ["tata consultancy", "tcs", "tata communications"],
+    "Wipro": ["wipro", "wipro digital"],
+    "Tech Mahindra": ["tech mahindra", "mahindra comviva"],
+    "Accenture": ["accenture", "accenture telecom"],
+    "Capgemini": ["capgemini", "capgemini telecom"],
+    "IBM": ["ibm", "ibm telecom", "ibm watson"],
+    "SAP": ["sap", "sap telecom"],
+    "Salesforce": ["salesforce", "salesforce communications"],
 }
 
+# TOP GLOBAL TELCOS - FLAT DICT (all variations directly under operator name)
 TOP_TELCOS = {
+    # USA
     "Verizon": ["verizon", "verizon wireless", "verizon fios"],
     "AT&T": ["at&t", "att mobility"],
     "T-Mobile": ["t-mobile", "tmobile usa", "sprint"],
-    # Add the rest from your flat list
+    "Comcast": ["comcast", "xfinity", "comcast cable"],
+    "Charter": ["charter communications", "spectrum", "charter spectrum"],
+    "Cox": ["cox communications", "cox cable", "cox business"],
+    "Lumen": ["lumen technologies", "centurylink", "lumen"],
+    "Frontier": ["frontier communications", "frontier"],
+    "Windstream": ["windstream", "windstream enterprise"],
+    "Mediacom": ["mediacom communications", "mediacom"],
+    "Altice USA": ["altice usa", "optimum", "suddenlink"],
+    
+    # UK & Europe
+    "BT": ["bt group", "british telecom", "bt", "bt enterprise", "ee"],
+    "Vodafone": ["vodafone", "vodafone group"],
+    "O2": ["o2", "telefonica uk"],
+    "Virgin Media": ["virgin media", "virgin media o2"],
+    "Three": ["three uk", "three mobile"],
+    "Orange": ["orange", "orange sa"],
+    "Deutsche Telekom": ["deutsche telekom", "t-mobile europe", "telekom"],
+    "Telefónica": ["telefonica", "telefonica spain", "movistar"],
+    "Telecom Italia": ["telecom italia", "tim", "tim brasil"],
+    "Swisscom": ["swisscom", "swisscom ag"],
+    "KPN": ["kpn", "koninklijke pn"],
+    "Proximus": ["proximus", "belgacom"],
+    "Telenor": ["telenor", "telenor group"],
+    "Telia": ["telia", "telia company"],
+    "Bouygues": ["bouygues", "bouygues telecom"],
+    
+    # APAC - Singapore/Malaysia/NZ
+    "Singtel": ["singtel", "singapore telecom", "singapore telecommunications"],
+    "StarHub": ["starhub", "starhub singapore"],
+    "M1": ["m1 limited", "m1 singapore"],
+    "Maxis": ["maxis", "maxis communications", "maxis malaysia"],
+    "Celcom": ["celcom", "celcom axiata"],
+    "Digi": ["digi telecommunications", "digi malaysia", "digi.com"],
+    "Telekom Malaysia": ["telekom malaysia", "tm", "tm unifi"],
+    "U Mobile": ["u mobile", "umobile malaysia"],
+    "Sky NZ": ["sky new zealand", "sky nz", "sky network television"],
+    "Spark": ["spark new zealand", "spark nz"],
+    "2degrees": ["2degrees", "2degrees mobile"],
+    "Vodafone NZ": ["vodafone new zealand", "vodafone nz"],
+    
+    # Australia
+    "Telstra": ["telstra", "telstra corporation"],
+    "Optus": ["optus", "singtel optus"],
+    "TPG": ["tpg telecom", "vodafone australia"],
+    
+    # Asia
+    "China Mobile": ["china mobile", "cmcc"],
+    "China Telecom": ["china telecom", "chinanet"],
+    "China Unicom": ["china unicom", "unicom"],
+    "NTT": ["ntt", "nippon telegraph", "ntt docomo"],
+    "SoftBank": ["softbank", "softbank corp"],
+    "KDDI": ["kddi", "kddi corporation", "au"],
+    "Reliance Jio": ["reliance jio", "jio", "jio platforms"],
+    "Airtel": ["bharti airtel", "airtel", "airtel india"],
+    "Vi": ["vodafone idea", "vi", "idea cellular"],
+    "BSNL": ["bsnl", "bharat sanchar"],
+    "SK Telecom": ["sk telecom", "skt"],
+    "KT": ["kt corporation", "kt"],
+    "LG Uplus": ["lg uplus", "lg u+"],
+    "Globe": ["globe telecom", "globe philippines"],
+    "PLDT": ["pldt", "philippine long distance"],
+    "Smart": ["smart communications", "smart philippines"],
+    
+    # Middle East
+    "Etisalat": ["etisalat", "emirates telecom", "e&"],
+    "Du": ["du", "emirates integrated"],
+    "STC": ["stc", "saudi telecom", "saudi telecom company"],
+    "Ooredoo": ["ooredoo", "ooredoo group"],
+    "Zain": ["zain", "zain group"],
+    "Mobily": ["mobily", "etihad etisalat"],
+    
+    # Americas
+    "América Móvil": ["america movil", "claro", "telmex"],
+    "Telus": ["telus", "telus communications"],
+    "Rogers": ["rogers communications", "rogers"],
+    "Bell": ["bell canada", "bce inc"],
+    "Shaw": ["shaw communications", "shaw"],
+    
+    # Africa
+    "MTN": ["mtn group", "mtn"],
+    "Vodacom": ["vodacom", "vodacom group"],
+    "Safaricom": ["safaricom", "safaricom plc"],
 }
 
-# ─────────────────────────────────────────────────────────────────────────────
-# SCORING SIGNALS
-# ─────────────────────────────────────────────────────────────────────────────
+# AI Scoring Keywords
 TELCO_SIGNALS = {
     "tier1": ["5g monetization", "convergent billing", "digital bss", "oss transformation",
               "real-time charging", "network slicing", "api-based billing"],
@@ -97,77 +220,81 @@ AI_SIGNALS = {
     "tier3": ["technology", "software", "digital"],
     "negative": ["semiconductor", "chip fabrication", "crypto mining", "nft"]
 }
-
 def calculate_relevance_score(title, summary, category):
     content = f"{title} {summary}".lower()
     score = 0
-
+   
     signals = {
         "telco": TELCO_SIGNALS,
         "ott": OTT_SIGNALS,
         "sports": SPORTS_SIGNALS,
         "technology": AI_SIGNALS
     }.get(category, {})
-
+   
     if not signals:
         return 0
-
+   
     if any(neg in content for neg in signals.get("negative", [])):
         return 0
-
+   
     score += sum(50 for kw in signals.get("tier1", []) if kw in content)
     score += sum(25 for kw in signals.get("tier2", []) if kw in content)
     score += sum(10 for kw in signals.get("tier3", []) if kw in content)
+   
+    # Client hidden boost
+    if any(any(var in content for var in vars) for vars in EVERGENT_CLIENTS.values()):
+        score += 70
 
-    # Hidden boosts
-    if any(any(v in content for v in vs) for vs in EVERGENT_CLIENTS.values()):
-        score += 80
+    # Competitor intel boost
+    if any(any(var in content for var in vars) for vars in COMPETITORS.values()):
+        score += 40
 
-    if any(any(v in content for v in vs) for vs in COMPETITORS.values()):
-        score += 60
+    # Top telco mention in context
+    if any(any(var in content for var in vars) for vars in TOP_TELCOS.values()):
+        score += 20
 
-    if any(any(v in content for v in vs) for vs in TOP_TELCOS.values()):
-        score += 30
-
+    # Strong action/impact keywords
     action_keywords = [
-        "acquisition", "merger", "partnership", "deal", "expansion", "launches",
-        "extension", "investment", "strategic", "wins", "award", "deploy", "scale",
-        "growth", "churn reduction", "monetization", "subscriber growth", "arpu",
-        "billing transformation", "oss transformation", "5g monetization",
+        "acquisition", "merger", "partnership", "deal", "extension", "investment", "strategic",
+        "wins", "award", "deploy", "scale", "growth", "churn reduction", "monetization",
+        "subscriber growth", "arpu", "billing transformation", "oss transformation", "5g monetization",
         "real-time charging", "revenue management", "content deal", "media rights"
     ]
     score += sum(20 for kw in action_keywords if kw in content)
-
-    return min(score, 100)
-
+   
+    # NBA special (recent big news)
+    if "nba" in content and any(kw in content for kw in ["investment", "strategic", "extension", "partnership"]):
+        score += 70
+   
+    return min(score, 95)
 def classify_article_ai(title, summary, category):
     content = f"{title} {summary}".lower()
+   
     score = calculate_relevance_score(title, summary, category)
-
+   
     if score < 50:
         return "IRRELEVANT", "", "", 999, 0
-
+   
     client_found = any(any(var in content for var in vars) for vars in EVERGENT_CLIENTS.values())
     competitor_found = any(any(var in content for var in vars) for vars in COMPETITORS.values())
-
+   
     if client_found:
         return "CLIENT", "🌟", "Strategic", 0, score
     if competitor_found:
         return "COMPETITOR", "⚠️", "Competitive", 1, score
-
+   
     badges = {
         "telco": ("TELCO", "📡", "Telecom OSS/BSS", 5),
         "ott": ("OTT", "📺", "Streaming", 6),
         "sports": ("SPORTS", "🏆", "Sports Media", 7),
         "technology": ("TECH", "⚡", "AI/Tech", 8)
     }
-
+   
     priority_type, badge, entity, priority = badges.get(category, ("OTHER", "", "", 999))
     return priority_type, badge, entity, priority, score
-
-# ─────────────────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
 # RSS FEEDS
-# ─────────────────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
     ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
@@ -197,9 +324,9 @@ HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
     "Accept": "application/rss+xml, application/xml, text/xml, */*",
 }
-# ─────────────────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
 # FEED FETCHING
-# ─────────────────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
 def clean(raw):
     if not raw:
         return ""
@@ -337,9 +464,9 @@ def get_time_str(dt):
         return f"{hrs}h", "time-warm"
     days = hrs // 24
     return f"{days}d", "time-normal"
-# ─────────────────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
 # STYLING
-# ─────────────────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -516,20 +643,17 @@ st.markdown("""
     [data-testid="column"] {padding: 0 8px !important;}
 </style>
 """, unsafe_allow_html=True)
-
-# ─────────────────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
 # MAIN APP
-# ─────────────────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
 <div class="header-container">
     <h1 class="main-title">🤖 Global Telecom & OTT Stellar Nexus</h1>
     <p class="subtitle">AI-Powered Real-time Competitive Intelligence Dashboard</p>
 </div>
 """, unsafe_allow_html=True)
-
 with st.spinner(""):
     data = load_feeds()
-
 # Strategic Highlights
 strategic_hits = data.get("strategic_hits", [])
 if strategic_hits:
@@ -555,7 +679,6 @@ if strategic_hits:
             st.markdown(f'<div class="strategic-item"><strong>{title}</strong><br><small>{days_ago}d ago • {html.escape(item["source"])}</small></div>', unsafe_allow_html=True)
    
     st.markdown('</div>', unsafe_allow_html=True)
-
 # News Sections
 SECTIONS = {
     "telco": {"icon": "📡", "name": "TELCO OSS/BSS", "style": "col-header-pink"},
@@ -588,7 +711,6 @@ for idx, (cat, sec) in enumerate(SECTIONS.items()):
            
             body_html.append('</div>')
             st.markdown(''.join(body_html), unsafe_allow_html=True)
-
 # Footer
 total = sum(len(data[cat]) for cat in ["telco", "ott", "sports", "technology"])
 avg_score = sum(item["relevance_score"] for cat in ["telco", "ott", "sports", "technology"] for item in data[cat]) / max(total, 1)
