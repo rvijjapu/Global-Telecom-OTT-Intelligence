@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import html
 import re
-import time
+import hashlib
 
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE CONFIG
@@ -17,62 +17,31 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Health check endpoint
+# Health check
 query_params = st.query_params
 if query_params.get("ping") == "1":
     st.write("alive")
     st.stop()
 
 # ══════════════════════════════════════════════════════════════════════════════
-# AI CONTENT FILTER - BLOCKS INAPPROPRIATE CONTENT
+# AI CONTENT FILTER
 # ══════════════════════════════════════════════════════════════════════════════
-
 BLACKLIST_WORDS = [
-    # Explicit content
     "sexual", "porn", "xxx", "adult", "explicit", "nude", "nsfw",
-    # Violence/Crime
     "murder", "killing", "shooter", "terrorist", "massacre", "rape", "assault",
-    # Inappropriate topics
     "scandal", "affair", "divorce", "lawsuit", "fraud", "corruption",
-    # Entertainment gossip
     "celebrity breakup", "dating rumors", "feud", "controversy",
-    # Off-topic industries
-    "oil spill", "gas leak", "mining accident", "casino", "gambling addiction",
-    "tobacco", "cigarette", "alcohol abuse", "drug", "overdose",
-    # Political drama
-    "election fraud", "protest violence", "riot", "impeachment",
-    # Health/Medical drama
-    "pandemic outbreak", "epidemic", "disease outbreak",
-    # Crypto/Scam
-    "ponzi", "scam", "fraud", "pyramid scheme", "crypto crash"
+    "casino", "gambling", "tobacco", "drug", "overdose",
+    "ponzi", "scam", "pyramid scheme", "crypto crash"
 ]
 
 def is_content_appropriate(title, summary=""):
-    """AI Filter: Blocks inappropriate content"""
     content = f"{title} {summary}".lower()
-    
-    # Check blacklist
-    for word in BLACKLIST_WORDS:
-        if word in content:
-            return False
-    
-    # Additional pattern checks
-    inappropriate_patterns = [
-        r'\b(sex|porn|xxx)\b',
-        r'\b(kill|murder|death)\b.*\b(trial|arrest)\b',
-        r'\b(scandal|affair|divorce)\b',
-    ]
-    
-    for pattern in inappropriate_patterns:
-        if re.search(pattern, content):
-            return False
-    
-    return True
+    return not any(word in content for word in BLACKLIST_WORDS)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# AI RELEVANCE SCORING ENGINE
+# EVERGENT INTELLIGENCE
 # ══════════════════════════════════════════════════════════════════════════════
-
 EVERGENT_CLIENTS = {
     "Astro": ["astro", "sooka", "njoi"],
     "Shahid": ["shahid", "mbc shahid"],
@@ -85,53 +54,40 @@ EVERGENT_CLIENTS = {
     "FOX": ["fox sports", "fox networks"],
 }
 
-# AI Relevance Scoring Keywords
+# AI Scoring Keywords
 TELCO_SIGNALS = {
     "tier1": ["5g monetization", "convergent billing", "digital bss", "oss transformation", 
-              "real-time charging", "network slicing", "telco cloud", "api-based billing"],
-    "tier2": ["bss", "oss", "billing platform", "charging system", "revenue management",
-              "order management", "product catalog", "service orchestration"],
-    "tier3": ["telecom", "telco", "operator", "service provider", "network"],
-    "negative": ["oil", "gas", "petroleum", "insurance core", "banking", "semiconductor fab",
-                 "chip manufacturing", "mining", "power plant", "automotive"]
+              "real-time charging", "network slicing", "api-based billing"],
+    "tier2": ["bss", "oss", "billing platform", "charging system", "revenue management"],
+    "tier3": ["telecom", "telco", "operator"],
+    "negative": ["oil", "gas", "petroleum", "insurance", "banking", "semiconductor", "mining"]
 }
 
 OTT_SIGNALS = {
-    "tier1": ["subscriber growth", "arpu increase", "streaming platform", "content deal",
-              "ott expansion", "svod launch", "sports streaming rights", "platform acquisition"],
-    "tier2": ["streaming", "ott", "video platform", "content monetization", "subscription",
-              "avod", "svod", "live streaming", "content aggregation"],
-    "tier3": ["media", "entertainment", "video", "content"],
-    "negative": ["cinema release", "box office", "movie review", "celebrity gossip",
-                 "film awards", "red carpet", "paparazzi", "dating rumors"]
+    "tier1": ["subscriber growth", "arpu", "streaming platform", "content deal", "ott expansion"],
+    "tier2": ["streaming", "ott", "video platform", "subscription", "svod", "avod"],
+    "tier3": ["media", "entertainment", "video"],
+    "negative": ["cinema release", "box office", "movie review", "celebrity gossip", "red carpet"]
 }
 
 SPORTS_SIGNALS = {
-    "tier1": ["media rights deal", "broadcasting rights", "sports streaming platform",
-              "league partnership", "fan engagement platform", "sports ott launch"],
-    "tier2": ["sports media", "broadcasting", "sports streaming", "league", "tournament",
-              "fan platform", "sports technology", "digital ticketing"],
-    "tier3": ["sports", "football", "basketball", "cricket", "racing"],
-    "negative": ["player injury", "match score", "game result", "fantasy tips",
-                 "betting odds", "transfer gossip", "player scandal"]
+    "tier1": ["media rights deal", "broadcasting rights", "sports streaming platform", "league partnership"],
+    "tier2": ["sports media", "broadcasting", "sports streaming", "fan engagement"],
+    "tier3": ["sports", "football", "basketball"],
+    "negative": ["player injury", "match score", "fantasy tips", "betting odds", "transfer gossip"]
 }
 
 AI_SIGNALS = {
-    "tier1": ["ai platform launch", "generative ai", "enterprise ai", "ai monetization",
-              "ai acquisition", "saas platform", "cloud platform deal", "api platform"],
-    "tier2": ["artificial intelligence", "machine learning", "ai platform", "cloud computing",
-              "enterprise software", "saas", "platform", "api"],
-    "tier3": ["technology", "software", "digital", "innovation"],
-    "negative": ["semiconductor", "chip fabrication", "gpu manufacturing", "crypto mining",
-                 "nft", "blockchain gaming", "metaverse hype"]
+    "tier1": ["ai platform launch", "generative ai", "enterprise ai", "saas platform"],
+    "tier2": ["artificial intelligence", "cloud computing", "enterprise software", "api"],
+    "tier3": ["technology", "software", "digital"],
+    "negative": ["semiconductor", "chip fabrication", "crypto mining", "nft"]
 }
 
 def calculate_relevance_score(title, summary, category):
-    """AI Agent: Scores article relevance (0-100)"""
     content = f"{title} {summary}".lower()
     score = 0
     
-    # Get category signals
     signals = {
         "telco": TELCO_SIGNALS,
         "ott": OTT_SIGNALS,
@@ -142,57 +98,36 @@ def calculate_relevance_score(title, summary, category):
     if not signals:
         return 0
     
-    # Check negative signals (immediate disqualification)
     if any(neg in content for neg in signals.get("negative", [])):
         return 0
     
-    # Tier 1 keywords: +40 points each
-    tier1_matches = sum(1 for kw in signals.get("tier1", []) if kw in content)
-    score += tier1_matches * 40
+    score += sum(40 for kw in signals.get("tier1", []) if kw in content)
+    score += sum(20 for kw in signals.get("tier2", []) if kw in content)
+    score += sum(10 for kw in signals.get("tier3", []) if kw in content)
     
-    # Tier 2 keywords: +20 points each
-    tier2_matches = sum(1 for kw in signals.get("tier2", []) if kw in content)
-    score += tier2_matches * 20
-    
-    # Tier 3 keywords: +10 points each
-    tier3_matches = sum(1 for kw in signals.get("tier3", []) if kw in content)
-    score += tier3_matches * 10
-    
-    # Evergent client bonus: +50 points
-    for client_name, variations in EVERGENT_CLIENTS.items():
+    for variations in EVERGENT_CLIENTS.values():
         if any(var in content for var in variations):
             score += 50
             break
     
-    # Business action keywords: +15 points each
-    action_keywords = ["acquisition", "merger", "partnership", "deal", "expansion", 
-                      "launches", "announces", "signs", "investment"]
-    action_matches = sum(1 for kw in action_keywords if kw in content)
-    score += action_matches * 15
+    action_keywords = ["acquisition", "merger", "partnership", "deal", "expansion", "launches"]
+    score += sum(15 for kw in action_keywords if kw in content)
     
-    # Recency bonus
-    # (handled separately by publication date)
-    
-    return min(score, 100)  # Cap at 100
+    return min(score, 100)
 
 def classify_article_ai(title, summary, category):
-    """AI Agent: Intelligent classification"""
     content = f"{title} {summary}".lower()
     
-    # Priority 1: Evergent Clients
     for client_name, variations in EVERGENT_CLIENTS.items():
         if any(var in content for var in variations):
             score = calculate_relevance_score(title, summary, category)
             return "CLIENT", "🌟", client_name, 0, score
     
-    # Calculate relevance score
     score = calculate_relevance_score(title, summary, category)
     
-    # Must score at least 30 to be included
     if score < 30:
         return "IRRELEVANT", "", "", 999, 0
     
-    # Categorize based on category
     badges = {
         "telco": ("TELCO", "📡", "Telecom", 5),
         "ott": ("OTT", "📺", "Streaming", 6),
@@ -212,7 +147,6 @@ RSS_FEEDS = [
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml", "telco"),
     ("RCR Wireless", "https://www.rcrwireless.com/feed", "telco"),
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/", "telco"),
-    ("Capacity Media", "https://www.capacitymedia.com/rss", "telco"),
     ("Variety", "https://variety.com/feed/", "ott"),
     ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/", "ott"),
     ("Deadline", "https://deadline.com/feed/", "ott"),
@@ -221,11 +155,9 @@ RSS_FEEDS = [
     ("ESPN", "https://www.espn.com/espn/rss/news", "sports"),
     ("SportsPro", "https://www.sportspromedia.com/feed/", "sports"),
     ("SportBusiness", "https://www.sportbusiness.com/feed/", "sports"),
-    ("SportTechie", "https://www.sporttechie.com/feed/", "sports"),
     ("TechCrunch", "https://techcrunch.com/feed/", "technology"),
     ("VentureBeat", "https://venturebeat.com/feed/", "technology"),
     ("The Verge", "https://www.theverge.com/rss/index.xml", "technology"),
-    ("Ars Technica", "https://arstechnica.com/feed/", "technology"),
 ]
 
 HEADERS = {
@@ -234,9 +166,8 @@ HEADERS = {
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
-# FEED FETCHING ENGINE
+# FEED FETCHING
 # ══════════════════════════════════════════════════════════════════════════════
-
 def clean(raw):
     if not raw:
         return ""
@@ -258,13 +189,13 @@ def fetch_feed(source, url, category):
                 continue
             
             summary = clean(entry.get("summary", ""))
-            link = entry.get("link", "")
             
-            # AI Content Filter
             if not is_content_appropriate(title, summary):
                 continue
             
-            pub = None
+            link = entry.get("link", "")
+            
+            pub = NOW
             for k in ("published_parsed", "updated_parsed"):
                 val = getattr(entry, k, None)
                 if val:
@@ -274,15 +205,10 @@ def fetch_feed(source, url, category):
                         pass
                     break
             
-            if not pub:
-                pub = NOW
-            
-            # AI Classification & Scoring
             priority_type, badge, entity, sort_priority, relevance_score = classify_article_ai(
                 title, summary, category
             )
             
-            # Skip irrelevant articles
             if priority_type == "IRRELEVANT":
                 continue
             
@@ -307,7 +233,6 @@ def fetch_feed(source, url, category):
 
 @st.cache_data(ttl=300, show_spinner=False)
 def load_feeds():
-    """AI Agent: Load and rank articles by relevance"""
     categorized = {
         "telco": [],
         "ott": [],
@@ -327,32 +252,50 @@ def load_feeds():
             for item in items:
                 categorized[item["category"]].append(item)
                 
-                # Strategic hits (last 30 days, high relevance)
                 if item["is_strategic"] and (datetime.now() - item["pub"]).days <= 30:
                     categorized["strategic_hits"].append(item)
     
-    # AI Ranking: Sort by relevance score + recency
+    # Deduplication using hash
     for cat in ["telco", "ott", "sports", "technology"]:
-        # Filter to last 3 days
+        seen_hashes = set()
+        unique = []
+        
+        for item in categorized[cat]:
+            # Create hash from normalized title
+            norm_title = re.sub(r'[^\w\s]', '', item["title"].lower())[:50]
+            content_hash = hashlib.md5(norm_title.encode()).hexdigest()
+            
+            if content_hash not in seen_hashes:
+                seen_hashes.add(content_hash)
+                unique.append(item)
+        
+        categorized[cat] = unique
+    
+    # Sort and filter
+    for cat in ["telco", "ott", "sports", "technology"]:
         cutoff = datetime.now() - timedelta(days=3)
         categorized[cat] = [a for a in categorized[cat] if a["pub"] >= cutoff]
         
-        # Sort by relevance score (descending) then recency
         categorized[cat].sort(
-            key=lambda x: (
-                -x["relevance_score"],  # Higher score first
-                -x["pub"].timestamp()   # More recent first
-            )
+            key=lambda x: (-x["relevance_score"], -x["pub"].timestamp())
         )
-        
-        # Keep top 10 most relevant
         categorized[cat] = categorized[cat][:10]
     
-    # Strategic hits: Keep top 6
-    categorized["strategic_hits"].sort(
+    # Deduplicate strategic hits
+    seen_hashes = set()
+    unique_strategic = []
+    for item in categorized["strategic_hits"]:
+        norm_title = re.sub(r'[^\w\s]', '', item["title"].lower())[:50]
+        content_hash = hashlib.md5(norm_title.encode()).hexdigest()
+        
+        if content_hash not in seen_hashes:
+            seen_hashes.add(content_hash)
+            unique_strategic.append(item)
+    
+    categorized["strategic_hits"] = sorted(
+        unique_strategic,
         key=lambda x: (-x["relevance_score"], -x["pub"].timestamp())
-    )
-    categorized["strategic_hits"] = categorized["strategic_hits"][:6]
+    )[:6]
     
     return categorized
 
@@ -365,9 +308,7 @@ def get_time_str(dt):
     if hrs < 24:
         return f"{hrs}h", "time-warm"
     days = hrs // 24
-    if days < 30:
-        return f"{days}d", "time-normal"
-    return f"{days}d", "time-old"
+    return f"{days}d", "time-normal"
 
 # ══════════════════════════════════════════════════════════════════════════════
 # STYLING
@@ -489,7 +430,6 @@ st.markdown("""
         padding: 12px;
         margin-bottom: 10px;
         transition: all 0.3s ease;
-        position: relative;
     }
     
     .news-card:hover {
@@ -539,7 +479,6 @@ st.markdown("""
     .time-hot {color: #dc2626; font-weight: 600;}
     .time-warm {color: #ea580c; font-weight: 600;}
     .time-normal {color: #64748b;}
-    .time-old {color: #94a3b8;}
     
     .col-body::-webkit-scrollbar {width: 6px;}
     .col-body::-webkit-scrollbar-track {background: #f1f5f9;}
@@ -562,7 +501,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Fetch Data
 with st.spinner(""):
     data = load_feeds()
 
@@ -570,45 +508,30 @@ with st.spinner(""):
 strategic_hits = data.get("strategic_hits", [])
 
 if strategic_hits:
-    st.markdown("""
-    <div class="hero-container">
-        <div class="hero-title">🚀 AI-DETECTED STRATEGIC HIGHLIGHTS (Last 30 Days)</div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="hero-container"><div class="hero-title">🚀 AI-DETECTED STRATEGIC HIGHLIGHTS (Last 30 Days)</div>', unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     mid = len(strategic_hits) // 2
     
     with col1:
         for item in strategic_hits[:mid]:
-            entity = item.get("entity", "Industry")
+            entity = html.escape(item.get("entity", "Industry"))
             title = html.escape(item["title"])
             days_ago = (datetime.now() - item["pub"]).days
             score = item["relevance_score"]
             
-            st.markdown(f"""
-            <div class="strategic-item">
-                <span class="relevance-badge">AI: {score}%</span>
-                <strong>{entity}:</strong> {title}<br>
-                <small>{days_ago}d ago • {item['source']}</small>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown(f'<div class="strategic-item"><span class="relevance-badge">AI: {score}%</span><strong>{entity}:</strong> {title}<br><small>{days_ago}d ago • {html.escape(item["source"])}</small></div>', unsafe_allow_html=True)
     
     with col2:
         for item in strategic_hits[mid:]:
-            entity = item.get("entity", "Industry")
+            entity = html.escape(item.get("entity", "Industry"))
             title = html.escape(item["title"])
             days_ago = (datetime.now() - item["pub"]).days
             score = item["relevance_score"]
             
-            st.markdown(f"""
-            <div class="strategic-item">
-                <span class="relevance-badge">AI: {score}%</span>
-                <strong>{entity}:</strong> {title}<br>
-                <small>{days_ago}d ago • {item['source']}</small>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown(f'<div class="strategic-item"><span class="relevance-badge">AI: {score}%</span><strong>{entity}:</strong> {title}<br><small>{days_ago}d ago • {html.escape(item["source"])}</small></div>', unsafe_allow_html=True)
     
-    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # News Sections
 SECTIONS = {
@@ -619,10 +542,8 @@ SECTIONS = {
 }
 
 cols = st.columns(4)
-cat_list = ["telco", "ott", "sports", "technology"]
 
-for idx, cat in enumerate(cat_list):
-    sec = SECTIONS[cat]
+for idx, (cat, sec) in enumerate(SECTIONS.items()):
     items = data.get(cat, [])
     
     with cols[idx]:
@@ -631,7 +552,7 @@ for idx, cat in enumerate(cat_list):
         if not items:
             st.markdown('<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">🤖 AI monitoring...</div></div>', unsafe_allow_html=True)
         else:
-            html_parts = ['<div class="col-body">']
+            body_html = ['<div class="col-body">']
             
             for item in items:
                 time_str, time_class = get_time_str(item["pub"])
@@ -643,38 +564,17 @@ for idx, cat in enumerate(cat_list):
                 
                 card_class = "news-card-client" if item["priority_type"] == "CLIENT" else "news-card"
                 
-                html_parts.append(f'''
-                <div class="{card_class}">
-                    <a href="{link}" target="_blank" class="news-title">{badge} {title}</a>
-                    <div class="news-meta">
-                        <span class="{time_class}">{time_str}</span>
-                        <span>•</span>
-                        <span>{source}</span>
-                        <span>•</span>
-                        <span class="score-badge">{score}%</span>
-                    </div>
-                </div>
-                ''')
+                body_html.append(f'<div class="{card_class}"><a href="{link}" target="_blank" class="news-title">{badge} {title}</a><div class="news-meta"><span class="{time_class}">{time_str}</span><span>•</span><span>{source}</span><span>•</span><span class="score-badge">{score}%</span></div></div>')
             
-            html_parts.append('</div>')
-            st.markdown(''.join(html_parts), unsafe_allow_html=True)
+            body_html.append('</div>')
+            st.markdown(''.join(body_html), unsafe_allow_html=True)
 
 # Footer
-total_articles = sum(len(data[cat]) for cat in cat_list)
-avg_score = sum(
-    item["relevance_score"] 
-    for cat in cat_list 
-    for item in data[cat]
-) / max(total_articles, 1)
+total = sum(len(data[cat]) for cat in ["telco", "ott", "sports", "technology"])
+avg_score = sum(item["relevance_score"] for cat in ["telco", "ott", "sports", "technology"] for item in data[cat]) / max(total, 1)
 
-st.markdown(f"""
-<div style="text-align:center;color:rgba(255,255,255,0.95);font-size:0.8rem;margin-top:20px;padding:16px;background:linear-gradient(135deg,rgba(10,25,47,0.95),rgba(30,41,59,0.95));border-radius:10px;">
-    <p><strong>🤖 AI Agent Active</strong> | <strong>📊 Articles:</strong> {total_articles} | <strong>⭐ Avg Quality:</strong> {avg_score:.0f}% | <strong>🔄 Refresh:</strong> 5min</p>
-    <p style="margin-top:6px;font-size:0.7rem;opacity:0.85;">AI-Filtered • Content-Safe • Relevance-Ranked • Last update: {datetime.now().strftime('%H:%M:%S')}</p>
-</div>
-""", unsafe_allow_html=True)
+st.markdown(f'<div style="text-align:center;color:rgba(255,255,255,0.95);font-size:0.8rem;margin-top:20px;padding:16px;background:linear-gradient(135deg,rgba(10,25,47,0.95),rgba(30,41,59,0.95));border-radius:10px;"><p><strong>🤖 AI Agent Active</strong> | <strong>📊 Articles:</strong> {total} | <strong>⭐ Avg Quality:</strong> {avg_score:.0f}% | <strong>🔄 Refresh:</strong> 5min</p><p style="margin-top:6px;font-size:0.7rem;opacity:0.85;">AI-Filtered • Deduplicated • Relevance-Ranked • Last: {datetime.now().strftime("%H:%M:%S")}</p></div>', unsafe_allow_html=True)
 
-# Auto-refresh
 st.markdown('<meta http-equiv="refresh" content="300">', unsafe_allow_html=True)
 
 @st.fragment(run_every=300)
