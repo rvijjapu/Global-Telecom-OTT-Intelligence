@@ -10,7 +10,7 @@ import hashlib
 # PAGE CONFIG
 # ══════════════════════════════════════════════════════════════════════════════
 st.set_page_config(
-    page_title="Evergent Strategic Intelligence",
+    page_title="Global Telecom & OTT Stellar Nexus AI Powered Real-time Competitive Intelligence Dashboard",
     page_icon="🌐",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -107,7 +107,7 @@ def calculate_relevance_score(title, summary, category):
     if "nba" in content and any(kw in content for kw in ["investment", "strategic", "extension", "partnership"]):
         score += 80
    
-    return min(score, 100)
+    return min(score, 95)  # Cap at 95% to avoid 100% display
 def classify_article_ai(title, summary, category):
     content = f"{title} {summary}".lower()
    
@@ -131,7 +131,7 @@ def classify_article_ai(title, summary, category):
     priority_type, badge, entity, priority = badges.get(category, ("OTHER", "", "", 999))
     return priority_type, badge, entity, priority, score
 # ══════════════════════════════════════════════════════════════════════════════
-# RSS FEEDS
+# RSS FEEDS - Enhanced with more premium sources for impactful news
 # ══════════════════════════════════════════════════════════════════════════════
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
@@ -139,21 +139,21 @@ RSS_FEEDS = [
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml", "telco"),
     ("RCR Wireless", "https://www.rcrwireless.com/feed", "telco"),
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/", "telco"),
+    ("TelecomTV", "https://www.telecomtv.com/feed", "telco"),
+    ("TM Forum", "https://inform.tmforum.org/feed/", "telco"),
     ("Variety", "https://variety.com/feed/", "ott"),
     ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/", "ott"),
     ("Deadline", "https://deadline.com/feed/", "ott"),
     ("Digital TV Europe", "https://www.digitaltveurope.com/feed/", "ott"),
     ("Streaming Media", "https://www.streamingmedia.com/rss", "ott"),
+    ("StreamTV Insider", "https://www.streamtvinsider.com/rss.xml", "ott"),
+    ("Cord Cutters News", "https://www.cordcuttersnews.com/feed/", "ott"),
     ("ESPN", "https://www.espn.com/espn/rss/news", "sports"),
     ("SportsPro", "https://www.sportspromedia.com/feed/", "sports"),
     ("SportBusiness", "https://www.sportbusiness.com/feed/", "sports"),
-    ("TV News Check", "https://tvnewscheck.com/business/feed", "sports"),  # Added for NBA/Evergent news
-    ("TelecomTV", "https://www.telecomtv.com/feed", "telco"),  # Added premium feed
-    ("TM Forum", "https://inform.tmforum.org/feed/", "telco"),  # OSS/BSS heavy
-    ("StreamTV Insider", "https://www.streamtvinsider.com/rss.xml", "ott"),
-    ("Cord Cutters News", "https://www.cordcuttersnews.com/feed/", "ott"),
     ("Sports Business Journal", "https://www.sportsbusinessjournal.com/rss", "sports"),
     ("Sportcal", "https://www.sportcal.com/feed/", "sports"),
+    ("TV News Check", "https://tvnewscheck.com/business/feed", "sports"),
     ("TechCrunch", "https://techcrunch.com/feed/", "technology"),
     ("VentureBeat", "https://venturebeat.com/feed/", "technology"),
     ("The Verge", "https://www.theverge.com/rss/index.xml", "technology"),
@@ -250,15 +250,15 @@ def load_feeds():
                 if item["is_strategic"] and (datetime.now() - item["pub"]).days <= 30:
                     categorized["strategic_hits"].append(item)
    
-    # Deduplication using hash
+    # Improved Deduplication using title + summary hash
     for cat in ["telco", "ott", "sports", "technology"]:
         seen_hashes = set()
         unique = []
        
         for item in categorized[cat]:
-            # Create hash from normalized title
-            norm_title = re.sub(r'[^\w\s]', '', item["title"].lower())[:50]
-            content_hash = hashlib.md5(norm_title.encode()).hexdigest()
+            # Hash title + summary for better dedup
+            norm_content = re.sub(r'[^\w\s]', '', (item["title"] + " " + item["summary"]).lower())
+            content_hash = hashlib.md5(norm_content.encode()).hexdigest()
            
             if content_hash not in seen_hashes:
                 seen_hashes.add(content_hash)
@@ -274,14 +274,14 @@ def load_feeds():
         categorized[cat].sort(
             key=lambda x: (-x["relevance_score"], -x["pub"].timestamp())
         )
-        categorized[cat] = categorized[cat][:5]  # Reduced to 5 for quality focus
+        categorized[cat] = categorized[cat][:5]  # Focus on top 5 impactful
    
-    # Deduplicate strategic hits
+    # Deduplicate strategic hits with improved hash
     seen_hashes = set()
     unique_strategic = []
     for item in categorized["strategic_hits"]:
-        norm_title = re.sub(r'[^\w\s]', '', item["title"].lower())[:50]
-        content_hash = hashlib.md5(norm_title.encode()).hexdigest()
+        norm_content = re.sub(r'[^\w\s]', '', (item["title"] + " " + item["summary"]).lower())
+        content_hash = hashlib.md5(norm_content.encode()).hexdigest()
        
         if content_hash not in seen_hashes:
             seen_hashes.add(content_hash)
@@ -487,8 +487,8 @@ st.markdown("""
 # ══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
 <div class="header-container">
-    <h1 class="main-title">🤖 Evergent AI Strategic Intelligence</h1>
-    <p class="subtitle">AI-Powered News Ranking • Content Filtered • Real-time Updates</p>
+    <h1 class="main-title">🤖 Global Telecom & OTT Stellar Nexus</h1>
+    <p class="subtitle">AI-Powered Real-time Competitive Intelligence Dashboard</p>
 </div>
 """, unsafe_allow_html=True)
 with st.spinner(""):
@@ -505,13 +505,13 @@ with st.spinner(""):
         "badge": "🏆",
         "entity": "NBA",
         "sort_priority": 7,
-        "relevance_score": 100,
+        "relevance_score": 95,
         "is_strategic": True
     }
     # Check if already in data to avoid dupes
-    if not any(item["title"] == nba_news["title"] for item in data["strategic_hits"]):
+    if not any(nba_news["title"].lower() in item["title"].lower() for item in data["strategic_hits"]):
         data["strategic_hits"].insert(0, nba_news)
-    if not any(item["title"] == nba_news["title"] for item in data["sports"]):
+    if not any(nba_news["title"].lower() in item["title"].lower() for item in data["sports"]):
         data["sports"].insert(0, nba_news)
 # Strategic Highlights
 strategic_hits = data.get("strategic_hits", [])
