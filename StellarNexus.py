@@ -17,7 +17,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Health check
+# Health check endpoint
 if st.query_params.get("ping") == "1":
     st.write("alive")
     st.stop()
@@ -40,37 +40,37 @@ def is_content_appropriate(title, summary=""):
     return not any(word in content for word in BLACKLIST_WORDS)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# EVERGENT DATA – PASTE YOUR FULL DICTIONARIES HERE
+# EVERGENT DATA LAYERS – REPLACE WITH YOUR FULL DICTS
 # ─────────────────────────────────────────────────────────────────────────────
-
 EVERGENT_CLIENTS = {
-    # Example – replace with your full list
     "Astro": ["astro", "sooka", "njoi"],
     "Shahid": ["shahid", "mbc shahid"],
     "AT&T": ["at&t", "att", "directv"],
     "NBA": ["nba", "national basketball"],
-    # "NextClient": ["var1", "var2"],
-    # ...
+    "Sony": ["sony", "sonyliv"],
+    "Sky": ["sky nz", "sky new zealand", "sky tv"],
+    "BBC": ["bbc", "bbc iplayer"],
+    "ABS-CBN": ["abs-cbn", "abscbn"],
+    "FOX": ["fox sports", "fox networks"],
+    # Add the rest from your list
 }
 
 COMPETITORS = {
-    # Example – replace with your full list
-    "Amdocs": ["amdocs"],
-    "Netcracker": ["netcracker"],
-    "CSG": ["csg"],
-    # ...
+    "Netcracker": ["netcracker", "netcracker technology", "nec netcracker"],
+    "Amdocs": ["amdocs", "amdocs ltd", "amdocs inc"],
+    "CSG": ["csg systems", "csg international", "csg"],
+    # Add the rest from your list
 }
 
 TOP_TELCOS = {
-    # Example – replace with your full flat list
-    "Verizon": ["verizon", "verizon wireless"],
-    "AT&T": ["at&t", "att"],
-    "Reliance Jio": ["jio", "reliance jio"],
-    # ...
+    "Verizon": ["verizon", "verizon wireless", "verizon fios"],
+    "AT&T": ["at&t", "att mobility"],
+    "T-Mobile": ["t-mobile", "tmobile usa", "sprint"],
+    # Add the rest from your flat list
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SCORING SIGNALS (your original – keep or tune)
+# SCORING SIGNALS
 # ─────────────────────────────────────────────────────────────────────────────
 TELCO_SIGNALS = {
     "tier1": ["5g monetization", "convergent billing", "digital bss", "oss transformation",
@@ -79,21 +79,18 @@ TELCO_SIGNALS = {
     "tier3": ["telecom", "telco", "operator"],
     "negative": ["oil", "gas", "petroleum", "insurance", "banking", "semiconductor", "mining"]
 }
-
 OTT_SIGNALS = {
     "tier1": ["subscriber growth", "arpu", "streaming platform", "content deal", "ott expansion"],
     "tier2": ["streaming", "ott", "video platform", "subscription", "svod", "avod"],
     "tier3": ["media", "entertainment", "video"],
     "negative": ["cinema release", "box office", "movie review", "celebrity gossip", "red carpet"]
 }
-
 SPORTS_SIGNALS = {
     "tier1": ["media rights deal", "broadcasting rights", "sports streaming platform", "league partnership"],
     "tier2": ["sports media", "broadcasting", "sports streaming", "fan engagement"],
     "tier3": ["sports", "football", "basketball"],
     "negative": ["player injury", "match score", "fantasy tips", "betting odds", "transfer gossip"]
 }
-
 AI_SIGNALS = {
     "tier1": ["ai platform launch", "generative ai", "enterprise ai", "saas platform"],
     "tier2": ["artificial intelligence", "cloud computing", "enterprise software", "api"],
@@ -122,7 +119,7 @@ def calculate_relevance_score(title, summary, category):
     score += sum(25 for kw in signals.get("tier2", []) if kw in content)
     score += sum(10 for kw in signals.get("tier3", []) if kw in content)
 
-    # Boosts (no display – only for ranking)
+    # Hidden boosts
     if any(any(v in content for v in vs) for vs in EVERGENT_CLIENTS.values()):
         score += 80
 
@@ -143,85 +140,92 @@ def calculate_relevance_score(title, summary, category):
 
     return min(score, 100)
 
-def classify_article(title, summary, category):
+def classify_article_ai(title, summary, category):
     content = f"{title} {summary}".lower()
     score = calculate_relevance_score(title, summary, category)
 
     if score < 50:
-        return "IRRELEVANT", "", 999
+        return "IRRELEVANT", "", "", 999, 0
 
-    if any(any(v in content for v in vs) for vs in EVERGENT_CLIENTS.values()):
-        return "CLIENT", "🌟", 0
+    client_found = any(any(var in content for var in vars) for vars in EVERGENT_CLIENTS.values())
+    competitor_found = any(any(var in content for var in vars) for vars in COMPETITORS.values())
 
-    if any(any(v in content for v in vs) for vs in COMPETITORS.values()):
-        return "COMPETITOR", "⚠️", 1
+    if client_found:
+        return "CLIENT", "🌟", "Strategic", 0, score
+    if competitor_found:
+        return "COMPETITOR", "⚠️", "Competitive", 1, score
 
     badges = {
-        "telco":      ("TELCO",  "📡", 5),
-        "ott":        ("OTT",    "📺", 6),
-        "sports":     ("SPORTS", "🏆", 7),
-        "technology": ("TECH",   "⚡", 8)
+        "telco": ("TELCO", "📡", "Telecom OSS/BSS", 5),
+        "ott": ("OTT", "📺", "Streaming", 6),
+        "sports": ("SPORTS", "🏆", "Sports Media", 7),
+        "technology": ("TECH", "⚡", "AI/Tech", 8)
     }
 
-    tag, icon, prio = badges.get(category, ("", "", 999))
-    return tag, icon, prio
+    priority_type, badge, entity, priority = badges.get(category, ("OTHER", "", "", 999))
+    return priority_type, badge, entity, priority, score
 
 # ─────────────────────────────────────────────────────────────────────────────
-# RSS FEEDS – FIXED SYNTAX
+# RSS FEEDS
 # ─────────────────────────────────────────────────────────────────────────────
 RSS_FEEDS = [
-    ("Telecoms.com",       "https://www.telecoms.com/feed",                    "telco"),
-    ("Light Reading",      "https://www.lightreading.com/rss/simple",          "telco"),
-    ("Fierce Telecom",     "https://www.fierce-network.com/rss.xml",           "telco"),
-    ("RCR Wireless",       "https://www.rcrwireless.com/feed",                 "telco"),
-    ("Mobile World Live",  "https://www.mobileworldlive.com/feed/",            "telco"),
-    ("Variety",            "https://variety.com/feed/",                        "ott"),
-    ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/",          "ott"),
-    ("Deadline",           "https://deadline.com/feed/",                       "ott"),
-    ("Streaming Media",    "https://www.streamingmedia.com/rss",               "ott"),
-    ("ESPN",               "https://www.espn.com/espn/rss/news",               "sports"),
-    ("SportsPro",          "https://www.sportspromedia.com/feed/",             "sports"),
-    ("SportBusiness",      "https://www.sportbusiness.com/feed/",              "sports"),
-    ("TV News Check",      "https://tvnewscheck.com/business/feed",            "sports"),
-    ("TechCrunch",         "https://techcrunch.com/feed/",                     "technology"),
-    ("VentureBeat",        "https://venturebeat.com/feed/",                    "technology"),
-    ("The Verge",          "https://www.theverge.com/rss/index.xml",           "technology"),
+    ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
+    ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
+    ("Fierce Telecom", "https://www.fierce-network.com/rss.xml", "telco"),
+    ("RCR Wireless", "https://www.rcrwireless.com/feed", "telco"),
+    ("Mobile World Live", "https://www.mobileworldlive.com/feed/", "telco"),
+    ("Variety", "https://variety.com/feed/", "ott"),
+    ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/", "ott"),
+    ("Deadline", "https://deadline.com/feed/", "ott"),
+    ("Digital TV Europe", "https://www.digitaltveurope.com/feed/", "ott"),
+    ("Streaming Media", "https://www.streamingmedia.com/rss", "ott"),
+    ("ESPN", "https://www.espn.com/espn/rss/news", "sports"),
+    ("SportsPro", "https://www.sportspromedia.com/feed/", "sports"),
+    ("SportBusiness", "https://www.sportbusiness.com/feed/", "sports"),
+    ("TV News Check", "https://tvnewscheck.com/business/feed", "sports"),
+    ("TelecomTV", "https://www.telecomtv.com/feed", "telco"),
+    ("TM Forum", "https://inform.tmforum.org/feed/", "telco"),
+    ("StreamTV Insider", "https://www.streamtvinsider.com/rss.xml", "ott"),
+    ("Cord Cutters News", "https://www.cordcuttersnews.com/feed/", "ott"),
+    ("Sports Business Journal", "https://www.sportsbusinessjournal.com/rss", "sports"),
+    ("Sportcal", "https://www.sportcal.com/feed/", "sports"),
+    ("TechCrunch", "https://techcrunch.com/feed/", "technology"),
+    ("VentureBeat", "https://venturebeat.com/feed/", "technology"),
+    ("The Verge", "https://www.theverge.com/rss/index.xml", "technology"),
 ]
-
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
     "Accept": "application/rss+xml, application/xml, text/xml, */*",
 }
-
 # ─────────────────────────────────────────────────────────────────────────────
-# FEED PROCESSING
+# FEED FETCHING
 # ─────────────────────────────────────────────────────────────────────────────
 def clean(raw):
     if not raw:
         return ""
     return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
-
 def fetch_feed(source, url, category):
     items = []
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=8)
+        resp = requests.get(url, headers=HEADERS, timeout=5)
         if resp.status_code != 200:
             return items
-
+       
         feed = feedparser.parse(resp.content)
         NOW = datetime.now()
-
-        for entry in feed.entries[:25]:
+       
+        for entry in feed.entries[:20]:
             title = clean(entry.get("title", ""))
-            if len(title) < 25:
+            if len(title) < 20:
                 continue
-
-            summary = clean(entry.get("summary") or entry.get("description", ""))
+           
+            summary = clean(entry.get("summary", entry.get("description", "")))
+           
             if not is_content_appropriate(title, summary):
                 continue
-
+           
             link = entry.get("link", "")
-
+           
             pub = NOW
             for k in ("published_parsed", "updated_parsed"):
                 val = getattr(entry, k, None)
@@ -231,13 +235,14 @@ def fetch_feed(source, url, category):
                     except:
                         pass
                     break
-
-            tag, badge, prio = classify_article(title, summary, category)
-            if tag == "IRRELEVANT":
+           
+            priority_type, badge, entity, sort_priority, relevance_score = classify_article_ai(
+                title, summary, category
+            )
+           
+            if priority_type == "IRRELEVANT":
                 continue
-
-            score = calculate_relevance_score(title, summary, category)
-
+           
             items.append({
                 "title": title,
                 "link": link,
@@ -245,305 +250,352 @@ def fetch_feed(source, url, category):
                 "source": source,
                 "summary": summary,
                 "category": category,
-                "tag": tag,
+                "priority_type": priority_type,
                 "badge": badge,
-                "prio": prio,
-                "score": score,
-                "is_priority": tag in ["CLIENT", "COMPETITOR"] or score >= 75
+                "entity": entity,
+                "sort_priority": sort_priority,
+                "relevance_score": relevance_score,
+                "is_strategic": relevance_score >= 70 or priority_type in ["CLIENT", "COMPETITOR"]
             })
-    except Exception:
+    except:
         pass
-
+   
     return items
-
-@st.cache_data(ttl=240, show_spinner=False)
+@st.cache_data(ttl=300, show_spinner=False)
 def load_feeds():
     categorized = {
         "telco": [],
         "ott": [],
         "sports": [],
         "technology": [],
-        "highlights": []
+        "strategic_hits": []
     }
-
-    with ThreadPoolExecutor(max_workers=16) as executor:
-        futures = [executor.submit(fetch_feed, s, u, c) for s, u, c in RSS_FEEDS]
-
+   
+    with ThreadPoolExecutor(max_workers=15) as executor:
+        futures = [
+            executor.submit(fetch_feed, source, url, cat)
+            for source, url, cat in RSS_FEEDS
+        ]
+       
         for future in as_completed(futures):
-            for item in future.result():
+            items = future.result()
+            for item in items:
                 categorized[item["category"]].append(item)
-                if item["is_priority"] and (datetime.now() - item["pub"]).days <= 45:
-                    categorized["highlights"].append(item)
-
-    # Deduplication
-    for key in categorized:
-        seen = set()
-        unique = []
-        for item in categorized[key]:
-            norm = re.sub(r'\W+', '', (item["title"] + item["summary"]).lower())
-            h = hashlib.md5(norm.encode()).hexdigest()
-            if h not in seen:
-                seen.add(h)
-                unique.append(item)
-        categorized[key] = unique
-
-    # Sort & limit
+               
+                if item["is_strategic"] and (datetime.now() - item["pub"]).days <= 30:
+                    categorized["strategic_hits"].append(item)
+   
+    # Deduplication using hash
     for cat in ["telco", "ott", "sports", "technology"]:
-        cutoff = datetime.now() - timedelta(days=10)
-        categorized[cat] = [x for x in categorized[cat] if x["pub"] >= cutoff]
-        categorized[cat].sort(key=lambda x: (-x["score"], -x["pub"].timestamp()))
-        categorized[cat] = categorized[cat][:6]
-
-    # Highlights: priority first
-    categorized["highlights"].sort(key=lambda x: (
-        0 if x["is_priority"] else 1,
-        -x["score"],
-        -x["pub"].timestamp()
-    ))
-    categorized["highlights"] = categorized["highlights"][:12]
-
+        seen_hashes = set()
+        unique = []
+       
+        for item in categorized[cat]:
+            norm_title = re.sub(r'[^\w\s]', '', item["title"].lower())[:50]
+            content_hash = hashlib.md5(norm_title.encode()).hexdigest()
+           
+            if content_hash not in seen_hashes:
+                seen_hashes.add(content_hash)
+                unique.append(item)
+       
+        categorized[cat] = unique
+   
+    # Sort and filter
+    for cat in ["telco", "ott", "sports", "technology"]:
+        cutoff = datetime.now() - timedelta(days=7)
+        categorized[cat] = [a for a in categorized[cat] if a["pub"] >= cutoff]
+       
+        categorized[cat].sort(
+            key=lambda x: (-x["relevance_score"], -x["pub"].timestamp())
+        )
+        categorized[cat] = categorized[cat][:5]
+   
+    # Deduplicate strategic hits
+    seen_hashes = set()
+    unique_strategic = []
+    for item in categorized["strategic_hits"]:
+        norm_title = re.sub(r'[^\w\s]', '', item["title"].lower())[:50]
+        content_hash = hashlib.md5(norm_title.encode()).hexdigest()
+       
+        if content_hash not in seen_hashes:
+            seen_hashes.add(content_hash)
+            unique_strategic.append(item)
+   
+    categorized["strategic_hits"] = sorted(
+        unique_strategic,
+        key=lambda x: (-x["relevance_score"], -x["pub"].timestamp())
+    )[:6]
+   
     return categorized
-
-def time_ago(dt):
-    secs = (datetime.now() - dt).total_seconds()
-    if secs < 3600:    return "Now", "time-hot"
-    if secs < 21600:   return f"{int(secs//3600)}h", "time-hot"
-    if secs < 86400:   return f"{int(secs//3600)}h", "time-warm"
-    return f"{int(secs//86400)}d", "time-normal"
-
+def get_time_str(dt):
+    hrs = int((datetime.now() - dt).total_seconds() / 3600)
+    if hrs < 1:
+        return "Now", "time-hot"
+    if hrs < 6:
+        return f"{hrs}h", "time-hot"
+    if hrs < 24:
+        return f"{hrs}h", "time-warm"
+    days = hrs // 24
+    return f"{days}d", "time-normal"
 # ─────────────────────────────────────────────────────────────────────────────
-# STYLING – CLEAN & MODERN
+# STYLING
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+   
     .stApp {
-        background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
-        background-size: cover;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         font-family: 'Inter', sans-serif;
+        padding-top: 0.5rem;
     }
-
-    .header {
-        background: rgba(15, 23, 42, 0.92);
-        backdrop-filter: blur(10px);
-        padding: 2rem 3rem;
-        border-radius: 16px;
+   
+    .header-container {
+        background: rgba(255, 255, 255, 0.97);
+        padding: 1.5rem 2rem;
         text-align: center;
-        margin: 1.5rem 0 2.5rem;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        border-radius: 20px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        margin: 0 0 2rem 0;
+        border-bottom: 4px solid #1e40af;
     }
-
-    .title {
-        font-size: 2.8rem;
+   
+    .main-title {
+        font-size: 2.4rem;
         font-weight: 800;
-        background: linear-gradient(90deg, #a5b4fc, #c084fc);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin: 0;
     }
-
+   
     .subtitle {
-        font-size: 1.1rem;
-        color: #cbd5e1;
+        font-size: 1rem;
+        color: #475569;
         margin-top: 0.5rem;
+        font-weight: 500;
     }
-
-    .highlights-container {
-        background: rgba(30, 41, 59, 0.9);
+   
+    .hero-container {
+        background: rgba(255, 255, 255, 0.98);
         border-radius: 16px;
-        padding: 1.8rem;
-        margin-bottom: 2.5rem;
-        border: 1px solid rgba(99, 102, 241, 0.3);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 35px rgba(0,0,0,0.15);
     }
-
-    .section-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #e0f2fe;
+   
+    .hero-title {
+        color: #0a192f;
+        font-size: 1.6rem;
+        font-weight: 800;
         margin-bottom: 1.2rem;
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
+        border-left: 6px solid #667eea;
+        padding-left: 15px;
     }
-
-    .highlight-card {
-        background: rgba(59, 69, 94, 0.5);
-        border-radius: 10px;
-        padding: 1.1rem 1.3rem;
-        margin-bottom: 0.9rem;
-        border-left: 4px solid #6366f1;
-        transition: all 0.2s;
+   
+    .strategic-item {
+        background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%);
+        border-left: 4px solid #f59e0b;
+        padding: 12px 16px;
+        margin-bottom: 12px;
+        border-radius: 8px;
+        position: relative;
     }
-
-    .highlight-card:hover {
-        background: rgba(79, 89, 114, 0.65);
-        transform: translateX(4px);
+   
+    .strategic-item strong {
+        color: #0a192f;
+        font-size: 0.95rem;
     }
-
-    .card-title {
-        color: #e0f2fe;
-        font-size: 1.05rem;
-        font-weight: 600;
-        margin-bottom: 0.4rem;
+   
+    .strategic-item small {
+        color: #64748b;
+        font-size: 0.8rem;
     }
-
-    .card-meta {
-        font-size: 0.82rem;
-        color: #94a3b8;
-    }
-
-    .time-hot   { color: #f87171; font-weight: 600; }
-    .time-warm  { color: #fb923c; font-weight: 600; }
-    .time-normal{ color: #94a3b8; }
-
-    .section-header {
-        font-size: 1.3rem;
-        font-weight: 700;
+   
+    .relevance-badge {
+        position: absolute;
+        top: 8px;
+        right: 12px;
+        background: #10b981;
         color: white;
-        padding: 1rem 1.5rem;
-        border-radius: 12px 12px 0 0;
-        margin: 0;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 700;
     }
-
-    .section-body {
-        background: rgba(30, 41, 59, 0.88);
-        border-radius: 0 0 12px 12px;
-        padding: 1.2rem;
-        min-height: 400px;
+   
+    .col-header {
+        padding: 12px 16px;
+        border-radius: 14px 14px 0 0;
+        color: white;
+        font-weight: 700;
+        font-size: 0.95rem;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
     }
-
+   
+    .col-header-pink {background: linear-gradient(135deg, #ec4899, #db2777);}
+    .col-header-purple {background: linear-gradient(135deg, #a78bfa, #8b5cf6);}
+    .col-header-green {background: linear-gradient(135deg, #34d399, #10b981);}
+    .col-header-orange {background: linear-gradient(135deg, #fb923c, #f97316);}
+   
+    .col-body {
+        background: white;
+        border-radius: 0 0 14px 14px;
+        padding: 12px;
+        min-height: 480px;
+        max-height: 580px;
+        overflow-y: auto;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        margin-bottom: 1rem;
+    }
+   
     .news-card {
-        background: rgba(59, 69, 94, 0.5);
-        border: 1px solid rgba(148, 163, 184, 0.25);
+        background: #fafbfc;
+        border: 1px solid #e2e8f0;
         border-radius: 10px;
-        padding: 1rem;
-        margin-bottom: 0.8rem;
-        transition: all 0.2s;
+        padding: 12px;
+        margin-bottom: 10px;
+        transition: all 0.3s ease;
     }
-
+   
     .news-card:hover {
-        background: rgba(79, 89, 114, 0.65);
-        border-color: #818cf8;
+        background: #f1f5f9;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+        transform: translateY(-1px);
     }
-
-    .news-link {
-        color: #c7d2fe;
-        font-size: 1.02rem;
+   
+    .news-card-client {
+        background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%);
+        border: 2px solid #fbbf24;
+    }
+   
+    .news-title {
+        color: #1e40af;
+        font-size: 0.9rem;
         font-weight: 600;
+        line-height: 1.35;
         text-decoration: none;
         display: block;
-        margin-bottom: 0.4rem;
+        margin-bottom: 6px;
     }
-
-    .news-link:hover { color: #e0f2fe; }
-
+   
+    .news-title:hover {
+        color: #1d4ed8;
+        text-decoration: underline;
+    }
+   
     .news-meta {
-        font-size: 0.8rem;
-        color: #94a3b8;
+        font-size: 0.75rem;
+        color: #64748b;
         display: flex;
-        gap: 1rem;
+        align-items: center;
+        gap: 7px;
         flex-wrap: wrap;
     }
+   
+    .score-badge {
+        background: #10b981;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 8px;
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
+   
+    .time-hot {color: #dc2626; font-weight: 600;}
+    .time-warm {color: #ea580c; font-weight: 600;}
+    .time-normal {color: #64748b;}
+   
+    .col-body::-webkit-scrollbar {width: 6px;}
+    .col-body::-webkit-scrollbar-track {background: #f1f5f9;}
+    .col-body::-webkit-scrollbar-thumb {background: #94a3b8; border-radius: 10px;}
+   
+    #MainMenu, footer, header {visibility: hidden;}
+    .stDeployButton {display: none;}
+    [data-testid="column"] {padding: 0 8px !important;}
 </style>
 """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# MAIN LAYOUT
+# MAIN APP
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown("""
-<div class="header">
-    <div class="title">Global Telecom & OTT Stellar Nexus</div>
-    <div class="subtitle">AI Powered Real-time Competitive Intelligence Dashboard</div>
+<div class="header-container">
+    <h1 class="main-title">🤖 Global Telecom & OTT Stellar Nexus</h1>
+    <p class="subtitle">AI-Powered Real-time Competitive Intelligence Dashboard</p>
 </div>
 """, unsafe_allow_html=True)
 
-with st.spinner("Loading latest intelligence..."):
+with st.spinner(""):
     data = load_feeds()
 
-# ── HIGHLIGHTS ──
-st.markdown('<div class="highlights-container">', unsafe_allow_html=True)
+# Strategic Highlights
+strategic_hits = data.get("strategic_hits", [])
+if strategic_hits:
+    st.markdown('<div class="hero-container"><div class="hero-title">🚀 AI-DETECTED STRATEGIC HIGHLIGHTS (Last 30 Days)</div>', unsafe_allow_html=True)
+   
+    col1, col2 = st.columns(2)
+    mid = len(strategic_hits) // 2
+   
+    with col1:
+        for item in strategic_hits[:mid]:
+            title = html.escape(item["title"])
+            days_ago = (datetime.now() - item["pub"]).days
+            score = item["relevance_score"]
+           
+            st.markdown(f'<div class="strategic-item"><strong>{title}</strong><br><small>{days_ago}d ago • {html.escape(item["source"])}</small></div>', unsafe_allow_html=True)
+   
+    with col2:
+        for item in strategic_hits[mid:]:
+            title = html.escape(item["title"])
+            days_ago = (datetime.now() - item["pub"]).days
+            score = item["relevance_score"]
+           
+            st.markdown(f'<div class="strategic-item"><strong>{title}</strong><br><small>{days_ago}d ago • {html.escape(item["source"])}</small></div>', unsafe_allow_html=True)
+   
+    st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown('<div class="section-title">🚀 Strategic Hits</div>', unsafe_allow_html=True)
-for item in [x for x in data["highlights"] if x["is_priority"]][:6]:
-    tago, cls = time_ago(item["pub"])
-    st.markdown(f"""
-    <div class="highlight-card">
-        <div class="card-title">{item["badge"]} {html.escape(item["title"])}</div>
-        <div class="card-meta">
-            <span class="{cls}">{tago}</span> • {html.escape(item["source"])}
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-st.markdown('<div class="section-title" style="margin-top:1.8rem;">⚡ Pulse</div>', unsafe_allow_html=True)
-for item in data["highlights"][:8]:
-    if item["is_priority"]: continue
-    tago, cls = time_ago(item["pub"])
-    st.markdown(f"""
-    <div class="highlight-card">
-        <div class="card-title">{item["badge"]} {html.escape(item["title"])}</div>
-        <div class="card-meta">
-            <span class="{cls}">{tago}</span> • {html.escape(item["source"])}
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-st.markdown('</div>', unsafe_allow_html=True)
-
-# ── MAIN SECTIONS ──
-cols = st.columns(4)
-
-sections = {
-    "telco":      {"name": "TELCO OSS/BSS",  "color": "#ec4899", "icon": "📡"},
-    "ott":        {"name": "OTT & STREAMING","color": "#a78bfa", "icon": "📺"},
-    "sports":     {"name": "SPORTS MEDIA",   "color": "#34d399", "icon": "🏆"},
-    "technology": {"name": "AI & TECHNOLOGY","color": "#fb923c", "icon": "⚡"},
+# News Sections
+SECTIONS = {
+    "telco": {"icon": "📡", "name": "TELCO OSS/BSS", "style": "col-header-pink"},
+    "ott": {"icon": "📺", "name": "OTT & STREAMING", "style": "col-header-purple"},
+    "sports": {"icon": "🏆", "name": "SPORTS MEDIA", "style": "col-header-green"},
+    "technology": {"icon": "⚡", "name": "AI & TECHNOLOGY", "style": "col-header-orange"},
 }
-
-for idx, (cat, cfg) in enumerate(sections.items()):
+cols = st.columns(4)
+for idx, (cat, sec) in enumerate(SECTIONS.items()):
+    items = data.get(cat, [])
+   
     with cols[idx]:
-        st.markdown(f"""
-        <div class="section-header" style="background:{cfg['color']};">
-            {cfg['icon']} {cfg['name']}
-        </div>
-        <div class="section-body">
-        """, unsafe_allow_html=True)
-
-        items = data.get(cat, [])
+        st.markdown(f'<div class="{sec["style"]} col-header">{sec["icon"]} {sec["name"]}</div>', unsafe_allow_html=True)
+       
         if not items:
-            st.markdown('<div style="text-align:center; color:#94a3b8; padding:100px 0;">Monitoring...</div>', unsafe_allow_html=True)
+            st.markdown('<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">🤖 AI monitoring...</div></div>', unsafe_allow_html=True)
         else:
+            body_html = ['<div class="col-body">']
+           
             for item in items:
-                tago, cls = time_ago(item["pub"])
-                st.markdown(f"""
-                <div class="news-card">
-                    <a href="{html.escape(item['link'])}" target="_blank" class="news-link">
-                        {item['badge']} {html.escape(item['title'])}
-                    </a>
-                    <div class="news-meta">
-                        <span class="{cls}">{tago}</span>
-                        <span>•</span>
-                        <span>{html.escape(item['source'])}</span>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-
-        st.markdown("</div>", unsafe_allow_html=True)
+                time_str, time_class = get_time_str(item["pub"])
+                title = html.escape(item["title"])
+                link = html.escape(item["link"])
+                source = html.escape(item["source"])
+                badge = item.get("badge", "")
+               
+                card_class = "news-card"
+               
+                body_html.append(f'<div class="{card_class}"><a href="{link}" target="_blank" class="news-title">{badge} {title}</a><div class="news-meta"><span class="{time_class}">{time_str}</span><span>•</span><span>{source}</span></div></div>')
+           
+            body_html.append('</div>')
+            st.markdown(''.join(body_html), unsafe_allow_html=True)
 
 # Footer
-st.markdown(f"""
-<div style="text-align:center; color:#cbd5e1; margin:3rem 0; padding:1.5rem; background:rgba(15,23,42,0.8); border-radius:12px;">
-    <strong>AI Intelligence Active</strong>  •  Articles: {sum(len(data[c]) for c in sections)}  • 
-    Last update: {datetime.now().strftime('%H:%M:%S')}
-</div>
-""", unsafe_allow_html=True)
-
-# Auto-refresh
+total = sum(len(data[cat]) for cat in ["telco", "ott", "sports", "technology"])
+avg_score = sum(item["relevance_score"] for cat in ["telco", "ott", "sports", "technology"] for item in data[cat]) / max(total, 1)
+st.markdown(f'<div style="text-align:center;color:rgba(255,255,255,0.95);font-size:0.8rem;margin-top:20px;padding:16px;background:linear-gradient(135deg,rgba(10,25,47,0.95),rgba(30,41,59,0.95));border-radius:10px;"><p><strong>🤖 AI Agent Active</strong> | <strong>📊 Articles:</strong> {total} | <strong>⭐ Avg Quality:</strong> {avg_score:.0f}% | <strong>🔄 Refresh:</strong> 5min</p><p style="margin-top:6px;font-size:0.7rem;opacity:0.85;">AI-Filtered • Deduplicated • Relevance-Ranked • Last: {datetime.now().strftime("%H:%M:%S")}</p></div>', unsafe_allow_html=True)
 st.markdown('<meta http-equiv="refresh" content="300">', unsafe_allow_html=True)
-
 @st.fragment(run_every=300)
-def keep_alive():
+def auto_refresh():
+    load_feeds()
     st.empty()
-
-keep_alive()
+auto_refresh()
