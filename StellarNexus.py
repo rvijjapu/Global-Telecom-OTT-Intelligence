@@ -301,18 +301,17 @@ RSS_FEEDS = [
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml", "telco"),
     ("RCR Wireless", "https://www.rcrwireless.com/feed", "telco"),
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/", "telco"),
-    ("TelecomTV", "https://www.telecomtv.com/feed", "telco"),
-    ("TM Forum", "https://inform.tmforum.org/feed/", "telco"),
     ("Variety", "https://variety.com/feed/", "ott"),
     ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/", "ott"),
     ("Deadline", "https://deadline.com/feed/", "ott"),
     ("Digital TV Europe", "https://www.digitaltveurope.com/feed/", "ott"),
     ("Streaming Media", "https://www.streamingmedia.com/rss", "ott"),
-    ("StreamTV Insider", "https://www.streamtvinsider.com/rss.xml", "ott"),
-    ("Cord Cutters News", "https://www.cordcuttersnews.com/feed/", "ott"),
     ("ESPN", "https://www.espn.com/espn/rss/news", "sports"),
     ("SportsPro", "https://www.sportspromedia.com/feed/", "sports"),
-    "SportBusiness": ("SportBusiness", "https://www.sportbusiness.com/feed/", "sports"),
+    ("SportBusiness", "https://www.sportbusiness.com/feed/", "sports"),
+    ("TechCrunch", "https://techcrunch.com/feed/", "technology"),
+    ("VentureBeat", "https://venturebeat.com/feed/", "technology"),
+    ("The Verge", "https://www.theverge.com/rss/index.xml", "technology"),
     ("TV News Check", "https://tvnewscheck.com/business/feed", "sports"),
     ("TelecomTV", "https://www.telecomtv.com/feed", "telco"),
     ("TM Forum", "https://inform.tmforum.org/feed/", "telco"),
@@ -320,9 +319,6 @@ RSS_FEEDS = [
     ("Cord Cutters News", "https://www.cordcuttersnews.com/feed/", "ott"),
     ("Sports Business Journal", "https://www.sportsbusinessjournal.com/rss", "sports"),
     ("Sportcal", "https://www.sportcal.com/feed/", "sports"),
-    ("TechCrunch", "https://techcrunch.com/feed/", "technology"),
-    ("VentureBeat", "https://venturebeat.com/feed/", "technology"),
-    ("The Verge", "https://www.theverge.com/rss/index.xml", "technology"),
 ]
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
@@ -345,7 +341,7 @@ def fetch_feed(source, url, category):
         feed = feedparser.parse(resp.content)
         NOW = datetime.now()
        
-        for entry in feed.entries[:30]:
+        for entry in feed.entries[:20]:
             title = clean(entry.get("title", ""))
             if len(title) < 20:
                 continue
@@ -476,7 +472,8 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
    
     .stApp {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
+        background-size: cover;
         font-family: 'Inter', sans-serif;
         padding-top: 0.5rem;
     }
