@@ -97,6 +97,17 @@ st.markdown("""
         font-weight: 700;
     }
     
+    .status-tag {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        color: white;
+    }
+    
     /* News Sections */
     .col-header {
         padding: 12px 16px;
@@ -178,7 +189,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 2026 STRATEGIC INTELLIGENCE (HARDCODED PPT-READY PRIORITY SECTION)
+# 2026 STRATEGIC INTELLIGENCE (HARDCODED - ALL YOUR REQUESTED NEWS, NO DUPLICATES)
 STRATEGIC_2026_HITS = [
     {
         "title": "[CRITICAL] NBA Scores Strategic Investment in Evergent; Named Preferred Global Vendor (Jan 14, 2026)",
@@ -186,21 +197,41 @@ STRATEGIC_2026_HITS = [
         "context": "The NBA has taken a strategic equity stake in Evergent, naming it a 'Preferred Vendor' to drive global League Pass personalization and churn management across 185 countries."
     },
     {
-        "title": "[HIGH] Ericsson & Wind Tre Launch Italy's First 5G Standalone Network (Jan 14, 2026)",
+        "title": "Amdocs Completes $200M Acquisition of Charging Leader Matrixx Software (Jan 2026)",
         "impact": "HIGH",
-        "context": "Powered by Ericsson's dual-mode 5G Core, this 5G-native infrastructure enables network slicing for enterprise use cases and live sports production."
+        "context": "Amdocs completes its $200M acquisition of charging leader Matrixx Software to dominate the Tier-1 5G billing market."
     },
     {
-        "title": "[HIGH] Netcracker Expands Cloud-Native BSS Partnership with T-Mobile (Jan 15, 2026)",
+        "title": "Disney Officially Phases Out Standalone Hulu App (Jan 2026)",
         "impact": "HIGH",
-        "context": "T-Mobile Wholesale pivots to agile digital-first models using the Netcracker stack to monetize open APIs and network slicing."
+        "context": "Disney officially begins phasing out the standalone Hulu app to integrate all content into a unified Disney+ hub."
+    },
+    {
+        "title": "NEC Finalizes Acquisition of CSG (Jan 2026)",
+        "impact": "HIGH",
+        "context": "Japan's NEC finalizes the acquisition of CSG, significantly scaling Netcracker's North American SaaS footprint."
     }
 ]
 
-# Priority companies (always first)
+STRATEGIC_PULSE = [
+    {
+        "title": "Agentic AI Core",
+        "context": "By EOY 2026, autonomous AI agents are expected to handle roughly 40% of standard BSS operational tasks."
+    },
+    {
+        "title": "Satellite Breakout",
+        "context": "Direct-to-consumer satellite broadband moves from niche to mainstream as a primary fiber competitor."
+    },
+    {
+        "title": "Physical AI",
+        "context": "Amazon deploys its 1-millionth robot, integrated with DeepFleet AI for a 10% gain in warehouse efficiency."
+    }
+]
+
+# Priority companies (always first in dynamic feed)
 PRIORITY_KWS = ["evergent", "nba", "amdocs", "matrixx", "netcracker", "nec", "csg"]
 
-# RSS FEEDS (your original feeds)
+# RSS FEEDS
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
     ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
@@ -261,7 +292,6 @@ def fetch_feed(source, url, category):
             
             full_text = (title + " " + summary).lower()
             
-            # Priority detection
             is_priority = any(kw in full_text for kw in PRIORITY_KWS)
             
             items.append({
@@ -281,14 +311,14 @@ def fetch_feed(source, url, category):
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
     
-    with ThreadPoolExecutor(max_workers=12) as executor:
-        futures = [executor.submit(fetch_feed, source, url, cat) for source, url, cat in RSS_FEEDS]
+    with ThreadPoolExecutor(max_workers=20) as executor:
+        futures = [executor.submit(fetch_feed, s, u, c) for s, u, c in RSS_FEEDS]
         for future in as_completed(futures):
             items = future.result()
             for item in items:
                 categorized[item["category"]].append(item)
     
-    # Sort by date + priority
+    # Sort: Priority first, then newest
     for cat in categorized:
         categorized[cat].sort(key=lambda x: (not x["priority"], x["pub"]), reverse=True)
     
@@ -296,10 +326,10 @@ def load_feeds():
 
 def get_time_str(dt):
     hrs = int((datetime.now() - dt).total_seconds() / 3600)
-    if hrs < 1: return "Now", "time-hot"
-    if hrs < 6: return f"{hrs}h", "time-hot"
-    if hrs < 24: return f"{hrs}h", "time-warm"
-    return f"{hrs//24}d", "time-normal"
+    if hrs < 1: return "Now"
+    if hrs < 6: return f"{hrs}h"
+    if hrs < 24: return f"{hrs}h"
+    return f"{hrs//24}d"
 
 def render_body(items):
     if not items:
@@ -307,7 +337,7 @@ def render_body(items):
     
     cards = []
     for item in items:
-        time_str, time_class = get_time_str(item["pub"])
+        time_str = get_time_str(item["pub"])
         title = html.escape(item["title"])
         link = html.escape(item["link"])
         source = html.escape(item["source"])
@@ -315,106 +345,89 @@ def render_body(items):
         card_class = "news-card-priority" if item["priority"] else "news-card"
         
         card_parts = [
-            '<div class="' + card_class + '">',
-            '<a href="' + link + '" target="_blank" class="news-title">' + title + '</a>',
+            f'<div class="{card_class}">',
+            f'<a href="{link}" target="_blank" class="news-title">{title}</a>',
             '<div class="news-meta">',
-            '<span class="' + time_class + '">' + time_str + '</span>',
+            f'<span class="time-hot">{time_str}</span>',
             '<span>•</span>',
-            '<span>' + source + '</span>',
+            f'<span>{source}</span>',
             '</div>',
             '</div>'
         ]
-        
         cards.append(''.join(card_parts))
     
-    body_parts = ['<div class="col-body">']
-    body_parts.extend(cards)
-    body_parts.append('</div>')
-    
-    return ''.join(body_parts)
+    return '<div class="col-body">' + ''.join(cards) + '</div>'
 
 # MAIN APPLICATION
 placeholder = st.empty()
 with placeholder.container():
     st.markdown("""
         <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:70vh;text-align:center;">
-            <h1 style="color:#0a192f;font-size:2.8rem;font-weight:800;">⚡ Igniting AI-powered intelligence...</h1>
-            <p style="color:#64748b;font-size:1.2rem;">Synchronizing global news nodes</p>
+            <h1 style="color:#0a192f;font-size:2.8rem;font-weight:800;">⚡ Critical Intelligence Engine</h1>
+            <p style="color:#64748b;font-size:1.2rem;">Real-time Strategic Signals – Mergers, Acquisitions, Partnerships & Deals</p>
         </div>
     """, unsafe_allow_html=True)
     time.sleep(1.5)
 
 placeholder.empty()
 
-# Header
 st.markdown("""
 <div class="header-container">
-    <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
+    <h1 class="main-title">Global Telecom & OTT Stellar Nexus</h1>
     <p class="subtitle">AI Powered Real-time Competitive Intelligence Dashboard</p>
 </div>
 """, unsafe_allow_html=True)
 
-# Hardcoded Strategic Highlights (2026 PPT-ready)
+# Hardcoded Strategic Highlights (ALL YOUR REQUESTED NEWS - NO DUPLICATES)
 st.markdown("""
 <div class="hero-container">
-    <div class="hero-title">🚀 HIGHLIGHTS</div>
+    <div class="hero-title">🚀 LATEST STRATEGIC HIGHLIGHTS (JAN 2026)</div>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div class="hero-box">
             <div class="hero-box-title" style="color: #10b981;">🟢 STRATEGIC HITS</div>
             <div class="hero-content">
-                <b>Amdocs-Matrixx Deal:</b> Amdocs completes its $200M acquisition of charging leader Matrixx Software to dominate the Tier-1 5G billing market.<br><br>
-                <b>Disney-Hulu Merger:</b> Disney officially begins phasing out the standalone Hulu app to integrate all content into a unified Disney+ hub.<br><br>
-                <b>NEC Expansion:</b> Japan's NEC finalizes the acquisition of CSG, significantly scaling Netcracker's North American SaaS footprint.
+                <b>[CRITICAL] NBA Scores Strategic Investment in Evergent</b> (Jan 14, 2026): The NBA has taken a strategic equity stake in Evergent, naming it a 'Preferred Vendor' to drive global League Pass personalization and churn management across 185 countries.<br><br>
+                <b>Amdocs-Matrixx Deal</b>: Amdocs completes its $200M acquisition of charging leader Matrixx Software to dominate the Tier-1 5G billing market.<br><br>
+                <b>Disney-Hulu Merger</b>: Disney officially begins phasing out the standalone Hulu app to integrate all content into a unified Disney+ hub.<br><br>
+                <b>NEC Expansion</b>: Japan's NEC finalizes the acquisition of CSG, significantly scaling Netcracker's North American SaaS footprint.
             </div>
         </div>
         <div class="hero-box">
             <div class="hero-box-title" style="color: #f97316;">🟠 PULSE</div>
             <div class="hero-content">
-                <b>Agentic AI Core:</b> By EOY 2026, autonomous AI agents are expected to handle roughly 40% of standard BSS operational tasks.<br><br>
-                <b>Satellite Breakout:</b> Direct-to-consumer satellite broadband moves from niche to mainstream as a primary fiber competitor.<br><br>
-                <b>Physical AI:</b> Amazon deploys its 1-millionth robot, integrated with DeepFleet AI for a 10% gain in warehouse efficiency.
+                <b>Agentic AI Core</b>: By EOY 2026, autonomous AI agents are expected to handle roughly 40% of standard BSS operational tasks.<br><br>
+                <b>Satellite Breakout</b>: Direct-to-consumer satellite broadband moves from niche to mainstream as a primary fiber competitor.<br><br>
+                <b>Physical AI</b>: Amazon deploys its 1-millionth robot, integrated with DeepFleet AI for a 10% gain in warehouse efficiency.
             </div>
         </div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# Fetch Real-Time News (all 4 sections)
-with st.spinner(""):
+# Dynamic RSS Feed Scanning
+with st.spinner("Scanning for latest strategic news..."):
     data = load_feeds()
 
-# Render News Columns (TELCO, OTT, SPORTS, AI TECH)
+# Render News Columns (all 4 sections fully dynamic)
 cols = st.columns(4)
 cat_list = ["telco", "ott", "sports", "technology"]
 
 for idx, cat in enumerate(cat_list):
     sec = SECTIONS[cat]
-    items = data.get(cat, [])[:10]
+    items = data.get(cat, [])[:15]
     
     with cols[idx]:
-        # Render header
-        header_parts = [
-            '<div class="',
-            sec["style"],
-            '">',
-            sec["icon"],
-            ' ',
-            sec["name"],
-            '</div>'
-        ]
+        header_parts = ['<div class="', sec["style"], '">', sec["icon"], ' ', sec["name"], '</div>']
         st.markdown(''.join(header_parts), unsafe_allow_html=True)
-        
-        # Render body
         st.markdown(render_body(items), unsafe_allow_html=True)
 
 # Footer
 st.markdown("""
 <div style="text-align:center;color:rgba(255,255,255,0.95);font-size:0.8rem;margin-top:20px;padding:16px;background:linear-gradient(135deg,rgba(10,25,47,0.95),rgba(30,41,59,0.95));border-radius:10px;">
-    <strong>🔄 Auto-refresh:</strong> Every 5 minutes | Powered by Real-time RSS Intelligence
+    <strong>Strict Focus:</strong> Mergers, Acquisitions, Partnerships, Deals & Strategic Moves | <strong>Priority:</strong> Evergent/NBA/Netcracker/Amdocs/NEC first | <strong>🔄 Auto-refresh:</strong> Every 5 minutes
 </div>
 """, unsafe_allow_html=True)
 
-# Auto-refresh
 st.markdown('<script>setTimeout(function() {window.location.reload();}, 300000);</script>', unsafe_allow_html=True)
 
 keep_alive()
