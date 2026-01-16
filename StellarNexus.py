@@ -14,21 +14,21 @@ STRATEGIC_2026_HITS = [
     {
         "title": "NBA Scores Strategic Investment in Evergent; Named Preferred Global Vendor (Jan 14, 2026)", 
         "impact": "CRITICAL",
-        "context": "Following work on NBA League Pass, the NBA has made a strategic investment in Evergent Technologies to drive hyper-personalization across 185 countries."
+        "context": "The NBA has taken a strategic equity stake in Evergent, naming it a 'Preferred Vendor' to drive global League Pass personalization and churn management across 185 countries."
     },
     {
-        "title": "Amdocs Snaps up Matrixx Software for $200M in Massive BSS Consolidation Move (Jan 6, 2026)", 
+        "title": "Ericsson & Wind Tre Launch Italy's First 5G Standalone Network (Jan 14, 2026)", 
         "impact": "HIGH",
-        "context": "Amdocs acquires charging leader Matrixx to bolster its 5G portfolio, forcing legacy consolidation while Evergent maintains agile independent leadership."
+        "context": "Powered by Ericsson's dual-mode 5G Core, this 5G-native infrastructure enables network slicing for enterprise use cases and live sports production."
     },
     {
-        "title": "Netcracker Expands Partnership with T-Mobile for Cloud-Native BSS (Jan 15, 2026)", 
+        "title": "Netcracker Expands Cloud-Native BSS Partnership with T-Mobile (Jan 15, 2026)", 
         "impact": "HIGH",
-        "context": "T-Mobile Wholesale shifts to Netcracker’s cloud platform to reduce service launch cycles, enabling digital-first business models for the 2026 season."
+        "context": "T-Mobile Wholesale pivots to agile digital-first models using the Netcracker stack to monetize open APIs and network slicing."
     }
 ]
 
-# Intelligence Dictionary for Automated Priority Matching
+# Client/Competitor matching engine (includes ALL names from your prompt)
 EVERGENT_CLIENTS = {
     "NBA": ["nba", "national basketball", "league pass"],
     "Astro": ["astro malaysia", "sooka", "njoi"],
@@ -53,21 +53,17 @@ st.markdown("""
         font-family: 'Inter', sans-serif; 
     }
     
-    /* Global Visibility Enhancements */
     .header-box { background: rgba(30, 64, 175, 0.98); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; text-align: center; border-bottom: 4px solid #3b82f6; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     .header-box h1 { margin: 0; font-weight: 800; color: #ffffff !important; letter-spacing: -1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+    .header-box p { margin: 5px 0 0; font-weight: 600; color: #e2e8f0 !important; }
 
-    /* Hero Containers */
     .hero-box { background: rgba(15, 23, 42, 0.97); border: 2px solid #1e40af; border-radius: 12px; padding: 1.5rem; min-height: 240px; box-shadow: 0 4px 25px rgba(0,0,0,0.6); }
-    .hero-box h4 { color: #fbbf24 !important; font-weight: 800; }
+    .status-tag { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; margin-bottom: 12px; text-transform: uppercase; color: white; }
     
-    /* News Section */
     .section-title { color: #ffffff !important; font-weight: 800; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); margin-bottom: 10px; background: rgba(0,0,0,0.4); padding: 5px 10px; border-radius: 5px; }
-    .news-card { background: rgba(30, 41, 59, 0.98); border-radius: 8px; padding: 12px; margin-bottom: 10px; border-left: 4px solid #3b82f6; transition: 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+    .news-card { background: rgba(30, 41, 59, 0.98); border-radius: 8px; padding: 12px; margin-bottom: 10px; border-left: 4px solid #3b82f6; transition: 0.3s ease; }
     .news-card:hover { transform: translateX(5px); background: rgba(51, 65, 85, 1); border-left: 4px solid #fbbf24; }
-    .priority-card { background: linear-gradient(90deg, rgba(30, 41, 59, 0.98) 0%, rgba(23, 37, 84, 0.98) 100%); border-left: 4px solid #fbbf24; }
     
-    /* Font Styling */
     .news-title { font-size: 0.92rem; font-weight: 700; color: #f8fafc !important; line-height: 1.4; }
     .impact-tag { color: #fbbf24; font-weight: 800; font-size: 0.8rem; }
     .client-chip { background: #fbbf24; color: #000; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 900; margin-right: 6px; }
@@ -137,9 +133,9 @@ with h2:
     <div class="hero-box" style="border-color:#f97316;">
         <span class="status-tag" style="background:#f97316;">2026 AGENTIC AI PULSE</span>
         <div style="font-size:0.95rem; line-height:1.7; color:white;">
-            <b style="color:#fbbf24;">NBA Vision:</b> Head of NBA Investments confirms data-driven engagement as the #1 driver for the <b>Evergent</b> equity stake (Jan 14, 2026).<br><br>
-            <b style="color:#fbbf24;">Agentic AI Core:</b> Shift from simple copilots to autonomous <b>Agentic AI</b> systems that resolve billing and churn in real-time without human input (Jan 15, 2026).<br><br>
-            <b style="color:#fbbf24;">Humanoid Manufacturing:</b> Boston Dynamics begins factory implementation of AI robots (Atlas) for automotive supply chain sorting (Jan 2026).
+            <b style="color:#fbbf24;">NBA Strategic Stake:</b> David Lee (NBA Investments) confirms personalization and data-driven churn management as the #1 priority for the <b>Evergent</b> equity stake (Jan 14, 2026).<br><br>
+            <b style="color:#fbbf24;">Agentic AI Shift:</b> Major shift from Generative AI to <b>Agentic AI</b>—autonomous systems that proactively manage subscriber retention journeys (Jan 15, 2026).<br><br>
+            <b style="color:#fbbf24;">OpenAI x T-Mobile:</b> Launch of IntentCX, an intent-driven AI-decisioning platform designed to deliver predictive and "magical" customer experiences (Jan 16, 2026).
         </div>
     </div>
     """, unsafe_allow_html=True)
