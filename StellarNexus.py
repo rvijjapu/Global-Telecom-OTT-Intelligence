@@ -7,15 +7,8 @@ import html
 import re
 import time
 
-# ══════════════════════════════════════════════════════════════════════════════
 # PAGE CONFIG
-# ══════════════════════════════════════════════════════════════════════════════
-st.set_page_config(
-    page_title="Global Telecom & OTT Stellar Nexus",
-    page_icon="🌐",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+st.set_page_config(page_title="Global Telecom & OTT Stellar Nexus", page_icon="🌐", layout="wide", initial_sidebar_state="collapsed")
 
 # KEEP-ALIVE
 @st.fragment(run_every=600)
@@ -59,6 +52,7 @@ st.markdown("""
         font-weight: 500;
     }
     
+    /* Highlights Section */
     .hero-container {
         background: rgba(255, 255, 255, 0.98);
         border-radius: 16px;
@@ -215,31 +209,13 @@ STRATEGIC_2026_HITS = [
     }
 ]
 
-# Client/Competitor matching engine
-EVERGENT_CLIENTS = {
-    "NBA": ["nba", "national basketball", "league pass"],
-    "Astro": ["astro malaysia", "sooka", "njoi"],
-    "Shahid": ["shahid vip", "mbc"],
-    "Sky NZ": ["sky nz", "neon"],
-    "Sony": ["sonyliv", "sony india"],
-    "FanDuel": ["fanduel", "bally sports"],
-    "Cignal": ["cignal tv", "pldt"],
-    "Telekom Malaysia": ["unifi tv", "tm"],
-    "DAZN": ["dazn"],
-    "Fox": ["fox sports", "fox networks"]
-}
+# Strategic keywords (only these types of news are allowed)
+STRATEGIC_KWS = ["merger", "acquisition", "investment", "partnership", "deal", "contract", "collaboration", "stake", "buy", "acquire", "alliance", "expansion", "strategic", "transformation"]
 
 # Priority companies (always first)
-PRIORITY_COMPANIES = ["evergent", "nba", "amdocs", "matrixx", "netcracker", "nec", "csg"]
+PRIORITY_KWS = ["evergent", "nba", "amdocs", "matrixx", "netcracker", "nec", "csg"]
 
-# Strategic keywords (only these types of news allowed)
-STRATEGIC_KWS = [
-    "merger", "acquisition", "investment", "partnership", "deal", "contract",
-    "collaboration", "stake", "buy", "acquire", "alliance", "joint venture",
-    "jv", "expansion", "strategic", "transformation", "integration"
-]
-
-# RSS FEEDS
+# RSS FEEDS (your original + reliable ones)
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
     ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
@@ -305,14 +281,12 @@ def fetch_feed(source, url, category):
             
             # Strict filter: MUST have strategic keyword AND company match
             has_strategic = any(kw in full_text for kw in STRATEGIC_KWS)
-            has_company = any(kw in full_text for kw in EVERGENT_CLIENTS_KWS + COMPETITORS_KWS)
+            has_company = any(kw in full_text for kw in PRIORITY_KWS)
             
             if not (has_strategic and has_company):
                 continue
             
-            # Priority score
-            is_priority = any(kw in full_text for kw in PRIORITY_KWS)
-            priority_score = 5 if is_priority else 3
+            priority_score = 5 if any(kw in full_text for kw in PRIORITY_KWS) else 3
             
             items.append({
                 "title": title,
@@ -434,7 +408,7 @@ st.markdown("""
 with st.spinner("Scanning for latest strategic news..."):
     data = load_feeds()
 
-# News Columns
+# Render News Columns (all 4 sections work dynamically)
 cols = st.columns(4)
 cat_list = ["telco", "ott", "sports", "technology"]
 
