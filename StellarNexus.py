@@ -52,7 +52,6 @@ st.markdown("""
         font-weight: 500;
     }
     
-    /* Highlights Section */
     .hero-container {
         background: rgba(255, 255, 255, 0.98);
         border-radius: 16px;
@@ -96,17 +95,6 @@ st.markdown("""
     .hero-content b {
         color: #0a192f;
         font-weight: 700;
-    }
-    
-    .status-tag {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        font-weight: 800;
-        margin-bottom: 12px;
-        text-transform: uppercase;
-        color: white;
     }
     
     /* News Sections */
@@ -209,22 +197,16 @@ STRATEGIC_2026_HITS = [
     }
 ]
 
-# Strategic keywords (only these types of news are allowed)
-STRATEGIC_KWS = ["merger", "acquisition", "investment", "partnership", "deal", "contract", "collaboration", "stake", "buy", "acquire", "alliance", "expansion", "strategic", "transformation"]
-
 # Priority companies (always first)
 PRIORITY_KWS = ["evergent", "nba", "amdocs", "matrixx", "netcracker", "nec", "csg"]
 
-# RSS FEEDS (your original + reliable ones)
+# RSS FEEDS (your original feeds)
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
     ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml", "telco"),
     ("RCR Wireless", "https://www.rcrwireless.com/feed", "telco"),
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/", "telco"),
-    ("StreamTV Insider", "https://www.streamtvinsider.com/feed", "sports"),
-    ("Sports Business Journal", "https://www.sportsbusinessjournal.com/rss", "sports"),
-    ("Sportcal", "https://www.sportcal.com/feed", "sports"),
     ("Variety", "https://variety.com/feed/", "ott"),
     ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/", "ott"),
     ("Deadline", "https://deadline.com/feed/", "ott"),
@@ -279,14 +261,8 @@ def fetch_feed(source, url, category):
             
             full_text = (title + " " + summary).lower()
             
-            # Strict filter: MUST have strategic keyword AND company match
-            has_strategic = any(kw in full_text for kw in STRATEGIC_KWS)
-            has_company = any(kw in full_text for kw in PRIORITY_KWS)
-            
-            if not (has_strategic and has_company):
-                continue
-            
-            priority_score = 5 if any(kw in full_text for kw in PRIORITY_KWS) else 3
+            # Priority detection
+            is_priority = any(kw in full_text for kw in PRIORITY_KWS)
             
             items.append({
                 "title": title,
@@ -295,7 +271,7 @@ def fetch_feed(source, url, category):
                 "source": source,
                 "summary": summary[:140] + "..." if len(summary) > 140 else summary,
                 "category": category,
-                "priority_score": priority_score
+                "priority": is_priority
             })
     except:
         pass
@@ -305,129 +281,140 @@ def fetch_feed(source, url, category):
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
     
-    with ThreadPoolExecutor(max_workers=20) as executor:
-        futures = [executor.submit(fetch_feed, s, u, c) for s, u, c in RSS_FEEDS]
+    with ThreadPoolExecutor(max_workers=12) as executor:
+        futures = [executor.submit(fetch_feed, source, url, cat) for source, url, cat in RSS_FEEDS]
         for future in as_completed(futures):
-            for item in future.result():
-                text = (item["title"] + " " + item["summary"]).lower()
-                
-                # Intelligent routing
-                if any(kw in text for kw in ["nba", "fanduel", "bally", "gotham", "marquee", "premier league", "dorna"]):
-                    item["category"] = "sports"
-                elif any(kw in text for kw in ["streaming", "ott", "sonyliv", "aha", "dazn", "shahid", "viki", "britbox"]):
-                    item["category"] = "ott"
-                elif any(kw in text for kw in ["oss", "bss", "billing", "charging", "amdocs", "netcracker", "csg", "matrixx"]):
-                    item["category"] = "telco"
+            items = future.result()
+            for item in items:
                 categorized[item["category"]].append(item)
     
-    # Sort: Highest priority first
+    # Sort by date + priority
     for cat in categorized:
-        categorized[cat].sort(key=lambda x: (-x["priority_score"], x["pub"]), reverse=True)
+        categorized[cat].sort(key=lambda x: (not x["priority"], x["pub"]), reverse=True)
     
     return categorized
 
 def get_time_str(dt):
     hrs = int((datetime.now() - dt).total_seconds() / 3600)
-    if hrs < 1: return "Now"
-    if hrs < 6: return f"{hrs}h"
-    if hrs < 24: return f"{hrs}h"
-    return f"{hrs//24}d"
+    if hrs < 1: return "Now", "time-hot"
+    if hrs < 6: return f"{hrs}h", "time-hot"
+    if hrs < 24: return f"{hrs}h", "time-warm"
+    return f"{hrs//24}d", "time-normal"
 
 def render_body(items):
     if not items:
-        return """<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">No major strategic news at this moment (feeds updating...)</div></div>"""
+        return """<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">Scanning for critical signals... (feeds updating...)</div></div>"""
     
     cards = []
     for item in items:
-        time_str = get_time_str(item["pub"])
+        time_str, time_class = get_time_str(item["pub"])
         title = html.escape(item["title"])
         link = html.escape(item["link"])
         source = html.escape(item["source"])
         
+        card_class = "news-card-priority" if item["priority"] else "news-card"
+        
         card_parts = [
-            f'<div class="news-card">',
-            f'<a href="{link}" target="_blank" class="news-title">{title}</a>',
+            '<div class="' + card_class + '">',
+            '<a href="' + link + '" target="_blank" class="news-title">' + title + '</a>',
             '<div class="news-meta">',
-            f'<span class="time-hot">{time_str}</span>',
+            '<span class="' + time_class + '">' + time_str + '</span>',
             '<span>•</span>',
-            f'<span>{source}</span>',
+            '<span>' + source + '</span>',
             '</div>',
             '</div>'
         ]
+        
         cards.append(''.join(card_parts))
     
-    return '<div class="col-body">' + ''.join(cards) + '</div>'
+    body_parts = ['<div class="col-body">']
+    body_parts.extend(cards)
+    body_parts.append('</div>')
+    
+    return ''.join(body_parts)
 
 # MAIN APPLICATION
 placeholder = st.empty()
 with placeholder.container():
     st.markdown("""
         <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:70vh;text-align:center;">
-            <h1 style="color:#0a192f;font-size:2.8rem;font-weight:800;">⚡ Critical Intelligence Engine</h1>
-            <p style="color:#64748b;font-size:1.2rem;">Real-time Strategic Signals – Mergers, Acquisitions, Partnerships & Deals</p>
+            <h1 style="color:#0a192f;font-size:2.8rem;font-weight:800;">⚡ Igniting AI-powered intelligence...</h1>
+            <p style="color:#64748b;font-size:1.2rem;">Synchronizing global news nodes</p>
         </div>
     """, unsafe_allow_html=True)
     time.sleep(1.5)
 
 placeholder.empty()
 
+# Header
 st.markdown("""
 <div class="header-container">
-    <h1 class="main-title">Global Telecom & OTT Stellar Nexus</h1>
-    <p class="subtitle">Real-time Strategic Intelligence – Focus on Evergent, NBA, Amdocs, Netcracker, NEC & Key Deals</p>
+    <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
+    <p class="subtitle">AI Powered Real-time Competitive Intelligence Dashboard</p>
 </div>
 """, unsafe_allow_html=True)
 
-# Hardcoded 2026 Strategic Intelligence (PPT-ready)
+# Hardcoded Strategic Highlights (2026 PPT-ready)
 st.markdown("""
 <div class="hero-container">
-    <div class="hero-title">🚀 STRATEGIC BREAKOUTS (JAN 14-16, 2026)</div>
+    <div class="hero-title">🚀 HIGHLIGHTS</div>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div class="hero-box">
-            <div class="hero-box-title" style="color: #10b981;">🟢 MARKET MOVERS</div>
+            <div class="hero-box-title" style="color: #10b981;">🟢 STRATEGIC HITS</div>
             <div class="hero-content">
-                """ + "".join([
-                    f"<div style='margin-bottom:12px;'><span class='status-tag' style='background:#10b981;'>{h['impact']}</span> <b>{h['title']}</b><br><span style='color:#475569;'>{h['context']}</span></div>"
-                    for h in STRATEGIC_2026_HITS
-                ]) + """
+                <b>Amdocs-Matrixx Deal:</b> Amdocs completes its $200M acquisition of charging leader Matrixx Software to dominate the Tier-1 5G billing market.<br><br>
+                <b>Disney-Hulu Merger:</b> Disney officially begins phasing out the standalone Hulu app to integrate all content into a unified Disney+ hub.<br><br>
+                <b>NEC Expansion:</b> Japan's NEC finalizes the acquisition of CSG, significantly scaling Netcracker's North American SaaS footprint.
             </div>
         </div>
         <div class="hero-box">
-            <div class="hero-box-title" style="color: #f97316;">🟠 2026 AGENTIC AI PULSE</div>
+            <div class="hero-box-title" style="color: #f97316;">🟠 PULSE</div>
             <div class="hero-content">
-                <b style="color:#f97316;">NBA Strategic Stake:</b> David Lee (NBA Investments) confirms personalization and data-driven churn management as the #1 priority for the Evergent equity stake (Jan 14, 2026).<br><br>
-                <b style="color:#f97316;">Agentic AI Shift:</b> Major shift from Generative AI to Agentic AI—autonomous systems that proactively manage subscriber retention journeys (Jan 15, 2026).<br><br>
-                <b style="color:#f97316;">OpenAI x T-Mobile:</b> Launch of IntentCX, an intent-driven AI-decisioning platform designed to deliver predictive and "magical" customer experiences (Jan 16, 2026).
+                <b>Agentic AI Core:</b> By EOY 2026, autonomous AI agents are expected to handle roughly 40% of standard BSS operational tasks.<br><br>
+                <b>Satellite Breakout:</b> Direct-to-consumer satellite broadband moves from niche to mainstream as a primary fiber competitor.<br><br>
+                <b>Physical AI:</b> Amazon deploys its 1-millionth robot, integrated with DeepFleet AI for a 10% gain in warehouse efficiency.
             </div>
         </div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# Dynamic RSS Feed Scanning (strict strategic filter)
-with st.spinner("Scanning for latest strategic news..."):
+# Fetch Real-Time News (all 4 sections)
+with st.spinner(""):
     data = load_feeds()
 
-# Render News Columns (all 4 sections work dynamically)
+# Render News Columns (TELCO, OTT, SPORTS, AI TECH)
 cols = st.columns(4)
 cat_list = ["telco", "ott", "sports", "technology"]
 
 for idx, cat in enumerate(cat_list):
     sec = SECTIONS[cat]
-    items = data.get(cat, [])[:15]
+    items = data.get(cat, [])[:10]
     
     with cols[idx]:
-        header_parts = ['<div class="', sec["style"], '">', sec["icon"], ' ', sec["name"], '</div>']
+        # Render header
+        header_parts = [
+            '<div class="',
+            sec["style"],
+            '">',
+            sec["icon"],
+            ' ',
+            sec["name"],
+            '</div>'
+        ]
         st.markdown(''.join(header_parts), unsafe_allow_html=True)
+        
+        # Render body
         st.markdown(render_body(items), unsafe_allow_html=True)
 
 # Footer
 st.markdown("""
 <div style="text-align:center;color:rgba(255,255,255,0.95);font-size:0.8rem;margin-top:20px;padding:16px;background:linear-gradient(135deg,rgba(10,25,47,0.95),rgba(30,41,59,0.95));border-radius:10px;">
-    <strong>Strict Focus:</strong> Mergers, Acquisitions, Partnerships, Deals & Strategic Moves only | <strong>Priority:</strong> Evergent/NBA/Netcracker/Amdocs/NEC first | <strong>🔄 Auto-refresh:</strong> Every 5 minutes
+    <strong>🔄 Auto-refresh:</strong> Every 5 minutes | Powered by Real-time RSS Intelligence
 </div>
 """, unsafe_allow_html=True)
 
+# Auto-refresh
 st.markdown('<script>setTimeout(function() {window.location.reload();}, 300000);</script>', unsafe_allow_html=True)
 
 keep_alive()
