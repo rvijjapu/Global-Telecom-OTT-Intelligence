@@ -19,14 +19,14 @@ def keep_alive():
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-    
+
     .stApp {
         background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
         background-size: cover;
         font-family: 'Inter', sans-serif;
         padding-top: 0.5rem;
     }
-    
+
     .header-container {
         background: rgba(255, 255, 255, 0.96);
         padding: 1.5rem 2rem;
@@ -36,7 +36,7 @@ st.markdown("""
         margin: 0 0 2rem 0;
         border-bottom: 4px solid #1e40af;
     }
-    
+
     .main-title {
         font-size: 2.6rem;
         font-weight: 800;
@@ -44,14 +44,14 @@ st.markdown("""
         margin: 0;
         letter-spacing: -0.8px;
     }
-    
+
     .subtitle {
         font-size: 1.1rem;
         color: #475569;
         margin-top: 0.6rem;
         font-weight: 500;
     }
-    
+
     .hero-container {
         background: rgba(255, 255, 255, 0.98);
         border-radius: 16px;
@@ -60,7 +60,7 @@ st.markdown("""
         box-shadow: 0 10px 35px rgba(0,0,0,0.12);
         border: 1px solid #e2e8f0;
     }
-    
+
     .hero-title {
         color: #0a192f;
         font-size: 1.85rem;
@@ -69,7 +69,7 @@ st.markdown("""
         border-left: 6px solid #1e40af;
         padding-left: 15px;
     }
-    
+
     .hero-box {
         background: #f8fafc;
         border-radius: 12px;
@@ -78,25 +78,25 @@ st.markdown("""
         border: 1px solid #e2e8f0;
         box-shadow: 0 4px 15px rgba(0,0,0,0.08);
     }
-    
+
     .hero-box-title {
         font-weight: 800;
         font-size: 1.1rem;
         margin-bottom: 12px;
         color: #1e40af;
     }
-    
+
     .hero-content {
         color: #1e293b;
         font-size: 0.95rem;
         line-height: 1.7;
     }
-    
+
     .hero-content b {
         color: #0a192f;
         font-weight: 700;
     }
-    
+
     .status-tag {
         display: inline-block;
         padding: 4px 10px;
@@ -107,7 +107,7 @@ st.markdown("""
         text-transform: uppercase;
         color: white;
     }
-    
+
     /* News Sections */
     .col-header {
         padding: 12px 16px;
@@ -118,12 +118,12 @@ st.markdown("""
         text-align: center;
         box-shadow: 0 4px 12px rgba(0,0,0,0.12);
     }
-    
+
     .col-header-pink {background: linear-gradient(135deg, #ec4899, #db2777);}
     .col-header-purple {background: linear-gradient(135deg, #a78bfa, #8b5cf6);}
     .col-header-green {background: linear-gradient(135deg, #34d399, #10b981);}
     .col-header-orange {background: linear-gradient(135deg, #fb923c, #f97316);}
-    
+
     .col-body {
         background: white;
         border-radius: 0 0 14px 14px;
@@ -134,7 +134,7 @@ st.markdown("""
         box-shadow: 0 6px 20px rgba(0,0,0,0.08);
         margin-bottom: 1rem;
     }
-    
+
     .news-card {
         background: #fafbfc;
         border: 1px solid #e2e8f0;
@@ -143,13 +143,13 @@ st.markdown("""
         margin-bottom: 10px;
         transition: all 0.3s ease;
     }
-    
+
     .news-card:hover {
         background: #f1f5f9;
         box-shadow: 0 6px 16px rgba(0,0,0,0.08);
         transform: translateY(-1px);
     }
-    
+
     .news-title {
         color: #1e40af;
         font-size: 0.92rem;
@@ -159,12 +159,12 @@ st.markdown("""
         display: block;
         margin-bottom: 6px;
     }
-    
+
     .news-title:hover {
         color: #1d4ed8;
         text-decoration: underline;
     }
-    
+
     .news-meta {
         font-size: 0.76rem;
         color: #64748b;
@@ -173,18 +173,18 @@ st.markdown("""
         gap: 7px;
         flex-wrap: wrap;
     }
-    
+
     .time-hot {color: #dc2626; font-weight: 600; font-style: italic;}
     .time-warm {color: #ea580c; font-weight: 600;}
     .time-normal {color: #64748b;}
-    
+
     .col-body::-webkit-scrollbar {width: 6px;}
     .col-body::-webkit-scrollbar-track {background: #f1f5f9; border-radius: 10px;}
     .col-body::-webkit-scrollbar-thumb {background: #94a3b8; border-radius: 10px;}
-    
+
     #MainMenu, footer, header {visibility: hidden;}
     .stDeployButton {display: none;}
-    
+
     [data-testid="column"] {padding: 0 8px !important;}
 </style>
 """, unsafe_allow_html=True)
@@ -202,12 +202,12 @@ STRATEGIC_2026_HITS = [
         "context": "Amdocs completes its $200M acquisition of charging leader Matrixx Software to dominate the Tier-1 5G billing market."
     },
     {
-        "title": "Disney Officially Phases Out Standalone Hulu App ",
+        "title": "Disney Officially Phases Out Standalone Hulu App",
         "impact": "HIGH",
         "context": "Disney officially begins phasing out the standalone Hulu app to integrate all content into a unified Disney+ hub."
     },
     {
-        "title": "NEC Finalizes Acquisition of CSG ",
+        "title": "NEC Finalizes Acquisition of CSG",
         "impact": "HIGH",
         "context": "Japan's NEC finalizes the acquisition of CSG, significantly scaling Netcracker's North American SaaS footprint."
     }
@@ -361,7 +361,7 @@ def render_body(items):
 # MAIN APPLICATION
 placeholder = st.empty()
 with placeholder.container():
-    st.markdown("""
+    st.markdown(""" 
         <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:70vh;text-align:center;">
             <h1 style="color:#0a192f;font-size:2.8rem;font-weight:800;">⚡ Critical Intelligence Engine</h1>
             <p style="color:#64748b;font-size:1.2rem;">Real-time Strategic Signals – Mergers, Acquisitions, Partnerships & Deals</p>
@@ -378,15 +378,16 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Hardcoded Strategic Highlights (ALL YOUR REQUESTED NEWS - NO DUPLICATES)
+# Hardcoded Strategic Highlights (UPDATED - ALL YOUR REQUESTED NEWS - NO DUPLICATES)
 st.markdown("""
 <div class="hero-container">
-    <div class="hero-title">🚀 LATEST STRATEGIC HIGHLIGHTS (JAN 2026)</div>
+    <div class="hero-title">🚀 Strategic Hits</div>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div class="hero-box">
             <div class="hero-box-title" style="color: #10b981;">🟢 STRATEGIC HITS</div>
             <div class="hero-content">
-                <b>[CRITICAL] NBA Scores Strategic Investment in Evergent</b> (Jan 14, 2026): The NBA has taken a strategic equity stake in Evergent, naming it a 'Preferred Vendor' to drive global League Pass personalization and churn management across 185 countries.<br><br>
+                <b>NBA Scores Strategic Investment in Evergent; Named Preferred Global Vendor</b>: The NBA has taken a strategic equity stake in Evergent, naming it a 'Preferred Vendor' to drive global League Pass personalization and churn management across 185 countries.<br><br>
+                <b>Evergent CEO Vijay Sajja at CES Defines Shift to Agentic AI</b>: Evergent CEO Vijay Sajja at CES defines the shift from GenAI to <b>Agentic AI</b>—BSS that independently executes subscriber retention strategies.<br><br>
                 <b>Amdocs-Matrixx Deal</b>: Amdocs completes its $200M acquisition of charging leader Matrixx Software to dominate the Tier-1 5G billing market.<br><br>
                 <b>Disney-Hulu Merger</b>: Disney officially begins phasing out the standalone Hulu app to integrate all content into a unified Disney+ hub.<br><br>
                 <b>NEC Expansion</b>: Japan's NEC finalizes the acquisition of CSG, significantly scaling Netcracker's North American SaaS footprint.
