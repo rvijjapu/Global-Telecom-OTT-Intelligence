@@ -20,7 +20,7 @@ st.set_page_config(
 def keep_alive():
     st.markdown("", unsafe_allow_html=True)
 
-# PREMIUM STYLING (CEO-grade clean look)
+# PREMIUM STYLING
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -42,20 +42,8 @@ st.markdown("""
         border-bottom: 4px solid #1e40af;
     }
     
-    .main-title {
-        font-size: 2.6rem;
-        font-weight: 800;
-        color: #0a192f;
-        margin: 0;
-        letter-spacing: -0.8px;
-    }
-    
-    .subtitle {
-        font-size: 1.1rem;
-        color: #475569;
-        margin-top: 0.6rem;
-        font-weight: 500;
-    }
+    .main-title { font-size: 2.6rem; font-weight: 800; color: #0a192f; margin: 0; letter-spacing: -0.8px; }
+    .subtitle { font-size: 1.1rem; color: #475569; margin-top: 0.6rem; font-weight: 500; }
     
     .hero-container {
         background: rgba(255, 255, 255, 0.98);
@@ -66,129 +54,45 @@ st.markdown("""
         border: 1px solid #e2e8f0;
     }
     
-    .hero-title {
-        color: #0a192f;
-        font-size: 1.85rem;
-        font-weight: 800;
-        margin-bottom: 1.5rem;
-        border-left: 6px solid #1e40af;
-        padding-left: 15px;
-    }
+    .hero-title { color: #0a192f; font-size: 1.85rem; font-weight: 800; margin-bottom: 1.5rem; border-left: 6px solid #1e40af; padding-left: 15px; }
     
-    .hero-box {
-        background: #f1f5f9;
-        border-radius: 12px;
-        padding: 1.5rem;
-        min-height: 220px;
-        border: 1px solid #e2e8f0;
-    }
+    .hero-box { background: #f1f5f9; border-radius: 12px; padding: 1.5rem; min-height: 200px; border: 1px solid #e2e8f0; }
+    .hero-box-title { font-weight: 800; font-size: 1.1rem; margin-bottom: 12px; }
+    .hero-content { color: #1e293b; font-size: 0.95rem; line-height: 1.7; }
+    .hero-content b { color: #0a192f; font-weight: 700; }
+    .hero-content a { color: #1e40af; text-decoration: none; font-weight: 600; }
+    .hero-content a:hover { color: #1d4ed8; text-decoration: underline; }
     
-    .hero-box-title {
-        font-weight: 800;
-        font-size: 1.1rem;
-        margin-bottom: 12px;
-    }
-    
-    .hero-content {
-        color: #1e293b;
-        font-size: 0.95rem;
-        line-height: 1.7;
-    }
-    
-    .hero-content b {
-        color: #0a192f;
-        font-weight: 700;
-    }
-    
-    .hero-content a {
-        color: #1e40af;
-        text-decoration: none;
-        font-weight: 600;
-    }
-    
-    .hero-content a:hover {
-        color: #1d4ed8;
-        text-decoration: underline;
-    }
-    
-    .col-header {
-        padding: 12px 16px;
-        border-radius: 14px 14px 0 0;
-        color: white;
-        font-weight: 700;
-        font-size: 0.95rem;
-        text-align: center;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-    }
-    
+    .col-header { padding: 12px 16px; border-radius: 14px 14px 0 0; color: white; font-weight: 700; font-size: 0.95rem; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
     .col-header-pink {background: linear-gradient(135deg, #ec4899, #db2777);}
     .col-header-purple {background: linear-gradient(135deg, #a78bfa, #8b5cf6);}
     .col-header-green {background: linear-gradient(135deg, #34d399, #10b981);}
     .col-header-orange {background: linear-gradient(135deg, #fb923c, #f97316);}
     
-    .col-body {
-        background: white;
-        border-radius: 0 0 14px 14px;
-        padding: 12px;
-        min-height: 480px;
-        max-height: 580px;
-        overflow-y: auto;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-        margin-bottom: 1rem;
+    .col-body { background: white; border-radius: 0 0 14px 14px; padding: 12px; min-height: 480px; max-height: 580px; overflow-y: auto; box-shadow: 0 6px 20px rgba(0,0,0,0.08); margin-bottom: 1rem; }
+    
+    .news-card { background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 10px; transition: all 0.3s ease; }
+    .news-card:hover { background: #f1f5f9; box-shadow: 0 6px 16px rgba(0,0,0,0.08); transform: translateY(-1px); }
+    
+    .news-card-priority { background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%); border: 2px solid #fbbf24; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+    .news-card-priority:hover { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); box-shadow: 0 8px 20px rgba(251,191,36,0.2); }
+    
+    .ultra-priority { 
+        border: 3px solid #ef4444 !important; 
+        background: rgba(239,68,68,0.12) !important; 
+        box-shadow: 0 0 15px rgba(239,68,68,0.4); 
+        animation: pulse 2s infinite; 
+    }
+    @keyframes pulse { 
+        0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); } 
+        70% { box-shadow: 0 0 0 10px rgba(239,68,68,0); } 
+        100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); } 
     }
     
-    .news-card {
-        background: #fafbfc;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        padding: 12px;
-        margin-bottom: 10px;
-        transition: all 0.3s ease;
-    }
+    .news-title { color: #1e40af; font-size: 0.92rem; font-weight: 600; line-height: 1.35; text-decoration: none; display: block; margin-bottom: 6px; }
+    .news-title:hover { color: #1d4ed8; text-decoration: underline; }
     
-    .news-card:hover {
-        background: #f1f5f9;
-        box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-        transform: translateY(-1px);
-    }
-    
-    .news-card-priority {
-        background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%);
-        border: 2px solid #fbbf24;
-        border-radius: 10px;
-        padding: 12px;
-        margin-bottom: 10px;
-    }
-    
-    .news-card-priority:hover {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        box-shadow: 0 8px 20px rgba(251,191,36,0.2);
-    }
-    
-    .news-title {
-        color: #1e40af;
-        font-size: 0.92rem;
-        font-weight: 600;
-        line-height: 1.35;
-        text-decoration: none;
-        display: block;
-        margin-bottom: 6px;
-    }
-    
-    .news-title:hover {
-        color: #1d4ed8;
-        text-decoration: underline;
-    }
-    
-    .news-meta {
-        font-size: 0.76rem;
-        color: #64748b;
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        flex-wrap: wrap;
-    }
-    
+    .news-meta { font-size: 0.76rem; color: #64748b; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
     .time-hot {color: #dc2626; font-weight: 600; font-style: italic;}
     .time-warm {color: #ea580c; font-weight: 600;}
     .time-normal {color: #64748b;}
@@ -211,15 +115,16 @@ RSS_FEEDS = [
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml", "telco"),
     ("RCR Wireless", "https://www.rcrwireless.com/feed", "telco"),
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/", "telco"),
-    ("StreamTV Insider", "https://www.streamtvinsider.com/feed", "sports"),
-    ("Sports Business Journal", "https://www.sportsbusinessjournal.com/rss", "sports"),
-    ("Sportcal", "https://www.sportcal.com/feed", "sports"),
     ("Variety", "https://variety.com/feed/", "ott"),
     ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/", "ott"),
     ("Deadline", "https://deadline.com/feed/", "ott"),
     ("Digital TV Europe", "https://www.digitaltveurope.com/feed/", "ott"),
     ("ESPN", "https://www.espn.com/espn/rss/news", "sports"),
+    ("BBC Sport", "https://feeds.bbci.co.uk/sport/rss.xml", "sports"),
     ("SportsPro", "https://www.sportspromedia.com/feed/", "sports"),
+    ("Sports Business Journal", "https://www.sportsbusinessjournal.com/rss", "sports"),
+    ("Sportcal", "https://www.sportcal.com/feed", "sports"),
+    ("StreamTV Insider", "https://www.streamtvinsider.com/feed", "sports"),
     ("TechCrunch", "https://techcrunch.com/feed/", "technology"),
     ("The Verge", "https://www.theverge.com/rss/index.xml", "technology"),
     ("Wired", "https://www.wired.com/feed/rss", "technology"),
@@ -235,11 +140,13 @@ SECTIONS = {
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
-# STRICT MEANINGFUL KEYWORDS (only high-impact for Evergent CEO)
-CRITICAL_KEYWORDS = [
-    "evergent", "evergent technologies", "nba", "league pass", "subscription management", "monetization platform",
-    "amdocs", "matrixx", "netcracker", "csg", "nec", "oss", "bss", "charging", "billing", "convergent",
-    "merger", "acquisition", "investment", "partnership", "strategic", "deal", "contract", "transformation"
+# Priority keywords - strict focus on competitors & meaningful deals
+EVERGENT_KWS = ["evergent", "evergent technologies", "nba evergent", "league pass evergent"]
+AMDOCS_KWS = ["amdocs", "matrixx"]
+NETCRACKER_KWS = ["netcracker", "csg", "nec csg"]
+CRITICAL_KWS = EVERGENT_KWS + AMDOCS_KWS + NETCRACKER_KWS + [
+    "oss", "bss", "charging", "billing", "convergent", "monetization", "subscription platform",
+    "merger", "acquisition", "investment", "partnership", "strategic deal", "contract", "transformation"
 ]
 
 def clean(raw):
@@ -274,11 +181,13 @@ def fetch_feed(source, url, category):
             
             text = (title + " " + summary).lower()
             
-            # Only include if it has CRITICAL keyword (no coupons, promos, spoilers, celebrity comments)
-            if not any(kw in text for kw in CRITICAL_KEYWORDS):
+            # Only include if it has at least one critical keyword
+            if not any(kw in text for kw in CRITICAL_KWS):
                 continue
             
-            is_ultra = any(kw in text for kw in ["evergent", "evergent technologies", "nba evergent"])
+            is_evergent = any(kw in text for kw in EVERGENT_KWS)
+            is_amdocs = any(kw in text for kw in AMDOCS_KWS)
+            is_netcracker = any(kw in text for kw in NETCRACKER_KWS)
             
             items.append({
                 "title": title,
@@ -287,8 +196,10 @@ def fetch_feed(source, url, category):
                 "source": source,
                 "summary": summary[:140] + "..." if len(summary) > 140 else summary,
                 "category": category,
-                "priority": True,  # All here are critical
-                "ultra": is_ultra
+                "priority": True,
+                "evergent": is_evergent,
+                "amdocs": is_amdocs,
+                "netcracker": is_netcracker
             })
     except:
         pass
@@ -304,26 +215,33 @@ def load_feeds():
             for item in future.result():
                 categorized[item["category"]].append(item)
     
-    # Sort: Evergent first (ultra), then newest
+    # Custom sort: Evergent first → Amdocs → Netcracker → others (newest first)
     for cat in categorized:
-        categorized[cat].sort(key=lambda x: (-x["ultra"], x["pub"]), reverse=True)
+        categorized[cat].sort(key=lambda x: (
+            -x["evergent"], 
+            -x["amdocs"], 
+            -x["netcracker"], 
+            x["pub"]
+        ), reverse=True)
     
-    # Force NBA-Evergent fallback (remove after Jan 20 if no longer needed)
+    # Force-add NBA-Evergent as fallback (top of sports if not already present)
     nba_evergent = {
         "title": "NBA Makes Strategic Investment in Evergent Technologies + Multi-Year Partnership Extension",
         "link": "https://www.sportsbusinessjournal.com/Articles/2026/01/15/nba-invests-in-d2c-subscription-tech-company-evergent",
         "pub": datetime(2026, 1, 15),
         "source": "Sports Business Journal",
-        "summary": "NBA takes stake in Evergent, extends collaboration on League Pass global subscription management (185+ countries), boosting personalization & monetization.",
+        "summary": "NBA takes minority stake in Evergent, extends collaboration powering NBA League Pass globally (185+ countries) — major validation for subscription management & monetization platform.",
         "category": "sports",
         "priority": True,
-        "ultra": True
+        "evergent": True,
+        "amdocs": False,
+        "netcracker": False
     }
     
-    if not any("evergent" in i["title"].lower() for i in categorized.get("sports", [])):
-        if "sports" not in categorized:
-            categorized["sports"] = []
-        categorized["sports"].insert(0, nba_evergent)
+    sports_items = categorized.get("sports", [])
+    if not any("evergent" in i["title"].lower() for i in sports_items):
+        sports_items.insert(0, nba_evergent)
+        categorized["sports"] = sports_items
     
     return categorized
 
@@ -336,7 +254,7 @@ def get_time_str(dt):
 
 def render_body(items):
     if not items:
-        return """<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">No critical signals at this time</div></div>"""
+        return """<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">Scanning for critical signals...</div></div>"""
     
     cards = []
     for item in items:
@@ -345,7 +263,7 @@ def render_body(items):
         link = html.escape(item["link"])
         source = html.escape(item["source"])
         
-        card_class = "ultra-priority" if item["ultra"] else "news-card-priority"
+        card_class = "ultra-priority" if item["evergent"] else "news-card-priority" if item["priority"] else "news-card"
         
         card_parts = [
             f'<div class="{card_class}">',
@@ -366,8 +284,8 @@ placeholder = st.empty()
 with placeholder.container():
     st.markdown("""
         <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:70vh;text-align:center;">
-            <h1 style="color:#0a192f;font-size:2.8rem;font-weight:800;">⚡ Executive Intelligence Platform</h1>
-            <p style="color:#64748b;font-size:1.2rem;">Critical signals for Telco OSS/BSS & OTT CEOs</p>
+            <h1 style="color:#0a192f;font-size:2.8rem;font-weight:800;">⚡ Executive Intelligence Engine</h1>
+            <p style="color:#64748b;font-size:1.2rem;">Critical signals for Evergent CEO – Telco OSS/BSS & OTT</p>
         </div>
     """, unsafe_allow_html=True)
     time.sleep(1.5)
@@ -377,60 +295,20 @@ placeholder.empty()
 st.markdown("""
 <div class="header-container">
     <h1 class="main-title">Global Telecom & OTT Stellar Nexus</h1>
-    <p class="subtitle">Real-time Critical Intelligence for Evergent CEO & Global Telco/OTT Leaders</p>
+    <p class="subtitle">Real-time Critical Intelligence – Evergent • Competitors • Deals • Partnerships</p>
 </div>
 """, unsafe_allow_html=True)
 
-# Dynamic Highlights - Only high-impact news
-with st.spinner("Loading critical signals..."):
+# Dynamic News – No separate highlights box, only columns with strict priority
+with st.spinner("Loading the most critical signals..."):
     data = load_feeds()
 
-all_critical = []
-for cat in data:
-    all_critical.extend(data[cat])  # Already filtered
-
-all_critical.sort(key=lambda x: (-x["ultra"], x["pub"]), reverse=True)
-
-strategic = [i for i in all_critical if i["ultra"] or "merger" in i["title"].lower() or "acquisition" in i["title"].lower() or "investment" in i["title"].lower()][:3]
-pulse_list = [i for i in all_critical if i not in strategic][:3]
-
-# Strategic Hits
-hits_html = '<div class="hero-box"><div class="hero-box-title" style="color: #10b981;">🟢 STRATEGIC HITS</div><div class="hero-content">'
-if strategic:
-    for item in strategic:
-        hits_html += f'<b>{item["title"]}</b><br>{item["summary"]}<br>'
-        hits_html += f'<a href="{item["link"]}" target="_blank">Read more →</a><br><br>'
-else:
-    hits_html += "No major strategic moves detected at this moment..."
-hits_html += '</div></div>'
-
-# Pulse
-pulse_html = '<div class="hero-box"><div class="hero-box-title" style="color: #f97316;">🟠 PULSE</div><div class="hero-content">'
-if pulse_list:
-    for item in pulse_list:
-        pulse_html += f'<b>{item["title"]}</b><br>{item["summary"]}<br>'
-        pulse_html += f'<a href="{item["link"]}" target="_blank">Read more →</a><br><br>'
-else:
-    pulse_html += "Scanning for emerging high-impact trends..."
-pulse_html += '</div></div>'
-
-st.markdown(f"""
-<div class="hero-container">
-    <div class="hero-title">🚀 CRITICAL HIGHLIGHTS</div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-        {hits_html}
-        {pulse_html}
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# News Columns
 cols = st.columns(4)
 cat_list = ["telco", "ott", "sports", "technology"]
 
 for idx, cat in enumerate(cat_list):
     sec = SECTIONS[cat]
-    items = data.get(cat, [])[:12]
+    items = data.get(cat, [])[:15]  # More items – priority ensures best first
     
     with cols[idx]:
         header_parts = ['<div class="', sec["style"], '">', sec["icon"], ' ', sec["name"], '</div>']
@@ -440,7 +318,7 @@ for idx, cat in enumerate(cat_list):
 # Footer
 st.markdown("""
 <div style="text-align:center;color:rgba(255,255,255,0.95);font-size:0.8rem;margin-top:20px;padding:16px;background:linear-gradient(135deg,rgba(10,25,47,0.95),rgba(30,41,59,0.95));border-radius:10px;">
-    <strong>Designed for:</strong> Evergent CEO & Global Telco/OTT Leaders | <strong>🔄 Auto-refresh:</strong> Every 5 minutes
+    <strong>🔄 Auto-refresh:</strong> Every 5 minutes | <strong>Strict Priority:</strong> Evergent → Amdocs → Netcracker → High-impact only
 </div>
 """, unsafe_allow_html=True)
 
