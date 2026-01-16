@@ -15,7 +15,7 @@ st.set_page_config(page_title="Global Telecom & OTT Stellar Nexus", page_icon="�
 def keep_alive():
     st.markdown("", unsafe_allow_html=True)
 
-# PREMIUM STYLING (clean & professional)
+# PREMIUM STYLING (clean, executive-ready)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -56,10 +56,10 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# COMPREHENSIVE LISTS (from your input)
+# COMPREHENSIVE LISTS (from your input + additions)
 EVERGENT_CLIENTS = {
     "Astro": ["astro malaysia", "astro sooka", "astro njoi", "astro", "sooka", "njoi"],
-    "MongolTV": ["mongoltv", "mongol tv", "mongolia tv"],
+    "MongolTV": ["mongoltv", "mongol tv", "mongolia tv", "bc mongol tv"],
     "FOX": ["fox sports", "fox corporation", "fox networks", "fox"],
     "AT&T": ["at&t", "att inc", "att wireless", "directv"],
     "NBA": ["nba", "national basketball"],
@@ -71,39 +71,43 @@ EVERGENT_CLIENTS = {
     "Viki": ["viki", "rakuten viki", "viki streaming"],
     "TRT": ["trt world", "trt", "turkish radio"],
     "Sinclair": ["sinclair broadcast", "sinclair", "bally sports"],
-    "FanDuel": ["fanduel", "fanduel group", "flutter"],
+    "FanDuel": ["fanduel", "fanduel group", "flutter", "fanduel sports"],
     "Bally Sports": ["bally sports", "bally regional", "diamond sports"],
     "Gotham": ["gotham advanced", "gotham fc"],
     "Marquee": ["marquee sports", "marquee network"],
     "Sony": ["sony pictures", "sony entertainment", "sonyliv", "sony india"],
     "Aha": ["aha video", "aha ott", "aha telugu"],
-    "BBC": ["bbc", "british broadcasting", "bbc iplayer"],
+    "BBC": ["bbc", "british broadcasting", "bbc iplayer", "britbox"],
     "Lightbox": ["lightbox", "spark lightbox"],
-    "Sky": ["sky nz", "sky new zealand", "sky tv", "sky uk", "sky italia", "sky deutschland"],
-    "Cignal": ["cignal tv", "cignal", "cignal satellite"],
+    "Sky": ["sky nz", "sky new zealand", "sky tv", "sky uk", "sky italia", "sky deutschland", "tv nz"],
+    "Cignal": ["cignal tv", "cignal", "cignal satellite", "cignal super", "cignal philippinas", "first light"],
     "ETV": ["etv network", "etv bharat"],
     "Simple TV": ["simpletv", "simple tv venezuela"],
-    "Telekom Malaysia": ["telekom malaysia", "tm unifi", "unifi tv", "tm"],
-    "Britbox": ["britbox", "britbox international"],
+    "Telekom Malaysia": ["telekom malaysia", "tm", "tm unifi", "unifi tv"],
     "Quickplay": ["quickplay", "quickplay media"],
     "Pilipinas": ["pilipinas", "abs-cbn"],
-    # Additional clients you mentioned
+    # Additional clients you listed
     "Akash DTH": ["akash dth", "akash"],
     "DirecTV": ["directv"],
     "DAZN": ["dazn"],
     "Antel": ["antel"],
-    "Ooredoo": ["ooredoo", "ooredoo mk"],
+    "Ooredoo": ["ooredoo", "ooredoo mk", "subhub e&"],
     "Exxen": ["exxen"],
     "Dorna Sports": ["dorna sports"],
     "Premier League": ["premier league"],
     "StarHub": ["starhub"],
-    "TV NZ": ["tv nz"],
     "TV9": ["tv9", "firstlight media"],
     "Minno": ["minno"],
+    "EKKL": ["ekkl", "pinnacle peak"],
     "Liberty Global": ["liberty global"],
+    "TV Asahi": ["tv asahi"],
+    "Antenna Greece": ["antenna greece"],
+    "Korea Content Platform": ["korea content platform"],
+    "Firstlight Ltd": ["firstlight ltd", "firstlight media", "pldt home"],
+    "WONDER Project": ["wonder project"],
 }
 
-COMPETITORS = {
+COMPETITORS = {  # your full list
     "Netcracker": ["netcracker", "netcracker technology", "nec netcracker"],
     "Amdocs": ["amdocs", "amdocs ltd", "amdocs inc"],
     "CSG": ["csg systems", "csg international", "csg"],
@@ -132,23 +136,21 @@ COMPETITORS = {
     "Salesforce": ["salesforce", "salesforce communications"],
 }
 
-# Combined keyword list for filtering
+# Combined keyword list for filtering (unique)
 ALL_COMPANY_KWS = []
-for lst in [EVERGENT_CLIENTS, COMPETITORS]:
-    for names in lst.values():
+for d in [EVERGENT_CLIENTS, COMPETITORS]:
+    for names in d.values():
         ALL_COMPANY_KWS.extend(names)
+ALL_COMPANY_KWS = list(set(ALL_COMPANY_KWS))
 
-ALL_COMPANY_KWS = list(set(ALL_COMPANY_KWS))  # unique
-
-# ══════════════════════════════════════════════════════════════════════════════
-# RSS FEEDS
-# ══════════════════════════════════════════════════════════════════════════════
+# RSS FEEDS (high-quality, relevant sources)
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
     ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml", "telco"),
     ("RCR Wireless", "https://www.rcrwireless.com/feed", "telco"),
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/", "telco"),
+    ("Light Reading OSS/BSS", "https://www.lightreading.com/rss/oss-bss-cx", "telco"),
     ("StreamTV Insider", "https://www.streamtvinsider.com/feed", "sports"),
     ("Sports Business Journal", "https://www.sportsbusinessjournal.com/rss", "sports"),
     ("Sportcal", "https://www.sportcal.com/feed", "sports"),
@@ -156,8 +158,6 @@ RSS_FEEDS = [
     ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/", "ott"),
     ("Deadline", "https://deadline.com/feed/", "ott"),
     ("Digital TV Europe", "https://www.digitaltveurope.com/feed/", "ott"),
-    ("ESPN", "https://www.espn.com/espn/rss/news", "sports"),
-    ("SportsPro", "https://www.sportspromedia.com/feed/", "sports"),
     ("TechCrunch", "https://techcrunch.com/feed/", "technology"),
     ("The Verge", "https://www.theverge.com/rss/index.xml", "technology"),
     ("Wired", "https://www.wired.com/feed/rss", "technology"),
@@ -186,7 +186,7 @@ def fetch_feed(source, url, category):
         NOW = datetime.now()
         CUTOFF = NOW - timedelta(days=10)
         
-        for entry in feed.entries[:15]:
+        for entry in feed.entries[:20]:
             title = clean(entry.get("title", ""))
             if len(title) < 30: continue
             
@@ -203,10 +203,10 @@ def fetch_feed(source, url, category):
             
             if not pub or pub < CUTOFF: continue
             
-            text = (title + " " + summary).lower()
+            full_text = (title + " " + summary).lower()
             
-            # Only include if it mentions a client or competitor
-            if not any(kw in text for kw in ALL_COMPANY_KWS):
+            # Strict filter: must mention at least one company from your lists
+            if not any(kw.lower() in full_text for kw in ALL_COMPANY_KWS):
                 continue
             
             items.append({
@@ -229,13 +229,14 @@ def load_feeds():
         futures = [executor.submit(fetch_feed, s, u, c) for s, u, c in RSS_FEEDS]
         for future in as_completed(futures):
             for item in future.result():
-                # Double-check category relevance
                 text = (item["title"] + " " + item["summary"]).lower()
-                if any(kw in text for kw in ["nba", "fanduel", "bally", "gotham", "marquee", "premier league", "dorna"]):
+                
+                # Intelligent routing to correct section
+                if any(kw in text for kw in ["nba", "fanduel", "bally sports", "gotham", "marquee", "premier league", "dorna sports"]):
                     item["category"] = "sports"
-                elif any(kw in text for kw in ["streaming", "ott", "subscription", "britbox", "shahid", "sonyliv", "aha", "dazn"]):
+                elif any(kw in text for kw in ["streaming", "ott", "sonyliv", "aha", "dazn", "shahid", "viki", "britbox"]):
                     item["category"] = "ott"
-                elif any(kw in text for kw in ["oss", "bss", "billing", "charging", "amdocs", "netcracker", "csg"]):
+                elif any(kw in text for kw in ["oss", "bss", "billing", "charging", "amdocs", "netcracker", "csg", "matrixx"]):
                     item["category"] = "telco"
                 categorized[item["category"]].append(item)
     
@@ -254,7 +255,7 @@ def get_time_str(dt):
 
 def render_body(items):
     if not items:
-        return """<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">Scanning for critical signals...</div></div>"""
+        return """<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">No critical signals at this time</div></div>"""
     
     cards = []
     for item in items:
@@ -283,7 +284,7 @@ with placeholder.container():
     st.markdown("""
         <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:70vh;text-align:center;">
             <h1 style="color:#0a192f;font-size:2.8rem;font-weight:800;">⚡ Critical Intelligence Engine</h1>
-            <p style="color:#64748b;font-size:1.2rem;">Real-time signals for Evergent – Clients & Competitors</p>
+            <p style="color:#64748b;font-size:1.2rem;">Real-time signals for Evergent – Clients & Competitors only</p>
         </div>
     """, unsafe_allow_html=True)
     time.sleep(1.5)
@@ -297,7 +298,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Load & Render Columns Only (strict filtering)
+# Load & Render Columns Only
 with st.spinner("Scanning latest critical news..."):
     data = load_feeds()
 
@@ -306,7 +307,7 @@ cat_list = ["telco", "ott", "sports", "technology"]
 
 for idx, cat in enumerate(cat_list):
     sec = SECTIONS[cat]
-    items = data.get(cat, [])[:15]  # Show more for coverage, but filtered strictly
+    items = data.get(cat, [])[:15]
     
     with cols[idx]:
         header_parts = ['<div class="', sec["style"], '">', sec["icon"], ' ', sec["name"], '</div>']
