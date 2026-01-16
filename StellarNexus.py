@@ -7,15 +7,22 @@ import html
 import re
 import time
 
+# ══════════════════════════════════════════════════════════════════════════════
 # PAGE CONFIG
-st.set_page_config(page_title="Global Telecom & OTT Stellar Nexus", page_icon="🌐", layout="wide", initial_sidebar_state="collapsed")
+# ══════════════════════════════════════════════════════════════════════════════
+st.set_page_config(
+    page_title="Global Telecom & OTT Stellar Nexus",
+    page_icon="🌐",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
 # KEEP-ALIVE
 @st.fragment(run_every=600)
 def keep_alive():
     st.markdown("", unsafe_allow_html=True)
 
-# PREMIUM LIGHT THEME STYLING (with your custom background image)
+# LIGHT-THEME PREMIUM STYLING with your custom background
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -52,7 +59,6 @@ st.markdown("""
         font-weight: 500;
     }
     
-    /* Highlights Section */
     .hero-container {
         background: rgba(255, 255, 255, 0.98);
         border-radius: 16px;
@@ -72,7 +78,7 @@ st.markdown("""
     }
     
     .hero-box {
-        background: #f1f5f9;
+        background: #f8fafc;
         border-radius: 12px;
         padding: 1.5rem;
         min-height: 240px;
@@ -190,7 +196,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 2026 STRATEGIC INTELLIGENCE (PPT-READY - HARDCODED FOR PRIORITY)
+# 2026 STRATEGIC INTELLIGENCE (HARDCODED PPT-READY PRIORITY SECTION)
 STRATEGIC_2026_HITS = [
     {
         "title": "[CRITICAL] NBA Scores Strategic Investment in Evergent; Named Preferred Global Vendor (Jan 14, 2026)",
@@ -209,21 +215,31 @@ STRATEGIC_2026_HITS = [
     }
 ]
 
-# Client/Competitor matching engine (includes ALL names from your prompt)
+# Client/Competitor matching engine
 EVERGENT_CLIENTS = {
     "NBA": ["nba", "national basketball", "league pass"],
     "Astro": ["astro malaysia", "sooka", "njoi"],
-    "Shahid": ["shahid vip", "mbc"], 
-    "Sky NZ": ["sky nz", "neon"], 
-    "Sony": ["sonyliv", "sony india"], 
+    "Shahid": ["shahid vip", "mbc"],
+    "Sky NZ": ["sky nz", "neon"],
+    "Sony": ["sonyliv", "sony india"],
     "FanDuel": ["fanduel", "bally sports"],
-    "Cignal": ["cignal tv", "pldt"], 
+    "Cignal": ["cignal tv", "pldt"],
     "Telekom Malaysia": ["unifi tv", "tm"],
-    "DAZN": ["dazn"], 
+    "DAZN": ["dazn"],
     "Fox": ["fox sports", "fox networks"]
 }
 
-# RSS FEEDS (focused on high-value sources)
+# Priority companies (always first)
+PRIORITY_COMPANIES = ["evergent", "nba", "amdocs", "matrixx", "netcracker", "nec", "csg"]
+
+# Strategic keywords (only these types of news allowed)
+STRATEGIC_KWS = [
+    "merger", "acquisition", "investment", "partnership", "deal", "contract",
+    "collaboration", "stake", "buy", "acquire", "alliance", "joint venture",
+    "jv", "expansion", "strategic", "transformation", "integration"
+]
+
+# RSS FEEDS
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
     ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
@@ -287,15 +303,15 @@ def fetch_feed(source, url, category):
             
             full_text = (title + " " + summary).lower()
             
-            # Strict filter: must have strategic intent + company match
-            has_strategic = any(kw in full_text for kw in ["merger", "acquisition", "investment", "partnership", "deal", "contract", "collaboration", "stake", "buy", "acquire", "alliance", "expansion", "strategic"])
-            has_company = any(kw in full_text for kw in ALL_COMPANY_KWS)
+            # Strict filter: MUST have strategic keyword AND company match
+            has_strategic = any(kw in full_text for kw in STRATEGIC_KWS)
+            has_company = any(kw in full_text for kw in EVERGENT_CLIENTS_KWS + COMPETITORS_KWS)
             
             if not (has_strategic and has_company):
                 continue
             
-            is_priority = any(kw in full_text for kw in ["evergent", "nba", "amdocs", "matrixx", "netcracker", "nec", "csg"])
-            
+            # Priority score
+            is_priority = any(kw in full_text for kw in PRIORITY_KWS)
             priority_score = 5 if is_priority else 3
             
             items.append({
@@ -330,7 +346,7 @@ def load_feeds():
                     item["category"] = "telco"
                 categorized[item["category"]].append(item)
     
-    # Sort: Highest priority first (Evergent/NBA/Netcracker/Amdocs/NEC > others), then newest
+    # Sort: Highest priority first
     for cat in categorized:
         categorized[cat].sort(key=lambda x: (-x["priority_score"], x["pub"]), reverse=True)
     
@@ -388,47 +404,35 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Dynamic Highlights - Prioritize Evergent/NBA/Netcracker/Amdocs/NEC first
-with st.spinner("Scanning for latest strategic news..."):
-    data = load_feeds()
-
-all_critical = []
-for cat in data:
-    all_critical.extend(data[cat])
-
-all_critical.sort(key=lambda x: (-x["priority_score"], x["pub"]), reverse=True)
-
-# Strategic Hits: Highest priority first
-strategic = [i for i in all_critical if i["priority_score"] >= 4][:4]
-pulse_list = [i for i in all_critical if i not in strategic][:4]
-
-hits_html = '<div class="hero-box"><div class="hero-box-title" style="color: #10b981;">🟢 STRATEGIC HITS</div><div class="hero-content">'
-if strategic:
-    for item in strategic:
-        hits_html += f'<b>{item["title"]}</b><br>{item["summary"]}<br>'
-        hits_html += f'<a href="{item["link"]}" target="_blank">Read more →</a><br><br>'
-else:
-    hits_html += "Scanning for latest major deals, acquisitions, partnerships... (Evergent/NBA/Amdocs/Netcracker/NEC prioritized)"
-hits_html += '</div></div>'
-
-pulse_html = '<div class="hero-box"><div class="hero-box-title" style="color: #f97316;">🟠 PULSE</div><div class="hero-content">'
-if pulse_list:
-    for item in pulse_list:
-        pulse_html += f'<b>{item["title"]}</b><br>{item["summary"]}<br>'
-        pulse_html += f'<a href="{item["link"]}" target="_blank">Read more →</a><br><br>'
-else:
-    pulse_html += "Emerging strategic trends loading..."
-pulse_html += '</div></div>'
-
-st.markdown(f"""
+# Hardcoded 2026 Strategic Intelligence (PPT-ready)
+st.markdown("""
 <div class="hero-container">
-    <div class="hero-title">🚀 LATEST STRATEGIC HIGHLIGHTS</div>
+    <div class="hero-title">🚀 STRATEGIC BREAKOUTS (JAN 14-16, 2026)</div>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-        {hits_html}
-        {pulse_html}
+        <div class="hero-box">
+            <div class="hero-box-title" style="color: #10b981;">🟢 MARKET MOVERS</div>
+            <div class="hero-content">
+                """ + "".join([
+                    f"<div style='margin-bottom:12px;'><span class='status-tag' style='background:#10b981;'>{h['impact']}</span> <b>{h['title']}</b><br><span style='color:#475569;'>{h['context']}</span></div>"
+                    for h in STRATEGIC_2026_HITS
+                ]) + """
+            </div>
+        </div>
+        <div class="hero-box">
+            <div class="hero-box-title" style="color: #f97316;">🟠 2026 AGENTIC AI PULSE</div>
+            <div class="hero-content">
+                <b style="color:#f97316;">NBA Strategic Stake:</b> David Lee (NBA Investments) confirms personalization and data-driven churn management as the #1 priority for the Evergent equity stake (Jan 14, 2026).<br><br>
+                <b style="color:#f97316;">Agentic AI Shift:</b> Major shift from Generative AI to Agentic AI—autonomous systems that proactively manage subscriber retention journeys (Jan 15, 2026).<br><br>
+                <b style="color:#f97316;">OpenAI x T-Mobile:</b> Launch of IntentCX, an intent-driven AI-decisioning platform designed to deliver predictive and "magical" customer experiences (Jan 16, 2026).
+            </div>
+        </div>
     </div>
 </div>
 """, unsafe_allow_html=True)
+
+# Dynamic RSS Feed Scanning (strict strategic filter)
+with st.spinner("Scanning for latest strategic news..."):
+    data = load_feeds()
 
 # News Columns
 cols = st.columns(4)
