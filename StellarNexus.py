@@ -192,7 +192,7 @@ st.markdown("""
 # 2026 STRATEGIC INTELLIGENCE (HARDCODED - ALL YOUR REQUESTED NEWS, NO DUPLICATES)
 STRATEGIC_2026_HITS = [
     {
-        "title": "[CRITICAL] NBA Scores Strategic Investment in Evergent; Named Preferred Global Vendor (Jan 14, 2026)",
+        "title": "NBA Scores Strategic Investment in Evergent; Named Preferred Global Vendor",
         "impact": "CRITICAL",
         "context": "The NBA has taken a strategic equity stake in Evergent, naming it a 'Preferred Vendor' to drive global League Pass personalization and churn management across 185 countries."
     },
