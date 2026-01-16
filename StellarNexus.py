@@ -63,6 +63,7 @@ st.markdown("""
         font-weight: 500;
     }
     
+    /* Highlights Section */
     .hero-container {
         background: rgba(255, 255, 255, 0.98);
         border-radius: 16px;
@@ -117,6 +118,7 @@ st.markdown("""
         text-decoration: underline;
     }
     
+    /* News Sections */
     .col-header {
         padding: 12px 16px;
         border-radius: 14px 14px 0 0;
@@ -198,7 +200,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# RSS FEEDS CONFIGURATION - Focused on critical sources
+# RSS FEEDS CONFIGURATION
 # ══════════════════════════════════════════════════════════════════════════════
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
@@ -206,7 +208,6 @@ RSS_FEEDS = [
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml", "telco"),
     ("RCR Wireless", "https://www.rcrwireless.com/feed", "telco"),
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/", "telco"),
-    ("Light Reading OSS/BSS", "https://www.lightreading.com/rss/oss-bss-cx", "telco"),
     ("Variety", "https://variety.com/feed/", "ott"),
     ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/", "ott"),
     ("Deadline", "https://deadline.com/feed/", "ott"),
@@ -214,13 +215,16 @@ RSS_FEEDS = [
     ("ESPN", "https://www.espn.com/espn/rss/news", "sports"),
     ("BBC Sport", "https://feeds.bbci.co.uk/sport/rss.xml", "sports"),
     ("SportsPro", "https://www.sportspromedia.com/feed/", "sports"),
-    ("Sports Business Journal", "https://www.sportsbusinessjournal.com/rss", "sports"),
-    ("Sportcal", "https://www.sportcal.com/feed", "sports"),
-    ("StreamTV Insider", "https://www.streamtvinsider.com/feed", "sports"),
     ("TechCrunch", "https://techcrunch.com/feed/", "technology"),
     ("The Verge", "https://www.theverge.com/rss/index.xml", "technology"),
     ("Wired", "https://www.wired.com/feed/rss", "technology"),
     ("VentureBeat", "https://venturebeat.com/feed/", "technology"),
+    # Additional sources for broader coverage
+    ("Sports Business Journal", "https://www.sportsbusinessjournal.com/rss", "sports"),
+    ("StreamTV Insider", "https://www.streamtvinsider.com/feed", "ott"),
+    ("Sportcal", "https://www.sportcal.com/feed", "sports"),
+    ("Fierce Video", "https://www.fiercevideo.com/rss.xml", "ott"),
+    ("TM Forum", "https://inform.tmforum.org/feed/", "telco"),
 ]
 
 SECTIONS = {
@@ -234,6 +238,19 @@ HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
     "Accept": "application/rss+xml, application/xml, text/xml, */*",
 }
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CRITICAL KEYWORDS FOR FILTERING - No silly news, only impactful
+# ══════════════════════════════════════════════════════════════════════════════
+CRITICAL_KEYWORDS = [
+    "evergent", "netcracker", "amdocs", "matrixx", "csg", "oracle communications", "ericsson", "nokia networks",
+    "huawei technologies", "comarch", "tecnotree", "optiva", "cerillion", "asiainfo", "hansen technologies",
+    "openet", "zte", "mavenir", "infosys telecom", "tcs telecom", "wipro digital", "tech mahindra comviva",
+    "accenture telecom", "capgemini telecom", "ibm telecom", "sap telecom", "salesforce communications",
+    "oss", "bss", "billing", "charging", "monetization", "subscription platform", "5g core", "cloud native bss",
+    "merger", "acquisition", "investment", "partnership", "deal", "contract", "deployment", "transformation",
+    "agentic ai", "autonomous bss", "digital transformation telecom"
+]
 
 # ══════════════════════════════════════════════════════════════════════════════
 # UTILITY FUNCTIONS
@@ -254,7 +271,7 @@ def fetch_feed(source, url, category):
         NOW = datetime.now()
         CUTOFF = NOW - timedelta(days=3)
         
-        for entry in feed.entries[:8]:
+        for entry in feed.entries[:15]:  # Increased for more coverage
             title = clean(entry.get("title", ""))
             if len(title) < 20:
                 continue
@@ -275,9 +292,11 @@ def fetch_feed(source, url, category):
             if not pub or pub < CUTOFF:
                 continue
             
-            # Priority detection
-            priority_keywords = ["amdocs", "netcracker", "matrixx", "evergent", "oss", "bss", "merger", "acquisition"]
-            is_priority = any(kw in title.lower() or kw in summary.lower() for kw in priority_keywords)
+            text_lower = title.lower() + " " + summary.lower()
+            
+            # Only add if it matches a critical keyword (no silly news)
+            if not any(kw in text_lower for kw in CRITICAL_KEYWORDS):
+                continue
             
             items.append({
                 "title": title,
@@ -285,8 +304,7 @@ def fetch_feed(source, url, category):
                 "pub": pub,
                 "source": source,
                 "summary": summary,
-                "category": category,
-                "priority": is_priority
+                "category": category
             })
     except:
         pass
@@ -302,7 +320,7 @@ def load_feeds():
         "technology": []
     }
     
-    with ThreadPoolExecutor(max_workers=12) as executor:
+    with ThreadPoolExecutor(max_workers=20) as executor:
         futures = [
             executor.submit(fetch_feed, source, url, cat)
             for source, url, cat in RSS_FEEDS
@@ -313,7 +331,7 @@ def load_feeds():
             for item in items:
                 categorized[item["category"]].append(item)
     
-    # Sort by date
+    # Sort by date descending
     for cat in categorized:
         categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
     
@@ -341,9 +359,9 @@ def render_body(items):
         link = html.escape(item["link"])
         source = html.escape(item["source"])
         
-        card_class = "news-card-priority" if item["priority"] else "news-card"
+        # No priority class - all cards are normal
+        card_class = "news-card"
         
-        # Build card HTML without f-strings to avoid display issues
         card_parts = [
             '<div class="' + card_class + '">',
             '<a href="' + link + '" target="_blank" class="news-title">' + title + '</a>',
@@ -396,17 +414,17 @@ st.markdown("""
         <div class="hero-box">
             <div class="hero-box-title" style="color: #10b981;">🟢 STRATEGIC HITS</div>
             <div class="hero-content">
-                <b>NBA-Evergent Partnership:</b> NBA makes strategic investment in Evergent Technologies, extends multi-year partnership for global subscription management on League Pass. Enhances personalization and monetization in OTT billing.<br><br>
-                <b>Amdocs-Matrixx Acquisition:</b> Amdocs acquires Matrixx Software for $200M, consolidating BSS market and boosting charging capabilities for 5G.<br><br>
-                <b>NEC-Netcracker-CSG Deal:</b> NEC acquires CSG for $2.9B, merging with Netcracker to scale SaaS BSS monetization.
+                <b>Amdocs-Matrixx Deal:</b> Amdocs completes its $200M acquisition of charging leader Matrixx Software to dominate the Tier-1 5G billing market.<br><br>
+                <b>Disney-Hulu Merger:</b> Disney officially begins phasing out the standalone Hulu app to integrate all content into a unified Disney+ hub.<br><br>
+                <b>NEC Expansion:</b> Japan's NEC finalizes the acquisition of CSG, significantly scaling Netcracker's North American SaaS footprint.
             </div>
         </div>
         <div class="hero-box">
             <div class="hero-box-title" style="color: #f97316;">🟠 PULSE</div>
             <div class="hero-content">
-                <b>Agentic AI Core:</b> Autonomous AI agents projected to handle 40% of BSS tasks by EOY 2026, revolutionizing operational efficiency.<br><br>
-                <b>Satellite Breakout:</b> Direct-to-consumer satellite broadband becoming mainstream fiber competitor, impacting telco monetization.<br><br>
-                <b>Physical AI:</b> Amazon deploys 1-millionth robot with DeepFleet AI, achieving 10% warehouse efficiency gain, signaling AI integration trends.
+                <b>Agentic AI Core:</b> By EOY 2026, autonomous AI agents are expected to handle roughly 40% of standard BSS operational tasks.<br><br>
+                <b>Satellite Breakout:</b> Direct-to-consumer satellite broadband moves from niche to mainstream as a primary fiber competitor.<br><br>
+                <b>Physical AI:</b> Amazon deploys its 1-millionth robot, integrated with DeepFleet AI for a 10% gain in warehouse efficiency.
             </div>
         </div>
     </div>
@@ -424,7 +442,7 @@ cat_list = ["telco", "ott", "sports", "technology"]
 for idx, cat in enumerate(cat_list):
     sec = SECTIONS[cat]
     items = data.get(cat, [])[:10]
-   
+    
     with cols[idx]:
         # Render header
         header_parts = [
@@ -437,7 +455,7 @@ for idx, cat in enumerate(cat_list):
             '</div>'
         ]
         st.markdown(''.join(header_parts), unsafe_allow_html=True)
-       
+        
         # Render body
         st.markdown(render_body(items), unsafe_allow_html=True)
 
