@@ -66,7 +66,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# COMPREHENSIVE KEYWORD LISTS (your full lists)
+# COMPREHENSIVE KEYWORD LISTS
 EVERGENT_CLIENTS = {
     "Astro": ["astro malaysia", "astro sooka", "astro njoi", "astro", "sooka", "njoi"],
     "MongolTV": ["mongoltv", "mongol tv", "mongolia tv", "bc mongol tv"],
@@ -96,7 +96,6 @@ EVERGENT_CLIENTS = {
     "Telekom Malaysia": ["telekom malaysia", "tm", "tm unifi", "unifi tv"],
     "Quickplay": ["quickplay", "quickplay media"],
     "Pilipinas": ["pilipinas", "abs-cbn"],
-    # Additional from your list
     "Akash DTH": ["akash dth", "akash"],
     "DirecTV": ["directv"],
     "DAZN": ["dazn"],
@@ -153,7 +152,12 @@ for d in [EVERGENT_CLIENTS, COMPETITORS]:
     for names in d.values():
         ALL_COMPANY_KWS.update([kw.lower() for kw in names])
 
-# RSS FEEDS (focused on reliable sources)
+# Priority keywords (Evergent + Netcracker + Amdocs + NEC)
+PRIORITY_KWS = [
+    "evergent", "nba", "netcracker", "nec netcracker", "nec", "amdocs", "matrixx", "csg"
+]
+
+# RSS FEEDS
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
     ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
@@ -191,16 +195,16 @@ def clean(raw):
 def fetch_feed(source, url, category):
     items = []
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=8)
+        resp = requests.get(url, headers=HEADERS, timeout=10)
         if resp.status_code != 200: return items
         
         feed = feedparser.parse(resp.content)
         NOW = datetime.now()
-        CUTOFF = NOW - timedelta(days=10)
+        CUTOFF = NOW - timedelta(days=14)
         
-        for entry in feed.entries[:20]:
+        for entry in feed.entries[:30]:
             title = clean(entry.get("title", ""))
-            if len(title) < 30: continue
+            if len(title) < 25: continue
             
             summary = clean(entry.get("summary", entry.get("description", "")))
             link = entry.get("link", "")
@@ -217,14 +221,15 @@ def fetch_feed(source, url, category):
             
             full_text = (title + " " + summary).lower()
             
-            # Ultra-strict filter: only relevant companies (no silly news)
+            # Ultra-strict filter: only relevant companies
             if not any(kw in full_text for kw in ALL_COMPANY_KWS):
                 continue
             
-            is_evergent_client = any(kw in full_text for kw in EVERGENT_CLIENTS_KWS)
-            is_competitor = any(kw in full_text for kw in COMPETITORS_KWS)
+            is_priority = any(kw in full_text for kw in PRIORITY_KWS)
+            is_evergent_client = any(kw in full_text for kw in EVERGENT_CLIENTS.keys())
+            is_competitor = any(kw in full_text for kw in COMPETITORS.keys())
             
-            priority_score = 4 if is_evergent_client else 3 if is_competitor else 1
+            priority_score = 5 if is_priority else 4 if is_evergent_client else 3 if is_competitor else 1
             
             items.append({
                 "title": title,
@@ -258,7 +263,7 @@ def load_feeds():
                     item["category"] = "telco"
                 categorized[item["category"]].append(item)
     
-    # Sort: Highest priority first (Evergent clients > Competitors > Normal), then newest
+    # Sort: Highest priority first (Evergent/Netcracker/Amdocs/NEC > others), then newest
     for cat in categorized:
         categorized[cat].sort(key=lambda x: (-x["priority_score"], x["pub"]), reverse=True)
     
@@ -273,7 +278,7 @@ def get_time_str(dt):
 
 def render_body(items):
     if not items:
-        return """<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">Scanning for critical signals...</div></div>"""
+        return """<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">Scanning for critical signals... (may take a few minutes for fresh news)</div></div>"""
     
     cards = []
     for item in items:
@@ -316,32 +321,30 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Load & Render Columns Only
-with st.spinner("Scanning latest critical news..."):
+# Load feeds
+with st.spinner("Loading latest critical signals..."):
     data = load_feeds()
 
-# Dynamic Highlights - Latest impactful news (Evergent/Netcracker/Amdocs first)
+# Dynamic Highlights - Evergent/Netcracker/Amdocs/NEC prioritized first
 all_critical = []
 for cat in data:
     all_critical.extend(data[cat])
 
 all_critical.sort(key=lambda x: (-x["priority_score"], x["pub"]), reverse=True)
 
-# Strategic Hits: Prioritize Evergent clients, Netcracker, Amdocs, deals
-strategic = [i for i in all_critical if i["priority_score"] >= 3][:4]  # Highest priority first
+# Strategic Hits: Highest priority first (Evergent/Netcracker/Amdocs/NEC)
+strategic = [i for i in all_critical if i["priority_score"] >= 4][:4]
 pulse_list = [i for i in all_critical if i not in strategic][:4]
 
-# Strategic Hits
 hits_html = '<div class="hero-box"><div class="hero-box-title" style="color: #10b981;">🟢 STRATEGIC HITS</div><div class="hero-content">'
 if strategic:
     for item in strategic:
         hits_html += f'<b>{item["title"]}</b><br>{item["summary"]}<br>'
         hits_html += f'<a href="{item["link"]}" target="_blank">Read more →</a><br><br>'
 else:
-    hits_html += "Scanning for latest major deals..."
+    hits_html += "Scanning for latest major deals & partnerships... (Evergent/Netcracker/Amdocs/NEC prioritized)"
 hits_html += '</div></div>'
 
-# Pulse
 pulse_html = '<div class="hero-box"><div class="hero-box-title" style="color: #f97316;">🟠 PULSE</div><div class="hero-content">'
 if pulse_list:
     for item in pulse_list:
@@ -377,7 +380,7 @@ for idx, cat in enumerate(cat_list):
 # Footer
 st.markdown("""
 <div style="text-align:center;color:rgba(255,255,255,0.95);font-size:0.8rem;margin-top:20px;padding:16px;background:linear-gradient(135deg,rgba(10,25,47,0.95),rgba(30,41,59,0.95));border-radius:10px;">
-    <strong>Strict Filter:</strong> Only Evergent Clients, Competitors & Strategic Deals | <strong>🔄 Auto-refresh:</strong> Every 5 minutes
+    <strong>Strict Filter:</strong> Only Evergent Clients, Competitors & Strategic Deals | <strong>Priority:</strong> Evergent/NBA/Netcracker/Amdocs/NEC first | <strong>🔄 Auto-refresh:</strong> Every 5 minutes
 </div>
 """, unsafe_allow_html=True)
 
