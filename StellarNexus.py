@@ -197,17 +197,17 @@ STRATEGIC_2026_HITS = [
         "context": "The NBA has taken a strategic equity stake in Evergent, naming it a 'Preferred Vendor' to drive global League Pass personalization and churn management across 185 countries."
     },
     {
-        "title": "Amdocs Completes $200M Acquisition of Charging Leader Matrixx Software (Jan 2026)",
+        "title": "Amdocs Completes $200M Acquisition of Charging Leader Matrixx Software",
         "impact": "HIGH",
         "context": "Amdocs completes its $200M acquisition of charging leader Matrixx Software to dominate the Tier-1 5G billing market."
     },
     {
-        "title": "Disney Officially Phases Out Standalone Hulu App (Jan 2026)",
+        "title": "Disney Officially Phases Out Standalone Hulu App ",
         "impact": "HIGH",
         "context": "Disney officially begins phasing out the standalone Hulu app to integrate all content into a unified Disney+ hub."
     },
     {
-        "title": "NEC Finalizes Acquisition of CSG (Jan 2026)",
+        "title": "NEC Finalizes Acquisition of CSG ",
         "impact": "HIGH",
         "context": "Japan's NEC finalizes the acquisition of CSG, significantly scaling Netcracker's North American SaaS footprint."
     }
