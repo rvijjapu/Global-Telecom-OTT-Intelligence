@@ -7,185 +7,50 @@ import html
 import re
 import time
 
-# ══════════════════════════════════════════════════════════════════════════════
 # PAGE CONFIG
-# ══════════════════════════════════════════════════════════════════════════════
-st.set_page_config(
-    page_title="Global Telecom & OTT Stellar Nexus",
-    page_icon="🌐",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+st.set_page_config(page_title="Global Telecom & OTT Stellar Nexus", page_icon="🌐", layout="wide", initial_sidebar_state="collapsed")
 
-# ══════════════════════════════════════════════════════════════════════════════
-# KEEP-ALIVE FRAGMENT
-# ══════════════════════════════════════════════════════════════════════════════
+# KEEP-ALIVE
 @st.fragment(run_every=600)
 def keep_alive():
     st.markdown("", unsafe_allow_html=True)
 
-# ══════════════════════════════════════════════════════════════════════════════
 # PREMIUM STYLING
-# ══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     
-    .stApp {
-        background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
-        background-size: cover;
-        font-family: 'Inter', sans-serif;
-        padding-top: 0.5rem;
-    }
+    .stApp { background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed; background-size: cover; font-family: 'Inter', sans-serif; padding-top: 0.5rem; }
     
-    .header-container {
-        background: rgba(255, 255, 255, 0.96);
-        padding: 1.5rem 2rem;
-        text-align: center;
-        border-radius: 20px;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-        margin: 0 0 2rem 0;
-        border-bottom: 4px solid #1e40af;
-    }
+    .header-container { background: rgba(255,255,255,0.96); padding: 1.5rem 2rem; text-align: center; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); margin: 0 0 2rem 0; border-bottom: 4px solid #1e40af; }
+    .main-title { font-size: 2.6rem; font-weight: 800; color: #0a192f; margin: 0; letter-spacing: -0.8px; }
+    .subtitle { font-size: 1.1rem; color: #475569; margin-top: 0.6rem; font-weight: 500; }
     
-    .main-title {
-        font-size: 2.6rem;
-        font-weight: 800;
-        color: #0a192f;
-        margin: 0;
-        letter-spacing: -0.8px;
-    }
+    .hero-container { background: rgba(255,255,255,0.98); border-radius: 16px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 10px 35px rgba(0,0,0,0.12); border: 1px solid #e2e8f0; }
+    .hero-title { color: #0a192f; font-size: 1.85rem; font-weight: 800; margin-bottom: 1.5rem; border-left: 6px solid #1e40af; padding-left: 15px; }
     
-    .subtitle {
-        font-size: 1.1rem;
-        color: #475569;
-        margin-top: 0.6rem;
-        font-weight: 500;
-    }
+    .hero-box { background: #f1f5f9; border-radius: 12px; padding: 1.5rem; min-height: 240px; border: 1px solid #e2e8f0; }
+    .hero-box-title { font-weight: 800; font-size: 1.1rem; margin-bottom: 12px; }
+    .hero-content { color: #1e293b; font-size: 0.95rem; line-height: 1.7; }
+    .hero-content b { color: #0a192f; font-weight: 700; }
+    .hero-content a { color: #1e40af; text-decoration: none; font-weight: 600; }
+    .hero-content a:hover { color: #1d4ed8; text-decoration: underline; }
     
-    /* Highlights Section */
-    .hero-container {
-        background: rgba(255, 255, 255, 0.98);
-        border-radius: 16px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 10px 35px rgba(0,0,0,0.12);
-        border: 1px solid #e2e8f0;
-    }
-    
-    .hero-title {
-        color: #0a192f;
-        font-size: 1.85rem;
-        font-weight: 800;
-        margin-bottom: 1.5rem;
-        border-left: 6px solid #1e40af;
-        padding-left: 15px;
-    }
-    
-    .hero-box {
-        background: #f1f5f9;
-        border-radius: 12px;
-        padding: 1.5rem;
-        min-height: 200px;
-        border: 1px solid #e2e8f0;
-    }
-    
-    .hero-box-title {
-        font-weight: 800;
-        font-size: 1.1rem;
-        margin-bottom: 12px;
-    }
-    
-    .hero-content {
-        color: #1e293b;
-        font-size: 0.95rem;
-        line-height: 1.7;
-    }
-    
-    .hero-content b {
-        color: #0a192f;
-        font-weight: 700;
-    }
-    
-    /* News Sections */
-    .col-header {
-        padding: 12px 16px;
-        border-radius: 14px 14px 0 0;
-        color: white;
-        font-weight: 700;
-        font-size: 0.95rem;
-        text-align: center;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-    }
-    
+    .col-header { padding: 12px 16px; border-radius: 14px 14px 0 0; color: white; font-weight: 700; font-size: 0.95rem; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
     .col-header-pink {background: linear-gradient(135deg, #ec4899, #db2777);}
     .col-header-purple {background: linear-gradient(135deg, #a78bfa, #8b5cf6);}
     .col-header-green {background: linear-gradient(135deg, #34d399, #10b981);}
     .col-header-orange {background: linear-gradient(135deg, #fb923c, #f97316);}
     
-    .col-body {
-        background: white;
-        border-radius: 0 0 14px 14px;
-        padding: 12px;
-        min-height: 480px;
-        max-height: 580px;
-        overflow-y: auto;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-        margin-bottom: 1rem;
-    }
+    .col-body { background: white; border-radius: 0 0 14px 14px; padding: 12px; min-height: 480px; max-height: 580px; overflow-y: auto; box-shadow: 0 6px 20px rgba(0,0,0,0.08); margin-bottom: 1rem; }
     
-    .news-card {
-        background: #fafbfc;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        padding: 12px;
-        margin-bottom: 10px;
-        transition: all 0.3s ease;
-    }
+    .news-card { background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 10px; transition: all 0.3s ease; }
+    .news-card:hover { background: #f1f5f9; box-shadow: 0 6px 16px rgba(0,0,0,0.08); transform: translateY(-1px); }
     
-    .news-card:hover {
-        background: #f1f5f9;
-        box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-        transform: translateY(-1px);
-    }
+    .news-title { color: #1e40af; font-size: 0.92rem; font-weight: 600; line-height: 1.35; text-decoration: none; display: block; margin-bottom: 6px; }
+    .news-title:hover { color: #1d4ed8; text-decoration: underline; }
     
-    .news-card-priority {
-        background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%);
-        border: 2px solid #fbbf24;
-        border-radius: 10px;
-        padding: 12px;
-        margin-bottom: 10px;
-    }
-    
-    .news-card-priority:hover {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        box-shadow: 0 8px 20px rgba(251,191,36,0.2);
-    }
-    
-    .news-title {
-        color: #1e40af;
-        font-size: 0.92rem;
-        font-weight: 600;
-        line-height: 1.35;
-        text-decoration: none;
-        display: block;
-        margin-bottom: 6px;
-    }
-    
-    .news-title:hover {
-        color: #1d4ed8;
-        text-decoration: underline;
-    }
-    
-    .news-meta {
-        font-size: 0.76rem;
-        color: #64748b;
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        flex-wrap: wrap;
-    }
-    
+    .news-meta { font-size: 0.76rem; color: #64748b; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
     .time-hot {color: #dc2626; font-weight: 600; font-style: italic;}
     .time-warm {color: #ea580c; font-weight: 600;}
     .time-normal {color: #64748b;}
@@ -201,9 +66,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ══════════════════════════════════════════════════════════════════════════════
-# COMPREHENSIVE INTELLIGENCE LISTS
-# ══════════════════════════════════════════════════════════════════════════════
+# COMPREHENSIVE KEYWORD LISTS (from your input)
 EVERGENT_CLIENTS = {
     "Astro": ["astro malaysia", "astro sooka", "astro njoi", "astro", "sooka", "njoi"],
     "MongolTV": ["mongoltv", "mongol tv", "mongolia tv"],
@@ -234,51 +97,26 @@ EVERGENT_CLIENTS = {
     "Britbox": ["britbox", "britbox international"],
     "Quickplay": ["quickplay", "quickplay media"],
     "Pilipinas": ["pilipinas", "abs-cbn"],
-    # Additional clients
-    "Akash DTH": ["akash dth"],
+    # Additional clients you listed
+    "Akash DTH": ["akash dth", "akash"],
     "DirecTV": ["directv"],
-    "Britbox": ["britbox"],
-    "NBA": ["nba"],
-    "Gotham": ["gotham"],
-    "FanDuel Sports": ["fanduel sports", "bally sports"],
-    "WONDER Project": ["wonder project"],
-    "Marquee Sports": ["marquee sports"],
-    "Astro": ["astro"],
-    "Akash": ["akash"],
-    "Etisalat": ["etisalat"],
-    "Sony": ["sony"],
     "DAZN": ["dazn"],
-    "Simple TV": ["simple tv"],
     "Antel": ["antel"],
-    "Aha": ["aha"],
-    "Sky NZ": ["sky nz"],
-    "BBC": ["bbc"],
-    "ABS CBN": ["abs cbn"],
-    "BC - Mongol TV": ["bc mongol tv"],
-    "Shahid": ["shahid"],
-    "Viki": ["viki"],
-    "TRT": ["trt"],
-    "TV3": ["tv3"],
-    "ETV": ["etv"],
-    "Cignal- Philippinas": ["cignal philippinas", "first light"],
-    "TV Asahi": ["tv asahi"],
-    "Ooredo - MK": ["ooredoo mk"],
-    "BC - One 31": ["bc one 31"],
-    "Antenna Greece": ["antenna greece"],
-    "Telekom Malaysia": ["telekom malaysia"],
+    "Ooredoo": ["ooredoo", "ooredoo mk", "subhub e&"],
     "Exxen": ["exxen"],
-    "Cignal Super": ["cignal super"],
     "Dorna Sports": ["dorna sports"],
     "Premier League": ["premier league"],
     "StarHub": ["starhub"],
-    "Subhub e&": ["subhub e&"],
     "TV NZ": ["tv nz"],
     "TV9 - Firstlight Media": ["tv9 firstlight media"],
-    "Korea Content Platform": ["korea content platform"],
-    "Firstlight Ltd - PLDT Home": ["firstlight ltd pldt home"],
     "Minno": ["minno"],
     "EKKL (Pinnacle Peak)": ["ekkl pinnacle peak"],
     "Liberty Global": ["liberty global"],
+    "TV Asahi": ["tv asahi"],
+    "Antenna Greece": ["antenna greece"],
+    "Korea Content Platform": ["korea content platform"],
+    "Firstlight Ltd - PLDT Home": ["firstlight ltd pldt home"],
+    "WONDER Project": ["wonder project"],
 }
 
 COMPETITORS = {
@@ -310,121 +148,33 @@ COMPETITORS = {
     "Salesforce": ["salesforce", "salesforce communications"],
 }
 
-TOP_TELCOS = {
-    # USA
-    "Verizon": ["verizon", "verizon wireless", "verizon fios"],
-    "AT&T": ["at&t", "att mobility"],
-    "T-Mobile": ["t-mobile", "tmobile usa", "sprint"],
-    "Comcast": ["comcast", "xfinity", "comcast cable"],
-    "Charter": ["charter communications", "spectrum", "charter spectrum"],
-    "Cox": ["cox communications", "cox cable", "cox business"],
-    "Lumen": ["lumen technologies", "centurylink", "lumen"],
-    "Frontier": ["frontier communications", "frontier"],
-    "Windstream": ["windstream", "windstream enterprise"],
-    "Mediacom": ["mediacom communications", "mediacom"],
-    "Altice USA": ["altice usa", "optimum", "suddenlink"],
-    # UK & Europe
-    "BT": ["bt group", "british telecom", "bt", "bt enterprise", "ee"],
-    "Vodafone": ["vodafone", "vodafone group"],
-    "O2": ["o2", "telefonica uk"],
-    "Virgin Media": ["virgin media", "virgin media o2"],
-    "Three": ["three uk", "three mobile"],
-    "Orange": ["orange", "orange sa"],
-    "Deutsche Telekom": ["deutsche telekom", "t-mobile europe", "telekom"],
-    "Telefónica": ["telefonica", "telefonica spain", "movistar"],
-    "Telecom Italia": ["telecom italia", "tim", "tim brasil"],
-    "Swisscom": ["swisscom", "swisscom ag"],
-    "KPN": ["kpn", "koninklijke pn"],
-    "Proximus": ["proximus", "belgacom"],
-    "Telenor": ["telenor", "telenor group"],
-    "Telia": ["telia", "telia company"],
-    "Bouygues": ["bouygues telecom", "bouygues"],
-    # APAC - Singapore/Malaysia/NZ
-    "Singtel": ["singtel", "singapore telecom", "singapore telecommunications"],
-    "StarHub": ["starhub", "starhub singapore"],
-    "M1": ["m1 limited", "m1 singapore"],
-    "Maxis": ["maxis", "maxis communications", "maxis malaysia"],
-    "Celcom": ["celcom", "celcom axiata"],
-    "Digi": ["digi telecommunications", "digi malaysia", "digi.com"],
-    "Telekom Malaysia": ["telekom malaysia", "tm", "tm unifi"],
-    "U Mobile": ["u mobile", "umobile malaysia"],
-    "Sky NZ": ["sky new zealand", "sky nz", "sky network television"],
-    "Spark": ["spark new zealand", "spark nz"],
-    "2degrees": ["2degrees", "2degrees mobile"],
-    "Vodafone NZ": ["vodafone new zealand", "vodafone nz"],
-    # Australia
-    "Telstra": ["telstra", "telstra corporation"],
-    "Optus": ["optus", "singtel optus"],
-    "TPG": ["tpg telecom", "vodafone australia"],
-    # Asia
-    "China Mobile": ["china mobile", "cmcc"],
-    "China Telecom": ["china telecom", "chinanet"],
-    "China Unicom": ["china unicom", "unicom"],
-    "NTT": ["ntt", "nippon telegraph", "ntt docomo"],
-    "SoftBank": ["softbank", "softbank corp"],
-    "KDDI": ["kddi", "kddi corporation", "au"],
-    "Reliance Jio": ["reliance jio", "jio", "jio platforms"],
-    "Airtel": ["bharti airtel", "airtel", "airtel india"],
-    "Vi": ["vodafone idea", "vi", "idea cellular"],
-    "BSNL": ["bsnl", "bharat sanchar"],
-    "SK Telecom": ["sk telecom", "skt"],
-    "KT": ["kt corporation", "kt"],
-    "LG Uplus": ["lg uplus", "lg u+"],
-    "Globe": ["globe telecom", "globe philippines"],
-    "PLDT": ["pldt", "philippine long distance"],
-    "Smart": ["smart communications", "smart philippines"],
-    # Middle East
-    "Etisalat": ["etisalat", "emirates telecom", "e&"],
-    "Du": ["du", "emirates integrated"],
-    "STC": ["stc", "saudi telecom", "saudi telecom company"],
-    "Ooredoo": ["ooredoo", "ooredoo group"],
-    "Zain": ["zain", "zain group"],
-    "Mobily": ["mobily", "etihad etisalat"],
-    # Americas
-    "América Móvil": ["america movil", "claro", "telmex"],
-    "Telus": ["telus", "telus communications"],
-    "Rogers": ["rogers communications", "rogers"],
-    "Bell": ["bell canada", "bce inc"],
-    "Shaw": ["shaw communications", "shaw"],
-    # Africa
-    "MTN": ["mtn group", "mtn"],
-    "Vodacom": ["vodacom", "vodacom group"],
-    "Safaricom": ["safaricom", "safaricom plc"],
-}
-
-# Combined keyword list for filtering
-ALL_COMPANY_KWS = []
-for d in [EVERGENT_CLIENTS, COMPETITORS, TOP_TELCOS]:
+# Combined keyword list for filtering (unique, lowercased)
+ALL_COMPANY_KWS = set()
+for d in [EVERGENT_CLIENTS, COMPETITORS]:
     for names in d.values():
-        ALL_COMPANY_KWS.extend(names)
-ALL_COMPANY_KWS = list(set([kw.lower() for kw in ALL_COMPANY_KWS]))  # unique, lowercased for matching
+        ALL_COMPANY_KWS.update([kw.lower() for kw in names])
 
-# RSS FEEDS (expanded for coverage)
+# RSS FEEDS (corrected & expanded)
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
     ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml", "telco"),
     ("RCR Wireless", "https://www.rcrwireless.com/feed", "telco"),
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/", "telco"),
+    ("StreamTV Insider", "https://www.streamtvinsider.com/feed", "sports"),
+    ("Sports Business Journal", "https://www.sportsbusinessjournal.com/rss", "sports"),
+    ("Sportcal", "https://www.sportcal.com/feed", "sports"),
     ("Variety", "https://variety.com/feed/", "ott"),
     ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/", "ott"),
     ("Deadline", "https://deadline.com/feed/", "ott"),
     ("Digital TV Europe", "https://www.digitaltveurope.com/feed/", "ott"),
     ("ESPN", "https://www.espn.com/espn/rss/news", "sports"),
-    "BBC Sport": ["bbc sport", "bbc sports"],
-    "SportsPro": ["sportspromedia.com", "sports pro"],
+    ("BBC Sport", "https://feeds.bbci.co.uk/sport/rss.xml", "sports"),  # Corrected
+    ("SportsPro", "https://www.sportspromedia.com/feed/", "sports"),
     ("TechCrunch", "https://techcrunch.com/feed/", "technology"),
     ("The Verge", "https://www.theverge.com/rss/index.xml", "technology"),
     ("Wired", "https://www.wired.com/feed/rss", "technology"),
     ("VentureBeat", "https://venturebeat.com/feed/", "technology"),
-    # Additional for clients & competitors
-    ("Sports Business Journal", "https://www.sportsbusinessjournal.com/rss", "sports"),
-    ("Sportcal", "https://www.sportcal.com/feed", "sports"),
-    ("StreamTV Insider", "https://www.streamtvinsider.com/feed", "ott"),
-    ("Fierce Video", "https://www.fiercevideo.com/rss.xml", "ott"),
-    ("TM Forum", "https://inform.tmforum.org/feed/", "telco"),
-    ("Appledore Research", "https://appledoreresearch.com/feed/", "telco"),
-    ("Omdia", "https://omdia.tech.informa.com/feed", "technology"),
 ]
 
 SECTIONS = {
@@ -449,7 +199,7 @@ def fetch_feed(source, url, category):
         NOW = datetime.now()
         CUTOFF = NOW - timedelta(days=10)
         
-        for entry in feed.entries[:15]:
+        for entry in feed.entries[:20]:
             title = clean(entry.get("title", ""))
             if len(title) < 30: continue
             
@@ -468,7 +218,7 @@ def fetch_feed(source, url, category):
             
             full_text = (title + " " + summary).lower()
             
-            # Strict filter: must match at least one company keyword
+            # Strict filter: only relevant companies
             if not any(kw in full_text for kw in ALL_COMPANY_KWS):
                 continue
             
@@ -492,6 +242,15 @@ def load_feeds():
         futures = [executor.submit(fetch_feed, s, u, c) for s, u, c in RSS_FEEDS]
         for future in as_completed(futures):
             for item in future.result():
+                text = (item["title"] + " " + item["summary"]).lower()
+                
+                # Intelligent routing
+                if any(kw in text for kw in ["nba", "fanduel", "bally", "gotham", "marquee", "premier league", "dorna"]):
+                    item["category"] = "sports"
+                elif any(kw in text for kw in ["streaming", "ott", "sonyliv", "aha", "dazn", "shahid", "viki", "britbox"]):
+                    item["category"] = "ott"
+                elif any(kw in text for kw in ["oss", "bss", "billing", "charging", "amdocs", "netcracker", "csg", "matrixx"]):
+                    item["category"] = "telco"
                 categorized[item["category"]].append(item)
     
     # Sort newest first
@@ -509,7 +268,7 @@ def get_time_str(dt):
 
 def render_body(items):
     if not items:
-        return """<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">No critical signals at this time</div></div>"""
+        return """<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">Scanning for critical signals...</div></div>"""
     
     cards = []
     for item in items:
