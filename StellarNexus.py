@@ -7,18 +7,15 @@ import html
 import re
 import time
 
-# ══════════════════════════════════════════════════════════════════════════════
-# PAGE CONFIG & KEEP-ALIVE
-# ══════════════════════════════════════════════════════════════════════════════
+# PAGE CONFIG
 st.set_page_config(page_title="Global Telecom & OTT Stellar Nexus", page_icon="🌐", layout="wide", initial_sidebar_state="collapsed")
 
+# KEEP-ALIVE
 @st.fragment(run_every=600)
 def keep_alive():
     st.markdown("", unsafe_allow_html=True)
 
-# ══════════════════════════════════════════════════════════════════════════════
-# STYLING (with added link styling for Read more)
-# ══════════════════════════════════════════════════════════════════════════════
+# STYLING
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -74,9 +71,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ══════════════════════════════════════════════════════════════════════════════
-# RSS FEEDS (includes NBA-Evergent sources)
-# ══════════════════════════════════════════════════════════════════════════════
+# RSS FEEDS
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
     ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
@@ -107,13 +102,15 @@ SECTIONS = {
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
-# ══════════════════════════════════════════════════════════════════════════════
-# PRIORITY KEYWORDS
-# ══════════════════════════════════════════════════════════════════════════════
+# PRIORITY KEYWORDS - Strict filter for meaningful impact
 KEY_EVERGENT = ["evergent", "evergent technologies", "nba league pass", "nba evergent"]
 KEY_AMDOCS = ["amdocs", "matrixx"]
 KEY_NETCRACKER = ["netcracker", "csg", "nec csg"]
-PRIORITY_KEYWORDS = KEY_EVERGENT + KEY_AMDOCS + KEY_NETCRACKER + ["oss", "bss", "charging", "billing", "merger", "acquisition", "investment", "partnership", "agentic ai"]
+MEANINGFUL_KEYWORDS = KEY_EVERGENT + KEY_AMDOCS + KEY_NETCRACKER + [
+    "oss", "bss", "charging", "billing", "convergent", "monetization", "subscription platform",
+    "merger", "acquisition", "investment", "partnership", "strategic", "deal", "contract",
+    "agentic ai", "autonomous", "5g core", "cloud native"
+]
 
 def clean(raw):
     return html.unescape(re.sub(r'<[^>]+>', '', str(raw or ""))).strip()
@@ -130,7 +127,7 @@ def fetch_feed(source, url, category):
         
         for entry in feed.entries[:15]:
             title = clean(entry.get("title", ""))
-            if len(title) < 20: continue
+            if len(title) < 25: continue
             
             summary = clean(entry.get("summary", entry.get("description", "")))
             link = entry.get("link", "")
@@ -146,7 +143,11 @@ def fetch_feed(source, url, category):
             if not pub or pub < CUTOFF: continue
             
             text = (title + " " + summary).lower()
-            is_priority = any(kw in text for kw in PRIORITY_KEYWORDS)
+            
+            # Strict filter: must have meaningful keyword
+            if not any(kw in text for kw in MEANINGFUL_KEYWORDS):
+                continue
+            
             is_ultra = any(kw in text for kw in KEY_EVERGENT)
             is_vendor = any(kw in text for kw in KEY_AMDOCS + KEY_NETCRACKER)
             
@@ -155,9 +156,9 @@ def fetch_feed(source, url, category):
                 "link": link,
                 "pub": pub,
                 "source": source,
-                "summary": summary[:120] + "..." if len(summary) > 120 else summary,
+                "summary": summary[:140] + "..." if len(summary) > 140 else summary,
                 "category": category,
-                "priority": is_priority,
+                "priority": True,  # All here are meaningful
                 "ultra": is_ultra,
                 "vendor": is_vendor
             })
@@ -176,7 +177,7 @@ def load_feeds():
                 categorized[item["category"]].append(item)
     
     for cat in categorized:
-        categorized[cat].sort(key=lambda x: (-x["ultra"], -x["vendor"], -x["priority"], x["pub"]), reverse=True)
+        categorized[cat].sort(key=lambda x: (-x["ultra"], -x["vendor"], x["pub"]), reverse=True)
     
     return categorized
 
@@ -189,7 +190,7 @@ def get_time_str(dt):
 
 def render_body(items):
     if not items:
-        return """<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">No recent news</div></div>"""
+        return """<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">Scanning for meaningful signals...</div></div>"""
     
     cards = []
     for item in items:
@@ -198,7 +199,7 @@ def render_body(items):
         link = html.escape(item["link"])
         source = html.escape(item["source"])
         
-        card_class = "ultra-priority" if item["ultra"] else "news-card-priority" if item["priority"] else "news-card"
+        card_class = "ultra-priority" if item["ultra"] else "news-card-priority"
         
         card_parts = [
             f'<div class="{card_class}">',
@@ -215,15 +216,15 @@ def render_body(items):
     return '<div class="col-body">' + ''.join(cards) + '</div>'
 
 # ──────────────────────────────────────────────────────────────────────────────
-# MAIN APPLICATION
+# MAIN APPLICATION - CEO Dashboard
 # ──────────────────────────────────────────────────────────────────────────────
 
 placeholder = st.empty()
 with placeholder.container():
     st.markdown("""
         <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:70vh;text-align:center;">
-            <h1 style="color:#0a192f;font-size:2.8rem;font-weight:800;">⚡ Igniting AI-powered intelligence...</h1>
-            <p style="color:#64748b;font-size:1.2rem;">Synchronizing global news nodes</p>
+            <h1 style="color:#0a192f;font-size:2.8rem;font-weight:800;">⚡ Building Executive Intelligence...</h1>
+            <p style="color:#64748b;font-size:1.2rem;">Prioritizing Evergent • Amdocs • Netcracker signals</p>
         </div>
     """, unsafe_allow_html=True)
     time.sleep(1.5)
@@ -233,36 +234,36 @@ placeholder.empty()
 st.markdown("""
 <div class="header-container">
     <h1 class="main-title">🌐 Global Telecom & OTT Stellar Nexus</h1>
-    <p class="subtitle">AI Powered Real-time Competitive Intelligence Dashboard</p>
+    <p class="subtitle">Executive Real-time Competitive Intelligence Dashboard</p>
 </div>
 """, unsafe_allow_html=True)
 
-# Dynamic Highlights with Read more links
-with st.spinner("Loading real-time intelligence..."):
+# Dynamic Executive Highlights
+with st.spinner("Loading high-impact signals..."):
     data = load_feeds()
 
-all_priority = []
+all_high_impact = []
 for cat in data:
-    all_priority.extend([i for i in data[cat] if i["priority"]])
+    all_high_impact.extend(data[cat])  # All items here are already filtered as meaningful
 
-all_priority.sort(key=lambda x: (-x["ultra"], -x["vendor"], x["pub"]), reverse=True)
+all_high_impact.sort(key=lambda x: (-x["ultra"], -x["vendor"], x["pub"]), reverse=True)
 
-strategic = [i for i in all_priority if i["ultra"] or i["vendor"] or "merger" in i["title"].lower() or "acquisition" in i["title"].lower() or "investment" in i["title"].lower()][:3]
-pulse_list = [i for i in all_priority if i not in strategic][:3]
+strategic = [i for i in all_high_impact if i["ultra"] or i["vendor"]][:3]
+pulse_list = [i for i in all_high_impact if i not in strategic][:3]
 
-# Build HTML for Strategic Hits
+# Strategic Hits HTML
 hits_html = '<div class="hero-box"><div class="hero-box-title" style="color: #10b981;">🟢 STRATEGIC HITS</div><div class="hero-content">'
 if strategic:
     for item in strategic:
         days = (datetime.now() - item["pub"]).days
-        tag = "🚨 ULTRA" if item["ultra"] else "High Impact"
+        tag = "🚨 ULTRA EVERGENT" if item["ultra"] else "High Impact"
         hits_html += f'<b>{tag}:</b> {item["title"]}<br>{item["summary"]}<br><small>({days}d ago via {item["source"]})</small><br>'
         hits_html += f'<a href="{item["link"]}" target="_blank">Read more →</a><br><br>'
 else:
     hits_html += "Scanning for major strategic moves..."
 hits_html += '</div></div>'
 
-# Build HTML for Pulse
+# Pulse HTML
 pulse_html = '<div class="hero-box"><div class="hero-box-title" style="color: #f97316;">🟠 PULSE</div><div class="hero-content">'
 if pulse_list:
     for item in pulse_list:
@@ -270,12 +271,12 @@ if pulse_list:
         pulse_html += f'<b>{item["title"]}</b><br>{item["summary"]}<br><small>({days}d ago via {item["source"]})</small><br>'
         pulse_html += f'<a href="{item["link"]}" target="_blank">Read more →</a><br><br>'
 else:
-    pulse_html += "Live industry trends loading..."
+    pulse_html += "High-impact trends loading..."
 pulse_html += '</div></div>'
 
 st.markdown(f"""
 <div class="hero-container">
-    <div class="hero-title">🚀 HIGHLIGHTS (Real-Time)</div>
+    <div class="hero-title">🚀 EXECUTIVE HIGHLIGHTS</div>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         {hits_html}
         {pulse_html}
@@ -299,7 +300,7 @@ for idx, cat in enumerate(cat_list):
 # Footer
 st.markdown("""
 <div style="text-align:center;color:rgba(255,255,255,0.95);font-size:0.8rem;margin-top:20px;padding:16px;background:linear-gradient(135deg,rgba(10,25,47,0.95),rgba(30,41,59,0.95));border-radius:10px;">
-    <strong>🔄 Auto-refresh:</strong> Every 5 minutes | <strong>Prioritized:</strong> Evergent • Amdocs • Netcracker first
+    <strong>🔄 Auto-refresh:</strong> Every 5 minutes | <strong>For Telco & OTT CEOs Worldwide</strong>
 </div>
 """, unsafe_allow_html=True)
 
