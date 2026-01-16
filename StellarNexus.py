@@ -7,56 +7,32 @@ import html
 import re
 import time
 
-# PAGE CONFIG
-st.set_page_config(
-    page_title="Global Telecom & OTT Stellar Nexus",
-    page_icon="🌐",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+# ══════════════════════════════════════════════════════════════════════════════
+# PAGE CONFIG & KEEP-ALIVE
+# ══════════════════════════════════════════════════════════════════════════════
+st.set_page_config(page_title="Global Telecom & OTT Stellar Nexus", page_icon="🌐", layout="wide", initial_sidebar_state="collapsed")
 
-# KEEP-ALIVE
 @st.fragment(run_every=600)
 def keep_alive():
     st.markdown("", unsafe_allow_html=True)
 
-# PREMIUM STYLING (your original + ultra styling)
+# ══════════════════════════════════════════════════════════════════════════════
+# STYLING
+# ══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     
-    .stApp {
-        background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
-        background-size: cover;
-        font-family: 'Inter', sans-serif;
-        padding-top: 0.5rem;
-    }
+    .stApp { background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed; background-size: cover; font-family: 'Inter', sans-serif; padding-top: 0.5rem; }
     
-    .header-container {
-        background: rgba(255, 255, 255, 0.96);
-        padding: 1.5rem 2rem;
-        text-align: center;
-        border-radius: 20px;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-        margin: 0 0 2rem 0;
-        border-bottom: 4px solid #1e40af;
-    }
-    
+    .header-container { background: rgba(255,255,255,0.96); padding: 1.5rem 2rem; text-align: center; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); margin: 0 0 2rem 0; border-bottom: 4px solid #1e40af; }
     .main-title { font-size: 2.6rem; font-weight: 800; color: #0a192f; margin: 0; letter-spacing: -0.8px; }
     .subtitle { font-size: 1.1rem; color: #475569; margin-top: 0.6rem; font-weight: 500; }
     
-    .hero-container {
-        background: rgba(255, 255, 255, 0.98);
-        border-radius: 16px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 10px 35px rgba(0,0,0,0.12);
-        border: 1px solid #e2e8f0;
-    }
-    
+    .hero-container { background: rgba(255,255,255,0.98); border-radius: 16px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 10px 35px rgba(0,0,0,0.12); border: 1px solid #e2e8f0; }
     .hero-title { color: #0a192f; font-size: 1.85rem; font-weight: 800; margin-bottom: 1.5rem; border-left: 6px solid #1e40af; padding-left: 15px; }
     
-    .hero-box { background: #f1f5f9; border-radius: 12px; padding: 1.5rem; min-height: 200px; border: 1px solid #e2e8f0; }
+    .hero-box { background: #f1f5f9; border-radius: 12px; padding: 1.5rem; min-height: 220px; border: 1px solid #e2e8f0; }
     .hero-box-title { font-weight: 800; font-size: 1.1rem; margin-bottom: 12px; }
     .hero-content { color: #1e293b; font-size: 0.95rem; line-height: 1.7; }
     .hero-content b { color: #0a192f; font-weight: 700; }
@@ -69,11 +45,13 @@ st.markdown("""
     
     .col-body { background: white; border-radius: 0 0 14px 14px; padding: 12px; min-height: 480px; max-height: 580px; overflow-y: auto; box-shadow: 0 6px 20px rgba(0,0,0,0.08); margin-bottom: 1rem; }
     
-    .news-card { background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 10px; transition: all 0.3s ease; }
-    .news-card:hover { background: #f1f5f9; box-shadow: 0 6px 16px rgba(0,0,0,0.08); transform: translateY(-1px); }
-    
-    .news-card-priority { background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%); border: 2px solid #fbbf24; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+    .news-card, .news-card-priority { background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 10px; transition: all 0.3s ease; }
+    .news-card:hover, .news-card-priority:hover { background: #f1f5f9; box-shadow: 0 6px 16px rgba(0,0,0,0.08); transform: translateY(-1px); }
+    .news-card-priority { background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%); border: 2px solid #fbbf24; }
     .news-card-priority:hover { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); box-shadow: 0 8px 20px rgba(251,191,36,0.2); }
+    
+    .ultra-priority { border: 3px solid #ef4444 !important; background: rgba(239,68,68,0.12) !important; box-shadow: 0 0 15px rgba(239,68,68,0.4); animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); } 70% { box-shadow: 0 0 0 10px rgba(239,68,68,0); } 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); } }
     
     .news-title { color: #1e40af; font-size: 0.92rem; font-weight: 600; line-height: 1.35; text-decoration: none; display: block; margin-bottom: 6px; }
     .news-title:hover { color: #1d4ed8; text-decoration: underline; }
@@ -91,39 +69,27 @@ st.markdown("""
     .stDeployButton {display: none;}
     
     [data-testid="column"] {padding: 0 8px !important;}
-    
-    .ultra-priority {
-        border: 3px solid #ef4444 !important;
-        background: rgba(239,68,68,0.12) !important;
-        box-shadow: 0 0 15px rgba(239,68,68,0.4);
-        animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-        0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
-        70% { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
-        100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
-    }
 </style>
 """, unsafe_allow_html=True)
 
-# RSS FEEDS (optimized - includes sources publishing NBA-Evergent news)
+# ══════════════════════════════════════════════════════════════════════════════
+# RSS FEEDS - Optimized for NBA-Evergent coverage
+# ══════════════════════════════════════════════════════════════════════════════
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
     ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml", "telco"),
     ("RCR Wireless", "https://www.rcrwireless.com/feed", "telco"),
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/", "telco"),
-    ("Light Reading OSS/BSS", "https://www.lightreading.com/rss/oss-bss-cx", "telco"),
+    ("StreamTV Insider", "https://www.streamtvinsider.com/feed", "sports"),
+    ("Sports Business Journal", "https://www.sportsbusinessjournal.com/rss", "sports"),
+    ("Sportcal", "https://www.sportcal.com/feed", "sports"),
     ("Variety", "https://variety.com/feed/", "ott"),
     ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/", "ott"),
     ("Deadline", "https://deadline.com/feed/", "ott"),
     ("Digital TV Europe", "https://www.digitaltveurope.com/feed/", "ott"),
-    ("StreamTV Insider", "https://www.streamtvinsider.com/feed", "ott"),  # NBA-Evergent source
     ("ESPN", "https://www.espn.com/espn/rss/news", "sports"),
-    ("BBC Sport", "https://feeds.bbci.co.uk/sport/rss.xml", "sports"),
     ("SportsPro", "https://www.sportspromedia.com/feed/", "sports"),
-    ("Sports Business Journal", "https://www.sportsbusinessjournal.com/rss", "sports"),  # NBA-Evergent source
-    ("Sportcal", "https://www.sportcal.com/feed", "sports"),  # NBA-Evergent source
     ("TechCrunch", "https://techcrunch.com/feed/", "technology"),
     ("The Verge", "https://www.theverge.com/rss/index.xml", "technology"),
     ("Wired", "https://www.wired.com/feed/rss", "technology"),
@@ -139,12 +105,13 @@ SECTIONS = {
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
-# Priority keywords (covers NBA-Evergent)
-PRIORITY_KEYWORDS = [
-    "amdocs", "netcracker", "matrixx", "evergent", "evergent technologies",
-    "oss", "bss", "merger", "acquisition", "nba", "league pass",
-    "strategic investment", "partnership extension", "subscription management"
-]
+# ══════════════════════════════════════════════════════════════════════════════
+# PRIORITY KEYWORDS - Strong focus on Evergent, Amdocs, Netcracker
+# ══════════════════════════════════════════════════════════════════════════════
+KEY_EVERGENT = ["evergent", "evergent technologies", "nba league pass", "nba evergent"]
+KEY_AMDOCS = ["amdocs", "matrixx"]
+KEY_NETCRACKER = ["netcracker", "csg", "nec csg"]
+PRIORITY_KEYWORDS = KEY_EVERGENT + KEY_AMDOCS + KEY_NETCRACKER + ["oss", "bss", "charging", "billing", "merger", "acquisition", "investment", "partnership", "agentic ai"]
 
 def clean(raw):
     return html.unescape(re.sub(r'<[^>]+>', '', str(raw or ""))).strip()
@@ -176,19 +143,21 @@ def fetch_feed(source, url, category):
             
             if not pub or pub < CUTOFF: continue
             
-            text_lower = (title + " " + summary).lower()
-            is_priority = any(kw in text_lower for kw in PRIORITY_KEYWORDS)
-            is_ultra = "evergent" in text_lower
+            text = (title + " " + summary).lower()
+            is_priority = any(kw in text for kw in PRIORITY_KEYWORDS)
+            is_ultra = any(kw in text for kw in KEY_EVERGENT)
+            is_high_vendor = any(kw in text for kw in KEY_AMDOCS + KEY_NETCRACKER)
             
             items.append({
                 "title": title,
                 "link": link,
                 "pub": pub,
                 "source": source,
-                "summary": summary,
+                "summary": summary[:120] + "..." if len(summary) > 120 else summary,
                 "category": category,
                 "priority": is_priority,
-                "ultra": is_ultra
+                "ultra": is_ultra,
+                "vendor_priority": is_high_vendor
             })
     except:
         pass
@@ -205,7 +174,7 @@ def load_feeds():
                 categorized[item["category"]].append(item)
     
     for cat in categorized:
-        categorized[cat].sort(key=lambda x: (-x["ultra"], -x["priority"], x["pub"]), reverse=True)
+        categorized[cat].sort(key=lambda x: (-x["ultra"], -x["vendor_priority"], -x["priority"], x["pub"]), reverse=True)
     
     return categorized
 
@@ -243,7 +212,10 @@ def render_body(items):
     
     return '<div class="col-body">' + ''.join(cards) + '</div>'
 
+# ──────────────────────────────────────────────────────────────────────────────
 # MAIN APPLICATION
+# ──────────────────────────────────────────────────────────────────────────────
+
 placeholder = st.empty()
 with placeholder.container():
     st.markdown("""
@@ -263,50 +235,36 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Dynamic Highlights (pulls real priority news for Hits & Pulse)
-with st.spinner("Building dynamic highlights..."):
+# Dynamic Highlights - Executive style with priority on Evergent, Amdocs, Netcracker
+with st.spinner("Loading real-time intelligence..."):
     data = load_feeds()
 
-strategic_hits = []
-pulse_items = []
-
+all_priority = []
 for cat in data:
-    for item in data[cat]:
-        if item["priority"]:
-            text = item["title"].lower() + " " + item["summary"].lower()
-            if item["ultra"] or "merger" in text or "acquisition" in text or "investment" in text or "partnership" in text:
-                strategic_hits.append(item)
-            else:
-                pulse_items.append(item)
+    all_priority.extend([i for i in data[cat] if i["priority"]])
 
-strategic_hits = sorted(strategic_hits, key=lambda x: x["pub"], reverse=True)[:4]
-pulse_items = sorted(pulse_items, key=lambda x: x["pub"], reverse=True)[:4]
+all_priority.sort(key=lambda x: (-x["ultra"], -x["vendor_priority"], x["pub"]), reverse=True)
 
-hits_md = '<div class="hero-box"><div class="hero-box-title" style="color: #10b981;">🟢 STRATEGIC HITS</div><div class="hero-content">'
-if strategic_hits:
-    for h in strategic_hits:
-        days = (datetime.now() - h["pub"]).days
-        tag = "🚨 ULTRA" if h["ultra"] else "High Impact"
-        hits_md += f'<b>{tag}:</b> {h["title"]} ({days}d ago via {h["source"]})<br><a href="{h["link"]}" target="_blank">Read more →</a><br><br>'
-else:
-    hits_md += "Scanning for major deals & investments..."
-hits_md += '</div></div>'
+strategic = [i for i in all_priority if i["ultra"] or i["vendor_priority"] or "merger" in i["title"].lower() or "acquisition" in i["title"].lower() or "investment" in i["title"].lower()][:3]
+pulse_list = [i for i in all_priority if i not in strategic][:3]
 
-pulse_md = '<div class="hero-box"><div class="hero-box-title" style="color: #f97316;">🟠 PULSE</div><div class="hero-content">'
-if pulse_items:
-    for p in pulse_items:
-        days = (datetime.now() - p["pub"]).days
-        pulse_md += f'<b>{p["title"]}</b> ({days}d ago via {p["source"]})<br><a href="{p["link"]}" target="_blank">Read more →</a><br><br>'
-else:
-    pulse_md += "Live trends & emerging signals..."
-pulse_md += '</div></div>'
-
+# Render Highlights
 st.markdown(f"""
 <div class="hero-container">
-    <div class="hero-title">🚀 HIGHLIGHTS (Real-Time)</div>
+    <div class="hero-title">🚀 HIGHLIGHTS</div>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-        {hits_md}
-        {pulse_md}
+        <div class="hero-box">
+            <div class="hero-box-title" style="color: #10b981;">🟢 STRATEGIC HITS</div>
+            <div class="hero-content">
+                {''.join([f'<b>{i["title"]}:</b> {i["summary"]}<br><br>' for i in strategic]) or "Scanning for major strategic moves..."}
+            </div>
+        </div>
+        <div class="hero-box">
+            <div class="hero-box-title" style="color: #f97316;">🟠 PULSE</div>
+            <div class="hero-content">
+                {''.join([f'<b>{i["title"]}:</b> {i["summary"]}<br><br>' for i in pulse_list]) or "Live industry trends loading..."}
+            </div>
+        </div>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -320,27 +278,17 @@ for idx, cat in enumerate(cat_list):
     items = data.get(cat, [])[:12]
     
     with cols[idx]:
-        header_parts = [
-            '<div class="',
-            sec["style"],
-            '">',
-            sec["icon"],
-            ' ',
-            sec["name"],
-            '</div>'
-        ]
+        header_parts = ['<div class="', sec["style"], '">', sec["icon"], ' ', sec["name"], '</div>']
         st.markdown(''.join(header_parts), unsafe_allow_html=True)
-        
         st.markdown(render_body(items), unsafe_allow_html=True)
 
 # Footer
 st.markdown("""
 <div style="text-align:center;color:rgba(255,255,255,0.95);font-size:0.8rem;margin-top:20px;padding:16px;background:linear-gradient(135deg,rgba(10,25,47,0.95),rgba(30,41,59,0.95));border-radius:10px;">
-    <strong>🔄 Auto-refresh:</strong> Every 5 minutes | <strong>Dynamic Engine</strong> - Covers NBA-Evergent & more
+    <strong>🔄 Auto-refresh:</strong> Every 5 minutes | <strong>Dynamic & Prioritized:</strong> Evergent • Amdocs • Netcracker first
 </div>
 """, unsafe_allow_html=True)
 
-# Auto-refresh
 st.markdown('<script>setTimeout(function() {window.location.reload();}, 300000);</script>', unsafe_allow_html=True)
 
 keep_alive()
