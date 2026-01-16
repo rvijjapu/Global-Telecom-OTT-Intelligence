@@ -66,10 +66,10 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# COMPREHENSIVE KEYWORD LISTS (from your input)
+# COMPREHENSIVE KEYWORD LISTS (your full lists)
 EVERGENT_CLIENTS = {
     "Astro": ["astro malaysia", "astro sooka", "astro njoi", "astro", "sooka", "njoi"],
-    "MongolTV": ["mongoltv", "mongol tv", "mongolia tv"],
+    "MongolTV": ["mongoltv", "mongol tv", "mongolia tv", "bc mongol tv"],
     "FOX": ["fox sports", "fox corporation", "fox networks", "fox"],
     "AT&T": ["at&t", "att inc", "att wireless", "directv"],
     "NBA": ["nba", "national basketball"],
@@ -81,23 +81,22 @@ EVERGENT_CLIENTS = {
     "Viki": ["viki", "rakuten viki", "viki streaming"],
     "TRT": ["trt world", "trt", "turkish radio"],
     "Sinclair": ["sinclair broadcast", "sinclair", "bally sports"],
-    "FanDuel": ["fanduel", "fanduel group", "flutter"],
+    "FanDuel": ["fanduel", "fanduel group", "flutter", "fanduel sports"],
     "Bally Sports": ["bally sports", "bally regional", "diamond sports"],
     "Gotham": ["gotham advanced", "gotham fc"],
     "Marquee": ["marquee sports", "marquee network"],
     "Sony": ["sony pictures", "sony entertainment", "sonyliv", "sony india"],
     "Aha": ["aha video", "aha ott", "aha telugu"],
-    "BBC": ["bbc", "british broadcasting", "bbc iplayer"],
+    "BBC": ["bbc", "british broadcasting", "bbc iplayer", "britbox"],
     "Lightbox": ["lightbox", "spark lightbox"],
-    "Sky": ["sky nz", "sky new zealand", "sky tv", "sky uk", "sky italia", "sky deutschland"],
-    "Cignal": ["cignal tv", "cignal", "cignal satellite"],
+    "Sky": ["sky nz", "sky new zealand", "sky tv", "sky uk", "sky italia", "sky deutschland", "tv nz"],
+    "Cignal": ["cignal tv", "cignal", "cignal satellite", "cignal super", "cignal philippinas", "first light"],
     "ETV": ["etv network", "etv bharat"],
     "Simple TV": ["simpletv", "simple tv venezuela"],
-    "Telekom Malaysia": ["telekom malaysia", "tm unifi", "unifi tv", "tm"],
-    "Britbox": ["britbox", "britbox international"],
+    "Telekom Malaysia": ["telekom malaysia", "tm", "tm unifi", "unifi tv"],
     "Quickplay": ["quickplay", "quickplay media"],
     "Pilipinas": ["pilipinas", "abs-cbn"],
-    # Additional clients you listed
+    # Additional from your list
     "Akash DTH": ["akash dth", "akash"],
     "DirecTV": ["directv"],
     "DAZN": ["dazn"],
@@ -148,13 +147,13 @@ COMPETITORS = {
     "Salesforce": ["salesforce", "salesforce communications"],
 }
 
-# Combined keyword list for filtering (unique, lowercased)
+# Combined keyword list (unique, lowercased)
 ALL_COMPANY_KWS = set()
 for d in [EVERGENT_CLIENTS, COMPETITORS]:
     for names in d.values():
         ALL_COMPANY_KWS.update([kw.lower() for kw in names])
 
-# RSS FEEDS (corrected & expanded)
+# RSS FEEDS (focused on reliable sources)
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
     ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
@@ -169,7 +168,7 @@ RSS_FEEDS = [
     ("Deadline", "https://deadline.com/feed/", "ott"),
     ("Digital TV Europe", "https://www.digitaltveurope.com/feed/", "ott"),
     ("ESPN", "https://www.espn.com/espn/rss/news", "sports"),
-    ("BBC Sport", "https://feeds.bbci.co.uk/sport/rss.xml", "sports"),  # Corrected
+    ("BBC Sport", "https://feeds.bbci.co.uk/sport/rss.xml", "sports"),
     ("SportsPro", "https://www.sportspromedia.com/feed/", "sports"),
     ("TechCrunch", "https://techcrunch.com/feed/", "technology"),
     ("The Verge", "https://www.theverge.com/rss/index.xml", "technology"),
@@ -218,9 +217,14 @@ def fetch_feed(source, url, category):
             
             full_text = (title + " " + summary).lower()
             
-            # Strict filter: only relevant companies
+            # Ultra-strict filter: only relevant companies (no silly news)
             if not any(kw in full_text for kw in ALL_COMPANY_KWS):
                 continue
+            
+            is_evergent_client = any(kw in full_text for kw in EVERGENT_CLIENTS_KWS)
+            is_competitor = any(kw in full_text for kw in COMPETITORS_KWS)
+            
+            priority_score = 4 if is_evergent_client else 3 if is_competitor else 1
             
             items.append({
                 "title": title,
@@ -228,7 +232,8 @@ def fetch_feed(source, url, category):
                 "pub": pub,
                 "source": source,
                 "summary": summary[:140] + "..." if len(summary) > 140 else summary,
-                "category": category
+                "category": category,
+                "priority_score": priority_score
             })
     except:
         pass
@@ -253,9 +258,9 @@ def load_feeds():
                     item["category"] = "telco"
                 categorized[item["category"]].append(item)
     
-    # Sort newest first
+    # Sort: Highest priority first (Evergent clients > Competitors > Normal), then newest
     for cat in categorized:
-        categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
+        categorized[cat].sort(key=lambda x: (-x["priority_score"], x["pub"]), reverse=True)
     
     return categorized
 
@@ -315,6 +320,48 @@ st.markdown("""
 with st.spinner("Scanning latest critical news..."):
     data = load_feeds()
 
+# Dynamic Highlights - Latest impactful news (Evergent/Netcracker/Amdocs first)
+all_critical = []
+for cat in data:
+    all_critical.extend(data[cat])
+
+all_critical.sort(key=lambda x: (-x["priority_score"], x["pub"]), reverse=True)
+
+# Strategic Hits: Prioritize Evergent clients, Netcracker, Amdocs, deals
+strategic = [i for i in all_critical if i["priority_score"] >= 3][:4]  # Highest priority first
+pulse_list = [i for i in all_critical if i not in strategic][:4]
+
+# Strategic Hits
+hits_html = '<div class="hero-box"><div class="hero-box-title" style="color: #10b981;">🟢 STRATEGIC HITS</div><div class="hero-content">'
+if strategic:
+    for item in strategic:
+        hits_html += f'<b>{item["title"]}</b><br>{item["summary"]}<br>'
+        hits_html += f'<a href="{item["link"]}" target="_blank">Read more →</a><br><br>'
+else:
+    hits_html += "Scanning for latest major deals..."
+hits_html += '</div></div>'
+
+# Pulse
+pulse_html = '<div class="hero-box"><div class="hero-box-title" style="color: #f97316;">🟠 PULSE</div><div class="hero-content">'
+if pulse_list:
+    for item in pulse_list:
+        pulse_html += f'<b>{item["title"]}</b><br>{item["summary"]}<br>'
+        pulse_html += f'<a href="{item["link"]}" target="_blank">Read more →</a><br><br>'
+else:
+    pulse_html += "Emerging high-impact trends loading..."
+pulse_html += '</div></div>'
+
+st.markdown(f"""
+<div class="hero-container">
+    <div class="hero-title">🚀 LATEST HIGHLIGHTS</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        {hits_html}
+        {pulse_html}
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# News Columns
 cols = st.columns(4)
 cat_list = ["telco", "ott", "sports", "technology"]
 
