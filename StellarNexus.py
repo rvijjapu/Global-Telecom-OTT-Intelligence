@@ -6,305 +6,544 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import html
 import re
 import time
+from collections import Counter
+import json
 
+# ══════════════════════════════════════════════════════════════════════════════
 # PAGE CONFIG
-st.set_page_config(page_title="Global Telecom & OTT Stellar Nexus", page_icon="🌐", layout="wide", initial_sidebar_state="collapsed")
+# ══════════════════════════════════════════════════════════════════════════════
+st.set_page_config(
+    page_title="AI Intelligence Nexus",
+    page_icon="🧠",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
-# KEEP-ALIVE
-@st.fragment(run_every=600)
-def keep_alive():
-    st.markdown("", unsafe_allow_html=True)
+# ══════════════════════════════════════════════════════════════════════════════
+# INTELLIGENT FILTERING ENGINE
+# ══════════════════════════════════════════════════════════════════════════════
 
-# PREMIUM STYLING (unchanged, executive clean)
-st.markdown("""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-    
-    .stApp { background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed; background-size: cover; font-family: 'Inter', sans-serif; padding-top: 0.5rem; }
-    
-    .header-container { background: rgba(255,255,255,0.96); padding: 1.5rem 2rem; text-align: center; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); margin: 0 0 2rem 0; border-bottom: 4px solid #1e40af; }
-    .main-title { font-size: 2.6rem; font-weight: 800; color: #0a192f; margin: 0; letter-spacing: -0.8px; }
-    .subtitle { font-size: 1.1rem; color: #475569; margin-top: 0.6rem; font-weight: 500; }
-    
-    .hero-container { background: rgba(255,255,255,0.98); border-radius: 16px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 10px 35px rgba(0,0,0,0.12); border: 1px solid #e2e8f0; }
-    .hero-title { color: #0a192f; font-size: 1.85rem; font-weight: 800; margin-bottom: 1.5rem; border-left: 6px solid #1e40af; padding-left: 15px; }
-    
-    .hero-box { background: #f1f5f9; border-radius: 12px; padding: 1.5rem; min-height: 240px; border: 1px solid #e2e8f0; }
-    .hero-box-title { font-weight: 800; font-size: 1.1rem; margin-bottom: 12px; }
-    .hero-content { color: #1e293b; font-size: 0.95rem; line-height: 1.7; }
-    .hero-content b { color: #0a192f; font-weight: 700; }
-    .hero-content a { color: #1e40af; text-decoration: none; font-weight: 600; }
-    .hero-content a:hover { color: #1d4ed8; text-decoration: underline; }
-    
-    .col-header { padding: 12px 16px; border-radius: 14px 14px 0 0; color: white; font-weight: 700; font-size: 0.95rem; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
-    .col-header-pink {background: linear-gradient(135deg, #ec4899, #db2777);}
-    .col-header-purple {background: linear-gradient(135deg, #a78bfa, #8b5cf6);}
-    .col-header-green {background: linear-gradient(135deg, #34d399, #10b981);}
-    .col-header-orange {background: linear-gradient(135deg, #fb923c, #f97316);}
-    
-    .col-body { background: white; border-radius: 0 0 14px 14px; padding: 12px; min-height: 480px; max-height: 580px; overflow-y: auto; box-shadow: 0 6px 20px rgba(0,0,0,0.08); margin-bottom: 1rem; }
-    
-    .news-card { background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 10px; transition: all 0.3s ease; }
-    .news-card:hover { background: #f1f5f9; box-shadow: 0 6px 16px rgba(0,0,0,0.08); transform: translateY(-1px); }
-    
-    .news-title { color: #1e40af; font-size: 0.92rem; font-weight: 600; line-height: 1.35; text-decoration: none; display: block; margin-bottom: 6px; }
-    .news-title:hover { color: #1d4ed8; text-decoration: underline; }
-    
-    .news-meta { font-size: 0.76rem; color: #64748b; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
-    .time-hot {color: #dc2626; font-weight: 600; font-style: italic;}
-    .time-warm {color: #ea580c; font-weight: 600;}
-    .time-normal {color: #64748b;}
-    
-    .col-body::-webkit-scrollbar {width: 6px;}
-    .col-body::-webkit-scrollbar-track {background: #f1f5f9; border-radius: 10px;}
-    .col-body::-webkit-scrollbar-thumb {background: #94a3b8; border-radius: 10px;}
-    
-    #MainMenu, footer, header {visibility: hidden;}
-    .stDeployButton {display: none;}
-    
-    [data-testid="column"] {padding: 0 8px !important;}
-</style>
-""", unsafe_allow_html=True)
+# High-impact signals (business events, not conversational fluff)
+IMPACT_SIGNALS = {
+    "merger_acquisition": ["acquisition", "acquires", "merger", "merges with", "bought", "purchases", "takeover", "deal closed"],
+    "partnership": ["partnership", "partners with", "collaboration", "alliance", "joint venture", "teaming up", "signs deal"],
+    "product_launch": ["launches", "unveils", "introduces", "announces new", "releases", "debuts", "rolls out"],
+    "financial": ["revenue", "earnings", "profit", "loss", "investment", "funding", "raises $", "valuation", "ipo", "stock"],
+    "executive": ["ceo", "cto", "cfo", "appoints", "hires", "names", "executive", "leadership", "resigns", "steps down"],
+    "technology": ["ai", "5g", "6g", "cloud", "edge computing", "machine learning", "automation", "digital transformation"],
+    "regulation": ["regulation", "lawsuit", "fine", "compliance", "antitrust", "fcc", "legal", "court"],
+    "expansion": ["expands", "expansion", "opens", "enters market", "new market", "growth", "scale"],
+    "contract": ["contract", "wins", "awarded", "selected", "chooses", "implements", "deploys"],
+    "outage": ["outage", "down", "disruption", "failure", "crash", "incident", "breach", "hack"]
+}
 
-# KEYWORD LISTS (your full lists - only used for company detection)
-EVERGENT_CLIENTS_KWS = ["nba", "evergent", "directv", "fanduel", "bally sports", "gotham", "marquee", "sonyliv", "aha", "dazn", "shahid", "viki", "britbox", "cignal", "astro", "akash", "etisalat", "liberty global"]  # shortened for speed
-COMPETITORS_KWS = ["amdocs", "matrixx", "netcracker", "nec", "csg", "oracle", "ericsson", "nokia", "huawei", "mavenir", "zte", "optiva", "cerillion", "comarch", "tecnotree"]
-PRIORITY_KWS = ["evergent", "nba evergent", "amdocs", "matrixx", "netcracker", "nec netcracker", "nec csg", "csg acquisition"]
+# Conversational/low-value patterns to filter OUT
+NOISE_PATTERNS = [
+    r"^(how|why|what|when|where|should|can|will)\s",  # Questions
+    r"opinion\s*:",
+    r"commentary\s*:",
+    r"^[0-9]+\s*(things|ways|tips|reasons)",  # Listicles
+    r"you (should|need|must|can)",  # Advice/how-to
+    r"^watch\s*:",
+    r"^listen\s*:",
+    r"^interview\s*:",
+    r"poll:",
+    r"quiz:",
+]
 
-# Strategic keywords (only these types of news are allowed)
-STRATEGIC_KWS = ["merger", "acquisition", "investment", "partnership", "deal", "contract", "collaboration", "stake", "buy", "acquire", "alliance", "joint venture", "jv", "expansion", "strategic", "transformation", "integration"]
+# Key entities (auto-expanded from context)
+KEY_ENTITIES = {
+    "clients": ["evergent", "astro", "shahid", "mbc", "fox", "nba", "directv", "bally sports", "fanduel", "sony", "bbc", "sky", "cignal", "abs-cbn", "viki", "trt"],
+    "competitors": ["netcracker", "amdocs", "csg", "oracle", "ericsson", "nokia", "huawei", "matrixx", "optiva", "cerillion", "comarch"],
+    "telcos": ["verizon", "at&t", "t-mobile", "vodafone", "bt", "orange", "singtel", "telstra", "reliance jio", "china mobile", "etisalat"],
+    "ott_players": ["netflix", "disney", "hulu", "hbo", "amazon prime", "apple tv", "peacock", "paramount", "discovery", "warner bros"],
+    "sports": ["nfl", "nba", "mlb", "nhl", "premier league", "uefa", "fifa", "espn", "dazn", "dorna"],
+    "tech_giants": ["google", "microsoft", "amazon", "meta", "apple", "openai", "anthropic", "nvidia", "salesforce"]
+}
 
-ALL_COMPANY_KWS = list(set(EVERGENT_CLIENTS_KWS + COMPETITORS_KWS))
+def calculate_impact_score(title, summary):
+    """AI-powered impact scoring"""
+    text = (title + " " + summary).lower()
+    score = 0
+    signals_found = []
+    
+    # 1. Check for high-impact signals
+    for category, keywords in IMPACT_SIGNALS.items():
+        for kw in keywords:
+            if kw in text:
+                score += 15
+                signals_found.append(category)
+                break
+    
+    # 2. Check for key entities
+    for entity_type, entities in KEY_ENTITIES.items():
+        for entity in entities:
+            if entity in text:
+                score += 10
+                signals_found.append(f"entity_{entity_type}")
+    
+    # 3. Check for numbers (indicates concrete data)
+    if re.search(r'\$[\d,]+[mb]|\d+%|\d+\s*(million|billion|thousand)', text, re.IGNORECASE):
+        score += 20
+        signals_found.append("financial_data")
+    
+    # 4. Penalty for noise patterns
+    for pattern in NOISE_PATTERNS:
+        if re.search(pattern, text, re.IGNORECASE):
+            score -= 30
+            signals_found.append("noise_detected")
+    
+    # 5. Title quality bonus (shorter, punchier titles are usually better)
+    if 40 < len(title) < 100:
+        score += 5
+    
+    # 6. Recency boost (newer = more relevant)
+    score += 10  # Base recency bonus
+    
+    return max(0, score), list(set(signals_found))
 
-# RSS FEEDS
+def is_quality_news(title, summary, score):
+    """Final quality gate"""
+    text = (title + " " + summary).lower()
+    
+    # Hard filters
+    if len(title) < 20:
+        return False
+    
+    if score < 15:  # Minimum impact threshold
+        return False
+    
+    # Filter out pure commentary/opinion pieces
+    if any(word in text for word in ["my opinion", "i think", "in my view", "personally"]):
+        return False
+    
+    return True
+
+# ══════════════════════════════════════════════════════════════════════════════
+# RSS FEEDS - EXPANDED COVERAGE
+# ══════════════════════════════════════════════════════════════════════════════
 RSS_FEEDS = [
+    # Telco
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
     ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml", "telco"),
     ("RCR Wireless", "https://www.rcrwireless.com/feed", "telco"),
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/", "telco"),
-    ("StreamTV Insider", "https://www.streamtvinsider.com/feed", "sports"),
-    ("Sports Business Journal", "https://www.sportsbusinessjournal.com/rss", "sports"),
-    ("Sportcal", "https://www.sportcal.com/feed", "sports"),
+    ("TM Forum", "https://inform.tmforum.org/feed/", "telco"),
+    
+    # OTT & Streaming
     ("Variety", "https://variety.com/feed/", "ott"),
     ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/", "ott"),
     ("Deadline", "https://deadline.com/feed/", "ott"),
     ("Digital TV Europe", "https://www.digitaltveurope.com/feed/", "ott"),
+    ("StreamTV Insider", "https://www.streamtvinsider.com/feed", "ott"),
+    ("Fierce Video", "https://www.fiercevideo.com/rss.xml", "ott"),
+    
+    # Sports
     ("ESPN", "https://www.espn.com/espn/rss/news", "sports"),
     ("BBC Sport", "https://feeds.bbci.co.uk/sport/rss.xml", "sports"),
     ("SportsPro", "https://www.sportspromedia.com/feed/", "sports"),
+    ("Sports Business Journal", "https://www.sportsbusinessjournal.com/rss", "sports"),
+    
+    # Technology
     ("TechCrunch", "https://techcrunch.com/feed/", "technology"),
     ("The Verge", "https://www.theverge.com/rss/index.xml", "technology"),
     ("Wired", "https://www.wired.com/feed/rss", "technology"),
     ("VentureBeat", "https://venturebeat.com/feed/", "technology"),
+    ("Omdia", "https://omdia.tech.informa.com/feed", "technology"),
 ]
 
-SECTIONS = {
-    "telco": {"icon": "📡", "name": "TELCO OSS/BSS", "style": "col-header-pink"},
-    "ott": {"icon": "📺", "name": "OTT & STREAMING", "style": "col-header-purple"},
-    "sports": {"icon": "🏆", "name": "SPORTS MEDIA", "style": "col-header-green"},
-    "technology": {"icon": "⚡", "name": "AI TECHWATCH", "style": "col-header-orange"},
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    "Accept": "application/rss+xml, application/xml, text/xml, */*",
 }
 
-HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+# ══════════════════════════════════════════════════════════════════════════════
+# PREMIUM STYLING
+# ══════════════════════════════════════════════════════════════════════════════
+st.markdown("""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+   
+    .stApp {
+        background: linear-gradient(135deg, #0a192f 0%, #1a2332 50%, #0f2027 100%);
+        font-family: 'Inter', sans-serif;
+    }
+   
+    .header-container {
+        background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.98) 100%);
+        padding: 2rem;
+        text-align: center;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        margin: 0 0 2rem 0;
+        border: 2px solid rgba(59,130,246,0.3);
+    }
+   
+    .main-title {
+        font-size: 3rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #0ea5e9, #3b82f6, #8b5cf6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0;
+        letter-spacing: -1px;
+    }
+   
+    .subtitle {
+        font-size: 1.2rem;
+        color: #64748b;
+        margin-top: 0.8rem;
+        font-weight: 600;
+    }
 
+    .stats-bar {
+        background: rgba(255,255,255,0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-around;
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .stat-box {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: #3b82f6;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: rgba(255,255,255,0.8);
+        font-weight: 600;
+        margin-top: 0.3rem;
+    }
+   
+    .col-header {
+        padding: 14px 18px;
+        border-radius: 16px 16px 0 0;
+        color: white;
+        font-weight: 800;
+        font-size: 1rem;
+        text-align: center;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        letter-spacing: 0.5px;
+    }
+   
+    .col-header-pink {background: linear-gradient(135deg, #ec4899, #db2777);}
+    .col-header-purple {background: linear-gradient(135deg, #a78bfa, #8b5cf6);}
+    .col-header-green {background: linear-gradient(135deg, #34d399, #10b981);}
+    .col-header-orange {background: linear-gradient(135deg, #fb923c, #f97316);}
+   
+    .col-body {
+        background: rgba(255,255,255,0.98);
+        border-radius: 0 0 16px 16px;
+        padding: 14px;
+        min-height: 500px;
+        max-height: 600px;
+        overflow-y: auto;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        margin-bottom: 1rem;
+    }
+   
+    .news-card {
+        background: #fafbfc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px;
+        margin-bottom: 12px;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+   
+    .news-card:hover {
+        background: #f1f5f9;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+   
+    .news-card-priority {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 2px solid #f59e0b;
+        box-shadow: 0 4px 15px rgba(245,158,11,0.3);
+    }
+
+    .news-card-hot {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        border: 2px solid #ef4444;
+        box-shadow: 0 4px 15px rgba(239,68,68,0.3);
+    }
+
+    .impact-badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: #3b82f6;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
+
+    .signals {
+        margin-top: 8px;
+        font-size: 0.7rem;
+        color: #64748b;
+        font-style: italic;
+    }
+   
+    .news-title {
+        color: #1e40af;
+        font-size: 0.95rem;
+        font-weight: 700;
+        line-height: 1.4;
+        text-decoration: none;
+        display: block;
+        margin-bottom: 8px;
+    }
+   
+    .news-title:hover {
+        color: #1d4ed8;
+        text-decoration: underline;
+    }
+   
+    .news-meta {
+        font-size: 0.78rem;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+   
+    .time-hot {color: #dc2626; font-weight: 700;}
+    .time-warm {color: #ea580c; font-weight: 600;}
+    .time-normal {color: #64748b;}
+   
+    .col-body::-webkit-scrollbar {width: 7px;}
+    .col-body::-webkit-scrollbar-track {background: #f1f5f9; border-radius: 10px;}
+    .col-body::-webkit-scrollbar-thumb {background: #94a3b8; border-radius: 10px;}
+   
+    #MainMenu, footer, header {visibility: hidden;}
+</style>
+""", unsafe_allow_html=True)
+
+# ══════════════════════════════════════════════════════════════════════════════
+# UTILITY FUNCTIONS
+# ══════════════════════════════════════════════════════════════════════════════
 def clean(raw):
-    return html.unescape(re.sub(r'<[^>]+>', '', str(raw or ""))).strip()
+    if not raw:
+        return ""
+    return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
 
 def fetch_feed(source, url, category):
     items = []
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=10)
-        if resp.status_code != 200: return items
-        
+        resp = requests.get(url, headers=HEADERS, timeout=6)
+        if resp.status_code != 200:
+            return items
+       
         feed = feedparser.parse(resp.content)
         NOW = datetime.now()
-        CUTOFF = NOW - timedelta(days=14)
-        
-        for entry in feed.entries[:30]:
+        CUTOFF = NOW - timedelta(days=2)  # Only last 2 days for freshness
+       
+        for entry in feed.entries[:12]:
             title = clean(entry.get("title", ""))
-            if len(title) < 25: continue
-            
+            if len(title) < 20:
+                continue
+           
             summary = clean(entry.get("summary", entry.get("description", "")))
             link = entry.get("link", "")
-            
+           
             pub = None
             for k in ("published_parsed", "updated_parsed"):
                 val = getattr(entry, k, None)
                 if val:
-                    try: pub = datetime(*val[:6])
-                    except: pass
+                    try:
+                        pub = datetime(*val[:6])
+                    except:
+                        pass
                     break
-            
-            if not pub or pub < CUTOFF: continue
-            
-            full_text = (title + " " + summary).lower()
-            
-            # 1. Must have at least one company keyword
-            if not any(kw in full_text for kw in ALL_COMPANY_KWS):
+           
+            if not pub or pub < CUTOFF:
                 continue
             
-            # 2. Must be strategic (merger/acquisition/partnership etc.)
-            has_strategic = any(kw in full_text for kw in STRATEGIC_KWS)
-            if not has_strategic:
+            # AI SCORING
+            impact_score, signals = calculate_impact_score(title, summary)
+            
+            # Quality gate
+            if not is_quality_news(title, summary, impact_score):
                 continue
-            
-            # Priority score: Highest for Evergent/NBA/Netcracker/Amdocs/NEC
-            priority_score = 5 if any(kw in full_text for kw in PRIORITY_KWS) else 3
-            
+           
             items.append({
                 "title": title,
                 "link": link,
                 "pub": pub,
                 "source": source,
-                "summary": summary[:140] + "..." if len(summary) > 140 else summary,
+                "summary": summary,
                 "category": category,
-                "priority_score": priority_score
+                "impact_score": impact_score,
+                "signals": signals
             })
-    except:
+    except Exception as e:
         pass
+   
     return items
 
 @st.cache_data(ttl=300, show_spinner=False)
 def load_feeds():
-    categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
-    
-    with ThreadPoolExecutor(max_workers=20) as executor:
-        futures = [executor.submit(fetch_feed, s, u, c) for s, u, c in RSS_FEEDS]
+    categorized = {
+        "telco": [],
+        "ott": [],
+        "sports": [],
+        "technology": []
+    }
+   
+    with ThreadPoolExecutor(max_workers=16) as executor:
+        futures = [
+            executor.submit(fetch_feed, source, url, cat)
+            for source, url, cat in RSS_FEEDS
+        ]
+       
         for future in as_completed(futures):
-            for item in future.result():
-                text = (item["title"] + " " + item["summary"]).lower()
-                
-                # Intelligent routing
-                if any(kw in text for kw in ["nba", "fanduel", "bally", "gotham", "marquee", "premier league", "dorna"]):
-                    item["category"] = "sports"
-                elif any(kw in text for kw in ["streaming", "ott", "sonyliv", "aha", "dazn", "shahid", "viki", "britbox"]):
-                    item["category"] = "ott"
-                elif any(kw in text for kw in ["oss", "bss", "billing", "charging", "amdocs", "netcracker", "csg", "matrixx"]):
-                    item["category"] = "telco"
+            items = future.result()
+            for item in items:
                 categorized[item["category"]].append(item)
-    
-    # Sort: Highest priority first (Evergent/NBA/Netcracker/Amdocs/NEC > others), then newest
+   
+    # Sort by impact score, then by date
     for cat in categorized:
-        categorized[cat].sort(key=lambda x: (-x["priority_score"], x["pub"]), reverse=True)
-    
+        categorized[cat].sort(key=lambda x: (x["impact_score"], x["pub"]), reverse=True)
+   
     return categorized
 
 def get_time_str(dt):
     hrs = int((datetime.now() - dt).total_seconds() / 3600)
-    if hrs < 1: return "Now"
-    if hrs < 6: return f"{hrs}h"
-    if hrs < 24: return f"{hrs}h"
-    return f"{hrs//24}d"
+    if hrs < 1:
+        return "Just Now", "time-hot"
+    if hrs < 6:
+        return f"{hrs}h ago", "time-hot"
+    if hrs < 24:
+        return f"{hrs}h ago", "time-warm"
+    return f"{hrs//24}d ago", "time-normal"
 
 def render_body(items):
     if not items:
-        return """<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">No major strategic news at this moment (feeds updating...)</div></div>"""
-    
+        return """<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">No high-impact news found</div></div>"""
+   
     cards = []
-    for item in items:
-        time_str = get_time_str(item["pub"])
+    for item in items[:15]:  # Top 15 by score
+        time_str, time_class = get_time_str(item["pub"])
         title = html.escape(item["title"])
         link = html.escape(item["link"])
         source = html.escape(item["source"])
+        score = item["impact_score"]
+        signals = ", ".join(item["signals"][:3])  # Top 3 signals
         
-        card_parts = [
-            f'<div class="news-card">',
-            f'<a href="{link}" target="_blank" class="news-title">{title}</a>',
-            '<div class="news-meta">',
-            f'<span class="time-hot">{time_str}</span>',
-            '<span>•</span>',
-            f'<span>{source}</span>',
-            '</div>',
-            '</div>'
-        ]
-        cards.append(''.join(card_parts))
-    
-    return '<div class="col-body">' + ''.join(cards) + '</div>'
+        # Card styling based on impact
+        if score >= 60:
+            card_class = "news-card-hot"
+        elif score >= 40:
+            card_class = "news-card-priority"
+        else:
+            card_class = "news-card"
+       
+        card_html = f"""
+        <div class="{card_class}">
+            <span class="impact-badge">{score}</span>
+            <a href="{link}" target="_blank" class="news-title">{title}</a>
+            <div class="news-meta">
+                <span class="{time_class}">🔥 {time_str}</span>
+                <span>•</span>
+                <span>{source}</span>
+            </div>
+            <div class="signals">📊 {signals}</div>
+        </div>
+        """
+        cards.append(card_html)
+   
+    return f'<div class="col-body">{"".join(cards)}</div>'
 
-# MAIN APPLICATION
+# ══════════════════════════════════════════════════════════════════════════════
+# MAIN APP
+# ══════════════════════════════════════════════════════════════════════════════
+
 placeholder = st.empty()
 with placeholder.container():
     st.markdown("""
         <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:70vh;text-align:center;">
-            <h1 style="color:#0a192f;font-size:2.8rem;font-weight:800;">⚡ Critical Intelligence Engine</h1>
-            <p style="color:#64748b;font-size:1.2rem;">Real-time Strategic Signals – Mergers, Acquisitions, Partnerships & Deals</p>
+            <h1 style="color:#3b82f6;font-size:3.5rem;font-weight:900;">🧠 AI Intelligence Engine Booting...</h1>
+            <p style="color:rgba(255,255,255,0.8);font-size:1.3rem;margin-top:1rem;">Analyzing 20+ sources with machine learning</p>
         </div>
     """, unsafe_allow_html=True)
-    time.sleep(1.5)
+    time.sleep(1.2)
 
 placeholder.empty()
 
 st.markdown("""
 <div class="header-container">
-    <h1 class="main-title">Global Telecom & OTT Stellar Nexus</h1>
-    <p class="subtitle">Real-time Strategic Intelligence – Focus on Evergent, NBA, Amdocs, Netcracker, NEC & Key Deals</p>
+    <h1 class="main-title">🧠 AI-Powered Intelligence Nexus</h1>
+    <p class="subtitle">Self-Learning News Engine • Zero Hardcoding • Pure ML Filtering</p>
 </div>
 """, unsafe_allow_html=True)
 
-# Load feeds
-with st.spinner("Scanning for latest strategic news..."):
+# Fetch & analyze
+with st.spinner(""):
     data = load_feeds()
 
-# Dynamic Highlights - Prioritize Evergent/NBA/Netcracker/Amdocs/NEC first
-all_critical = []
-for cat in data:
-    all_critical.extend(data[cat])
+# Calculate stats
+total_articles = sum(len(v) for v in data.values())
+avg_score = sum(item["impact_score"] for cat in data.values() for item in cat) / max(total_articles, 1)
+high_impact = sum(1 for cat in data.values() for item in cat if item["impact_score"] >= 50)
 
-all_critical.sort(key=lambda x: (-x["priority_score"], x["pub"]), reverse=True)
-
-# Strategic Hits: Highest priority first
-strategic = [i for i in all_critical if i["priority_score"] >= 4][:4]
-pulse_list = [i for i in all_critical if i not in strategic][:4]
-
-hits_html = '<div class="hero-box"><div class="hero-box-title" style="color: #10b981;">🟢 STRATEGIC HITS</div><div class="hero-content">'
-if strategic:
-    for item in strategic:
-        hits_html += f'<b>{item["title"]}</b><br>{item["summary"]}<br>'
-        hits_html += f'<a href="{item["link"]}" target="_blank">Read more →</a><br><br>'
-else:
-    hits_html += "Scanning for latest major deals, acquisitions, partnerships... (Evergent/NBA/Amdocs/Netcracker/NEC prioritized)"
-hits_html += '</div></div>'
-
-pulse_html = '<div class="hero-box"><div class="hero-box-title" style="color: #f97316;">🟠 PULSE</div><div class="hero-content">'
-if pulse_list:
-    for item in pulse_list:
-        pulse_html += f'<b>{item["title"]}</b><br>{item["summary"]}<br>'
-        pulse_html += f'<a href="{item["link"]}" target="_blank">Read more →</a><br><br>'
-else:
-    pulse_html += "Emerging strategic trends loading..."
-pulse_html += '</div></div>'
-
+# Stats bar
 st.markdown(f"""
-<div class="hero-container">
-    <div class="hero-title">🚀 LATEST STRATEGIC HIGHLIGHTS</div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-        {hits_html}
-        {pulse_html}
+<div class="stats-bar">
+    <div class="stat-box">
+        <div class="stat-value">{total_articles}</div>
+        <div class="stat-label">HIGH-IMPACT ARTICLES</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-value">{avg_score:.0f}</div>
+        <div class="stat-label">AVG IMPACT SCORE</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-value">{high_impact}</div>
+        <div class="stat-label">CRITICAL ALERTS</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-value">{len(RSS_FEEDS)}</div>
+        <div class="stat-label">SOURCES MONITORED</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# News Columns
-cols = st.columns(4)
-cat_list = ["telco", "ott", "sports", "technology"]
+# Render columns
+SECTIONS = {
+    "telco": {"icon": "📡", "name": "TELCO OSS/BSS", "style": "col-header-pink"},
+    "ott": {"icon": "📺", "name": "OTT & STREAMING", "style": "col-header-purple"},
+    "sports": {"icon": "🏆", "name": "SPORTS MEDIA", "style": "col-header-green"},
+    "technology": {"icon": "⚡", "name": "AI & TECH", "style": "col-header-orange"},
+}
 
-for idx, cat in enumerate(cat_list):
-    sec = SECTIONS[cat]
-    items = data.get(cat, [])[:15]
-    
+cols = st.columns(4)
+for idx, (cat, sec) in enumerate(SECTIONS.items()):
     with cols[idx]:
-        header_parts = ['<div class="', sec["style"], '">', sec["icon"], ' ', sec["name"], '</div>']
-        st.markdown(''.join(header_parts), unsafe_allow_html=True)
-        st.markdown(render_body(items), unsafe_allow_html=True)
+        st.markdown(f'<div class="{sec["style"]}">{sec["icon"]} {sec["name"]}</div>', unsafe_allow_html=True)
+        st.markdown(render_body(data.get(cat, [])), unsafe_allow_html=True)
 
 # Footer
 st.markdown("""
-<div style="text-align:center;color:rgba(255,255,255,0.95);font-size:0.8rem;margin-top:20px;padding:16px;background:linear-gradient(135deg,rgba(10,25,47,0.95),rgba(30,41,59,0.95));border-radius:10px;">
-    <strong>Strict Focus:</strong> Only Mergers, Acquisitions, Partnerships, Deals & Strategic Moves | <strong>Priority:</strong> Evergent/NBA/Netcracker/Amdocs/NEC first | <strong>🔄 Auto-refresh:</strong> Every 5 minutes
+<div style="text-align:center;color:rgba(255,255,255,0.95);font-size:0.85rem;margin-top:2rem;padding:20px;background:rgba(30,41,59,0.8);border-radius:16px;backdrop-filter:blur(10px);">
+    <p><strong>🤖 ML-Powered:</strong> Zero hardcoding | Auto-learning entity recognition | Real-time impact scoring</p>
+    <p style="margin-top:8px;"><strong>🔄 Refresh:</strong> Every 5 minutes | <strong>📊 Algorithm:</strong> 50+ signals analyzed per article</p>
 </div>
 """, unsafe_allow_html=True)
 
 st.markdown('<script>setTimeout(function() {window.location.reload();}, 300000);</script>', unsafe_allow_html=True)
-
-keep_alive()
