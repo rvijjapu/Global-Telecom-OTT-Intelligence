@@ -387,7 +387,7 @@ st.markdown("""
             <div class="hero-box-title" style="color: #10b981;">🟢 STRATEGIC HITS</div>
             <div class="hero-content">
                 <b>NBA Scores Strategic Investment in Evergent</b>: The NBA has taken a strategic equity stake in Evergent, naming it a 'Preferred Vendor' to drive global League Pass personalization and churn management across 185 countries.<br><br>
-                <b>Evergent CEO Vijay Sajja at CES </b>: Evergent CEO Vijay Sajja at CES defines the shift from GenAI to <b>Agentic AI</b>—BSS that independently executes subscriber retention strategies.<br><br>
+                <b> CES </b>: Evergent CEO Vijay Sajja at CES defines the shift from GenAI to <b>Agentic AI</b>—BSS that independently executes subscriber retention strategies.<br><br>
                 <b>Amdocs-Matrixx Deal</b>: Amdocs completes its $200M acquisition of charging leader Matrixx Software to dominate the Tier-1 5G billing market.<br><br>
                 <b>Disney-Hulu Merger</b>: Disney officially begins phasing out the standalone Hulu app to integrate all content into a unified Disney+ hub.<br><br>
                 <b>NEC Expansion</b>: Japan's NEC finalizes the acquisition of CSG, significantly scaling Netcracker's North American SaaS footprint.
