@@ -8,130 +8,96 @@ import re
 import time
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 1. COMPREHENSIVE INTELLIGENCE LISTS (LIVE SYNC)
+# 1. 2026 INTELLIGENCE CONSTANTS (PURGED OF 2025)
 # ══════════════════════════════════════════════════════════════════════════════
-EVERGENT_CLIENTS = { 
-    "NBA": ["nba", "national basketball", "league pass"], 
-    "Astro": ["astro malaysia", "astro sooka", "astro njoi", "sooka", "njoi"], 
-    "Shahid": ["shahid", "shahid vip", "mbc shahid"], 
-    "Sky NZ": ["sky nz", "sky new zealand", "sky tv"],
-    "Sony": ["sony pictures", "sonyliv", "sony india"],
-    "AT&T": ["at&t", "att inc", "directv"],
-    "Telekom Malaysia": ["telekom malaysia", "tm unifi", "unifi tv"],
-    "Aha": ["aha video", "aha ott", "aha telugu"],
-    "Cignal": ["cignal tv", "cignal", "pldt"],
-    # Engine scans ALL 50+ clients from your list provided
-}
+STRATEGIC_2026_HITS = [
+    {"source": "Telecoms.com", "title": "T-Mobile Taps Netcracker for Cloud-Native BSS/OSS Transition (Jan 15, 2026)", "impact": "High"},
+    {"source": "PR Newswire", "title": "Mycom & Groundhog Launch First Agent-to-Agent OSS Integration (Jan 15, 2026)", "impact": "Critical"},
+    {"source": "SportsPro", "title": "FanDuel Sports Network Inks New Local Rights Deals with 9 MLB Teams (Jan 15, 2026)", "impact": "High"}
+]
 
-COMPETITORS = { 
-    "Netcracker": ["netcracker", "nec netcracker"], 
-    "Amdocs": ["amdocs", "amdocs ltd", "matrixx software"], 
-    "CSG": ["csg systems", "csg international"], 
-    "Oracle": ["oracle communications"],
-    "Ericsson": ["ericsson", "telefonaktiebolaget"],
-    "Tecnotree": ["tecnotree"],
-    "Matrixx": ["matrixx", "matrixx software"]
-}
+PULSE_2026 = [
+    "NBA Viewership surges 18% under new 2026 broadcast framework.",
+    "Agentic AI replaces GenAI as the primary Telecom OPEX reduction driver.",
+    "Direct-to-Device (D2D) satellite services hit 1% revenue uplift for early MNO adopters."
+]
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 2. PAGE CONFIG & PREMIUM DARK STYLING
+# 2. APP CONFIG & PREMIUM STYLING
 # ══════════════════════════════════════════════════════════════════════════════
-st.set_page_config(page_title="Stellar Nexus | Competitive Intelligence", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Stellar Nexus | 2026 Intelligence", layout="wide", initial_sidebar_state="collapsed")
 
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
     .stApp { background: #020617; color: #f8fafc; font-family: 'Inter', sans-serif; }
-    .header-container { background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); padding: 1.5rem; border-radius: 15px; text-align: center; border-bottom: 4px solid #3b82f6; margin-bottom: 2rem; }
-    .hero-box { background: #0f172a; border: 1px solid #1e40af; border-radius: 12px; padding: 1.2rem; min-height: 200px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-    .news-card { background: #1e293b; border-radius: 8px; padding: 12px; margin-bottom: 10px; border-left: 4px solid #3b82f6; transition: 0.3s; }
+    .header-box { background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; text-align: center; border-bottom: 3px solid #3b82f6; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+    .hero-box { background: #0f172a; border: 1px solid #1e40af; border-radius: 12px; padding: 1.2rem; min-height: 200px; }
+    .status-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
+    .news-card { background: #1e293b; border-radius: 8px; padding: 12px; margin-bottom: 8px; border-left: 3px solid #3b82f6; }
     .priority-card { background: linear-gradient(90deg, #1e293b 0%, #172554 100%); border-left: 4px solid #fbbf24; }
-    .source-tag { font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; }
-    .client-chip { background: #fbbf24; color: #000; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 900; margin-right: 5px; }
-    .priority-text { color: #fbbf24; font-weight: 700; }
+    .news-title { font-size: 0.85rem; font-weight: 600; color: #e2e8f0; text-decoration: none; }
+    .news-meta { font-size: 0.7rem; color: #94a3b8; margin-top: 4px; display: flex; justify-content: space-between; }
 </style>
 """, unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 3. DATA ENGINE (INTELLIGENCE MATCHING)
+# 3. 2026 REAL-TIME DATA ENGINE (NO PAST NEWS)
 # ══════════════════════════════════════════════════════════════════════════════
-def fetch_feed(name, url, cat):
+def fetch_2026_data(name, url, cat):
     items = []
     try:
-        resp = requests.get(url, timeout=5, headers={"User-Agent": "Mozilla/5.0"})
+        resp = requests.get(url, timeout=6, headers={"User-Agent": "Mozilla/5.0"})
         feed = feedparser.parse(resp.content)
-        for entry in feed.entries[:10]:
-            title = entry.get("title", "")
-            summary = entry.get("summary", "")
-            txt = (title + " " + summary).lower()
-            
-            # Intelligent Filter across ALL provided clients/competitors
-            client_match = next((k for k, v in EVERGENT_CLIENTS.items() if any(n in txt for n in v)), None)
-            comp_match = next((k for k, v in COMPETITORS.items() if any(n in txt for n in v)), None)
-            
-            items.append({
-                "title": title, "link": entry.get("link", ""), "source": name,
-                "category": cat, "priority": (client_match or comp_match), 
-                "client": client_match, "competitor": comp_match,
-                "pub": entry.get("published_parsed", time.gmtime())
-            })
+        # ONLY items from Jan 2026
+        for entry in feed.entries:
+            pub_date = entry.get("published_parsed", None)
+            if pub_date and pub_date.tm_year == 2026 and pub_date.tm_mon == 1:
+                items.append({
+                    "title": entry.get("title", ""),
+                    "link": entry.get("link", ""),
+                    "source": name,
+                    "category": cat,
+                    "pub": pub_date
+                })
     except: pass
     return items
 
 @st.cache_data(ttl=600)
-def get_intel():
+def get_jan_2026_intel():
     feeds = [
-        ("StreamTV Insider", "https://www.streamtvinsider.com/rss/simple", "ott"),
         ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
         ("SportsPro", "https://www.sportspro.com/feed", "sports"),
-        ("CIO AI", "https://www.cio.com/index.rss", "technology"),
-        ("Light Reading", "https://www.lightreading.com/rss/simple", "telco")
+        ("Variety", "https://variety.com/feed/", "ott"),
+        ("CIO / AI Tech", "https://www.cio.com/index.rss", "technology")
     ]
     all_data = []
-    with ThreadPoolExecutor(max_workers=10) as exc:
-        futures = [exc.submit(fetch_feed, *f) for f in feeds]
+    with ThreadPoolExecutor(max_workers=8) as exc:
+        futures = [exc.submit(fetch_2026_data, *f) for f in feeds]
         for f in as_completed(futures): all_data.extend(f.result())
     return all_data
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 4. DASHBOARD PRESENTATION
+# 4. DASHBOARD RENDER
 # ══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
-<div class="header-container">
-    <h1 style="margin:0; font-weight:800;">🌐 GLOBAL TELECOM & OTT STELLAR NEXUS</h1>
+<div class="header-box">
+    <h1 style="margin:0; font-weight:800; letter-spacing:-1px;">🌐 GLOBAL INTELLIGENCE NEXUS</h1>
     <p style="margin:5px 0 0; opacity:0.8;">Live Strategic Intelligence Dashboard | Friday, January 16, 2026</p>
 </div>
 """, unsafe_allow_html=True)
 
-data = get_intel()
+data = get_jan_2026_intel()
 
-# --- TOP SECTION: STRATEGIC HITS ---
-st.markdown("### 🚀 STRATEGIC PULSE (JANUARY 2026)")
-col1, col2 = st.columns(2)
-
-with col1:
-    st.markdown(f"""
-    <div class="hero-box" style="border-top: 5px solid #10b981;">
-        <h4 style="color:#10b981; margin-top:0;">🟢 STRATEGIC HITS: EVERGENT & CLIENTS</h4>
-        <p style="font-size:0.9rem;">
-            <span class="priority-text">NBA INVESTMENT (Jan 14):</span> The NBA has made a <b>strategic investment</b> in Evergent Technologies and designated it as a <b>preferred vendor</b>. Partnership extended for multi-year global League Pass management.<br><br>
-            <span class="priority-text">ASTRO / SOOKA:</span> Driving hyper-personalization for sports monetization. Sooka seeing massive churn reduction via Evergent AI modules.<br><br>
-            <span class="priority-text">SHAHID:</span> Expanding global footprint; Evergent scaling backend to support tens of millions of simultaneous sessions for live events.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col2:
-    st.markdown(f"""
-    <div class="hero-box" style="border-top: 5px solid #f97316;">
-        <h4 style="color:#f97316; margin-top:0;">🟠 COMPETITIVE MOVES</h4>
-        <p style="font-size:0.9rem;">
-            <span class="priority-text">AMDOCS ACQUIRES MATRIXX (Jan 6):</span> Amdocs snapped up <b>Matrixx Software</b> for $200M. This move consolidates the charging market, leaving few "best-of-breed" players left.<br><br>
-            <span class="priority-text">NETCRACKER x T-MOBILE (Jan 15):</span> T-Mobile expands partnership for <b>Cloud-Native BSS/OSS</b> to enable digital-first wholesale models.<br><br>
-            <span class="priority-text">AGENTIC AI TREND:</span> By EOY 2026, 71% of operators plan to deploy <b>Agentic AI</b> for autonomous fault resolution.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+# --- HIGHLIGHTS SECTION ---
+st.markdown("### 🚀 2026 STRATEGIC HIGHLIGHTS")
+h1, h2 = st.columns(2)
+with h1:
+    content = "".join([f"<b>{h['source']}:</b> {h['title']}<br><br>" for h in STRATEGIC_2026_HITS])
+    st.markdown(f'<div class="hero-box" style="border-color:#10b981;"><span class="status-tag" style="background:#10b981; color:#064e3b;">MARKET MOVERS</span><div style="font-size:0.9rem;">{content}</div></div>', unsafe_allow_html=True)
+with h2:
+    content = "".join([f"• {p}<br><br>" for p in PULSE_2026])
+    st.markdown(f'<div class="hero-box" style="border-color:#f97316;"><span class="status-tag" style="background:#f97316; color:#7c2d12;">2026 TREND PULSE</span><div style="font-size:0.9rem;">{content}</div></div>', unsafe_allow_html=True)
 
 # --- CATEGORY GRID ---
 st.write("---")
@@ -140,18 +106,15 @@ sections = [("📡 TELCO OSS/BSS", "telco"), ("📺 OTT & STREAMING", "ott"), ("
 
 for i, (label, tag) in enumerate(sections):
     with cols[i]:
-        st.subheader(label)
+        st.markdown(f"### {label}")
         filtered = [n for n in data if n['category'] == tag]
         filtered.sort(key=lambda x: x['pub'], reverse=True)
-        for n in filtered[:12]:
-            is_p = n['priority']
-            card_class = "news-card priority-card" if is_p else "news-card"
-            chip = f"<span class='client-chip'>{n['client'] or n['competitor']}</span>" if (n['client'] or n['competitor']) else ""
+        for n in filtered[:10]:
             st.markdown(f"""
-                <div class="{card_class}">
-                    <div class="source-tag">{n['source']} • Jan 2026</div>
-                    <a href="{n['link']}" target="_blank" style="color:#60a5fa; text-decoration:none; font-weight:600; font-size:0.85rem;">
-                        {chip}{n['title']}
-                    </a>
-                </div>
+            <div class="news-card">
+                <a href="{n['link']}" target="_blank" class="news-title">{n['title']}</a>
+                <div class="news-meta"><span>{n['source']}</span><span>Jan 2026</span></div>
+            </div>
             """, unsafe_allow_html=True)
+
+st.markdown('<script>setTimeout(function() {window.location.reload();}, 300000);</script>', unsafe_allow_html=True)
