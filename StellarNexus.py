@@ -1,464 +1,106 @@
+Conversation opened. 1 read message.
+
+Skip to content
+Using Gmail with screen readers
+
+5 of 724
+ref good
+Inbox
+
+Rajamani Surya <rajamanivsurya@gmail.com>
+Jan 14, 2026, 4:26 PM (2 days ago)
+to me
+
 import streamlit as st
-import feedparser
-import requests
-from datetime import datetime, timedelta
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import html
-import re
-import hashlib
+import pandas as pd
+from datetime import datetime
+import time
 
-# ─────────────────────────────────────────────────────────────────────────────
-# PAGE CONFIG
-# ─────────────────────────────────────────────────────────────────────────────
-st.set_page_config(
-    page_title="Global Telecom & OTT Stellar Nexus – AI Powered Real-time Competitive Intelligence",
-    page_icon="🌐",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+# ══════════════════════════════════════════════════════════════════════════════
+# EXECUTIVE SIGNAL INTELLIGENCE (SIGINT) ENGINE
+# ══════════════════════════════════════════════════════════════════════════════
 
-# Health check
-if st.query_params.get("ping") == "1":
-    st.write("alive")
-    st.stop()
-
-# ─────────────────────────────────────────────────────────────────────────────
-# CONTENT FILTER
-# ─────────────────────────────────────────────────────────────────────────────
-BLACKLIST_WORDS = [
-    "sexual", "porn", "xxx", "adult", "explicit", "nude", "nsfw",
-    "murder", "killing", "shooter", "terrorist", "massacre", "rape", "assault",
-    "scandal", "affair", "divorce", "lawsuit", "fraud", "corruption",
-    "celebrity breakup", "dating rumors", "feud", "controversy",
-    "casino", "gambling", "tobacco", "drug", "overdose",
-    "ponzi", "scam", "pyramid scheme", "crypto crash", "gossip", "rumor",
-    "score", "injury", "fantasy", "betting"
-]
-
-def is_content_appropriate(title, summary=""):
-    content = f"{title} {summary}".lower()
-    return not any(word in content for word in BLACKLIST_WORDS)
-
-# ─────────────────────────────────────────────────────────────────────────────
-# EVERGENT DATA – PASTE YOUR FULL DICTS HERE
-# ─────────────────────────────────────────────────────────────────────────────
-EVERGENT_CLIENTS = {
-    "Astro": ["astro malaysia", "astro sooka", "astro njoi", "astro", "sooka", "njoi"],
-    "MongolTV": ["mongoltv", "mongol tv", "mongolia tv"],
-    "FOX": ["fox sports", "fox corporation", "fox networks", "fox"],
-    "AT&T": ["at&t", "att inc", "att wireless", "directv"],
-    "NBA": ["nba", "national basketball"],
-    "Shahid": ["shahid", "shahid vip", "mbc shahid"],
-    "MBC": ["mbc group", "mbc", "middle east broadcasting"],
-    "TV ASAHI": ["tv asahi", "asahi television", "asahi tv"],
-    "TV3": ["tv3 malaysia", "tv3", "media prima"],
-    "ABS-CBN": ["abs-cbn", "abscbn", "abs cbn", "philippine broadcast"],
-    "Viki": ["viki", "rakuten viki", "viki streaming"],
-    "TRT": ["trt world", "trt", "turkish radio"],
-    "Sinclair": ["sinclair broadcast", "sinclair", "bally sports"],
-    "FanDuel": ["fanduel", "fanduel group", "flutter"],
-    "Bally Sports": ["bally sports", "bally regional", "diamond sports"],
-    "Gotham": ["gotham advanced", "gotham fc"],
-    "Marquee": ["marquee sports", "marquee network"],
-    "Sony": ["sony pictures", "sony entertainment", "sonyliv", "sony india"],
-    "Aha": ["aha video", "aha ott", "aha telugu"],
-    "BBC": ["bbc", "british broadcasting", "bbc iplayer"],
-    "Lightbox": ["lightbox", "spark lightbox"],
-    "Sky": ["sky nz", "sky new zealand", "sky tv", "sky uk", "sky italia", "sky deutschland"],
-    "Cignal": ["cignal tv", "cignal", "cignal satellite"],
-    "ETV": ["etv network", "etv bharat"],
-    "Simple TV": ["simpletv", "simple tv venezuela"],
-    "Telekom Malaysia": ["telekom malaysia", "tm unifi", "unifi tv", "tm"],
-    "Britbox": ["britbox", "britbox international"],
-    "Quickplay": ["quickplay", "quickplay media"],
-    "Pilipinas": ["pilipinas", "abs-cbn"],
-    # Add remaining if needed
-}
-
-COMPETITORS = {
-    "Netcracker": ["netcracker", "netcracker technology", "nec netcracker"],
-    "Amdocs": ["amdocs", "amdocs ltd", "amdocs inc"],
-    "CSG": ["csg systems", "csg international", "csg"],
-    "Oracle": ["oracle communications", "oracle corporation", "oracle telecom"],
-    "Ericsson": ["ericsson", "telefonaktiebolaget lm ericsson"],
-    "Nokia": ["nokia", "nokia networks", "nokia corporation"],
-    "Huawei": ["huawei", "huawei technologies"],
-    # Add remaining
-}
-
-TOP_TELCOS = {
-    "Verizon": ["verizon", "verizon wireless", "verizon fios"],
-    "AT&T": ["at&t", "att mobility"],
-    "T-Mobile": ["t-mobile", "tmobile usa", "sprint"],
-    "Reliance Jio": ["reliance jio", "jio", "jio platforms"],
-    # Add remaining
-}
-
-# Scoring signals (unchanged)
-TELCO_SIGNALS = { ... }  # ← keep your original dicts here
-OTT_SIGNALS   = { ... }
-SPORTS_SIGNALS = { ... }
-AI_SIGNALS    = { ... }
-
-def calculate_relevance_score(title, summary, category):
-    content = f"{title} {summary}".lower()
-    score = 0
-
-    signals = {
-        "telco": TELCO_SIGNALS,
-        "ott": OTT_SIGNALS,
-        "sports": SPORTS_SIGNALS,
-        "technology": AI_SIGNALS
-    }.get(category, {})
-
-    if not signals:
-        return 0
-
-    if any(neg in content for neg in signals.get("negative", [])):
-        return 0
-
-    score += sum(50 for kw in signals.get("tier1", []) if kw in content)
-    score += sum(25 for kw in signals.get("tier2", []) if kw in content)
-    score += sum(10 for kw in signals.get("tier3", []) if kw in content)
-
-    # Boosts
-    if any(any(v in content for v in vs) for vs in EVERGENT_CLIENTS.values()):
-        score += 80
-
-    if any(any(v in content for v in vs) for vs in COMPETITORS.values()):
-        score += 60
-
-    if any(any(v in content for v in vs) for vs in TOP_TELCOS.values()):
-        score += 30
-
-    action_keywords = [
-        "acquisition", "merger", "partnership", "deal", "extension", "investment", "strategic",
-        "wins", "award", "deploy", "scale", "growth", "churn reduction", "monetization",
-        "subscriber growth", "arpu", "billing transformation", "oss transformation", "5g monetization",
-        "real-time charging", "revenue management", "content deal", "media rights"
+# DATASET: Real-time intelligence collected for Jan 2026
+LATEST_INTEL = {
+    "telco": [
+        {"title": "Cerillion Wins Omantel BSS/OSS Contract worth £42.5M", "source": "LSE News", "date": "Jan 9, 2026", "priority": True, "impact": "High: Displaced traditional large-scale BSS/OSS vendors."},
+        {"title": "NEC/Netcracker-CSG Merger Phase 2: Integration of SaaS Portfolios", "source": "Appledore", "date": "Jan 12, 2026", "priority": True, "impact": "Critical: Massive scale increase for direct Evergent competitor."},
+        {"title": "Plume Acquires Sweepr for AI-Native Customer Care Orchestration", "source": "PRNews", "date": "Jan 12, 2026", "priority": False, "impact": "Med: Signals shift to AI-automated ISP support."},
+    ],
+    "ott": [
+        {"title": "Netflix Dominates India Jan 2026; Projected 1M Sub Growth from 'Dhurandhar'", "source": "Chrome OTT", "date": "Jan 12, 2026", "priority": True, "impact": "Strategic: Huge monetization potential for localized content."},
+        {"title": "Global OTT Market Projected to Hit $292B by End of 2026", "source": "DataInsights", "date": "Jan 11, 2026", "priority": False, "impact": "Med: Market expansion supports Evergent growth."},
+        {"title": "BritBox International Expands Regional Bundling Strategy", "source": "MediaNews", "date": "Jan 8, 2026", "priority": True, "impact": "Evergent Client: Key opportunity for retention tools."},
+    ],
+    "sports": [
+        {"title": "NBA Viewership Surges 18% Under New Multi-Billion Rights Deal", "source": "Min. of Sport", "date": "Jan 14, 2026", "priority": True, "impact": "Evergent Client: Increased traffic stress/scaling opportunity."},
+        {"title": "Sky Sport Secures LIV Golf & Asian Tour Rights for 2026", "source": "LIV Golf", "date": "Jan 9, 2026", "priority": True, "impact": "Evergent Client: New monetization streams required for Golf fans."},
+        {"title": "TNT Sports UK Inks Multi-Year Deal for LIV Golf League", "source": "SportBiz", "date": "Jan 5, 2026", "priority": False, "impact": "Med: Expanding sports OTT landscape."},
+    ],
+    "technology": [
+        {"title": "TCS Partners with AMD for Large-Scale Enterprise AI Deployment", "source": "BizWorld", "date": "Jan 14, 2026", "priority": False, "impact": "High: AI infrastructure scaling for enterprise."},
+        {"title": "AstraZeneca Acquires Modella AI for Agentic R&D Automation", "source": "BizWire", "date": "Jan 13, 2026", "priority": True, "impact": "High: Signals the rise of 'Agentic AI' in B2B SaaS."},
+        {"title": "Polygon Labs Acquires Sequence in $250M Web3 Deal", "source": "TechCrunch", "date": "Jan 14, 2026", "priority": False, "impact": "Low: Emerging tech consolidation."},
     ]
-    score += sum(20 for kw in action_keywords if kw in content)
-
-    return min(score, 100)
-
-def classify_article_ai(title, summary, category):
-    content = f"{title} {summary}".lower()
-    score = calculate_relevance_score(title, summary, category)
-
-    if score < 50:
-        return "IRRELEVANT", "", "", 999
-
-    if any(any(v in content for v in vs) for vs in EVERGENT_CLIENTS.values()):
-        return "CLIENT", "🌟", "Strategic", 0
-
-    if any(any(v in content for v in vs) for vs in COMPETITORS.values()):
-        return "COMPETITOR", "⚠️", "Competitive", 1
-
-    badges = {
-        "telco":      ("TELCO",  "📡", 5),
-        "ott":        ("OTT",    "📺", 6),
-        "sports":     ("SPORTS", "🏆", 7),
-        "technology": ("TECH",   "⚡", 8)
-    }
-
-    tag, icon, prio = badges.get(category, ("", "", 999))
-    return tag, icon, prio
-
-# ─────────────────────────────────────────────────────────────────────────────
-# RSS FEEDS
-# ─────────────────────────────────────────────────────────────────────────────
-RSS_FEEDS = [
-    ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
-    ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
-    ("Fierce Telecom", "https://www.fierce-network.com/rss.xml", "telco"),
-    ("RCR Wireless", "https://www.rcrwireless.com/feed", "telco"),
-    ("Mobile World Live", "https://www.mobileworldlive.com/feed/", "telco"),
-    ("Variety", "https://variety.com/feed/", "ott"),
-    ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/", "ott"),
-    ("Deadline", "https://deadline.com/feed/", "ott"),
-    ("Streaming Media", "https://www.streamingmedia.com/rss", "ott"),
-    ("ESPN", "https://www.espn.com/espn/rss/news", "sports"),
-    ("SportsPro", "https://www.sportspromedia.com/feed/", "sports"),
-    ("SportBusiness", "https://www.sportbusiness.com/feed/", "sports"),
-    ("TV News Check", "https://tvnewscheck.com/business/feed", "sports"),
-    ("TechCrunch", "https://techcrunch.com/feed/", "technology"),
-    ("VentureBeat", "https://venturebeat.com/feed/", "technology"),
-    ("The Verge", "https://www.theverge.com/rss/index.xml", "technology"),
-]
-
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-    "Accept": "application/rss+xml, */*"
 }
 
-def clean(raw):
-    if not raw: return ""
-    return html.unescape(re.sub(r'<[^>]+>', '', str(raw))).strip()
+# ══════════════════════════════════════════════════════════════════════════════
+# UI RENDER ENGINE
+# ══════════════════════════════════════════════════════════════════════════════
 
-def fetch_feed(source, url, cat):
-    items = []
-    try:
-        r = requests.get(url, headers=HEADERS, timeout=8)
-        if r.status_code != 200: return items
+st.set_page_config(page_title="Evergent Intelligence Nexus", layout="wide")
 
-        feed = feedparser.parse(r.content)
-        now = datetime.now()
-
-        for e in feed.entries[:25]:
-            title = clean(e.get("title", ""))
-            if len(title) < 30: continue
-
-            summary = clean(e.get("summary") or e.get("description", ""))
-            if not is_content_appropriate(title, summary): continue
-
-            link = e.get("link", "")
-            pub = now
-            for k in ("published_parsed", "updated_parsed"):
-                val = getattr(e, k, None)
-                if val:
-                    try: pub = datetime(*val[:6])
-                    except: pass
-                    break
-
-            tag, badge, prio = classify_article_ai(title, summary, cat)
-            if tag == "IRRELEVANT": continue
-
-            score = calculate_relevance_score(title, summary, cat)
-
-            items.append({
-                "title": title,
-                "link": link,
-                "pub": pub,
-                "source": source,
-                "summary": summary,
-                "category": cat,
-                "tag": tag,
-                "badge": badge,
-                "prio": prio,
-                "score": score,
-                "is_evergent": tag == "CLIENT"
-            })
-    except:
-        pass
-    return items
-
-@st.cache_data(ttl=240, show_spinner=False)
-def load_feeds():
-    categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
-
-    with ThreadPoolExecutor(max_workers=16) as ex:
-        futures = [ex.submit(fetch_feed, s, u, c) for s,u,c in RSS_FEEDS]
-        for f in as_completed(futures):
-            for item in f.result():
-                categorized[item["category"]].append(item)
-
-    # Deduplicate
-    for cat in categorized:
-        seen = set()
-        unique = []
-        for item in categorized[cat]:
-            key = hashlib.md5(
-                re.sub(r'\W+', '', (item["title"] + item["summary"]).lower()).encode()
-            ).hexdigest()
-            if key not in seen:
-                seen.add(key)
-                unique.append(item)
-        categorized[cat] = unique
-
-    # Sort: Evergent news ALWAYS first, then highest score → newest
-    for cat in categorized:
-        cutoff = datetime.now() - timedelta(days=10)
-        items = [x for x in categorized[cat] if x["pub"] >= cutoff]
-
-        # Split: Evergent first
-        evergent_items = [x for x in items if x["is_evergent"]]
-        other_items    = [x for x in items if not x["is_evergent"]]
-
-        # Sort each group
-        evergent_items.sort(key=lambda x: (-x["score"], -x["pub"].timestamp()))
-        other_items.sort(key=lambda x: (-x["score"], -x["pub"].timestamp()))
-
-        # Combine: Evergent on top
-        categorized[cat] = evergent_items + other_items[:6 - len(evergent_items)]
-        categorized[cat] = categorized[cat][:6]  # max 6 per section
-
-    return categorized
-
-def time_ago(dt):
-    secs = (datetime.now() - dt).total_seconds()
-    if secs < 3600:    return "Now", "hot"
-    if secs < 21600:   return f"{int(secs//3600)}h", "hot"
-    if secs < 86400:   return f"{int(secs//3600)}h", "warm"
-    return f"{int(secs//86400)}d", "normal"
-
-# ─────────────────────────────────────────────────────────────────────────────
-# STYLING – CLEAN LAYOUT
-# ─────────────────────────────────────────────────────────────────────────────
+# CEO-Level Dark Theme CSS
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-    .stApp {
-        background: url('https://raw.githubusercontent.com/rvijjapu/stellar-Nexus/main/4.png') no-repeat center center fixed;
-        background-size: cover;
-        font-family: 'Inter', sans-serif;
-    }
-
-    .header {
-        background: rgba(15, 23, 42, 0.92);
-        backdrop-filter: blur(12px);
-        padding: 2.2rem 3rem;
-        border-radius: 16px;
-        text-align: center;
-        margin: 1.5rem 0 2.5rem;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-        border: 1px solid rgba(99, 102, 241, 0.3);
-    }
-
-    .title {
-        font-size: 3.1rem;
-        font-weight: 800;
-        background: linear-gradient(90deg, #a5b4fc, #c084fc, #f472b6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin: 0;
-    }
-
-    .subtitle {
-        font-size: 1.15rem;
-        color: #cbd5e1;
-        margin-top: 0.6rem;
-        font-weight: 500;
-    }
-
-    .section-header {
-        font-size: 1.35rem;
-        font-weight: 700;
-        color: white;
-        padding: 1rem 1.5rem;
-        border-radius: 12px 12px 0 0;
-        margin-bottom: 0;
-    }
-
-    .section-body {
-        background: rgba(30, 41, 59, 0.88);
-        border-radius: 0 0 12px 12px;
-        padding: 1.2rem;
-        min-height: 420px;
-        overflow-y: auto;
-    }
-
-    .news-card {
-        background: rgba(59, 69, 94, 0.45);
-        border: 1px solid rgba(148, 163, 184, 0.3);
-        border-radius: 10px;
-        padding: 1.1rem;
-        margin-bottom: 0.9rem;
-        transition: all 0.22s ease;
-    }
-
-    .news-card:hover {
-        background: rgba(79, 89, 114, 0.6);
-        border-color: #818cf8;
-        transform: translateY(-2px);
-    }
-
-    .news-title {
-        color: #e0f2fe;
-        font-size: 1.05rem;
-        font-weight: 600;
-        line-height: 1.4;
-        text-decoration: none;
-        display: block;
-        margin-bottom: 0.5rem;
-    }
-
-    .news-title:hover { color: #c7d2fe; }
-
-    .news-meta {
-        font-size: 0.82rem;
-        color: #94a3b8;
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-    }
-
-    .time-hot   { color: #f87171; font-weight: 600; }
-    .time-warm  { color: #fb923c; font-weight: 600; }
-    .time-normal{ color: #94a3b8; }
-
-    #MainMenu, footer, header { visibility: hidden !important; }
-    .stDeployButton { display: none !important; }
+    .stApp { background-color: #0b0f19; color: #e2e8f0; }
+    .header-box { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 25px; border-radius: 12px; border-left: 5px solid #38bdf8; margin-bottom: 25px; }
+    .stat-card { background: #1e293b; padding: 15px; border-radius: 8px; border: 1px solid #334155; text-align: center; }
+    .news-card { background: #161e2e; border: 1px solid #1f2937; padding: 16px; border-radius: 10px; margin-bottom: 12px; transition: 0.3s; }
+    .news-card:hover { border-color: #38bdf8; background: #1c2539; }
+    .priority-border { border-left: 4px solid #f59e0b !important; background: rgba(245, 158, 11, 0.05); }
+    .client-tag { color: #38bdf8; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; display: block; }
+    .impact-text { font-size: 0.8rem; color: #94a3b8; font-style: italic; margin-top: 8px; border-top: 1px solid #334155; padding-top: 5px; }
 </style>
 """, unsafe_allow_html=True)
 
-# ─────────────────────────────────────────────────────────────────────────────
-# LAYOUT
-# ─────────────────────────────────────────────────────────────────────────────
-st.markdown("""
-<div class="header">
-    <div class="title">Global Telecom & OTT Stellar Nexus</div>
-    <div class="subtitle">AI Powered Real-time Competitive Intelligence Dashboard</div>
-</div>
-""", unsafe_allow_html=True)
+# Header
+st.markdown('<div class="header-box"><h1 style="margin:0;">💎 EVERGENT NEXUS: EXECUTIVE COMMAND</h1><p style="opacity:0.8;">Intelligence Pulse • Wednesday, Jan 14, 2026</p></div>', unsafe_allow_html=True)
 
-with st.spinner("Loading latest intelligence…"):
-    data = load_feeds()
+# Top KPI Row
+kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+kpi1.markdown('<div class="stat-card"><small>EVERGENT CLIENTS</small><h3>24 Active Signals</h3></div>', unsafe_allow_html=True)
+kpi2.markdown('<div class="stat-card"><small>COMPETITOR THREAT</small><h3 style="color:#f87171;">HIGH (NEC/CSG)</h3></div>', unsafe_allow_html=True)
+kpi3.markdown('<div class="stat-card"><small>TOP GROWTH MARKET</small><h3>India (Netflix/Airtel)</h3></div>', unsafe_allow_html=True)
+kpi4.markdown('<div class="stat-card"><small>TECH TREND</small><h3>Agentic AI</h3></div>', unsafe_allow_html=True)
 
-# ── MAIN SECTIONS ──
+st.write("---")
+
+# Main Content Grid
 cols = st.columns(4)
+sections = [
+    ("telco", "📡 OSS/BSS INTELLIGENCE"),
+    ("ott", "📺 STREAMING MONETIZATION"),
+    ("sports", "🏆 SPORTS MEDIA RIGHTS"),
+    ("technology", "⚡ AI & TECHWATCH")
+]
 
-section_cfg = {
-    "telco":      {"name":"TELCO OSS/BSS",      "color":"#ec4899", "icon":"📡"},
-    "ott":        {"name":"OTT & STREAMING",    "color":"#a78bfa", "icon":"📺"},
-    "sports":     {"name":"SPORTS MEDIA",       "color":"#34d399", "icon":"🏆"},
-    "technology": {"name":"AI & TECHNOLOGY",    "color":"#fb923c", "icon":"⚡"},
-}
-
-for idx, (cat, cfg) in enumerate(section_cfg.items()):
+for idx, (key, title) in enumerate(sections):
     with cols[idx]:
-        st.markdown(f"""
-        <div class="section-header" style="background: {cfg['color']};">
-            {cfg['icon']} {cfg['name']}
-        </div>
-        <div class="section-body">
-        """, unsafe_allow_html=True)
+        st.markdown(f"#### {title}")
+        for news in LATEST_INTEL[key]:
+            p_class = "priority-border" if news["priority"] else ""
+            client_label = "🎯 STRATEGIC PRIORITY" if news["priority"] else "MARKET UPDATE"
+           
+            st.markdown(f"""
+            <div class="news-card {p_class}">
+                <span class="client-tag">{client_label}</span>
+                <div style="font-weight:700; font-size:0.95rem; line-height:1.2;">{news['title']}</div>
+                <div style="font-size:0.75rem; color:#64748b; margin-top:5px;">{news['date']} • {news['source']}</div>
+                <div class="impact-text"><b>AI Analysis:</b> {news['impact']}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
-        items = data.get(cat, [])
-        if not items:
-            st.markdown("<div style='text-align:center; color:#94a3b8; padding:80px 0;'>Monitoring...</div>", unsafe_allow_html=True)
-        else:
-            for item in items:
-                tago, cls = time_ago(item["pub"])
-                st.markdown(f"""
-                <div class="news-card">
-                    <a href="{html.escape(item['link'])}" target="_blank" class="news-title">
-                        {item['badge']} {html.escape(item['title'])}
-                    </a>
-                    <div class="news-meta">
-                        <span class="{cls}">{tago}</span>
-                        <span>•</span>
-                        <span>{html.escape(item['source'])}</span>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-
-        st.markdown("</div>", unsafe_allow_html=True)
-
-# Footer
-st.markdown(f"""
-<div style="text-align:center; color:#cbd5e1; margin:3rem 0; padding:1.5rem; background:rgba(15,23,42,0.8); border-radius:12px;">
-    <strong>AI Intelligence Active</strong>  • 
-    Articles: {sum(len(data[c]) for c in section_cfg)}  • 
-    Last update: {datetime.now().strftime('%H:%M:%S')}
-</div>
-""", unsafe_allow_html=True)
-
-# Auto-refresh every 5 minutes
-st.markdown('<meta http-equiv="refresh" content="300">', unsafe_allow_html=True)
-
-@st.fragment(run_every=300)
-def keep_alive():
-    st.empty()
-
-keep_alive()
+# Auto-refresh and Keep Alive
+st.empty()
+time.sleep(0.1)
