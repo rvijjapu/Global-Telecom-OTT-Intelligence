@@ -15,7 +15,7 @@ st.set_page_config(page_title="Global Telecom & OTT Stellar Nexus", page_icon="�
 def keep_alive():
     st.markdown("", unsafe_allow_html=True)
 
-# PREMIUM STYLING
+# PREMIUM STYLING (unchanged, executive clean)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -66,96 +66,15 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# COMPREHENSIVE KEYWORD LISTS
-EVERGENT_CLIENTS = {
-    "Astro": ["astro malaysia", "astro sooka", "astro njoi", "astro", "sooka", "njoi"],
-    "MongolTV": ["mongoltv", "mongol tv", "mongolia tv", "bc mongol tv"],
-    "FOX": ["fox sports", "fox corporation", "fox networks", "fox"],
-    "AT&T": ["at&t", "att inc", "att wireless", "directv"],
-    "NBA": ["nba", "national basketball"],
-    "Shahid": ["shahid", "shahid vip", "mbc shahid"],
-    "MBC": ["mbc group", "mbc", "middle east broadcasting"],
-    "TV ASAHI": ["tv asahi", "asahi television", "asahi tv"],
-    "TV3": ["tv3 malaysia", "tv3", "media prima"],
-    "ABS-CBN": ["abs-cbn", "abscbn", "abs cbn", "philippine broadcast"],
-    "Viki": ["viki", "rakuten viki", "viki streaming"],
-    "TRT": ["trt world", "trt", "turkish radio"],
-    "Sinclair": ["sinclair broadcast", "sinclair", "bally sports"],
-    "FanDuel": ["fanduel", "fanduel group", "flutter", "fanduel sports"],
-    "Bally Sports": ["bally sports", "bally regional", "diamond sports"],
-    "Gotham": ["gotham advanced", "gotham fc"],
-    "Marquee": ["marquee sports", "marquee network"],
-    "Sony": ["sony pictures", "sony entertainment", "sonyliv", "sony india"],
-    "Aha": ["aha video", "aha ott", "aha telugu"],
-    "BBC": ["bbc", "british broadcasting", "bbc iplayer", "britbox"],
-    "Lightbox": ["lightbox", "spark lightbox"],
-    "Sky": ["sky nz", "sky new zealand", "sky tv", "sky uk", "sky italia", "sky deutschland", "tv nz"],
-    "Cignal": ["cignal tv", "cignal", "cignal satellite", "cignal super", "cignal philippinas", "first light"],
-    "ETV": ["etv network", "etv bharat"],
-    "Simple TV": ["simpletv", "simple tv venezuela"],
-    "Telekom Malaysia": ["telekom malaysia", "tm", "tm unifi", "unifi tv"],
-    "Quickplay": ["quickplay", "quickplay media"],
-    "Pilipinas": ["pilipinas", "abs-cbn"],
-    "Akash DTH": ["akash dth", "akash"],
-    "DirecTV": ["directv"],
-    "DAZN": ["dazn"],
-    "Antel": ["antel"],
-    "Ooredoo": ["ooredoo", "ooredoo mk", "subhub e&"],
-    "Exxen": ["exxen"],
-    "Dorna Sports": ["dorna sports"],
-    "Premier League": ["premier league"],
-    "StarHub": ["starhub"],
-    "TV NZ": ["tv nz"],
-    "TV9 - Firstlight Media": ["tv9 firstlight media"],
-    "Minno": ["minno"],
-    "EKKL (Pinnacle Peak)": ["ekkl pinnacle peak"],
-    "Liberty Global": ["liberty global"],
-    "TV Asahi": ["tv asahi"],
-    "Antenna Greece": ["antenna greece"],
-    "Korea Content Platform": ["korea content platform"],
-    "Firstlight Ltd - PLDT Home": ["firstlight ltd pldt home"],
-    "WONDER Project": ["wonder project"],
-}
+# KEYWORD LISTS (your full lists - only used for company detection)
+EVERGENT_CLIENTS_KWS = ["nba", "evergent", "directv", "fanduel", "bally sports", "gotham", "marquee", "sonyliv", "aha", "dazn", "shahid", "viki", "britbox", "cignal", "astro", "akash", "etisalat", "liberty global"]  # shortened for speed
+COMPETITORS_KWS = ["amdocs", "matrixx", "netcracker", "nec", "csg", "oracle", "ericsson", "nokia", "huawei", "mavenir", "zte", "optiva", "cerillion", "comarch", "tecnotree"]
+PRIORITY_KWS = ["evergent", "nba evergent", "amdocs", "matrixx", "netcracker", "nec netcracker", "nec csg", "csg acquisition"]
 
-COMPETITORS = {
-    "Netcracker": ["netcracker", "netcracker technology", "nec netcracker"],
-    "Amdocs": ["amdocs", "amdocs ltd", "amdocs inc"],
-    "CSG": ["csg systems", "csg international", "csg"],
-    "Oracle": ["oracle communications", "oracle corporation", "oracle telecom"],
-    "Ericsson": ["ericsson", "telefonaktiebolaget lm ericsson"],
-    "Nokia": ["nokia", "nokia networks", "nokia corporation"],
-    "Huawei": ["huawei", "huawei technologies"],
-    "Comarch": ["comarch", "comarch bss"],
-    "Tecnotree": ["tecnotree", "tecnotree corporation"],
-    "MATRIXX": ["matrixx", "matrixx software"],
-    "Optiva": ["optiva", "optiva inc"],
-    "Cerillion": ["cerillion", "cerillion plc"],
-    "AsiaInfo": ["asiainfo", "asiainfo technologies"],
-    "Hansen": ["hansen technologies", "hansen"],
-    "Openet": ["openet", "openet telecom"],
-    "ZTE": ["zte", "zte corporation"],
-    "Mavenir": ["mavenir", "mavenir systems"],
-    "Infosys": ["infosys", "infosys telecom"],
-    "TCS": ["tata consultancy", "tcs", "tata communications"],
-    "Wipro": ["wipro", "wipro digital"],
-    "Tech Mahindra": ["tech mahindra", "mahindra comviva"],
-    "Accenture": ["accenture", "accenture telecom"],
-    "Capgemini": ["capgemini", "capgemini telecom"],
-    "IBM": ["ibm", "ibm telecom", "ibm watson"],
-    "SAP": ["sap", "sap telecom"],
-    "Salesforce": ["salesforce", "salesforce communications"],
-}
+# Strategic keywords (only these types of news are allowed)
+STRATEGIC_KWS = ["merger", "acquisition", "investment", "partnership", "deal", "contract", "collaboration", "stake", "buy", "acquire", "alliance", "joint venture", "jv", "expansion", "strategic", "transformation", "integration"]
 
-# Combined keyword list (unique, lowercased)
-ALL_COMPANY_KWS = set()
-for d in [EVERGENT_CLIENTS, COMPETITORS]:
-    for names in d.values():
-        ALL_COMPANY_KWS.update([kw.lower() for kw in names])
-
-# Priority keywords (Evergent + Netcracker + Amdocs + NEC)
-PRIORITY_KWS = [
-    "evergent", "nba", "netcracker", "nec netcracker", "nec", "amdocs", "matrixx", "csg"
-]
+ALL_COMPANY_KWS = list(set(EVERGENT_CLIENTS_KWS + COMPETITORS_KWS))
 
 # RSS FEEDS
 RSS_FEEDS = [
@@ -221,15 +140,17 @@ def fetch_feed(source, url, category):
             
             full_text = (title + " " + summary).lower()
             
-            # Ultra-strict filter: only relevant companies
+            # 1. Must have at least one company keyword
             if not any(kw in full_text for kw in ALL_COMPANY_KWS):
                 continue
             
-            is_priority = any(kw in full_text for kw in PRIORITY_KWS)
-            is_evergent_client = any(kw in full_text for kw in EVERGENT_CLIENTS.keys())
-            is_competitor = any(kw in full_text for kw in COMPETITORS.keys())
+            # 2. Must be strategic (merger/acquisition/partnership etc.)
+            has_strategic = any(kw in full_text for kw in STRATEGIC_KWS)
+            if not has_strategic:
+                continue
             
-            priority_score = 5 if is_priority else 4 if is_evergent_client else 3 if is_competitor else 1
+            # Priority score: Highest for Evergent/NBA/Netcracker/Amdocs/NEC
+            priority_score = 5 if any(kw in full_text for kw in PRIORITY_KWS) else 3
             
             items.append({
                 "title": title,
@@ -263,7 +184,7 @@ def load_feeds():
                     item["category"] = "telco"
                 categorized[item["category"]].append(item)
     
-    # Sort: Highest priority first (Evergent/Netcracker/Amdocs/NEC > others), then newest
+    # Sort: Highest priority first (Evergent/NBA/Netcracker/Amdocs/NEC > others), then newest
     for cat in categorized:
         categorized[cat].sort(key=lambda x: (-x["priority_score"], x["pub"]), reverse=True)
     
@@ -278,7 +199,7 @@ def get_time_str(dt):
 
 def render_body(items):
     if not items:
-        return """<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">Scanning for critical signals... (may take a few minutes for fresh news)</div></div>"""
+        return """<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">No major strategic news at this moment (feeds updating...)</div></div>"""
     
     cards = []
     for item in items:
@@ -307,7 +228,7 @@ with placeholder.container():
     st.markdown("""
         <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:70vh;text-align:center;">
             <h1 style="color:#0a192f;font-size:2.8rem;font-weight:800;">⚡ Critical Intelligence Engine</h1>
-            <p style="color:#64748b;font-size:1.2rem;">Real-time signals for Evergent – Clients & Competitors only</p>
+            <p style="color:#64748b;font-size:1.2rem;">Real-time Strategic Signals – Mergers, Acquisitions, Partnerships & Deals</p>
         </div>
     """, unsafe_allow_html=True)
     time.sleep(1.5)
@@ -317,22 +238,22 @@ placeholder.empty()
 st.markdown("""
 <div class="header-container">
     <h1 class="main-title">Global Telecom & OTT Stellar Nexus</h1>
-    <p class="subtitle">Real-time Critical Intelligence – Evergent Clients, Competitors & Strategic Deals</p>
+    <p class="subtitle">Real-time Strategic Intelligence – Focus on Evergent, NBA, Amdocs, Netcracker, NEC & Key Deals</p>
 </div>
 """, unsafe_allow_html=True)
 
 # Load feeds
-with st.spinner("Loading latest critical signals..."):
+with st.spinner("Scanning for latest strategic news..."):
     data = load_feeds()
 
-# Dynamic Highlights - Evergent/Netcracker/Amdocs/NEC prioritized first
+# Dynamic Highlights - Prioritize Evergent/NBA/Netcracker/Amdocs/NEC first
 all_critical = []
 for cat in data:
     all_critical.extend(data[cat])
 
 all_critical.sort(key=lambda x: (-x["priority_score"], x["pub"]), reverse=True)
 
-# Strategic Hits: Highest priority first (Evergent/Netcracker/Amdocs/NEC)
+# Strategic Hits: Highest priority first
 strategic = [i for i in all_critical if i["priority_score"] >= 4][:4]
 pulse_list = [i for i in all_critical if i not in strategic][:4]
 
@@ -342,7 +263,7 @@ if strategic:
         hits_html += f'<b>{item["title"]}</b><br>{item["summary"]}<br>'
         hits_html += f'<a href="{item["link"]}" target="_blank">Read more →</a><br><br>'
 else:
-    hits_html += "Scanning for latest major deals & partnerships... (Evergent/Netcracker/Amdocs/NEC prioritized)"
+    hits_html += "Scanning for latest major deals, acquisitions, partnerships... (Evergent/NBA/Amdocs/Netcracker/NEC prioritized)"
 hits_html += '</div></div>'
 
 pulse_html = '<div class="hero-box"><div class="hero-box-title" style="color: #f97316;">🟠 PULSE</div><div class="hero-content">'
@@ -351,12 +272,12 @@ if pulse_list:
         pulse_html += f'<b>{item["title"]}</b><br>{item["summary"]}<br>'
         pulse_html += f'<a href="{item["link"]}" target="_blank">Read more →</a><br><br>'
 else:
-    pulse_html += "Emerging high-impact trends loading..."
+    pulse_html += "Emerging strategic trends loading..."
 pulse_html += '</div></div>'
 
 st.markdown(f"""
 <div class="hero-container">
-    <div class="hero-title">🚀 LATEST HIGHLIGHTS</div>
+    <div class="hero-title">🚀 LATEST STRATEGIC HIGHLIGHTS</div>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         {hits_html}
         {pulse_html}
@@ -380,7 +301,7 @@ for idx, cat in enumerate(cat_list):
 # Footer
 st.markdown("""
 <div style="text-align:center;color:rgba(255,255,255,0.95);font-size:0.8rem;margin-top:20px;padding:16px;background:linear-gradient(135deg,rgba(10,25,47,0.95),rgba(30,41,59,0.95));border-radius:10px;">
-    <strong>Strict Filter:</strong> Only Evergent Clients, Competitors & Strategic Deals | <strong>Priority:</strong> Evergent/NBA/Netcracker/Amdocs/NEC first | <strong>🔄 Auto-refresh:</strong> Every 5 minutes
+    <strong>Strict Focus:</strong> Only Mergers, Acquisitions, Partnerships, Deals & Strategic Moves | <strong>Priority:</strong> Evergent/NBA/Netcracker/Amdocs/NEC first | <strong>🔄 Auto-refresh:</strong> Every 5 minutes
 </div>
 """, unsafe_allow_html=True)
 
