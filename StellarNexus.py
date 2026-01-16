@@ -8,36 +8,34 @@ import re
 import time
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 1. COMPREHENSIVE INTELLIGENCE LISTS (2026 PPT SYNC)
+# 1. 2026 STRATEGIC INTELLIGENCE (PPT-READY)
 # ══════════════════════════════════════════════════════════════════════════════
 STRATEGIC_2026_HITS = [
     {
         "title": "NBA Scores Strategic Investment in Evergent; Named Preferred Global Vendor (Jan 14, 2026)", 
         "impact": "CRITICAL",
-        "context": "Following a successful 185-country rollout, the NBA has taken an equity stake in Evergent to drive hyper-personalization for League Pass via AI-driven churn management."
+        "context": "Following work on NBA League Pass, the NBA has made a strategic investment in Evergent Technologies to drive hyper-personalization across 185 countries."
     },
     {
         "title": "Amdocs Snaps up Matrixx Software for $200M in Massive BSS Consolidation Move (Jan 6, 2026)", 
         "impact": "HIGH",
-        "context": "Amdocs acquires charging leader Matrixx to protect its Tier-1 accounts, leaving Evergent as the leading independent agile choice in the market."
+        "context": "Amdocs acquires charging leader Matrixx to bolster its 5G portfolio, forcing legacy consolidation while Evergent maintains agile independent leadership."
     },
     {
-        "title": "Netcracker Expands Partnership with T-Mobile for Cloud-Native Wholesale BSS (Jan 15, 2026)", 
+        "title": "Netcracker Expands Partnership with T-Mobile for Cloud-Native BSS (Jan 15, 2026)", 
         "impact": "HIGH",
-        "context": "T-Mobile Wholesale shifts to Netcracker’s cloud platform to reduce service launch cycles from months to weeks, enabling digital-first business models."
+        "context": "T-Mobile Wholesale shifts to Netcracker’s cloud platform to reduce service launch cycles, enabling digital-first business models for the 2026 season."
     }
 ]
 
-# Client/Competitor matching engine (includes ALL names from your prompt)
+# Intelligence Dictionary for Automated Priority Matching
 EVERGENT_CLIENTS = {
     "NBA": ["nba", "national basketball", "league pass"],
     "Astro": ["astro malaysia", "sooka", "njoi"],
     "Shahid": ["shahid vip", "mbc"], "Sky NZ": ["sky nz", "neon"], 
     "Sony": ["sonyliv", "sony india"], "FanDuel": ["fanduel", "bally sports"],
     "Cignal": ["cignal tv", "pldt"], "Telekom Malaysia": ["unifi tv", "tm"],
-    "Aha": ["aha ott", "aha telugu"], "Etisalat": ["e&", "etisalat"],
-    "DAZN": ["dazn"], "Fox": ["fox sports", "fox networks"],
-    "BBC": ["bbc", "wimbledon"], "StarHub": ["starhub"]
+    "DAZN": ["dazn"], "Fox": ["fox sports", "fox networks"]
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -55,35 +53,30 @@ st.markdown("""
         font-family: 'Inter', sans-serif; 
     }
     
-    /* Header Visibility */
+    /* Global Visibility Enhancements */
     .header-box { background: rgba(30, 64, 175, 0.98); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; text-align: center; border-bottom: 4px solid #3b82f6; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     .header-box h1 { margin: 0; font-weight: 800; color: #ffffff !important; letter-spacing: -1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
-    .header-box p { margin: 5px 0 0; font-weight: 600; color: #e2e8f0 !important; }
 
     /* Hero Containers */
     .hero-box { background: rgba(15, 23, 42, 0.97); border: 2px solid #1e40af; border-radius: 12px; padding: 1.5rem; min-height: 240px; box-shadow: 0 4px 25px rgba(0,0,0,0.6); }
-    .hero-box h4 { color: #fbbf24 !important; font-weight: 800; margin-top: 0; }
-    .status-tag { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; margin-bottom: 12px; text-transform: uppercase; color: white; }
+    .hero-box h4 { color: #fbbf24 !important; font-weight: 800; }
     
-    /* News Section visibility */
+    /* News Section */
     .section-title { color: #ffffff !important; font-weight: 800; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); margin-bottom: 10px; background: rgba(0,0,0,0.4); padding: 5px 10px; border-radius: 5px; }
     .news-card { background: rgba(30, 41, 59, 0.98); border-radius: 8px; padding: 12px; margin-bottom: 10px; border-left: 4px solid #3b82f6; transition: 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
     .news-card:hover { transform: translateX(5px); background: rgba(51, 65, 85, 1); border-left: 4px solid #fbbf24; }
     .priority-card { background: linear-gradient(90deg, rgba(30, 41, 59, 0.98) 0%, rgba(23, 37, 84, 0.98) 100%); border-left: 4px solid #fbbf24; }
     
-    /* Font Visibility */
+    /* Font Styling */
     .news-title { font-size: 0.92rem; font-weight: 700; color: #f8fafc !important; line-height: 1.4; }
     .impact-tag { color: #fbbf24; font-weight: 800; font-size: 0.8rem; }
     .client-chip { background: #fbbf24; color: #000; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 900; margin-right: 6px; }
     .read-more-link { color: #60a5fa !important; font-size: 0.75rem; font-weight: 700; text-decoration: none; display: inline-block; margin-top: 8px; }
-    .read-more-link:hover { text-decoration: underline; color: #93c5fd !important; }
-    
-    hr { border: 0; height: 1px; background: rgba(255,255,255,0.2); margin: 2rem 0; }
 </style>
 """, unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 3. 2026 LIVE DATA ENGINE (JANUARY 1-16)
+# 3. 2026 LIVE DATA ENGINE (STRICT JAN 2026 FILTER)
 # ══════════════════════════════════════════════════════════════════════════════
 def fetch_2026_intel(name, url, cat):
     items = []
@@ -92,12 +85,12 @@ def fetch_2026_intel(name, url, cat):
         feed = feedparser.parse(resp.content)
         for entry in feed.entries:
             pub = entry.get("published_parsed", None)
+            # HARD FILTER: Only news from Jan 2026
             if pub and pub.tm_year == 2026 and pub.tm_mon == 1:
                 title = entry.get("title", "")
                 txt = (title + " " + entry.get("summary", "")).lower()
-                
                 client_match = next((k for k, v in EVERGENT_CLIENTS.items() if any(n in txt for n in v)), None)
-                is_priority = (client_match == "NBA") or ("amdocs" in txt and "matrixx" in txt) or ("netcracker" in txt and "t-mobile" in txt)
+                is_priority = (client_match == "NBA") or ("agentic" in txt)
                 
                 items.append({
                     "title": title, "link": entry.get("link", ""), 
@@ -144,15 +137,15 @@ with h2:
     <div class="hero-box" style="border-color:#f97316;">
         <span class="status-tag" style="background:#f97316;">2026 AGENTIC AI PULSE</span>
         <div style="font-size:0.95rem; line-height:1.7; color:white;">
-            <b style="color:#fbbf24;">Autonomous Retention:</b> Industry shift from Generative AI to <b>Agentic AI</b> where autonomous agents independently manage churn and billing (CES 2026 Keynote).<br><br>
-            <b style="color:#fbbf24;">NBA Vision:</b> David Lee (NBA Investments) confirms personalization and data-driven engagement as the #1 driver for the <b>Evergent</b> equity stake (Jan 14).<br><br>
-            <b style="color:#fbbf24;">Sovereign Cloud:</b> AWS and Google Cloud (Jan 15) accelerate European Sovereign Cloud rollouts to meet Tier-1 telco data privacy demands.
+            <b style="color:#fbbf24;">NBA Vision:</b> Head of NBA Investments confirms data-driven engagement as the #1 driver for the <b>Evergent</b> equity stake (Jan 14, 2026).<br><br>
+            <b style="color:#fbbf24;">Agentic AI Core:</b> Shift from simple copilots to autonomous <b>Agentic AI</b> systems that resolve billing and churn in real-time without human input (Jan 15, 2026).<br><br>
+            <b style="color:#fbbf24;">Humanoid Manufacturing:</b> Boston Dynamics begins factory implementation of AI robots (Atlas) for automotive supply chain sorting (Jan 2026).
         </div>
     </div>
     """, unsafe_allow_html=True)
 
 # --- DYNAMIC GRID ---
-st.markdown("<hr>", unsafe_allow_html=True)
+st.markdown("<hr style='opacity:0.2'>", unsafe_allow_html=True)
 cols = st.columns(4)
 sections = [("📡 TELCO OSS/BSS", "telco"), ("📺 OTT & STREAMING", "ott"), ("🏆 SPORTS MEDIA", "sports"), ("⚡ AI TECHWATCH", "technology")]
 
@@ -161,9 +154,6 @@ for i, (label, tag) in enumerate(sections):
         st.markdown(f"<h3 class='section-title'>{label}</h3>", unsafe_allow_html=True)
         filtered = [n for n in data if n['category'] == tag]
         filtered.sort(key=lambda x: x['pub'], reverse=True)
-        
-        if not filtered:
-            st.markdown("<div class='news-card' style='color:#94a3b8;'>Monitoring live feeds...</div>", unsafe_allow_html=True)
         
         for n in filtered[:12]:
             client_chip = f"<span class='client-chip'>{n['client']}</span>" if n['client'] else ""
