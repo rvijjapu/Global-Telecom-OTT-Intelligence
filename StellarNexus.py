@@ -188,9 +188,19 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# PRIORITY KEYWORDS & RSS SOURCES (unchanged)
+# PRIORITY KEYWORDS (for general priority)
 PRIORITY_KWS = ["evergent", "nba", "amdocs", "matrixx", "netcracker", "nec", "csg"]
 
+# CEO THINKING FILTER: KEYWORDS FOR IMPORTANT NEWS (remove silly/irrelevant)
+CEO_IMPORTANT_KWS = [
+    "merger", "acquisition", "partnership", "deal", "investment", "strategic", "equity stake",
+    "acquire", "merge", "partner", "buyout", "expansion", "footprint", "dominate", "market leader",
+    "billing", "charging", "BSS", "OSS", "5G", "AI", "agentic", "autonomous", "retention", "churn",
+    "personalization", "satellite", "broadband", "fiber", "streaming", "OTT", "content integration",
+    "League Pass", "Disney+", "Hulu", "SaaS", "vendor", "preferred vendor", "CEO", "executive"
+]
+
+# RSS FEEDS (unchanged - focused on telco OSS/BSS, OTT, etc.)
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
     ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
@@ -250,6 +260,11 @@ def fetch_feed(source, url, category):
             if not pub or pub < CUTOFF: continue
             
             full_text = (title + " " + summary).lower()
+            
+            # CEO filter: Check for important keywords to exclude silly news
+            is_important = any(kw in full_text for kw in CEO_IMPORTANT_KWS)
+            if not is_important: continue  # Skip silly/irrelevant news
+            
             is_priority = any(kw in full_text for kw in PRIORITY_KWS)
             
             items.append({
@@ -331,7 +346,7 @@ placeholder.empty()
 st.markdown("""
 <div class="header-container">
     <h1 class="main-title">Global Telecom & OTT Stellar Nexus</h1>
-    <p class="subtitle">AI Powered Real-time Competitive Intelligence Dashboard</p>
+    <p class="subtitle">AI Powered Real-time Competitive Intelligence Dashboard (CEO-Focused: Filters Out Irrelevant News)</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -360,8 +375,8 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# AI ENGINE SCAN + NEWS COLUMNS
-with st.spinner("Scanning for latest strategic news..."):
+# AI ENGINE SCAN + NEWS COLUMNS (with CEO filter integrated in fetch_feed)
+with st.spinner("AI Engine (CEO Mode): Scanning & Filtering for Most Impactful Strategic News..."):
     data = load_feeds()
 
 cols = st.columns(4)
