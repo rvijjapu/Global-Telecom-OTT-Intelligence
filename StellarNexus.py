@@ -6,7 +6,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import html
 import re
 import time
-import random  # For simulating AI scoring; replace with real ML if needed
 
 # PAGE CONFIG
 st.set_page_config(
@@ -189,10 +188,203 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# PRIORITY KEYWORDS
-PRIORITY_KWS = ["evergent", "nba", "amdocs", "matrixx", "netcracker", "nec", "csg"]
+# COMPREHENSIVE INTELLIGENCE LISTS
+EVERGENT_CLIENTS = {
+    "Astro": ["astro malaysia", "astro sooka", "astro njoi", "astro", "sooka", "njoi"],
+    "MongolTV": ["mongoltv", "mongol tv", "mongolia tv"],
+    "FOX": ["fox sports", "fox corporation", "fox networks", "fox"],
+    "AT&T": ["at&t", "att inc", "att wireless", "directv"],
+    "NBA": ["nba", "national basketball"],
+    "Shahid": ["shahid", "shahid vip", "mbc shahid"],
+    "MBC": ["mbc group", "mbc", "middle east broadcasting"],
+    "TV ASAHI": ["tv asahi", "asahi television", "asahi tv"],
+    "TV3": ["tv3 malaysia", "tv3", "media prima"],
+    "ABS-CBN": ["abs-cbn", "abscbn", "abs cbn", "philippine broadcast"],
+    "Viki": ["viki", "rakuten viki", "viki streaming"],
+    "TRT": ["trt world", "trt", "turkish radio"],
+    "Sinclair": ["sinclair broadcast", "sinclair", "bally sports"],
+    "FanDuel": ["fanduel", "fanduel group", "flutter"],
+    "Bally Sports": ["bally sports", "bally regional", "diamond sports"],
+    "Gotham": ["gotham advanced", "gotham fc"],
+    "Marquee": ["marquee sports", "marquee network"],
+    "Sony": ["sony pictures", "sony entertainment", "sonyliv", "sony india"],
+    "Aha": ["aha video", "aha ott", "aha telugu"],
+    "BBC": ["bbc", "british broadcasting", "bbc iplayer"],
+    "Lightbox": ["lightbox", "spark lightbox"],
+    "Sky": ["sky nz", "sky new zealand", "sky tv", "sky uk", "sky italia", "sky deutschland"],
+    "Cignal": ["cignal tv", "cignal", "cignal satellite"],
+    "ETV": ["etv network", "etv bharat"],
+    "Simple TV": ["simpletv", "simple tv venezuela"],
+    "Telekom Malaysia": ["telekom malaysia", "tm unifi", "unifi tv", "tm"],
+    "Britbox": ["britbox", "britbox international"],
+    "Quickplay": ["quickplay", "quickplay media"],
+    "Pilipinas": ["pilipinas", "abs-cbn"],
+    # Additional clients
+    "Akash DTH": ["akash dth"],
+    "DirecTV": ["directv"],
+    "Britbox": ["britbox"],
+    "NBA": ["nba"],
+    "Gotham": ["gotham"],
+    "FanDuel Sports": ["fanduel sports", "bally sports"],
+    "WONDER Project": ["wonder project"],
+    "Marquee Sports": ["marquee sports"],
+    "Astro": ["astro"],
+    "Akash": ["akash"],
+    "Etisalat": ["etisalat"],
+    "Sony": ["sony"],
+    "DAZN": ["dazn"],
+    "Simple TV": ["simple tv"],
+    "Antel": ["antel"],
+    "Aha": ["aha"],
+    "Sky NZ": ["sky nz"],
+    "BBC": ["bbc"],
+    "ABS CBN": ["abs cbn"],
+    "BC - Mongol TV": ["bc mongol tv"],
+    "Shahid": ["shahid"],
+    "Viki": ["viki"],
+    "TRT": ["trt"],
+    "TV3": ["tv3"],
+    "ETV": ["etv"],
+    "Cignal- Philippinas": ["cignal philippinas", "first light"],
+    "TV Asahi": ["tv asahi"],
+    "Ooredo - MK": ["ooredoo mk"],
+    "BC - One 31": ["bc one 31"],
+    "Antenna Greece": ["antenna greece"],
+    "Telekom Malaysia": ["telekom malaysia"],
+    "Exxen": ["exxen"],
+    "Cignal Super": ["cignal super"],
+    "Dorna Sports": ["dorna sports"],
+    "Premier League": ["premier league"],
+    "StarHub": ["starhub"],
+    "Subhub e&": ["subhub e&"],
+    "TV NZ": ["tv nz"],
+    "TV9 - Firstlight Media": ["tv9 firstlight media"],
+    "Korea Content Platform": ["korea content platform"],
+    "Firstlight Ltd - PLDT Home": ["firstlight ltd pldt home"],
+    "Minno": ["minno"],
+    "EKKL (Pinnacle Peak)": ["ekkl pinnacle peak"],
+    "Liberty Global": ["liberty global"],
+}
 
-# RSS FEEDS
+COMPETITORS = {
+    "Netcracker": ["netcracker", "netcracker technology", "nec netcracker"],
+    "Amdocs": ["amdocs", "amdocs ltd", "amdocs inc"],
+    "CSG": ["csg systems", "csg international", "csg"],
+    "Oracle": ["oracle communications", "oracle corporation", "oracle telecom"],
+    "Ericsson": ["ericsson", "telefonaktiebolaget lm ericsson"],
+    "Nokia": ["nokia", "nokia networks", "nokia corporation"],
+    "Huawei": ["huawei", "huawei technologies"],
+    "Comarch": ["comarch", "comarch bss"],
+    "Tecnotree": ["tecnotree", "tecnotree corporation"],
+    "MATRIXX": ["matrixx", "matrixx software"],
+    "Optiva": ["optiva", "optiva inc"],
+    "Cerillion": ["cerillion", "cerillion plc"],
+    "AsiaInfo": ["asiainfo", "asiainfo technologies"],
+    "Hansen": ["hansen technologies", "hansen"],
+    "Openet": ["openet", "openet telecom"],
+    "ZTE": ["zte", "zte corporation"],
+    "Mavenir": ["mavenir", "mavenir systems"],
+    "Infosys": ["infosys", "infosys telecom"],
+    "TCS": ["tata consultancy", "tcs", "tata communications"],
+    "Wipro": ["wipro", "wipro digital"],
+    "Tech Mahindra": ["tech mahindra", "mahindra comviva"],
+    "Accenture": ["accenture", "accenture telecom"],
+    "Capgemini": ["capgemini", "capgemini telecom"],
+    "IBM": ["ibm", "ibm telecom", "ibm watson"],
+    "SAP": ["sap", "sap telecom"],
+    "Salesforce": ["salesforce", "salesforce communications"],
+}
+
+TOP_TELCOS = {
+    # USA
+    "Verizon": ["verizon", "verizon wireless", "verizon fios"],
+    "AT&T": ["at&t", "att mobility"],
+    "T-Mobile": ["t-mobile", "tmobile usa", "sprint"],
+    "Comcast": ["comcast", "xfinity", "comcast cable"],
+    "Charter": ["charter communications", "spectrum", "charter spectrum"],
+    "Cox": ["cox communications", "cox cable", "cox business"],
+    "Lumen": ["lumen technologies", "centurylink", "lumen"],
+    "Frontier": ["frontier communications", "frontier"],
+    "Windstream": ["windstream", "windstream enterprise"],
+    "Mediacom": ["mediacom communications", "mediacom"],
+    "Altice USA": ["altice usa", "optimum", "suddenlink"],
+    # UK & Europe
+    "BT": ["bt group", "british telecom", "bt", "bt enterprise", "ee"],
+    "Vodafone": ["vodafone", "vodafone group"],
+    "O2": ["o2", "telefonica uk"],
+    "Virgin Media": ["virgin media", "virgin media o2"],
+    "Three": ["three uk", "three mobile"],
+    "Orange": ["orange", "orange sa"],
+    "Deutsche Telekom": ["deutsche telekom", "t-mobile europe", "telekom"],
+    "Telefónica": ["telefonica", "telefonica spain", "movistar"],
+    "Telecom Italia": ["telecom italia", "tim", "tim brasil"],
+    "Swisscom": ["swisscom", "swisscom ag"],
+    "KPN": ["kpn", "koninklijke pn"],
+    "Proximus": ["proximus", "belgacom"],
+    "Telenor": ["telenor", "telenor group"],
+    "Telia": ["telia", "telia company"],
+    "Bouygues": ["bouygues telecom", "bouygues"],
+    # APAC - Singapore/Malaysia/NZ
+    "Singtel": ["singtel", "singapore telecom", "singapore telecommunications"],
+    "StarHub": ["starhub", "starhub singapore"],
+    "M1": ["m1 limited", "m1 singapore"],
+    "Maxis": ["maxis", "maxis communications", "maxis malaysia"],
+    "Celcom": ["celcom", "celcom axiata"],
+    "Digi": ["digi telecommunications", "digi malaysia", "digi.com"],
+    "Telekom Malaysia": ["telekom malaysia", "tm", "tm unifi"],
+    "U Mobile": ["u mobile", "umobile malaysia"],
+    "Sky NZ": ["sky new zealand", "sky nz", "sky network television"],
+    "Spark": ["spark new zealand", "spark nz"],
+    "2degrees": ["2degrees", "2degrees mobile"],
+    "Vodafone NZ": ["vodafone new zealand", "vodafone nz"],
+    # Australia
+    "Telstra": ["telstra", "telstra corporation"],
+    "Optus": ["optus", "singtel optus"],
+    "TPG": ["tpg telecom", "vodafone australia"],
+    # Asia
+    "China Mobile": ["china mobile", "cmcc"],
+    "China Telecom": ["china telecom", "chinanet"],
+    "China Unicom": ["china unicom", "unicom"],
+    "NTT": ["ntt", "nippon telegraph", "ntt docomo"],
+    "SoftBank": ["softbank", "softbank corp"],
+    "KDDI": ["kddi", "kddi corporation", "au"],
+    "Reliance Jio": ["reliance jio", "jio", "jio platforms"],
+    "Airtel": ["bharti airtel", "airtel", "airtel india"],
+    "Vi": ["vodafone idea", "vi", "idea cellular"],
+    "BSNL": ["bsnl", "bharat sanchar"],
+    "SK Telecom": ["sk telecom", "skt"],
+    "KT": ["kt corporation", "kt"],
+    "LG Uplus": ["lg uplus", "lg u+"],
+    "Globe": ["globe telecom", "globe philippines"],
+    "PLDT": ["pldt", "philippine long distance"],
+    "Smart": ["smart communications", "smart philippines"],
+    # Middle East
+    "Etisalat": ["etisalat", "emirates telecom", "e&"],
+    "Du": ["du", "emirates integrated"],
+    "STC": ["stc", "saudi telecom", "saudi telecom company"],
+    "Ooredoo": ["ooredoo", "ooredoo group"],
+    "Zain": ["zain", "zain group"],
+    "Mobily": ["mobily", "etihad etisalat"],
+    # Americas
+    "América Móvil": ["america movil", "claro", "telmex"],
+    "Telus": ["telus", "telus communications"],
+    "Rogers": ["rogers communications", "rogers"],
+    "Bell": ["bell canada", "bce inc"],
+    "Shaw": ["shaw communications", "shaw"],
+    # Africa
+    "MTN": ["mtn group", "mtn"],
+    "Vodacom": ["vodacom", "vodacom group"],
+    "Safaricom": ["safaricom", "safaricom plc"],
+}
+
+# Combined keyword list for filtering
+ALL_COMPANY_KWS = []
+for d in [EVERGENT_CLIENTS, COMPETITORS, TOP_TELCOS]:
+    for names in d.values():
+        ALL_COMPANY_KWS.extend(names)
+ALL_COMPANY_KWS = list(set([kw.lower() for kw in ALL_COMPANY_KWS]))  # unique, lowercased for matching
+
+# RSS FEEDS (expanded for coverage)
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
     ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
@@ -210,6 +402,14 @@ RSS_FEEDS = [
     ("The Verge", "https://www.theverge.com/rss/index.xml", "technology"),
     ("Wired", "https://www.wired.com/feed/rss", "technology"),
     ("VentureBeat", "https://venturebeat.com/feed/", "technology"),
+    # Additional for clients & competitors
+    ("Sports Business Journal", "https://www.sportsbusinessjournal.com/rss", "sports"),
+    ("Sportcal", "https://www.sportcal.com/feed", "sports"),
+    ("StreamTV Insider", "https://www.streamtvinsider.com/feed", "ott"),
+    ("Fierce Video", "https://www.fiercevideo.com/rss.xml", "ott"),
+    ("TM Forum", "https://inform.tmforum.org/feed/", "telco"),
+    ("Appledore Research", "https://appledoreresearch.com/feed/", "telco"),
+    ("Omdia", "https://omdia.tech.informa.com/feed", "technology"),
 ]
 
 SECTIONS = {
@@ -253,7 +453,17 @@ def fetch_feed(source, url, category):
             
             full_text = (title + " " + summary).lower()
             
-            is_priority = any(kw in full_text for kw in PRIORITY_KWS)
+            # Check for relevance to section
+            if category == "telco" and not any(kw in full_text for kw in ["oss", "bss", "billing", "charging", "telco", "telecom", "provider", "operator"]):
+                continue
+            if category == "ott" and not any(kw in full_text for kw in ["ott", "streaming", "content", "video", "tv", "netflix", "disney", "hulu"]):
+                continue
+            if category == "sports" and not any(kw in full_text for kw in ["sports", "league", "nba", "premier league", "media rights", "broadcast"]):
+                continue
+            if category == "technology" and not any(kw in full_text for kw in ["ai", "tech", "innovation", "startup", "machine learning", "technology", "gadget"]):
+                continue
+            
+            is_company_related = any(kw in full_text for kw in ALL_COMPANY_KWS)
             
             items.append({
                 "title": title,
@@ -262,7 +472,7 @@ def fetch_feed(source, url, category):
                 "source": source,
                 "summary": summary[:140] + "..." if len(summary) > 140 else summary,
                 "category": category,
-                "priority": is_priority
+                "company_related": is_company_related
             })
     except:
         pass
@@ -283,11 +493,11 @@ def load_feeds():
         # Sort by pub descending (newest first)
         categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
         
-        # Separate priority and non-priority, preserving order
-        priority_items = [item for item in categorized[cat] if item["priority"]]
-        non_priority_items = [item for item in categorized[cat] if not item["priority"]]
+        # Separate company-related and others, preserving order
+        company_related_items = [item for item in categorized[cat] if item["company_related"]]
+        other_items = [item for item in categorized[cat] if not item["company_related"]]
         
-        categorized[cat] = priority_items + non_priority_items
+        categorized[cat] = company_related_items + other_items
     
     return categorized
 
@@ -309,7 +519,7 @@ def render_body(items):
         link = html.escape(item["link"])
         source = html.escape(item["source"])
         
-        card_class = "news-card-priority" if item["priority"] else "news-card"
+        card_class = "news-card-priority" if item["company_related"] else "news-card"
         
         card_parts = [
             f'<div class="{card_class}">',
@@ -345,55 +555,35 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# AI-GENERATED STRATEGIC HITS AND PULSE (dynamic from latest news)
-with st.spinner("AI Framing Strategic Hits and Pulse from Latest News..."):
-    data = load_feeds()
-    
-    # Pool all recent items across categories
-    all_items = []
-    for cat in data:
-        all_items.extend(data[cat])
-    
-    # Sort all by pub descending (newest first)
-    all_items.sort(key=lambda x: x["pub"], reverse=True)
-    
-    # AI-like framing: Select top 3 priority/relevant for Hits (strategic actions)
-    hits = []
-    pulse = []
-    
-    for item in all_items[0:20]:  # Check top 20 newest
-        full_text = item["title"] + " " + item["summary"]
-        if len(hits) < 3 and ("merger" in full_text or "acquisition" in full_text or "partnership" in full_text or "deal" in full_text or "investment" in full_text or item["priority"]):
-            hits.append(f'<b>{item["title"]}</b>: {item["summary"]} ({item["source"]})')
-        
-        if len(pulse) < 3 and ("forecast" in full_text or "trend" in full_text or "expected" in full_text or "breakout" in full_text or "scale-up" in full_text or item["priority"]):
-            pulse.append(f'<b>{item["title"]}</b>: {item["summary"]} ({item["source"]})')
-        
-        if len(hits) == 3 and len(pulse) == 3:
-            break
-
-# Display dynamic Strategic Hits and Pulse
+# STRATEGIC SECTION – EXACTLY 3 HITS + 3 PULSE (balanced & distinct)
 st.markdown("""
 <div class="hero-container">
-    <div class="hero-title">🚀 AI-Framed Strategic Intelligence (Jan 2026)</div>
+    <div class="hero-title">🚀 Strategic Intelligence (Jan 2026)</div>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div class="hero-box">
             <div class="hero-box-title" style="color: #10b981;">🟢 STRATEGIC HITS</div>
             <div class="hero-content">
-""" + '<br><br>'.join(hits) + """
+                <b>NBA Strategic Investment in Evergent</b>: The NBA has taken a strategic equity stake in Evergent, naming it a 'Preferred Vendor' to drive global League Pass personalization and churn management across 185 countries.<br><br>
+                <b>Agentic AI Shift at CES</b>: Evergent CEO Vijay Sajja at CES defines the shift from GenAI to <b>Agentic AI</b> — BSS that independently executes subscriber retention strategies.<br><br>
+                <b>Amdocs Acquires Matrixx ($200M)</b>: Amdocs completes its $200M acquisition of charging leader Matrixx Software to dominate the Tier-1 5G billing market.
             </div>
         </div>
         <div class="hero-box">
             <div class="hero-box-title" style="color: #f97316;">🟠 MARKET PULSE</div>
             <div class="hero-content">
-""" + '<br><br>'.join(pulse) + """
+                <b>Agentic AI Core by EOY 2026</b>: Autonomous AI agents expected to handle ~40% of standard BSS operational tasks, reshaping telecom operations.<br><br>
+                <b>Satellite Broadband Breakout</b>: Direct-to-consumer satellite broadband moves from niche to mainstream as a primary fiber competitor.<br><br>
+                <b>Physical AI Scale-Up</b>: Amazon deploys its 1-millionth robot, integrated with DeepFleet AI for a 10% gain in warehouse efficiency.
             </div>
         </div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# NEWS COLUMNS (unchanged)
+# AI ENGINE SCAN + NEWS COLUMNS
+with st.spinner("Scanning for latest strategic news..."):
+    data = load_feeds()
+
 cols = st.columns(4)
 cat_list = ["telco", "ott", "sports", "technology"]
 
