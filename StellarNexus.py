@@ -188,25 +188,32 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# PRIORITY KEYWORDS (for general priority)
-PRIORITY_KWS = ["evergent", "nba", "amdocs", "matrixx", "netcracker", "nec", "csg"]
+# PRIORITY KEYWORDS (for company-specific priority)
+PRIORITY_KWS = ["evergent", "nba", "amdocs", "matrixx", "netcracker", "nec", "csg", "oracle", "ericsson", "nokia"]
 
-# CEO THINKING FILTER: KEYWORDS FOR IMPORTANT NEWS (remove silly/irrelevant)
+# EXPANDED CEO THINKING FILTER: KEYWORDS FOR IMPORTANT OSS/BSS/TELCO NEWS (optimized for acquisitions, mergers, partnerships, deals, telco companies, providers, billing systems, etc.)
 CEO_IMPORTANT_KWS = [
-    "merger", "acquisition", "partnership", "deal", "investment", "strategic", "equity stake",
-    "acquire", "merge", "partner", "buyout", "expansion", "footprint", "dominate", "market leader",
-    "billing", "charging", "BSS", "OSS", "5G", "AI", "agentic", "autonomous", "retention", "churn",
-    "personalization", "satellite", "broadband", "fiber", "streaming", "OTT", "content integration",
-    "League Pass", "Disney+", "Hulu", "SaaS", "vendor", "preferred vendor", "CEO", "executive"
+    "merger", "acquisition", "partnership", "deal", "investment", "strategic", "equity stake", "buyout", "consolidation", "expansion", "footprint", "dominate", "market leader",
+    "acquire", "merge", "partner", "joint venture", "collaboration", "alliance", "sale", "divestment",
+    "billing", "charging", "BSS", "OSS", "5G", "AI", "agentic", "autonomous", "retention", "churn", "personalization", "CRM", "revenue management", "revenue assurance",
+    "network management", "orchestration", "digital transformation", "cloud BSS", "convergent charging", "SaaS", "vendor", "preferred vendor",
+    "satellite", "broadband", "fiber", "streaming", "OTT", "content integration", "League Pass", "Disney+", "Hulu",
+    "telco", "telecom", "operator", "service provider", "CSP", "MNO", "MVNO", "carrier",
+    "verizon", "at&t", "t-mobile", "vodafone", "orange", "deutsche telekom", "telefonica", "bt", "comcast", "charter", "cox", "dish", "echostar", "spacex",
+    "xl axiata", "smartfren", "axiata", "sinar mas", "telecom argentina", "oi", "telekom romania", "hellenic telecommunications",
+    "CEO", "executive", "board", "leadership"
 ]
 
-# RSS FEEDS (unchanged - focused on telco OSS/BSS, OTT, etc.)
+# RSS FEEDS (optimized with additional sources for max OSS/BSS coverage)
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
     ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml", "telco"),
     ("RCR Wireless", "https://www.rcrwireless.com/feed", "telco"),
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/", "telco"),
+    ("TM Forum", "https://inform.tmforum.org/feed/", "telco"),  # Added: OSS/BSS focused
+    ("Telecom Ramblings", "https://www.telecomramblings.com/feed/", "telco"),  # Added: Telco M&A/deals
+    ("Telecom Lead", "https://www.telecomlead.com/feed/", "telco"),  # Added: OSS/BSS news
     ("Variety", "https://variety.com/feed/", "ott"),
     ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/", "ott"),
     ("Deadline", "https://deadline.com/feed/", "ott"),
@@ -242,7 +249,7 @@ def fetch_feed(source, url, category):
         NOW = datetime.now()
         CUTOFF = NOW - timedelta(days=14)
         
-        for entry in feed.entries[:30]:
+        for entry in feed.entries[:50]:  # Increased to 50 for max coverage
             title = clean(entry.get("title", ""))
             if len(title) < 25: continue
             
@@ -261,9 +268,9 @@ def fetch_feed(source, url, category):
             
             full_text = (title + " " + summary).lower()
             
-            # CEO filter: Check for important keywords to exclude silly news
-            is_important = any(kw in full_text for kw in CEO_IMPORTANT_KWS)
-            if not is_important: continue  # Skip silly/irrelevant news
+            # CEO filter: Calculate relevance score based on keyword matches (optimized for max relevance)
+            relevance_score = sum(full_text.count(kw) for kw in CEO_IMPORTANT_KWS)
+            if relevance_score == 0: continue  # Skip irrelevant/silly news
             
             is_priority = any(kw in full_text for kw in PRIORITY_KWS)
             
@@ -274,7 +281,8 @@ def fetch_feed(source, url, category):
                 "source": source,
                 "summary": summary[:140] + "..." if len(summary) > 140 else summary,
                 "category": category,
-                "priority": is_priority
+                "priority": is_priority,
+                "relevance_score": relevance_score
             })
     except:
         pass
@@ -292,7 +300,8 @@ def load_feeds():
                 categorized[item["category"]].append(item)
     
     for cat in categorized:
-        categorized[cat].sort(key=lambda x: (not x["priority"], x["pub"]), reverse=True)
+        # Optimized sort: Relevance score descending, then pub descending (latest first)
+        categorized[cat].sort(key=lambda x: (-x["relevance_score"], x["pub"]), reverse=True)
     
     return categorized
 
@@ -346,7 +355,7 @@ placeholder.empty()
 st.markdown("""
 <div class="header-container">
     <h1 class="main-title">Global Telecom & OTT Stellar Nexus</h1>
-    <p class="subtitle">AI Powered Real-time Competitive Intelligence Dashboard (CEO-Focused: Filters Out Irrelevant News)</p>
+    <p class="subtitle">AI Powered Real-time Competitive Intelligence Dashboard</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -375,8 +384,8 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# AI ENGINE SCAN + NEWS COLUMNS (with CEO filter integrated in fetch_feed)
-with st.spinner("AI Engine (CEO Mode): Scanning & Filtering for Most Impactful Strategic News..."):
+# AI ENGINE SCAN + NEWS COLUMNS
+with st.spinner("Scanning for latest strategic news..."):
     data = load_feeds()
 
 cols = st.columns(4)
