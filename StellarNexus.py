@@ -188,7 +188,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# PRIORITY KEYWORDS FOR EVERGENT-SPECIFIC BOOST (as CEO: focus on competitors, clients, tech)
+# PRIORITY KEYWORDS (Evergent/CEO focus: competitors, clients, tech, strategic moves)
 PRIORITY_KWS = [
     "evergent", "vijay sajja", "subscriber management", "churn management", "personalization", "league pass",
     "nba", "amdocs", "matrixx", "netcracker", "nec", "csg", "oracle communications", "ericsson", "nokia",
@@ -196,26 +196,24 @@ PRIORITY_KWS = [
     "bally sports", "premier league", "starhub"
 ]
 
-# CEO CRITICAL NEWS FILTER KEYWORDS (optimized for mergers, acquisitions, partnerships, deals, OSS/BSS, billing, telco providers)
-CEO_CRITICAL_KWS = [
-    "merger", "acquisition", "partnership", "deal", "investment", "strategic alliance", "equity stake", "buyout", "consolidation", "expansion", "footprint",
-    "billing", "charging", "BSS", "OSS", "5G", "AI", "agentic AI", "autonomous AI", "retention", "churn", "personalization", "CRM", "revenue management",
-    "network management", "orchestration", "digital transformation", "cloud BSS", "convergent charging", "SaaS", "vendor", "preferred vendor",
-    "telco", "telecom", "service provider", "CSP", "MNO", "MVNO", "carrier", "operator",
-    "verizon", "at&t", "t-mobile", "vodafone", "orange", "deutsche telekom", "telefonica", "bt", "comcast", "charter", "cox", "dish",
-    "CEO", "executive", "leadership change"
-]
+# SECTION-SPECIFIC CRITICAL FILTERS (skip superficial statements, focus on substantial news)
+SECTION_CRITICAL_KWS = {
+    "telco": ["OSS", "BSS", "billing", "charging", "5G", "telco provider", "service provider", "merger", "acquisition", "partnership", "deal", "investment", "expansion"],
+    "ott": ["OTT", "streaming", "content integration", "Disney+", "Hulu", "Netflix", "merger", "acquisition", "partnership", "deal", "investment", "content rights"],
+    "sports": ["sports media", "league", "NBA", "Premier League", "media rights", "broadcast deal", "merger", "acquisition", "partnership", "deal", "sponsorship"],
+    "technology": ["AI", "agentic AI", "machine learning", "techwatch", "innovation", "startup", "merger", "acquisition", "partnership", "deal", "investment", "breakthrough"]
+}
 
-# RSS FEEDS (optimized with more telco/OSS/BSS sources for max coverage)
+# GENERAL CRITICAL KWS (for all sections, to skip superficial news)
+GENERAL_CRITICAL_KWS = ["merger", "acquisition", "partnership", "deal", "investment", "strategic", "equity stake", "buyout", "consolidation", "expansion", "footprint", "dominate", "market leader"]
+
+# RSS FEEDS (unchanged)
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
     ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml", "telco"),
     ("RCR Wireless", "https://www.rcrwireless.com/feed", "telco"),
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/", "telco"),
-    ("TM Forum", "https://inform.tmforum.org/feed/", "telco"),  # OSS/BSS focused
-    ("Telecom Ramblings", "https://www.telecomramblings.com/feed/", "telco"),  # M&A/deals
-    ("Telecom Lead", "https://www.telecomlead.com/feed/", "telco"),  # OSS/BSS news
     ("Variety", "https://variety.com/feed/", "ott"),
     ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/", "ott"),
     ("Deadline", "https://deadline.com/feed/", "ott"),
@@ -251,7 +249,7 @@ def fetch_feed(source, url, category):
         NOW = datetime.now()
         CUTOFF = NOW - timedelta(days=14)
         
-        for entry in feed.entries[:50]:  # Increased for broader pool
+        for entry in feed.entries[:30]:
             title = clean(entry.get("title", ""))
             if len(title) < 25: continue
             
@@ -270,12 +268,18 @@ def fetch_feed(source, url, category):
             
             full_text = (title + " " + summary).lower()
             
-            # CEO-optimized filter: Relevance score with higher weight for critical terms (e.g., merger=3 points)
-            relevance_score = 3 * sum(full_text.count(kw) for kw in ["merger", "acquisition", "partnership", "deal", "investment"]) + \
-                              sum(full_text.count(kw) for kw in CEO_CRITICAL_KWS)
-            if relevance_score < 1: continue  # Skip low-relevance
+            # CEO-optimized filter: Skip if superficial (no critical keywords or short summary)
+            if len(summary) < 50 or not any(kw in full_text for kw in GENERAL_CRITICAL_KWS):
+                continue
+            
+            # Section-specific filter: Boost if matches section KWS
+            section_score = sum(full_text.count(kw) for kw in SECTION_CRITICAL_KWS.get(category, []))
+            if section_score < 1: continue
             
             is_priority = any(kw in full_text for kw in PRIORITY_KWS)
+            
+            # Relevance score: Combined general + section + priority boost
+            relevance_score = section_score + sum(full_text.count(kw) for kw in GENERAL_CRITICAL_KWS) + (10 if is_priority else 0)
             
             items.append({
                 "title": title,
@@ -303,13 +307,8 @@ def load_feeds():
                 categorized[item["category"]].append(item)
     
     for cat in categorized:
-        # CEO-optimized sort: Relevance score desc, then pub desc (critical + latest first)
+        # Sort by relevance desc, then pub desc
         categorized[cat].sort(key=lambda x: (-x["relevance_score"], x["pub"]), reverse=True)
-        
-        # Boost priority to top, preserving order
-        priority_items = [item for item in categorized[cat] if item["priority"]]
-        non_priority_items = [item for item in categorized[cat] if not item["priority"]]
-        categorized[cat] = priority_items + non_priority_items
     
     return categorized
 
