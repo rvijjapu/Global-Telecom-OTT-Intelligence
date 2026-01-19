@@ -25,7 +25,9 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# YOUR ORIGINAL LIGHT-THEME STYLING (unchanged)
+# ───────────────────────────────────────────────────────────────
+# STYLING (your original light theme – unchanged)
+# ───────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -188,32 +190,16 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# PRIORITY KEYWORDS (for company-specific priority)
-PRIORITY_KWS = ["evergent", "nba", "amdocs", "matrixx", "netcracker", "nec", "csg", "oracle", "ericsson", "nokia"]
+# PRIORITY KEYWORDS
+PRIORITY_KWS = ["evergent", "nba", "amdocs", "matrixx", "netcracker", "nec", "csg"]
 
-# EXPANDED CEO THINKING FILTER: KEYWORDS FOR IMPORTANT OSS/BSS/TELCO NEWS (optimized for acquisitions, mergers, partnerships, deals, telco companies, providers, billing systems, etc.)
-CEO_IMPORTANT_KWS = [
-    "merger", "acquisition", "partnership", "deal", "investment", "strategic", "equity stake", "buyout", "consolidation", "expansion", "footprint", "dominate", "market leader",
-    "acquire", "merge", "partner", "joint venture", "collaboration", "alliance", "sale", "divestment",
-    "billing", "charging", "BSS", "OSS", "5G", "AI", "agentic", "autonomous", "retention", "churn", "personalization", "CRM", "revenue management", "revenue assurance",
-    "network management", "orchestration", "digital transformation", "cloud BSS", "convergent charging", "SaaS", "vendor", "preferred vendor",
-    "satellite", "broadband", "fiber", "streaming", "OTT", "content integration", "League Pass", "Disney+", "Hulu",
-    "telco", "telecom", "operator", "service provider", "CSP", "MNO", "MVNO", "carrier",
-    "verizon", "at&t", "t-mobile", "vodafone", "orange", "deutsche telekom", "telefonica", "bt", "comcast", "charter", "cox", "dish", "echostar", "spacex",
-    "xl axiata", "smartfren", "axiata", "sinar mas", "telecom argentina", "oi", "telekom romania", "hellenic telecommunications",
-    "CEO", "executive", "board", "leadership"
-]
-
-# RSS FEEDS (optimized with additional sources for max OSS/BSS coverage)
+# RSS FEEDS
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
     ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml", "telco"),
     ("RCR Wireless", "https://www.rcrwireless.com/feed", "telco"),
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/", "telco"),
-    ("TM Forum", "https://inform.tmforum.org/feed/", "telco"),  # Added: OSS/BSS focused
-    ("Telecom Ramblings", "https://www.telecomramblings.com/feed/", "telco"),  # Added: Telco M&A/deals
-    ("Telecom Lead", "https://www.telecomlead.com/feed/", "telco"),  # Added: OSS/BSS news
     ("Variety", "https://variety.com/feed/", "ott"),
     ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/", "ott"),
     ("Deadline", "https://deadline.com/feed/", "ott"),
@@ -249,7 +235,7 @@ def fetch_feed(source, url, category):
         NOW = datetime.now()
         CUTOFF = NOW - timedelta(days=14)
         
-        for entry in feed.entries[:50]:  # Increased to 50 for max coverage
+        for entry in feed.entries[:30]:
             title = clean(entry.get("title", ""))
             if len(title) < 25: continue
             
@@ -268,10 +254,6 @@ def fetch_feed(source, url, category):
             
             full_text = (title + " " + summary).lower()
             
-            # CEO filter: Calculate relevance score based on keyword matches (optimized for max relevance)
-            relevance_score = sum(full_text.count(kw) for kw in CEO_IMPORTANT_KWS)
-            if relevance_score == 0: continue  # Skip irrelevant/silly news
-            
             is_priority = any(kw in full_text for kw in PRIORITY_KWS)
             
             items.append({
@@ -281,8 +263,7 @@ def fetch_feed(source, url, category):
                 "source": source,
                 "summary": summary[:140] + "..." if len(summary) > 140 else summary,
                 "category": category,
-                "priority": is_priority,
-                "relevance_score": relevance_score
+                "priority": is_priority
             })
     except:
         pass
@@ -300,8 +281,15 @@ def load_feeds():
                 categorized[item["category"]].append(item)
     
     for cat in categorized:
-        # Optimized sort: Relevance score descending, then pub descending (latest first)
-        categorized[cat].sort(key=lambda x: (-x["relevance_score"], x["pub"]), reverse=True)
+        # Step 1: Sort ALL items by date descending (newest first)
+        categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
+        
+        # Step 2: Separate priority and non-priority
+        priority_items = [item for item in categorized[cat] if item["priority"]]
+        non_priority_items = [item for item in categorized[cat] if not item["priority"]]
+        
+        # Step 3: Priority first (already sorted newest → oldest), then non-priority (also newest → oldest)
+        categorized[cat] = priority_items + non_priority_items
     
     return categorized
 
@@ -359,35 +347,38 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# STRATEGIC SECTION – EXACTLY 3 HITS + 3 PULSE (balanced & distinct)
+# Hardcoded Strategic Highlights
 st.markdown("""
 <div class="hero-container">
-    <div class="hero-title">🚀 Strategic Intelligence (Jan 2026)</div>
+    <div class="hero-title">🚀 Strategic Hits</div>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div class="hero-box">
             <div class="hero-box-title" style="color: #10b981;">🟢 STRATEGIC HITS</div>
             <div class="hero-content">
-                <b>NBA Strategic Investment in Evergent</b>: The NBA has taken a strategic equity stake in Evergent, naming it a 'Preferred Vendor' to drive global League Pass personalization and churn management across 185 countries.<br><br>
-                <b>Agentic AI Shift at CES</b>: Evergent CEO Vijay Sajja at CES defines the shift from GenAI to <b>Agentic AI</b> — BSS that independently executes subscriber retention strategies.<br><br>
-                <b>Amdocs Acquires Matrixx ($200M)</b>: Amdocs completes its $200M acquisition of charging leader Matrixx Software to dominate the Tier-1 5G billing market.
+                <b>NBA Scores Strategic Investment in Evergent</b>: The NBA has taken a strategic equity stake in Evergent, naming it a 'Preferred Vendor' to drive global League Pass personalization and churn management across 185 countries.<br><br>
+                <b> CES </b>: Evergent CEO Vijay Sajja at CES defines the shift from GenAI to <b>Agentic AI</b>—BSS that independently executes subscriber retention strategies.<br><br>
+                <b>Amdocs-Matrixx Deal</b>: Amdocs completes its $200M acquisition of charging leader Matrixx Software to dominate the Tier-1 5G billing market.<br><br>
+                <b>Disney-Hulu Merger</b>: Disney officially begins phasing out the standalone Hulu app to integrate all content into a unified Disney+ hub.<br><br>
+                <b>NEC Expansion</b>: Japan's NEC finalizes the acquisition of CSG, significantly scaling Netcracker's North American SaaS footprint.
             </div>
         </div>
         <div class="hero-box">
-            <div class="hero-box-title" style="color: #f97316;">🟠 MARKET PULSE</div>
+            <div class="hero-box-title" style="color: #f97316;">🟠 PULSE</div>
             <div class="hero-content">
-                <b>Agentic AI Core by EOY 2026</b>: Autonomous AI agents expected to handle ~40% of standard BSS operational tasks, reshaping telecom operations.<br><br>
-                <b>Satellite Broadband Breakout</b>: Direct-to-consumer satellite broadband moves from niche to mainstream as a primary fiber competitor.<br><br>
-                <b>Physical AI Scale-Up</b>: Amazon deploys its 1-millionth robot, integrated with DeepFleet AI for a 10% gain in warehouse efficiency.
+                <b>Agentic AI Core</b>: By EOY 2026, autonomous AI agents are expected to handle roughly 40% of standard BSS operational tasks.<br><br>
+                <b>Satellite Breakout</b>: Direct-to-consumer satellite broadband moves from niche to mainstream as a primary fiber competitor.<br><br>
+                <b>Physical AI</b>: Amazon deploys its 1-millionth robot, integrated with DeepFleet AI for a 10% gain in warehouse efficiency.
             </div>
         </div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# AI ENGINE SCAN + NEWS COLUMNS
+# Dynamic RSS Feed Scanning
 with st.spinner("Scanning for latest strategic news..."):
     data = load_feeds()
 
+# Render News Columns
 cols = st.columns(4)
 cat_list = ["telco", "ott", "sports", "technology"]
 
@@ -400,7 +391,7 @@ for idx, cat in enumerate(cat_list):
         st.markdown(''.join(header_parts), unsafe_allow_html=True)
         st.markdown(render_body(items), unsafe_allow_html=True)
 
-# FOOTER
+# Footer
 st.markdown("""
 <div style="text-align:center;color:rgba(255,255,255,0.95);font-size:0.8rem;margin-top:20px;padding:16px;background:linear-gradient(135deg,rgba(10,25,47,0.95),rgba(30,41,59,0.95));border-radius:10px;">
     <strong>Strict Focus:</strong> Mergers, Acquisitions, Partnerships, Deals & Strategic Moves | <strong>Priority:</strong> Evergent/NBA/Netcracker/Amdocs/NEC first | <strong>🔄 Auto-refresh:</strong> Every 5 minutes
