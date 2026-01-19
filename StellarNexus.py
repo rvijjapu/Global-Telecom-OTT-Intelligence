@@ -25,9 +25,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ───────────────────────────────────────────────────────────────
-# STYLING (your original light theme – unchanged)
-# ───────────────────────────────────────────────────────────────
+# LIGHT-THEME STYLING (your original – unchanged)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -179,6 +177,15 @@ st.markdown("""
     .time-warm {color: #ea580c; font-weight: 600;}
     .time-normal {color: #64748b;}
 
+    .priority-tag {
+        background: #e0f2fe;
+        color: #1e40af;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
+
     .col-body::-webkit-scrollbar {width: 6px;}
     .col-body::-webkit-scrollbar-track {background: #f1f5f9; border-radius: 10px;}
     .col-body::-webkit-scrollbar-thumb {background: #94a3b8; border-radius: 10px;}
@@ -281,24 +288,25 @@ def load_feeds():
                 categorized[item["category"]].append(item)
     
     for cat in categorized:
-        # Step 1: Sort ALL items by date descending (newest first)
-        categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
+        # Step 1: Sort ALL items by pub descending (newest → oldest)
+        categorized[cat].sort(key=lambda x: x["pub"] if x["pub"] else datetime.min, reverse=True)
         
-        # Step 2: Separate priority and non-priority
+        # Step 2: Separate priority and non-priority (both lists already date-sorted)
         priority_items = [item for item in categorized[cat] if item["priority"]]
         non_priority_items = [item for item in categorized[cat] if not item["priority"]]
         
-        # Step 3: Priority first (already sorted newest → oldest), then non-priority (also newest → oldest)
+        # Step 3: Priority first + non-priority
         categorized[cat] = priority_items + non_priority_items
     
     return categorized
 
 def get_time_str(dt):
+    if dt is None: return "Unknown"
     hrs = int((datetime.now() - dt).total_seconds() / 3600)
     if hrs < 1: return "Now"
     if hrs < 6: return f"{hrs}h"
     if hrs < 24: return f"{hrs}h"
-    return f"{hrs//24}d"
+    return f"{hrs//24}d ago"
 
 def render_body(items):
     if not items:
@@ -312,6 +320,7 @@ def render_body(items):
         source = html.escape(item["source"])
         
         card_class = "news-card-priority" if item["priority"] else "news-card"
+        priority_tag = '<span class="priority-tag">★ Priority</span>' if item["priority"] else ''
         
         card_parts = [
             f'<div class="{card_class}">',
@@ -320,6 +329,7 @@ def render_body(items):
             f'<span class="time-hot">{time_str}</span>',
             '<span>•</span>',
             f'<span>{source}</span>',
+            f'{priority_tag}',
             '</div>',
             '</div>'
         ]
@@ -347,7 +357,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Hardcoded Strategic Highlights
+# STRATEGIC HITS (your last version)
 st.markdown("""
 <div class="hero-container">
     <div class="hero-title">🚀 Strategic Hits</div>
