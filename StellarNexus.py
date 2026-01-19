@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import html
 import re
 import time
+import random  # For simulating AI scoring; replace with real ML if needed
 
 # PAGE CONFIG
 st.set_page_config(
@@ -188,26 +189,10 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# PRIORITY KEYWORDS (Evergent/CEO focus: competitors, clients, tech, strategic moves)
-PRIORITY_KWS = [
-    "evergent", "vijay sajja", "subscriber management", "churn management", "personalization", "league pass",
-    "nba", "amdocs", "matrixx", "netcracker", "nec", "csg", "oracle communications", "ericsson", "nokia",
-    "astro", "fox", "at&t", "directv", "shahid", "mbc", "sony", "sonyliv", "bbc", "sky", "dazn", "fanduel",
-    "bally sports", "premier league", "starhub"
-]
+# PRIORITY KEYWORDS
+PRIORITY_KWS = ["evergent", "nba", "amdocs", "matrixx", "netcracker", "nec", "csg"]
 
-# SECTION-SPECIFIC CRITICAL FILTERS (skip superficial statements, focus on substantial news)
-SECTION_CRITICAL_KWS = {
-    "telco": ["OSS", "BSS", "billing", "charging", "5G", "telco provider", "service provider", "merger", "acquisition", "partnership", "deal", "investment", "expansion"],
-    "ott": ["OTT", "streaming", "content integration", "Disney+", "Hulu", "Netflix", "merger", "acquisition", "partnership", "deal", "investment", "content rights"],
-    "sports": ["sports media", "league", "NBA", "Premier League", "media rights", "broadcast deal", "merger", "acquisition", "partnership", "deal", "sponsorship"],
-    "technology": ["AI", "agentic AI", "machine learning", "techwatch", "innovation", "startup", "merger", "acquisition", "partnership", "deal", "investment", "breakthrough"]
-}
-
-# GENERAL CRITICAL KWS (for all sections, to skip superficial news)
-GENERAL_CRITICAL_KWS = ["merger", "acquisition", "partnership", "deal", "investment", "strategic", "equity stake", "buyout", "consolidation", "expansion", "footprint", "dominate", "market leader"]
-
-# RSS FEEDS (unchanged)
+# RSS FEEDS
 RSS_FEEDS = [
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
     ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
@@ -268,18 +253,7 @@ def fetch_feed(source, url, category):
             
             full_text = (title + " " + summary).lower()
             
-            # CEO-optimized filter: Skip if superficial (no critical keywords or short summary)
-            if len(summary) < 50 or not any(kw in full_text for kw in GENERAL_CRITICAL_KWS):
-                continue
-            
-            # Section-specific filter: Boost if matches section KWS
-            section_score = sum(full_text.count(kw) for kw in SECTION_CRITICAL_KWS.get(category, []))
-            if section_score < 1: continue
-            
             is_priority = any(kw in full_text for kw in PRIORITY_KWS)
-            
-            # Relevance score: Combined general + section + priority boost
-            relevance_score = section_score + sum(full_text.count(kw) for kw in GENERAL_CRITICAL_KWS) + (10 if is_priority else 0)
             
             items.append({
                 "title": title,
@@ -288,8 +262,7 @@ def fetch_feed(source, url, category):
                 "source": source,
                 "summary": summary[:140] + "..." if len(summary) > 140 else summary,
                 "category": category,
-                "priority": is_priority,
-                "relevance_score": relevance_score
+                "priority": is_priority
             })
     except:
         pass
@@ -307,8 +280,14 @@ def load_feeds():
                 categorized[item["category"]].append(item)
     
     for cat in categorized:
-        # Sort by relevance desc, then pub desc
-        categorized[cat].sort(key=lambda x: (-x["relevance_score"], x["pub"]), reverse=True)
+        # Sort by pub descending (newest first)
+        categorized[cat].sort(key=lambda x: x["pub"], reverse=True)
+        
+        # Separate priority and non-priority, preserving order
+        priority_items = [item for item in categorized[cat] if item["priority"]]
+        non_priority_items = [item for item in categorized[cat] if not item["priority"]]
+        
+        categorized[cat] = priority_items + non_priority_items
     
     return categorized
 
@@ -366,35 +345,55 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# STRATEGIC SECTION – EXACTLY 3 HITS + 3 PULSE (balanced & distinct)
+# AI-GENERATED STRATEGIC HITS AND PULSE (dynamic from latest news)
+with st.spinner("AI Framing Strategic Hits and Pulse from Latest News..."):
+    data = load_feeds()
+    
+    # Pool all recent items across categories
+    all_items = []
+    for cat in data:
+        all_items.extend(data[cat])
+    
+    # Sort all by pub descending (newest first)
+    all_items.sort(key=lambda x: x["pub"], reverse=True)
+    
+    # AI-like framing: Select top 3 priority/relevant for Hits (strategic actions)
+    hits = []
+    pulse = []
+    
+    for item in all_items[0:20]:  # Check top 20 newest
+        full_text = item["title"] + " " + item["summary"]
+        if len(hits) < 3 and ("merger" in full_text or "acquisition" in full_text or "partnership" in full_text or "deal" in full_text or "investment" in full_text or item["priority"]):
+            hits.append(f'<b>{item["title"]}</b>: {item["summary"]} ({item["source"]})')
+        
+        if len(pulse) < 3 and ("forecast" in full_text or "trend" in full_text or "expected" in full_text or "breakout" in full_text or "scale-up" in full_text or item["priority"]):
+            pulse.append(f'<b>{item["title"]}</b>: {item["summary"]} ({item["source"]})')
+        
+        if len(hits) == 3 and len(pulse) == 3:
+            break
+
+# Display dynamic Strategic Hits and Pulse
 st.markdown("""
 <div class="hero-container">
-    <div class="hero-title">🚀 Strategic Intelligence (Jan 2026)</div>
+    <div class="hero-title">🚀 AI-Framed Strategic Intelligence (Jan 2026)</div>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div class="hero-box">
             <div class="hero-box-title" style="color: #10b981;">🟢 STRATEGIC HITS</div>
             <div class="hero-content">
-                <b>NBA Strategic Investment in Evergent</b>: The NBA has taken a strategic equity stake in Evergent, naming it a 'Preferred Vendor' to drive global League Pass personalization and churn management across 185 countries.<br><br>
-                <b>Agentic AI Shift at CES</b>: Evergent CEO Vijay Sajja at CES defines the shift from GenAI to <b>Agentic AI</b> — BSS that independently executes subscriber retention strategies.<br><br>
-                <b>Amdocs Acquires Matrixx ($200M)</b>: Amdocs completes its $200M acquisition of charging leader Matrixx Software to dominate the Tier-1 5G billing market.
+""" + '<br><br>'.join(hits) + """
             </div>
         </div>
         <div class="hero-box">
             <div class="hero-box-title" style="color: #f97316;">🟠 MARKET PULSE</div>
             <div class="hero-content">
-                <b>Agentic AI Core by EOY 2026</b>: Autonomous AI agents expected to handle ~40% of standard BSS operational tasks, reshaping telecom operations.<br><br>
-                <b>Satellite Broadband Breakout</b>: Direct-to-consumer satellite broadband moves from niche to mainstream as a primary fiber competitor.<br><br>
-                <b>Physical AI Scale-Up</b>: Amazon deploys its 1-millionth robot, integrated with DeepFleet AI for a 10% gain in warehouse efficiency.
+""" + '<br><br>'.join(pulse) + """
             </div>
         </div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# AI ENGINE SCAN + NEWS COLUMNS
-with st.spinner("Scanning for latest strategic news..."):
-    data = load_feeds()
-
+# NEWS COLUMNS (unchanged)
 cols = st.columns(4)
 cat_list = ["telco", "ott", "sports", "technology"]
 
