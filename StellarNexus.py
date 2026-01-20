@@ -8,24 +8,20 @@ import re
 import time
 
 # ────────────────────────────────────────────────
-# PAGE CONFIG
+# PAGE CONFIG & REFRESH
 # ────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Global Telco/OTT/Sports/Tech Nexus",
+    page_title="Global Telco • OTT • Sports • Tech Nexus",
     page_icon="🌐",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# AUTO-REFRESH EVERY 5 MINUTES
 @st.fragment(run_every=300)
 def keep_alive():
     st.markdown("", unsafe_allow_html=True)
 
-st.markdown(
-    '<script>setTimeout(function(){window.location.reload();}, 300000);</script>',
-    unsafe_allow_html=True
-)
+st.markdown('<script>setTimeout(function(){window.location.reload();}, 300000);</script>', unsafe_allow_html=True)
 
 # ────────────────────────────────────────────────
 # STYLING
@@ -73,7 +69,7 @@ ALL_PRIORITY = {
 }
 ALL_KWS = set(k.lower() for v in ALL_PRIORITY.values() for k in v)
 
-NOISE = ["opinion", "how to", "guide", "podcast", "awards", "prediction"]
+NOISE = ["opinion", "how to", "guide", "podcast", "awards", "prediction", "review", "recap"]
 
 RSS_FEEDS = [
     ("Light Reading",       "https://www.lightreading.com/rss/simple",               "telco"),
@@ -114,10 +110,10 @@ def score_relevance(title, summary, cat):
     text = (title + " " + summary).lower()
     kw = {"telco": TELCO_KW, "ott": OTT_KW, "sports": SPORTS_KW, "technology": TECH_KW}[cat]
     score = 0
-    if any(m in text for m in kw["must"]):  score += 20
+    if any(m in text for m in kw["must"]): score += 20
     if any(s in text for s in kw["strat"]): score += 40
 
-    for group, boost in [("competitors", 30), ("evergent_clients", 50 if "evergent" in text or "nba" in text else 35), ("top_telcos", 25)]:
+    for group, boost in [("competitors", 30), ("evergent_clients", 50 if any(x in text for x in ["evergent", "nba"]) else 35), ("top_telcos", 25)]:
         score += sum(boost for k in ALL_PRIORITY[group] if k in text)
 
     if any(w in text for w in ["global", "investment", "acquisition", "preferred vendor", "agentic", "churn", "retention", "league pass"]):
@@ -137,6 +133,7 @@ def fetch(source, url, cat):
             summ = clean(e.get("summary") or e.get("description") or title)
             if len(title) < 30 or is_noise(title + summ):
                 continue
+
             pub = None
             for k in ("published_parsed", "updated_parsed"):
                 if val := getattr(e, k, None):
@@ -145,23 +142,29 @@ def fetch(source, url, cat):
                     except:
                         pass
                     break
+
             if not pub or pub < cutoff:
                 continue
+
             rel = score_relevance(title, summ, cat)
             if rel < 40:
                 continue
+
             full = (title + " " + summ).lower()
             prio = any(k in full for k in ALL_KWS) or "evergent" in full
-            items.append({
-                "title": title,
-                "link": e.link or "",
-                "pub": pub,
-                "source": source,
-                "summary": summ[:150] + "..." if len(summ) > 150 else summ,
-                "cat": cat,
-                "prio": prio,
-                "score": rel
-            })
+
+            # Only create item if minimum required fields are valid
+            if title and isinstance(pub, datetime):
+                items.append({
+                    "title": title,
+                    "link": e.link or "#",
+                    "pub": pub,
+                    "source": source,
+                    "summary": summ[:150] + "..." if len(summ) > 150 else summ,
+                    "cat": cat,
+                    "prio": prio,
+                    "score": rel
+                })
     except Exception:
         pass
     return items
@@ -176,10 +179,12 @@ def load():
                 cats[i["cat"]].append(i)
 
     for c in cats:
-        # Deduplicate using hashable tuple (title + source)
+        # Deduplicate using hashable tuple
         seen = set()
         unique = []
         for item in cats[c]:
+            if not isinstance(item, dict):
+                continue
             sig = (
                 item.get("title", "").lower().strip(),
                 item.get("source", "").lower().strip()
@@ -191,12 +196,14 @@ def load():
         # Sort: newest first, then highest score
         cats[c] = sorted(
             unique,
-            key=lambda x: (-x["pub"].timestamp(), -x["score"])
+            key=lambda x: (-x.get("pub", datetime.min.replace(tzinfo=timezone.utc)).timestamp(), -x.get("score", 0))
         )[:12]
 
     return cats
 
 def time_disp(dt):
+    if not isinstance(dt, datetime):
+        return "?"
     secs = (datetime.now(timezone.utc) - dt).total_seconds()
     h = int(secs / 3600)
     if h < 1: return "Now"
@@ -206,51 +213,71 @@ def time_disp(dt):
 def render_news(items):
     if not items:
         return '<div style="text-align:center;padding:50px;color:#94a3b8;">Scanning global strategic signals...</div>'
-    html = []
-    for i in items[:10]:
-        cls = "news-card priority" if i["prio"] else "news-card"
-        tcls = "hot" if (datetime.now(timezone.utc) - i["pub"]).total_seconds() < 21600 else "warm" if (datetime.now(timezone.utc) - i["pub"]).total_seconds() < 86400 else ""
-        badge = '<span class="impact">HIGH IMPACT</span>' if i["score"] > 80 else ""
+
+    html_parts = []
+    now = datetime.now(timezone.utc)
+
+    for item in items[:10]:
+        if not isinstance(item, dict):
+            continue
+
+        title   = item.get("title",   "Untitled")
+        link    = item.get("link",    "#")
+        source  = item.get("source",  "Unknown")
+        pub     = item.get("pub")
+        score   = item.get("score",   0)
+        prio    = item.get("prio",    False)
+
+        if not isinstance(pub, datetime):
+            continue
+
+        cls = "news-card priority" if prio else "news-card"
+        secs_old = (now - pub).total_seconds()
+        tcls = "hot" if secs_old < 21600 else "warm" if secs_old < 86400 else ""
+        badge = '<span class="impact">HIGH IMPACT</span>' if score > 80 else ""
+
         card = f'''
         <div class="{cls}">
-            <a href="{html.escape(i["link"])}" target="_blank" class="news-title">{html.escape(i["title"])}</a>
+            <a href="{html.escape(link)}" target="_blank" class="news-title">{html.escape(title)}</a>
             <div class="meta">
-                <span class="{tcls}">{time_disp(i["pub"])}</span> • {html.escape(i["source"])} {badge}
+                <span class="{tcls}">{time_disp(pub)}</span> • {html.escape(source)} {badge}
             </div>
         </div>'''
-        html.append(card)
-    return ''.join(html)
+        html_parts.append(card)
+
+    return ''.join(html_parts)
 
 # ────────────────────────────────────────────────
-# TOP HITS & PULSE (narrative style)
+# NARRATIVE TOP HITS & PULSE
 # ────────────────────────────────────────────────
 @st.cache_data(ttl=300)
 def top_hits(data):
-    all_items = [i for lst in data.values() for i in lst]
-    all_items.sort(key=lambda x: -x["score"])
+    all_items = [i for lst in data.values() for i in lst if isinstance(i, dict)]
+    all_items.sort(key=lambda x: -x.get("score", 0))
     narratives = []
     for item in all_items[:4]:
-        if item["score"] < 60:
+        if item.get("score", 0) < 60:
             continue
-        t = item["title"].lower()
-        s = item["summary"].lower()
-        src = item["source"]
-        if "nba" in t+s and ("evergent" in t+s or "investment" in t+s or "stake" in t+s):
+        t = item.get("title", "").lower()
+        s = item.get("summary", "").lower()
+        src = item.get("source", "source")
+        text = t + " " + s
+        if "nba" in text and ("evergent" in text or "investment" in text or "stake" in text):
             narratives.append("**NBA Strategic Equity Stake in Evergent**: The NBA has taken a strategic investment in Evergent Technologies, designating it a **Preferred Vendor** and extending their multi-year partnership. Powers personalized NBA League Pass across **185+ countries**, driving subscriber growth, churn reduction, and global fan retention.")
-        elif "amdocs" in t+s and ("matrixx" in t+s or "acquir" in t+s):
+        elif "amdocs" in text and ("matrixx" in text or "acquir" in text):
             narratives.append("**Amdocs Acquires Matrixx (~$200M)**: Amdocs completes ~$200M acquisition of charging/BSS leader Matrixx Software, consolidating Tier-1 5G BSS market dominance and intensifying competition in telecom charging/monetization.")
-        elif "agentic" in t+s and ("ai" in t+s or "bss" in t+s or "oss" in t+s):
+        elif "agentic" in text and ("ai" in text or "bss" in text or "oss" in text):
             narratives.append("**Agentic AI Shift in BSS/OSS**: Autonomous Agentic AI agents projected to handle ~40% of standard telecom BSS tasks by EOY 2026 — enabling proactive churn strategies, real-time retention, and intent-driven operations.")
         else:
-            narratives.append(f"**{item['title']}**: {item['summary']} — Strategic signal from {src}.")
+            narratives.append(f"**{item.get('title', 'Signal')}**: {item.get('summary', '')[:120]}... — Strategic signal from {src}.")
     return narratives or ["<i>Monitoring high-impact global moves...</i>"]
 
 @st.cache_data(ttl=300)
 def market_pulse(data):
-    all_items = [i for lst in data.values() for i in lst]
+    all_items = [i for lst in data.values() for i in lst if isinstance(i, dict)]
     mentions = {}
     for i in all_items:
-        txt = (i["title"] + " " + i["summary"]).lower()
+        txt = (i.get("title", "") + " " + i.get("summary", "")).lower()
         for k in ALL_KWS:
             if k in txt:
                 mentions[k] = mentions.get(k, 0) + 1
@@ -259,7 +286,7 @@ def market_pulse(data):
     return lines or ["<i>Analyzing priority trends...</i>"]
 
 # ────────────────────────────────────────────────
-# MAIN UI
+# UI
 # ────────────────────────────────────────────────
 with st.spinner("🔍 Scanning global Telco / OTT / Sports / AI signals..."):
     data = load()
@@ -285,8 +312,8 @@ st.markdown(f"""
             {'<br><br>'.join(pulse_lines)}
             <div style="margin-top:20px; padding-top:15px; border-top:1px solid #e2e8f0;">
                 <b>Total Signals:</b> {sum(len(v) for v in data.values())}<br>
-                <b>Priority Mentions:</b> {sum(1 for v in data.values() for i in v if i['prio'])}<br>
-                <b>High-Impact:</b> {sum(1 for v in data.values() for i in v if i['score'] > 80)}
+                <b>Priority Mentions:</b> {sum(1 for v in data.values() for i in v if i.get('prio', False))}<br>
+                <b>High-Impact:</b> {sum(1 for v in data.values() for i in v if i.get('score', 0) > 80)}
             </div>
         </div>
     </div>
