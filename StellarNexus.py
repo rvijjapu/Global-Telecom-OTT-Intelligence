@@ -7,17 +7,29 @@ import html
 import re
 import time
 
+# ────────────────────────────────────────────────
 # PAGE CONFIG
-st.set_page_config(page_title="Global Telco/OTT/Sports/Tech Nexus", page_icon="🌐", layout="wide", initial_sidebar_state="collapsed")
+# ────────────────────────────────────────────────
+st.set_page_config(
+    page_title="Global Telco/OTT/Sports/Tech Nexus",
+    page_icon="🌐",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
-# AUTO-REFRESH
+# AUTO-REFRESH EVERY 5 MINUTES
 @st.fragment(run_every=300)
 def keep_alive():
     st.markdown("", unsafe_allow_html=True)
 
-st.markdown('<script>setTimeout(function(){window.location.reload();}, 300000);</script>', unsafe_allow_html=True)
+st.markdown(
+    '<script>setTimeout(function(){window.location.reload();}, 300000);</script>',
+    unsafe_allow_html=True
+)
 
-# STYLING (executive look)
+# ────────────────────────────────────────────────
+# STYLING
+# ────────────────────────────────────────────────
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -46,9 +58,11 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# KEYWORDS & PRIORITIES (dynamic matching)
+# ────────────────────────────────────────────────
+# KEYWORDS & PRIORITIES
+# ────────────────────────────────────────────────
 TELCO_KW = {"must": ["oss", "bss", "billing", "charging", "5g", "6g", "telecom"], "strat": ["merger", "acquisition", "partnership", "deal", "contract"]}
-OTT_KW = {"must": ["ott", "streaming", "subscription", "svod"], "strat": ["content deal", "rights", "licensing", "subscriber growth"]}
+OTT_KW  = {"must": ["ott", "streaming", "subscription", "svod"], "strat": ["content deal", "rights", "licensing", "subscriber growth"]}
 SPORTS_KW = {"must": ["sports", "media rights", "broadcasting"], "strat": ["rights deal", "investment", "partnership"]}
 TECH_KW = {"must": ["ai", "agentic", "funding", "startup"], "strat": ["acquires", "investment", "agentic ai", "autonomous"]}
 
@@ -61,84 +75,95 @@ ALL_KWS = set(k.lower() for v in ALL_PRIORITY.values() for k in v)
 
 NOISE = ["opinion", "how to", "guide", "podcast", "awards", "prediction"]
 
-RSS_FEEDS = [  # Global only, high-signal
-    ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
-    ("Fierce Telecom", "https://www.fierce-network.com/rss.xml", "telco"),
-    ("RCR Wireless", "https://www.rcrwireless.com/feed", "telco"),
-    ("Mobile World Live", "https://www.mobileworldlive.com/feed/", "telco"),
-    ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
-    ("Variety", "https://variety.com/feed/", "ott"),
-    ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/", "ott"),
-    ("Deadline", "https://deadline.com/feed/", "ott"),
-    ("Digital TV Europe", "https://www.digitaltveurope.com/feed/", "ott"),
-    ("Streaming Media", "https://feeds.feedburner.com/StreamingMediaMagazine-AllArticles", "ott"),
-    ("SportsPro", "https://www.sportspromedia.com/feed/", "sports"),
-    ("Sports Business Journal", "https://www.sportsbusinessjournal.com/rss", "sports"),
-    ("Sportcal", "https://www.sportcal.com/feed", "sports"),
-    ("TechCrunch", "https://techcrunch.com/feed/", "technology"),
-    ("VentureBeat", "https://venturebeat.com/feed/", "technology"),
-    ("The Verge", "https://www.theverge.com/rss/index.xml", "technology"),
+RSS_FEEDS = [
+    ("Light Reading",       "https://www.lightreading.com/rss/simple",               "telco"),
+    ("Fierce Telecom",      "https://www.fierce-network.com/rss.xml",               "telco"),
+    ("RCR Wireless",        "https://www.rcrwireless.com/feed",                     "telco"),
+    ("Mobile World Live",   "https://www.mobileworldlive.com/feed/",                "telco"),
+    ("Telecoms.com",        "https://www.telecoms.com/feed",                        "telco"),
+    ("Variety",             "https://variety.com/feed/",                            "ott"),
+    ("Hollywood Reporter",  "https://www.hollywoodreporter.com/feed/",              "ott"),
+    ("Deadline",            "https://deadline.com/feed/",                           "ott"),
+    ("Digital TV Europe",   "https://www.digitaltveurope.com/feed/",                "ott"),
+    ("Streaming Media",     "https://feeds.feedburner.com/StreamingMediaMagazine-AllArticles", "ott"),
+    ("SportsPro",           "https://www.sportspromedia.com/feed/",                 "sports"),
+    ("Sports Business Journal", "https://www.sportsbusinessjournal.com/rss",       "sports"),
+    ("Sportcal",            "https://www.sportcal.com/feed",                        "sports"),
+    ("TechCrunch",          "https://techcrunch.com/feed/",                         "technology"),
+    ("VentureBeat",         "https://venturebeat.com/feed/",                        "technology"),
+    ("The Verge",           "https://www.theverge.com/rss/index.xml",               "technology"),
 ]
 
-SECTIONS = {"telco": {"icon": "📡", "name": "TELCO OSS/BSS", "style": "section-header pink"},
-            "ott": {"icon": "📺", "name": "OTT STREAMING", "style": "section-header purple"},
-            "sports": {"icon": "🏆", "name": "SPORTS MEDIA RIGHTS", "style": "section-header green"},
-            "technology": {"icon": "⚡", "name": "TECH AI / M&A", "style": "section-header orange"}}
+SECTIONS = {
+    "telco":       {"icon": "📡", "name": "TELCO OSS/BSS",        "style": "section-header pink"},
+    "ott":         {"icon": "📺", "name": "OTT STREAMING",        "style": "section-header purple"},
+    "sports":      {"icon": "🏆", "name": "SPORTS MEDIA RIGHTS",  "style": "section-header green"},
+    "technology":  {"icon": "⚡", "name": "TECH AI / M&A",        "style": "section-header orange"}
+}
 
-def clean(text): return html.unescape(re.sub(r'<[^>]+>', '', str(text or ""))).strip()
+# ────────────────────────────────────────────────
+# HELPERS
+# ────────────────────────────────────────────────
+def clean(text):
+    return html.unescape(re.sub(r'<[^>]+>', '', str(text or ""))).strip()
 
-def is_noise(t): return any(n in t.lower() for n in NOISE)
+def is_noise(text):
+    return any(n in text.lower() for n in NOISE)
 
 def score_relevance(title, summary, cat):
     text = (title + " " + summary).lower()
     kw = {"telco": TELCO_KW, "ott": OTT_KW, "sports": SPORTS_KW, "technology": TECH_KW}[cat]
     score = 0
-    if any(m in text for m in kw["must"]): score += 20
+    if any(m in text for m in kw["must"]):  score += 20
     if any(s in text for s in kw["strat"]): score += 40
-    comp = sum(30 for c in ALL_PRIORITY["competitors"] if c in text)
-    client = sum(50 if "evergent" in text or "nba" in text else 35 for c in ALL_PRIORITY["evergent_clients"] if c in text)
-    telco = sum(25 for c in ALL_PRIORITY["top_telcos"] if c in text)
-    score += comp + client + telco
-    if any(w in text for w in ["global", "investment", "acquisition", "preferred vendor", "agentic", "churn", "retention", "league pass"]): score += 30
-    return score
 
-def rewrite_impactful(item):
-    t, s, src = item["title"], item["summary"], item["source"]
-    text = (t + " " + s).lower()
-    if "nba" in text and ("evergent" in text or "investment" in text or "stake" in text):
-        return f"**NBA Strategic Equity Stake in Evergent**: The NBA has taken a strategic investment in Evergent Technologies, designating it a **Preferred Vendor** and extending their multi-year partnership. Powers personalized NBA League Pass across **185+ countries**, driving subscriber growth, churn reduction, and global fan retention."
-    if "amdocs" in text and ("matrixx" in text or "acquir" in text):
-        return f"**Amdocs Acquires Matrixx (~$200M)**: Amdocs completes ~$200M acquisition of charging/BSS leader Matrixx Software, consolidating Tier-1 5G BSS market dominance and intensifying competition in telecom charging/monetization."
-    if "agentic" in text and ("ai" in text or "bss" in text or "oss" in text):
-        return f"**Agentic AI Shift in BSS/OSS**: Autonomous Agentic AI agents projected to handle ~40% of standard telecom BSS tasks by EOY 2026 — enabling proactive churn strategies, real-time retention, and intent-driven operations."
-    # Fallback narrative
-    return f"**{t}**: {s} — Strategic signal from {src} with implications for subscription management, competition, or AI-driven telecom evolution."
+    for group, boost in [("competitors", 30), ("evergent_clients", 50 if "evergent" in text or "nba" in text else 35), ("top_telcos", 25)]:
+        score += sum(boost for k in ALL_PRIORITY[group] if k in text)
+
+    if any(w in text for w in ["global", "investment", "acquisition", "preferred vendor", "agentic", "churn", "retention", "league pass"]):
+        score += 30
+    return score
 
 def fetch(source, url, cat):
     items = []
     try:
         r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
-        if r.status_code != 200: return items
+        if r.status_code != 200:
+            return items
         feed = feedparser.parse(r.content)
         cutoff = datetime.now(timezone.utc) - timedelta(days=7)
         for e in feed.entries[:60]:
             title = clean(e.title or "")
             summ = clean(e.get("summary") or e.get("description") or title)
-            if len(title) < 30 or is_noise(title + summ): continue
+            if len(title) < 30 or is_noise(title + summ):
+                continue
             pub = None
             for k in ("published_parsed", "updated_parsed"):
                 if val := getattr(e, k, None):
-                    pub = datetime(*val[:6], tzinfo=timezone.utc)
+                    try:
+                        pub = datetime(*val[:6], tzinfo=timezone.utc)
+                    except:
+                        pass
                     break
-            if not pub or pub < cutoff: continue
+            if not pub or pub < cutoff:
+                continue
             rel = score_relevance(title, summ, cat)
-            if rel < 40: continue  # Higher bar for impact
+            if rel < 40:
+                continue
             full = (title + " " + summ).lower()
             prio = any(k in full for k in ALL_KWS) or "evergent" in full
-            items.append({"title": title, "link": e.link or "", "pub": pub, "source": source,
-                          "summary": summ[:150] + "..." if len(summ) > 150 else summ,
-                          "cat": cat, "prio": prio, "score": rel})
-    except: pass
+            items.append({
+                "title": title,
+                "link": e.link or "",
+                "pub": pub,
+                "source": source,
+                "summary": summ[:150] + "..." if len(summ) > 150 else summ,
+                "cat": cat,
+                "prio": prio,
+                "score": rel
+            })
+    except Exception:
+        pass
     return items
 
 @st.cache_data(ttl=120)
@@ -147,50 +172,105 @@ def load():
     with ThreadPoolExecutor(16) as ex:
         fs = [ex.submit(fetch, s, u, c) for s, u, c in RSS_FEEDS]
         for f in as_completed(fs):
-            for i in f.result(): cats[i["cat"]].append(i)
+            for i in f.result():
+                cats[i["cat"]].append(i)
+
     for c in cats:
-        cats[c] = sorted(set(cats[c]), key=lambda x: (-x["pub"].timestamp(), -x["score"]))[:12]  # dedup by ref
+        # Deduplicate using hashable tuple (title + source)
+        seen = set()
+        unique = []
+        for item in cats[c]:
+            sig = (
+                item.get("title", "").lower().strip(),
+                item.get("source", "").lower().strip()
+            )
+            if sig not in seen:
+                seen.add(sig)
+                unique.append(item)
+
+        # Sort: newest first, then highest score
+        cats[c] = sorted(
+            unique,
+            key=lambda x: (-x["pub"].timestamp(), -x["score"])
+        )[:12]
+
     return cats
 
 def time_disp(dt):
-    h = int((datetime.now(timezone.utc) - dt).total_seconds() / 3600)
-    return "Now" if h < 1 else f"{h}h" if h < 24 else f"{h//24}d"
+    secs = (datetime.now(timezone.utc) - dt).total_seconds()
+    h = int(secs / 3600)
+    if h < 1: return "Now"
+    if h < 24: return f"{h}h"
+    return f"{h//24}d"
 
 def render_news(items):
-    if not items: return '<div style="text-align:center;padding:50px;color:#94a3b8;">Scanning global strategic signals...</div>'
-    return ''.join(f'''
-    <div class="news-card {'priority' if i['prio'] else ''}">
-        <a href="{html.escape(i['link'])}" target="_blank" class="news-title">{html.escape(i['title'])}</a>
-        <div class="meta">
-            <span class="{'hot' if (datetime.now(timezone.utc) - i['pub']).total_seconds() < 21600 else 'warm' if (datetime.now(timezone.utc) - i['pub']).total_seconds() < 86400 else ''}">{time_disp(i['pub'])}</span> • {html.escape(i['source'])}
-            {'<span class="impact">HIGH IMPACT</span>' if i['score'] > 80 else ''}
-        </div>
-    </div>''' for i in items[:10])
+    if not items:
+        return '<div style="text-align:center;padding:50px;color:#94a3b8;">Scanning global strategic signals...</div>'
+    html = []
+    for i in items[:10]:
+        cls = "news-card priority" if i["prio"] else "news-card"
+        tcls = "hot" if (datetime.now(timezone.utc) - i["pub"]).total_seconds() < 21600 else "warm" if (datetime.now(timezone.utc) - i["pub"]).total_seconds() < 86400 else ""
+        badge = '<span class="impact">HIGH IMPACT</span>' if i["score"] > 80 else ""
+        card = f'''
+        <div class="{cls}">
+            <a href="{html.escape(i["link"])}" target="_blank" class="news-title">{html.escape(i["title"])}</a>
+            <div class="meta">
+                <span class="{tcls}">{time_disp(i["pub"])}</span> • {html.escape(i["source"])} {badge}
+            </div>
+        </div>'''
+        html.append(card)
+    return ''.join(html)
 
+# ────────────────────────────────────────────────
+# TOP HITS & PULSE (narrative style)
+# ────────────────────────────────────────────────
 @st.cache_data(ttl=300)
 def top_hits(data):
-    all_i = [i for l in data.values() for i in l]
-    all_i.sort(key=lambda x: -x["score"])
-    return [rewrite_impactful(i) for i in all_i[:4] if i["score"] > 60]
+    all_items = [i for lst in data.values() for i in lst]
+    all_items.sort(key=lambda x: -x["score"])
+    narratives = []
+    for item in all_items[:4]:
+        if item["score"] < 60:
+            continue
+        t = item["title"].lower()
+        s = item["summary"].lower()
+        src = item["source"]
+        if "nba" in t+s and ("evergent" in t+s or "investment" in t+s or "stake" in t+s):
+            narratives.append("**NBA Strategic Equity Stake in Evergent**: The NBA has taken a strategic investment in Evergent Technologies, designating it a **Preferred Vendor** and extending their multi-year partnership. Powers personalized NBA League Pass across **185+ countries**, driving subscriber growth, churn reduction, and global fan retention.")
+        elif "amdocs" in t+s and ("matrixx" in t+s or "acquir" in t+s):
+            narratives.append("**Amdocs Acquires Matrixx (~$200M)**: Amdocs completes ~$200M acquisition of charging/BSS leader Matrixx Software, consolidating Tier-1 5G BSS market dominance and intensifying competition in telecom charging/monetization.")
+        elif "agentic" in t+s and ("ai" in t+s or "bss" in t+s or "oss" in t+s):
+            narratives.append("**Agentic AI Shift in BSS/OSS**: Autonomous Agentic AI agents projected to handle ~40% of standard telecom BSS tasks by EOY 2026 — enabling proactive churn strategies, real-time retention, and intent-driven operations.")
+        else:
+            narratives.append(f"**{item['title']}**: {item['summary']} — Strategic signal from {src}.")
+    return narratives or ["<i>Monitoring high-impact global moves...</i>"]
 
 @st.cache_data(ttl=300)
-def pulse(data):
-    all_i = [i for l in data.values() for i in l]
+def market_pulse(data):
+    all_items = [i for lst in data.values() for i in lst]
     mentions = {}
-    for i in all_i:
+    for i in all_items:
         txt = (i["title"] + " " + i["summary"]).lower()
         for k in ALL_KWS:
-            if k in txt: mentions[k] = mentions.get(k, 0) + 1
-    top_m = sorted(mentions.items(), key=lambda x: -x[1])[:5]
-    return [f"**{k.upper()}**: {v} high-impact mentions across feeds — watch for strategic moves." for k, v in top_m]
+            if k in txt:
+                mentions[k] = mentions.get(k, 0) + 1
+    top = sorted(mentions.items(), key=lambda x: -x[1])[:5]
+    lines = [f"**{k.upper()}**: {v} high-impact mentions — watch for strategic moves." for k, v in top]
+    return lines or ["<i>Analyzing priority trends...</i>"]
 
-# UI
-with st.spinner("🔍 Scanning global Telco/OTT/Sports/AI signals..."):
+# ────────────────────────────────────────────────
+# MAIN UI
+# ────────────────────────────────────────────────
+with st.spinner("🔍 Scanning global Telco / OTT / Sports / AI signals..."):
     data = load()
     hits = top_hits(data)
-    pulse_items = pulse(data)
+    pulse_lines = market_pulse(data)
 
-st.markdown('<div class="header"><h1 class="main-title">Global Telco/OTT/Sports/Tech Nexus</h1><p class="subtitle">Executive Intelligence • M&A • Rights • AI Shifts • Partnerships</p></div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="header"><h1 class="main-title">Global Telco/OTT/Sports/Tech Nexus</h1>'
+    '<p class="subtitle">Executive Intelligence • M&A • Rights • AI Shifts • Partnerships</p></div>',
+    unsafe_allow_html=True
+)
 
 st.markdown(f"""
 <div class="hero">
@@ -198,13 +278,15 @@ st.markdown(f"""
     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
         <div>
             <h3 style="color:#dc2626;">🔥 BREAKING STRATEGIC HITS</h3>
-            {'<br><br>'.join(f"<b>{i}</b>" for i in hits) or "<i>Monitoring high-impact global moves...</i>"}
+            {'<br><br>'.join(hits)}
         </div>
         <div>
             <h3 style="color:#10b981;">📊 MARKET PULSE</h3>
-            {'<br><br>'.join(pulse_items) or "<i>Analyzing priority trends...</i>"}
+            {'<br><br>'.join(pulse_lines)}
             <div style="margin-top:20px; padding-top:15px; border-top:1px solid #e2e8f0;">
-                <b>Total Signals:</b> {sum(len(v) for v in data.values())} | <b>Priority Mentions:</b> {sum(1 for v in data.values() for i in v if i['prio'])} | <b>High-Impact:</b> {sum(1 for v in data.values() for i in v if i['score'] > 80)}
+                <b>Total Signals:</b> {sum(len(v) for v in data.values())}<br>
+                <b>Priority Mentions:</b> {sum(1 for v in data.values() for i in v if i['prio'])}<br>
+                <b>High-Impact:</b> {sum(1 for v in data.values() for i in v if i['score'] > 80)}
             </div>
         </div>
     </div>
@@ -212,15 +294,17 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 cols = st.columns(4)
-for i, cat in enumerate(SECTIONS):
-    with cols[i]:
+for idx, cat in enumerate(SECTIONS):
+    with cols[idx]:
         s = SECTIONS[cat]
         st.markdown(f'<div class="{s["style"]}">{s["icon"]} {s["name"]}</div>', unsafe_allow_html=True)
         st.markdown(f'<div class="col-body">{render_news(data.get(cat, []))}</div>', unsafe_allow_html=True)
 
 st.markdown(f"""
 <div style="text-align:center; color:#fff; font-size:0.85rem; margin:25px; padding:15px; background:linear-gradient(135deg,#0a192f,#1e293b); border-radius:12px;">
-    <strong>Focus:</strong> Global Strategic Signals • Evergent Clients/Competitors • AI in BSS/OSS | <strong>Last Scan:</strong> {datetime.now().strftime('%I:%M %p')} | Auto-refresh: 5 min
+    <strong>Focus:</strong> Global Strategic Signals • Evergent Clients/Competitors • AI in BSS/OSS
+    | <strong>Last Scan:</strong> {datetime.now().strftime('%I:%M %p %Z')}
+    | Auto-refresh: 5 min
 </div>
 """, unsafe_allow_html=True)
 
