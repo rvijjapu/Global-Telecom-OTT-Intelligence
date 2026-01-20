@@ -25,7 +25,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ENHANCED STYLING WITH PRIORITY INDICATORS
+# ENHANCED STYLING
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -93,7 +93,6 @@ st.markdown("""
         font-weight: 800;
         font-size: 1.1rem;
         margin-bottom: 12px;
-        color: #1e40af;
     }
 
     .hero-content {
@@ -220,117 +219,76 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# CRITICAL STRATEGIC KEYWORDS - ULTRA FOCUSED
-CRITICAL_IMPACT_KWS = [
-    # M&A and Deals
-    "acquisition", "acquires", "acquired", "merger", "merges", "merged",
-    "partnership", "partners with", "joint venture", "collaboration with",
-    "strategic investment", "invests in", "funding round", "raises $",
-    "deal worth", "contract award", "wins contract", "tender award",
-    
-    # Market Moving Events  
-    "launches new", "expands into", "enters market", "exits",
-    "shuts down", "bankruptcy", "restructuring", "layoffs",
-    "appoints ceo", "appoints cto", "new ceo", "leadership change",
-    "ipo", "goes public", "unicorn valuation",
-    
-    # Technology & Product
-    "5g rollout", "fiber deployment", "network upgrade",
-    "streaming platform", "ott launch", "content deal",
-    "media rights", "broadcasting rights", "exclusive rights",
-    
-    # Financial
-    "revenue decline", "revenue growth", "earnings beat", "earnings miss",
-    "subscriber loss", "subscriber gain", "churn rate",
-    "market share", "valuation reaches"
-]
+# STRATEGIC KEYWORDS BY CATEGORY
+TELCO_KEYWORDS = {
+    "must_have": ["bss", "oss", "billing", "charging", "5g", "fiber", "network", "telecom", "telco", "operator", "carrier"],
+    "strategic": ["acquisition", "merger", "partnership", "deal", "launches", "deploys", "contract", "appoints ceo"],
+    "companies": ["verizon", "at&t", "t-mobile", "vodafone", "deutsche telekom", "orange", "telefonica", "bt group", 
+                  "singtel", "telstra", "ntt docomo", "china mobile", "reliance jio", "airtel", "netcracker", "amdocs", 
+                  "csg", "oracle communications", "ericsson", "matrixx"]
+}
 
-# ABSOLUTE NOISE - AUTO-REJECT
+OTT_KEYWORDS = {
+    "must_have": ["streaming", "ott", "content", "subscription", "svod", "avod", "vod", "video platform"],
+    "strategic": ["launches platform", "content deal", "licensing", "original series", "streaming rights", "subscriber growth"],
+    "companies": ["netflix", "disney", "hulu", "max", "paramount", "peacock", "prime video", "apple tv", 
+                  "shahid", "viki", "sonyliv", "bbc iplayer", "astro", "sky", "directv", "abs-cbn", "trt"]
+}
+
+SPORTS_KEYWORDS = {
+    "must_have": ["sports", "league", "broadcasting", "media rights", "sports streaming"],
+    "strategic": ["broadcasting deal", "media rights", "streaming rights", "broadcast contract", "sports platform"],
+    "companies": ["nba", "nfl", "premier league", "espn", "fox sports", "dazn", "bally sports", "peacock sports", 
+                  "amazon sports", "apple sports", "sportspro"]
+}
+
+TECH_KEYWORDS = {
+    "must_have": ["ai", "technology", "startup", "funding", "acquisition", "tech"],
+    "strategic": ["raises $", "funding round", "acquires", "merger", "ipo", "valuation", "investment"],
+    "companies": ["anthropic", "openai", "google", "microsoft", "amazon", "meta", "nvidia"]
+}
+
+# NOISE BLOCKLIST
 NOISE_BLOCKLIST = [
-    "opinion:", "op-ed:", "commentary:", "analysis:", "perspective:",
-    "review:", "recap:", "roundup:", "preview:", "predictions:",
-    "how to", "guide to", "tips for", "best practices", "what to watch",
+    "opinion:", "op-ed:", "commentary:", "analysis:", "perspective:", "editorial:",
+    "review:", "recap:", "roundup:", "preview:", "predictions:", "forecast:",
+    "how to", "guide to", "tips for", "best practices", "what to watch", "what to expect",
     "webinar:", "podcast:", "interview:", "q&a:", "transcript:",
-    "awards", "wins award", "nominated for", "hall of fame",
-    "celebrates", "anniversary", "birthday", "tribute to",
-    "ai bubble", "flux.2", "black forest labs"  # Today's junk examples
+    "awards", "wins award", "nominated", "hall of fame", "celebrates", "anniversary",
+    "prediction market", "betting", "gambling", "fantasy sports"
 ]
 
-# EVERGENT CLIENTS - ULTRA PRECISE
-EVERGENT_CLIENTS = {
-    "NBA": ["nba", "national basketball association", "nba league pass"],
-    "Astro Malaysia": ["astro malaysia", "astro sooka"],
-    "Shahid": ["shahid vip", "shahid mbc"],
-    "FOX Sports": ["fox sports", "fox corporation"],
-    "AT&T": ["directv", "at&t tv"],
-    "TV Asahi": ["tv asahi"],
-    "ABS-CBN": ["abs-cbn"],
-    "Viki": ["rakuten viki"],
-    "TRT": ["trt world"],
-    "Sony": ["sonyliv", "sony pictures networks"],
-    "BBC": ["bbc iplayer"],
-    "Sky": ["sky nz", "sky uk"],
-    "Telekom Malaysia": ["telekom malaysia", "tm unifi"],
-}
+# PRIORITY COMPANIES
+EVERGENT_CLIENTS = ["nba", "astro", "shahid", "fox sports", "directv", "tv asahi", "abs-cbn", 
+                    "viki", "trt", "sonyliv", "bbc iplayer", "sky", "telekom malaysia"]
+COMPETITORS = ["netcracker", "amdocs", "csg", "oracle communications", "ericsson", "matrixx", "optiva"]
+TOP_TELCOS = ["verizon", "at&t", "t-mobile", "vodafone", "deutsche telekom", "orange", 
+              "telefonica", "bt group", "singtel", "telstra", "ntt", "china mobile", "jio", "airtel"]
 
-# DIRECT COMPETITORS
-COMPETITORS = {
-    "Netcracker": ["netcracker"],
-    "Amdocs": ["amdocs"],
-    "CSG": ["csg systems", "csg ascendon"],
-    "Oracle": ["oracle communications"],
-    "Ericsson": ["ericsson charging", "ericsson bss"],
-    "Matrixx": ["matrixx software"],
-    "Optiva": ["optiva"],
-}
+ALL_PRIORITY = EVERGENT_CLIENTS + COMPETITORS + TOP_TELCOS
 
-# TOP TIER TELCOS ONLY
-TOP_TELCOS = {
-    "Verizon": ["verizon"],
-    "AT&T": ["at&t mobility"],
-    "T-Mobile": ["t-mobile"],
-    "Vodafone": ["vodafone"],
-    "Deutsche Telekom": ["deutsche telekom"],
-    "Orange": ["orange sa"],
-    "Telefónica": ["telefonica"],
-    "BT Group": ["bt group"],
-    "Singtel": ["singtel"],
-    "Telstra": ["telstra"],
-    "NTT Docomo": ["ntt docomo"],
-    "China Mobile": ["china mobile"],
-    "Jio": ["reliance jio"],
-    "Airtel": ["bharti airtel"],
-}
-
-# COMBINED PRIORITY
-PRIORITY_COMPANIES = {}
-for d in [EVERGENT_CLIENTS, COMPETITORS, TOP_TELCOS]:
-    PRIORITY_COMPANIES.update(d)
-
-ALL_PRIORITY_KWS = []
-for names in PRIORITY_COMPANIES.values():
-    ALL_PRIORITY_KWS.extend([kw.lower() for kw in names])
-ALL_PRIORITY_KWS = list(set(ALL_PRIORITY_KWS))
-
-# RSS FEEDS - BUSINESS FOCUSED ONLY
+# RSS FEEDS - SPECIALIZED BY CATEGORY
 RSS_FEEDS = [
-    # Telecom Business
+    # TELCO
     ("Light Reading", "https://www.lightreading.com/rss/simple", "telco"),
     ("Fierce Telecom", "https://www.fierce-network.com/rss.xml", "telco"),
     ("Telecoms.com", "https://www.telecoms.com/feed", "telco"),
     ("Mobile World Live", "https://www.mobileworldlive.com/feed/", "telco"),
+    ("RCR Wireless", "https://www.rcrwireless.com/feed", "telco"),
     
-    # OTT Business
+    # OTT
     ("Variety", "https://variety.com/feed/", "ott"),
     ("Hollywood Reporter", "https://www.hollywoodreporter.com/feed/", "ott"),
     ("Deadline", "https://deadline.com/feed/", "ott"),
     ("Digital TV Europe", "https://www.digitaltveurope.com/feed/", "ott"),
+    ("Fierce Video", "https://www.fiercevideo.com/rss.xml", "ott"),
+    ("StreamTV Insider", "https://www.streamtvinsider.com/feed", "ott"),
     
-    # Sports Business
+    # SPORTS
     ("SportsPro", "https://www.sportspromedia.com/feed/", "sports"),
     ("Sports Business Journal", "https://www.sportsbusinessjournal.com/rss", "sports"),
     
-    # Tech Business (very selective)
+    # TECH
     ("TechCrunch", "https://techcrunch.com/feed/", "technology"),
 ]
 
@@ -346,60 +304,48 @@ HEADERS = {"User-Agent": "Mozilla/5.0"}
 def clean(raw):
     return html.unescape(re.sub(r'<[^>]+>', '', str(raw or ""))).strip()
 
-def is_strategic_signal(title, summary):
-    """STRICT filter - must have critical impact keyword"""
-    text = (title + " " + summary).lower()
-    
-    # IMMEDIATE REJECT if noise
-    for noise in NOISE_BLOCKLIST:
-        if noise in text:
-            return False
-    
-    # MUST have critical keyword
-    has_critical_kw = any(kw in text for kw in CRITICAL_IMPACT_KWS)
-    
-    # OR must mention priority company with business context
-    if not has_critical_kw:
-        has_company = any(kw in text for kw in ALL_PRIORITY_KWS)
-        has_business = any(word in text for word in ["revenue", "subscriber", "customer", "market", "deal", "contract", "platform", "service"])
-        if not (has_company and has_business):
-            return False
-    
-    return True
-
-def calculate_relevance_score(text):
-    """Score based on strategic relevance"""
+def is_noise(text):
+    """Check if content is noise"""
     text_lower = text.lower()
+    return any(noise in text_lower for noise in NOISE_BLOCKLIST)
+
+def calculate_category_relevance(title, summary, category):
+    """Calculate how relevant article is to specific category"""
+    text = (title + " " + summary).lower()
     score = 0
     
-    # Critical business events
-    critical_events = ["acquisition", "merger", "partnership", "deal", "investment", "funding", "contract"]
-    for event in critical_events:
-        if event in text_lower:
-            score += 20
+    if category == "telco":
+        keywords = TELCO_KEYWORDS
+    elif category == "ott":
+        keywords = OTT_KEYWORDS
+    elif category == "sports":
+        keywords = SPORTS_KEYWORDS
+    else:  # technology
+        keywords = TECH_KEYWORDS
     
-    # Priority companies
-    for kw in ALL_PRIORITY_KWS:
-        if kw in text_lower:
-            score += 25
-            break
+    # Must have category-specific keyword
+    has_must_have = any(kw in text for kw in keywords["must_have"])
+    if not has_must_have:
+        return 0
     
-    # Business metrics
-    metrics = ["revenue", "subscriber", "customer", "market share", "churn", "arpu"]
-    for metric in metrics:
-        if metric in text_lower:
-            score += 10
+    score += 20
     
     # Strategic keywords
-    strategic = ["launches", "expands", "enters", "appoints", "ceo", "platform"]
-    for word in strategic:
-        if word in text_lower:
-            score += 5
+    if any(kw in text for kw in keywords["strategic"]):
+        score += 30
+    
+    # Priority companies
+    if any(company in text for company in keywords["companies"]):
+        score += 25
+    
+    # Global priority companies
+    if any(company in text for company in ALL_PRIORITY):
+        score += 15
     
     return score
 
 def deduplicate_stories(items):
-    """Remove duplicate stories"""
+    """Remove duplicates"""
     seen_titles = set()
     unique_items = []
     
@@ -422,14 +368,17 @@ def fetch_feed(source, url, category):
         
         feed = feedparser.parse(resp.content)
         NOW = datetime.now()
-        CUTOFF = NOW - timedelta(days=7)  # Last 7 days only
+        CUTOFF = NOW - timedelta(days=7)
         
         for entry in feed.entries[:50]:
             title = clean(entry.get("title", ""))
             summary = clean(entry.get("summary", entry.get("description", "")))
             
-            # STRICT strategic filter
-            if not is_strategic_signal(title, summary):
+            if len(title) < 20:
+                continue
+            
+            # Skip noise
+            if is_noise(title + " " + summary):
                 continue
             
             link = entry.get("link", "")
@@ -447,14 +396,15 @@ def fetch_feed(source, url, category):
             if not pub or pub < CUTOFF: 
                 continue
             
-            full_text = title + " " + summary
-            relevance_score = calculate_relevance_score(full_text)
+            # Calculate category-specific relevance
+            relevance = calculate_category_relevance(title, summary, category)
             
-            # Only keep highly relevant stories
-            if relevance_score < 15:
+            # Only keep relevant stories (score >= 20)
+            if relevance < 20:
                 continue
             
-            is_priority = any(kw in full_text.lower() for kw in ALL_PRIORITY_KWS)
+            full_text = (title + " " + summary).lower()
+            is_priority = any(company in full_text for company in ALL_PRIORITY)
             
             items.append({
                 "title": title,
@@ -464,7 +414,7 @@ def fetch_feed(source, url, category):
                 "summary": summary[:100] + "..." if len(summary) > 100 else summary,
                 "category": category,
                 "priority": is_priority,
-                "score": relevance_score
+                "score": relevance
             })
     except:
         pass
@@ -475,14 +425,14 @@ def fetch_feed(source, url, category):
 def load_feeds():
     categorized = {"telco": [], "ott": [], "sports": [], "technology": []}
     
-    with ThreadPoolExecutor(max_workers=12) as executor:
+    with ThreadPoolExecutor(max_workers=14) as executor:
         futures = [executor.submit(fetch_feed, s, u, c) for s, u, c in RSS_FEEDS]
         for future in as_completed(futures):
             items = future.result()
             for item in items:
                 categorized[item["category"]].append(item)
     
-    # Deduplicate and sort by relevance + recency
+    # Deduplicate and sort
     for cat in categorized:
         categorized[cat] = deduplicate_stories(categorized[cat])
         categorized[cat].sort(key=lambda x: (x["score"], x["pub"]), reverse=True)
@@ -507,7 +457,7 @@ def render_body(items):
         return """<div class="col-body"><div style="text-align:center;color:#94a3b8;padding:40px;">🎯 Monitoring for strategic signals...</div></div>"""
     
     cards = []
-    for item in items[:10]:  # Top 10 only
+    for item in items[:12]:
         time_str = get_time_str(item["pub"])
         time_class = get_time_class(item["pub"])
         title = html.escape(item["title"])
@@ -517,7 +467,7 @@ def render_body(items):
         card_class = "news-card-priority" if item["priority"] else "news-card"
         
         impact_badge = ""
-        if item["score"] >= 40:
+        if item["score"] >= 60:
             impact_badge = '<span class="impact-badge">CRITICAL</span>'
         
         card_html = f'''
@@ -535,30 +485,46 @@ def render_body(items):
     
     return '<div class="col-body">' + ''.join(cards) + '</div>'
 
-# DYNAMIC STRATEGIC INTELLIGENCE - ONLY BUSINESS CRITICAL
+# STRATEGIC INTELLIGENCE
 @st.cache_data(ttl=600)
 def get_strategic_hits(data):
-    """Extract top strategic hits - BUSINESS FOCUSED"""
+    """Top 3 strategic hits"""
     all_items = []
     for cat_items in data.values():
         all_items.extend(cat_items)
     
-    # Sort by score
     all_items.sort(key=lambda x: x["score"], reverse=True)
     
     hits = []
     for item in all_items[:3]:
-        # Extract key info
-        title = item["title"]
-        source = item["source"]
-        
-        # Create concise summary
-        hits.append({
-            "title": title,
-            "source": source,
-        })
+        hits.append({"title": item["title"], "source": item["source"]})
     
     return hits
+
+@st.cache_data(ttl=600)
+def get_market_pulse(data):
+    """Market pulse trends"""
+    all_items = []
+    for cat_items in data.values():
+        all_items.extend(cat_items)
+    
+    pulse = []
+    
+    # Count priority company mentions
+    priority_mentions = {}
+    for item in all_items:
+        text = (item["title"] + " " + item["summary"]).lower()
+        for company in ALL_PRIORITY[:10]:  # Top 10 companies
+            if company in text:
+                priority_mentions[company] = priority_mentions.get(company, 0) + 1
+    
+    # Top 3 trending companies
+    top_companies = sorted(priority_mentions.items(), key=lambda x: x[1], reverse=True)[:3]
+    
+    for company, count in top_companies:
+        pulse.append(f"<b>{company.upper()}:</b> {count} strategic mentions")
+    
+    return pulse
 
 # LOADING SCREEN
 placeholder = st.empty()
@@ -566,7 +532,7 @@ with placeholder.container():
     st.markdown("""
         <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:70vh;text-align:center;">
             <h1 style="color:#0a192f;font-size:2.8rem;font-weight:800;">⚡ Strategic Intelligence Engine</h1>
-            <p style="color:#64748b;font-size:1.2rem;">M&A • Partnerships • Market-Moving Events Only</p>
+            <p style="color:#64748b;font-size:1.2rem;">Scanning Global Telecom & OTT Markets</p>
         </div>
     """, unsafe_allow_html=True)
     time.sleep(1.5)
@@ -576,7 +542,7 @@ placeholder.empty()
 st.markdown("""
 <div class="header-container">
     <h1 class="main-title">Global Telecom & OTT Stellar Nexus</h1>
-    <p class="subtitle">Executive Intelligence • Zero Noise • Strategic Signals Only</p>
+    <p class="subtitle">Executive Intelligence • Strategic Signals Only</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -584,22 +550,30 @@ st.markdown("""
 with st.spinner("🔍 Analyzing strategic signals..."):
     data = load_feeds()
     strategic_hits = get_strategic_hits(data)
+    market_pulse = get_market_pulse(data)
 
-# DYNAMIC STRATEGIC SECTION
+# STRATEGIC SECTION
 hits_html = ""
 if strategic_hits:
     for idx, hit in enumerate(strategic_hits, 1):
         hits_html += f"<b>#{idx}:</b> {hit['title']}<br><span style='color:#64748b;font-size:0.85rem;'>({hit['source']})</span><br><br>"
 else:
-    hits_html = "<i style='color:#64748b;'>Monitoring for M&A, partnerships, and strategic announcements...</i>"
+    hits_html = "<i style='color:#64748b;'>Monitoring for M&A and strategic moves...</i>"
+
+pulse_html = ""
+if market_pulse:
+    for p in market_pulse:
+        pulse_html += f"{p}<br><br>"
+else:
+    pulse_html = "<i style='color:#64748b;'>Analyzing market trends...</i>"
 
 total_signals = sum(len(items) for items in data.values())
 priority_signals = len([i for cat in data.values() for i in cat if i['priority']])
-critical_signals = len([i for cat in data.values() for i in cat if i['score'] >= 40])
+critical_signals = len([i for cat in data.values() for i in cat if i['score'] >= 60])
 
 st.markdown(f"""
 <div class="hero-container">
-    <div class="hero-title">🎯 Top Strategic Intelligence (Live Feed)</div>
+    <div class="hero-title">🎯 Strategic Intelligence Dashboard</div>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div class="hero-box">
             <div class="hero-box-title" style="color: #dc2626;">🔥 BREAKING STRATEGIC SIGNALS</div>
@@ -608,13 +582,12 @@ st.markdown(f"""
             </div>
         </div>
         <div class="hero-box">
-            <div class="hero-box-title" style="color: #1e40af;">📊 INTELLIGENCE METRICS</div>
+            <div class="hero-box-title" style="color: #10b981;">📊 MARKET PULSE</div>
             <div class="hero-content">
-                <b>High-Impact Signals Detected:</b> {total_signals}<br><br>
-                <b>Priority Company Mentions:</b> {priority_signals}<br><br>
-                <b>Critical Events (M&A/Deals):</b> {critical_signals}<br><br>
-                <b>Last Scan:</b> {datetime.now().strftime('%I:%M %p')}<br><br>
-                <b>Focus:</b> Evergent Clients • Competitors • Top Telcos
+                {pulse_html}
+                <div style="margin-top:15px;padding-top:15px;border-top:1px solid #e2e8f0;">
+                    <b>Total Signals:</b> {total_signals} | <b>Priority:</b> {priority_signals} | <b>Critical:</b> {critical_signals}
+                </div>
             </div>
         </div>
     </div>
@@ -636,7 +609,7 @@ for idx, cat in enumerate(cat_list):
 # FOOTER
 st.markdown(f"""
 <div style="text-align:center;color:rgba(255,255,255,0.95);font-size:0.8rem;margin-top:20px;padding:16px;background:linear-gradient(135deg,rgba(10,25,47,0.95),rgba(30,41,59,0.95));border-radius:10px;">
-    <strong>Strategic Focus:</strong> M&A • Partnerships • Revenue Events • Leadership Changes • Market Entry/Exit | <strong>Auto-refresh:</strong> Every 5 minutes
+    <strong>Focus:</strong> M&A • Partnerships • Strategic Launches • Market Entry/Exit | <strong>Last Scan:</strong> {datetime.now().strftime('%I:%M %p')} | <strong>Auto-refresh:</strong> 5 min
 </div>
 """, unsafe_allow_html=True)
 
